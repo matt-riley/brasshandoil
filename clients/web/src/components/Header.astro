@@ -1,8 +1,15 @@
 ---
 
+const links = [
+  {slug: "blog", text: "Blog"},
+  {slug: "uses", text: "Uses"},
+]
+
 ---
 
-<header class="flex flex-row w-screen">
-  <a href="/"><h1 class="text-3xl font-black uppercase">Brass Hand Oil</h1></a>
-  <a href="/blog">Blog</a>
+<header class="flex flex-row gap-2 items-center px-4 w-screen h-24">
+  <a href="/"><h1 class="text-4xl font-black uppercase">Brass Hand Oil</h1></a>
+  <div class="flex flex-row gap-2">
+    {links.map(link => (<a href=`/${link.slug}`><h2 class="font-black uppercase">{link.text}</h2></a>))}
+  </div>
 </header>
