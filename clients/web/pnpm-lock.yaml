@@ -13,13 +13,13 @@ importers:
         version: 0.9.3(typescript@5.6.2)
       '@astrojs/mdx':
         specifier: 3.1.6
-        version: 3.1.6(astro@4.15.6(rollup@4.20.0)(typescript@5.6.2))
+        version: 3.1.6(astro@4.15.7(rollup@4.20.0)(typescript@5.6.2))
       '@astrojs/tailwind':
-        specifier: 5.1.0
-        version: 5.1.0(astro@4.15.6(rollup@4.20.0)(typescript@5.6.2))(tailwindcss@3.4.12)
+        specifier: 5.1.1
+        version: 5.1.1(astro@4.15.7(rollup@4.20.0)(typescript@5.6.2))(tailwindcss@3.4.12)
       astro:
-        specifier: 4.15.6
-        version: 4.15.6(rollup@4.20.0)(typescript@5.6.2)
+        specifier: 4.15.7
+        version: 4.15.7(rollup@4.20.0)(typescript@5.6.2)
       tailwindcss:
         specifier: 3.4.12
         version: 3.4.12
@@ -74,10 +74,10 @@ packages:
     resolution: {integrity: sha512-Z9IYjuXSArkAUx3N6xj6+Bnvx8OdUSHA8YoOgyepp3+zJmtVYJIl/I18GozdJVW1p5u/CNpl3Km7/gwTJK85cw==}
     engines: {node: ^18.17.1 || ^20.3.0 || >=21.0.0}
 
-  '@astrojs/tailwind@5.1.0':
-    resolution: {integrity: sha512-BJoCDKuWhU9FT2qYg+fr6Nfb3qP4ShtyjXGHKA/4mHN94z7BGcmauQK23iy+YH5qWvTnhqkd6mQPQ1yTZTe9Ig==}
+  '@astrojs/tailwind@5.1.1':
+    resolution: {integrity: sha512-LwurA10uIKcGRxQP2R81RvAnBT0WPKzBntXZBF4hrAefDgM5Uumn0nsGr6tdIjSARgYz4X+Cq/Vh78t3bql3yw==}
     peerDependencies:
-      astro: ^3.0.0 || ^4.0.0
+      astro: ^3.0.0 || ^4.0.0 || ^5.0.0-beta.0
       tailwindcss: ^3.0.24
 
   '@astrojs/telemetry@3.1.0':
@@ -746,8 +746,8 @@ packages:
     resolution: {integrity: sha512-ISvCdHdlTDlH5IpxQJIex7BWBywFWgjJSVdwst+/iQCoEYnyOaQ95+X1JGshuBjGp6nxKUy1jMgE3zPqN7fQdg==}
     hasBin: true
 
-  astro@4.15.6:
-    resolution: {integrity: sha512-SWcUNwm8CiVRaIbh4w5byh62BNihpsovlCd4ElvC7cL/53D24HcI7AaGFsPrromCamQklwQmIan/QS7x/3lLuQ==}
+  astro@4.15.7:
+    resolution: {integrity: sha512-RGZjGpLcR3jcnXA1+g56i73O77krmqs7VjpoBOfk9UVP8Js5T2YSeUBAyComOUb6vj31wEw1vgRgOEN0MzYc8w==}
     engines: {node: ^18.17.1 || ^20.3.0 || >=21.0.0, npm: '>=9.6.5', pnpm: '>=7.1.0'}
     hasBin: true
 
@@ -1698,10 +1698,6 @@ packages:
   postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
 
-  postcss@8.4.40:
-    resolution: {integrity: sha512-YF2kKIUzAofPMpfH6hOi2cGnv/HrUlfucspc7pDyvv7kGdqXrfj8SCl/t8owkEgKEuu8ZcRjSOxFxVLqwChZ2Q==}
-    engines: {node: ^10 || ^12 || >=14}
-
   postcss@8.4.45:
     resolution: {integrity: sha512-7KTLTdzdZZYscUc65XmjFiB73vBhBfbPztCYdUNvlaso9PrzjzcmjqBPR0lNGkcVlcO4BjiO5rK/qNz+XAen1Q==}
     engines: {node: ^10 || ^12 || >=14}
@@ -2336,12 +2332,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@3.1.6(astro@4.15.6(rollup@4.20.0)(typescript@5.6.2))':
+  '@astrojs/mdx@3.1.6(astro@4.15.7(rollup@4.20.0)(typescript@5.6.2))':
     dependencies:
       '@astrojs/markdown-remark': 5.2.0
       '@mdx-js/mdx': 3.0.1
       acorn: 8.12.1
-      astro: 4.15.6(rollup@4.20.0)(typescript@5.6.2)
+      astro: 4.15.7(rollup@4.20.0)(typescript@5.6.2)
       es-module-lexer: 1.5.4
       estree-util-visit: 2.0.0
       gray-matter: 4.0.3
@@ -2360,12 +2356,12 @@ snapshots:
     dependencies:
       prismjs: 1.29.0
 
-  '@astrojs/tailwind@5.1.0(astro@4.15.6(rollup@4.20.0)(typescript@5.6.2))(tailwindcss@3.4.12)':
+  '@astrojs/tailwind@5.1.1(astro@4.15.7(rollup@4.20.0)(typescript@5.6.2))(tailwindcss@3.4.12)':
     dependencies:
-      astro: 4.15.6(rollup@4.20.0)(typescript@5.6.2)
-      autoprefixer: 10.4.20(postcss@8.4.40)
-      postcss: 8.4.40
-      postcss-load-config: 4.0.2(postcss@8.4.40)
+      astro: 4.15.7(rollup@4.20.0)(typescript@5.6.2)
+      autoprefixer: 10.4.20(postcss@8.4.45)
+      postcss: 8.4.45
+      postcss-load-config: 4.0.2(postcss@8.4.45)
       tailwindcss: 3.4.12
     transitivePeerDependencies:
       - ts-node
@@ -3015,7 +3011,7 @@ snapshots:
 
   astring@1.8.6: {}
 
-  astro@4.15.6(rollup@4.20.0)(typescript@5.6.2):
+  astro@4.15.7(rollup@4.20.0)(typescript@5.6.2):
     dependencies:
       '@astrojs/compiler': 2.10.3
       '@astrojs/internal-helpers': 0.4.1
@@ -3098,14 +3094,14 @@ snapshots:
       - terser
       - typescript
 
-  autoprefixer@10.4.20(postcss@8.4.40):
+  autoprefixer@10.4.20(postcss@8.4.45):
     dependencies:
       browserslist: 4.23.3
       caniuse-lite: 1.0.30001649
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.0.1
-      postcss: 8.4.40
+      postcss: 8.4.45
       postcss-value-parser: 4.2.0
 
   axobject-query@4.1.0: {}
@@ -4323,13 +4319,6 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.45
 
-  postcss-load-config@4.0.2(postcss@8.4.40):
-    dependencies:
-      lilconfig: 3.1.2
-      yaml: 2.5.0
-    optionalDependencies:
-      postcss: 8.4.40
-
   postcss-load-config@4.0.2(postcss@8.4.45):
     dependencies:
       lilconfig: 3.1.2
@@ -4348,12 +4337,6 @@ snapshots:
       util-deprecate: 1.0.2
 
   postcss-value-parser@4.2.0: {}
-
-  postcss@8.4.40:
-    dependencies:
-      nanoid: 3.3.7
-      picocolors: 1.0.1
-      source-map-js: 1.2.0
 
   postcss@8.4.45:
     dependencies:
