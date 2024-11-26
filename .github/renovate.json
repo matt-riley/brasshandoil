@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "labels": [
     "dependencies"
@@ -22,72 +22,72 @@
       "automerge": true
     },
     {
-      "matchPackagePatterns": [
-        "^eslint",
-        "^prettier",
-        "^@typescript-eslint"
-      ],
       "labels": [
         "linting",
         "dependencies"
       ],
-      "groupName": "linting"
+      "groupName": "linting",
+      "matchPackageNames": [
+        "/^eslint/",
+        "/^prettier/",
+        "/^@typescript-eslint/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "^astro",
-        "^@astrojs"
-      ],
       "labels": [
         "astro",
         "dependencies"
       ],
-      "groupName": "astro"
+      "groupName": "astro",
+      "matchPackageNames": [
+        "/^astro/",
+        "/^@astrojs/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "babel"
-      ],
       "labels": [
         "babel",
         "dependencies"
       ],
-      "groupName": "babel"
+      "groupName": "babel",
+      "matchPackageNames": [
+        "/babel/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "^@types",
-        "^typescript"
-      ],
       "labels": [
         "typescript",
         "dependencies"
       ],
-      "groupName": "typescript"
+      "groupName": "typescript",
+      "matchPackageNames": [
+        "/^@types/",
+        "/^typescript/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "^commitizen",
-        "^cz-conventional-changelog",
-        "^standard-version"
-      ],
       "labels": [
         "conventional-commits",
         "dependencies"
       ],
-      "groupName": "conventional-commits"
+      "groupName": "conventional-commits",
+      "matchPackageNames": [
+        "/^commitizen/",
+        "/^cz-conventional-changelog/",
+        "/^standard-version/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "^graphql",
-        "^graphiql",
-        "^apollo"
-      ],
       "labels": [
         "graphql",
         "dependencies"
       ],
-      "groupName": "graphql"
+      "groupName": "graphql",
+      "matchPackageNames": [
+        "/^graphql/",
+        "/^graphiql/",
+        "/^apollo/"
+      ]
     },
     {
       "matchPackageNames": [
@@ -104,57 +104,57 @@
       "groupName": "css"
     },
     {
-      "matchPackagePatterns": [
-        "^react"
-      ],
       "labels": [
         "react",
         "dependencies"
       ],
-      "groupName": "react"
+      "groupName": "react",
+      "matchPackageNames": [
+        "/^react/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "^webpack",
-        "loader$"
-      ],
       "labels": [
         "webpack",
         "dependencies"
       ],
-      "groupName": "webpack"
+      "groupName": "webpack",
+      "matchPackageNames": [
+        "/^webpack/",
+        "/loader$/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "^jest",
-        "jest$"
-      ],
       "labels": [
         "test",
         "dependencies"
       ],
-      "groupName": "test"
+      "groupName": "test",
+      "matchPackageNames": [
+        "/^jest/",
+        "/jest$/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "^svelte",
-        "^@svelte"
-      ],
       "labels": [
         "svelte",
         "dependencies"
       ],
-      "groupName": "svelte"
+      "groupName": "svelte",
+      "matchPackageNames": [
+        "/^svelte/",
+        "/^@svelte/"
+      ]
     },
     {
-      "matchPackagePatterns": [
-        "^@nestjs"
-      ],
       "labels": [
         "nestjs",
         "dependencies"
       ],
-      "groupName": "nestjs"
+      "groupName": "nestjs",
+      "matchPackageNames": [
+        "/^@nestjs/"
+      ]
     }
   ]
 }
