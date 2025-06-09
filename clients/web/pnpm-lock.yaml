@@ -13,13 +13,13 @@ importers:
         version: 0.9.4(typescript@5.8.3)
       '@astrojs/mdx':
         specifier: 4.3.0
-        version: 4.3.0(astro@5.9.1(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))
+        version: 4.3.0(astro@5.9.2(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))
       '@astrojs/tailwind':
         specifier: 6.0.2
-        version: 6.0.2(astro@5.9.1(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))(tailwindcss@3.4.17)
+        version: 6.0.2(astro@5.9.2(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))(tailwindcss@3.4.17)
       astro:
-        specifier: 5.9.1
-        version: 5.9.1(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
+        specifier: 5.9.2
+        version: 5.9.2(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
       tailwindcss:
         specifier: 3.4.17
         version: 3.4.17
@@ -42,8 +42,8 @@ packages:
   '@astrojs/compiler@2.10.3':
     resolution: {integrity: sha512-bL/O7YBxsFt55YHU021oL+xz+B/9HvGNId3F9xURN16aeqDK9juHGktdkCSXz+U4nqFACq6ZFvWomOzhV+zfPw==}
 
-  '@astrojs/compiler@2.12.1':
-    resolution: {integrity: sha512-WDSyVIiz7sNcJcCJxJFITu6XjfGhJ50Z0auyaWsrM+xb07IlhBLFtQuDkNy0caVHWNcKTM2LISAaHhgkRqGAVg==}
+  '@astrojs/compiler@2.12.2':
+    resolution: {integrity: sha512-w2zfvhjNCkNMmMMOn5b0J8+OmUaBL1o40ipMvqcG6NRpdC+lKxmTi48DT8Xw0SzJ3AfmeFLB45zXZXtmbsjcgw==}
 
   '@astrojs/internal-helpers@0.6.1':
     resolution: {integrity: sha512-l5Pqf6uZu31aG+3Lv8nl/3s4DbUzdlxTWDof4pEpto6GUJNhhCbelVi9dEyurOVyqaelwmS9oSyOWOENSfgo9A==}
@@ -694,8 +694,8 @@ packages:
     resolution: {integrity: sha512-ISvCdHdlTDlH5IpxQJIex7BWBywFWgjJSVdwst+/iQCoEYnyOaQ95+X1JGshuBjGp6nxKUy1jMgE3zPqN7fQdg==}
     hasBin: true
 
-  astro@5.9.1:
-    resolution: {integrity: sha512-wxoJcTbuDZNFSv6EaL0PAlrp0Wx6VnOAULCXvy0scsV70oWMeUkdxuBxfO54JxO5Qgyvwj9h99y6E0elqOpGtA==}
+  astro@5.9.2:
+    resolution: {integrity: sha512-K/zZlQOWMpamfLDOls5jvG7lrsjH1gkk3ESRZyZDCkVBtKHMF4LbjwCicm/iBb3mX3V/PerqRYzLbOy3/4JLCQ==}
     engines: {node: 18.20.8 || ^20.3.0 || >=22.0.0, npm: '>=9.6.5', pnpm: '>=7.1.0'}
     hasBin: true
 
@@ -2293,7 +2293,7 @@ snapshots:
 
   '@astrojs/compiler@2.10.3': {}
 
-  '@astrojs/compiler@2.12.1': {}
+  '@astrojs/compiler@2.12.2': {}
 
   '@astrojs/internal-helpers@0.6.1': {}
 
@@ -2346,12 +2346,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@4.3.0(astro@5.9.1(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))':
+  '@astrojs/mdx@4.3.0(astro@5.9.2(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))':
     dependencies:
       '@astrojs/markdown-remark': 6.3.2
       '@mdx-js/mdx': 3.1.0(acorn@8.14.1)
       acorn: 8.14.1
-      astro: 5.9.1(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
+      astro: 5.9.2(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
       es-module-lexer: 1.6.0
       estree-util-visit: 2.0.0
       hast-util-to-html: 9.0.5
@@ -2369,9 +2369,9 @@ snapshots:
     dependencies:
       prismjs: 1.30.0
 
-  '@astrojs/tailwind@6.0.2(astro@5.9.1(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))(tailwindcss@3.4.17)':
+  '@astrojs/tailwind@6.0.2(astro@5.9.2(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))(tailwindcss@3.4.17)':
     dependencies:
-      astro: 5.9.1(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
+      astro: 5.9.2(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
       autoprefixer: 10.4.21(postcss@8.5.3)
       postcss: 8.5.3
       postcss-load-config: 4.0.2(postcss@8.5.3)
@@ -2910,9 +2910,9 @@ snapshots:
 
   astring@1.8.6: {}
 
-  astro@5.9.1(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0):
+  astro@5.9.2(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0):
     dependencies:
-      '@astrojs/compiler': 2.12.1
+      '@astrojs/compiler': 2.12.2
       '@astrojs/internal-helpers': 0.6.1
       '@astrojs/markdown-remark': 6.3.2
       '@astrojs/telemetry': 3.3.0
