@@ -10,22 +10,22 @@ importers:
     dependencies:
       '@astrojs/check':
         specifier: 0.9.4
-        version: 0.9.4(typescript@5.8.3)
+        version: 0.9.4(typescript@5.9.2)
       '@astrojs/mdx':
         specifier: 4.3.2
-        version: 4.3.2(astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))
+        version: 4.3.2(astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.2)(yaml@2.5.0))
       '@astrojs/tailwind':
         specifier: 6.0.2
-        version: 6.0.2(astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))(tailwindcss@3.4.17)
+        version: 6.0.2(astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.2)(yaml@2.5.0))(tailwindcss@3.4.17)
       astro:
         specifier: 5.12.7
-        version: 5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
+        version: 5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.2)(yaml@2.5.0)
       tailwindcss:
         specifier: 3.4.17
         version: 3.4.17
       typescript:
-        specifier: 5.8.3
-        version: 5.8.3
+        specifier: 5.9.2
+        version: 5.9.2
 
 packages:
 
@@ -1889,8 +1889,8 @@ packages:
   typescript-auto-import-cache@0.3.3:
     resolution: {integrity: sha512-ojEC7+Ci1ij9eE6hp8Jl9VUNnsEKzztktP5gtYNRMrTmfXVwA1PITYYAkpxCvvupdSYa/Re51B6KMcv1CTZEUA==}
 
-  typescript@5.8.3:
-    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
+  typescript@5.9.2:
+    resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -2277,12 +2277,12 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@astrojs/check@0.9.4(typescript@5.8.3)':
+  '@astrojs/check@0.9.4(typescript@5.9.2)':
     dependencies:
-      '@astrojs/language-server': 2.15.0(typescript@5.8.3)
+      '@astrojs/language-server': 2.15.0(typescript@5.9.2)
       chokidar: 4.0.1
       kleur: 4.1.5
-      typescript: 5.8.3
+      typescript: 5.9.2
       yargs: 17.7.2
     transitivePeerDependencies:
       - prettier
@@ -2294,12 +2294,12 @@ snapshots:
 
   '@astrojs/internal-helpers@0.7.0': {}
 
-  '@astrojs/language-server@2.15.0(typescript@5.8.3)':
+  '@astrojs/language-server@2.15.0(typescript@5.9.2)':
     dependencies:
       '@astrojs/compiler': 2.10.3
       '@astrojs/yaml2ts': 0.2.1
       '@jridgewell/sourcemap-codec': 1.5.0
-      '@volar/kit': 2.4.5(typescript@5.8.3)
+      '@volar/kit': 2.4.5(typescript@5.9.2)
       '@volar/language-core': 2.4.5
       '@volar/language-server': 2.4.5
       '@volar/language-service': 2.4.5
@@ -2343,12 +2343,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@4.3.2(astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))':
+  '@astrojs/mdx@4.3.2(astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.2)(yaml@2.5.0))':
     dependencies:
       '@astrojs/markdown-remark': 6.3.4
       '@mdx-js/mdx': 3.1.0(acorn@8.14.1)
       acorn: 8.14.1
-      astro: 5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
+      astro: 5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.2)(yaml@2.5.0)
       es-module-lexer: 1.6.0
       estree-util-visit: 2.0.0
       hast-util-to-html: 9.0.5
@@ -2366,9 +2366,9 @@ snapshots:
     dependencies:
       prismjs: 1.30.0
 
-  '@astrojs/tailwind@6.0.2(astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0))(tailwindcss@3.4.17)':
+  '@astrojs/tailwind@6.0.2(astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.2)(yaml@2.5.0))(tailwindcss@3.4.17)':
     dependencies:
-      astro: 5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0)
+      astro: 5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.2)(yaml@2.5.0)
       autoprefixer: 10.4.21(postcss@8.5.3)
       postcss: 8.5.3
       postcss-load-config: 4.0.2(postcss@8.5.3)
@@ -2813,12 +2813,12 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@volar/kit@2.4.5(typescript@5.8.3)':
+  '@volar/kit@2.4.5(typescript@5.9.2)':
     dependencies:
       '@volar/language-service': 2.4.5
       '@volar/typescript': 2.4.5
       typesafe-path: 0.2.2
-      typescript: 5.8.3
+      typescript: 5.9.2
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.0.8
 
@@ -2907,7 +2907,7 @@ snapshots:
 
   astring@1.8.6: {}
 
-  astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.8.3)(yaml@2.5.0):
+  astro@5.12.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.2)(yaml@2.5.0):
     dependencies:
       '@astrojs/compiler': 2.12.2
       '@astrojs/internal-helpers': 0.7.0
@@ -2957,7 +2957,7 @@ snapshots:
       smol-toml: 1.4.1
       tinyexec: 0.3.2
       tinyglobby: 0.2.13
-      tsconfck: 3.1.5(typescript@5.8.3)
+      tsconfck: 3.1.5(typescript@5.9.2)
       ultrahtml: 1.6.0
       unifont: 0.5.0
       unist-util-visit: 5.0.0
@@ -2970,7 +2970,7 @@ snapshots:
       yocto-spinner: 0.2.1
       zod: 3.25.76
       zod-to-json-schema: 3.24.5(zod@3.25.76)
-      zod-to-ts: 1.2.0(typescript@5.8.3)(zod@3.25.76)
+      zod-to-ts: 1.2.0(typescript@5.9.2)(zod@3.25.76)
     optionalDependencies:
       sharp: 0.33.4
     transitivePeerDependencies:
@@ -4650,9 +4650,9 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  tsconfck@3.1.5(typescript@5.8.3):
+  tsconfck@3.1.5(typescript@5.9.2):
     optionalDependencies:
-      typescript: 5.8.3
+      typescript: 5.9.2
 
   tslib@2.8.1: {}
 
@@ -4664,7 +4664,7 @@ snapshots:
     dependencies:
       semver: 7.7.1
 
-  typescript@5.8.3: {}
+  typescript@5.9.2: {}
 
   ufo@1.5.4: {}
 
@@ -4992,9 +4992,9 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  zod-to-ts@1.2.0(typescript@5.8.3)(zod@3.25.76):
+  zod-to-ts@1.2.0(typescript@5.9.2)(zod@3.25.76):
     dependencies:
-      typescript: 5.8.3
+      typescript: 5.9.2
       zod: 3.25.76
 
   zod@3.25.76: {}
