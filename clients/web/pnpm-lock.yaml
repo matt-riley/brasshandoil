@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@astrojs/check':
-        specifier: 0.9.4
-        version: 0.9.4(typescript@5.9.3)
+        specifier: 0.9.5
+        version: 0.9.5(typescript@5.9.3)
       '@astrojs/mdx':
         specifier: 4.3.7
-        version: 4.3.7(astro@5.14.6(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0))
+        version: 4.3.7(astro@5.14.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0))
       '@astrojs/tailwind':
         specifier: 6.0.2
-        version: 6.0.2(astro@5.14.6(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0))(tailwindcss@3.4.18)
+        version: 6.0.2(astro@5.14.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0))(tailwindcss@3.4.18)
       astro:
-        specifier: 5.14.6
-        version: 5.14.6(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0)
+        specifier: 5.14.7
+        version: 5.14.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0)
       tailwindcss:
         specifier: 3.4.18
         version: 3.4.18
@@ -33,14 +33,11 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@astrojs/check@0.9.4':
-    resolution: {integrity: sha512-IOheHwCtpUfvogHHsvu0AbeRZEnjJg3MopdLddkJE70mULItS/Vh37BHcI00mcOJcH1vhD3odbpvWokpxam7xA==}
+  '@astrojs/check@0.9.5':
+    resolution: {integrity: sha512-88vc8n2eJ1Oua74yXSGo/8ABMeypfQPGEzuoAx2awL9Ju8cE6tZ2Rz9jVx5hIExHK5gKVhpxfZj4WXm7e32g1w==}
     hasBin: true
     peerDependencies:
       typescript: ^5.0.0
-
-  '@astrojs/compiler@2.10.3':
-    resolution: {integrity: sha512-bL/O7YBxsFt55YHU021oL+xz+B/9HvGNId3F9xURN16aeqDK9juHGktdkCSXz+U4nqFACq6ZFvWomOzhV+zfPw==}
 
   '@astrojs/compiler@2.12.2':
     resolution: {integrity: sha512-w2zfvhjNCkNMmMMOn5b0J8+OmUaBL1o40ipMvqcG6NRpdC+lKxmTi48DT8Xw0SzJ3AfmeFLB45zXZXtmbsjcgw==}
@@ -419,9 +416,6 @@ packages:
     resolution: {integrity: sha512-R8gLRTZeyp03ymzP/6Lil/28tGeGEzhx1q2k703KGWRAI1VdvPIXdG70VJc2pAMw3NA6JKL5hhFu1sJX0Mnn/A==}
     engines: {node: '>=6.0.0'}
 
-  '@jridgewell/sourcemap-codec@1.5.0':
-    resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
-
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
@@ -707,8 +701,8 @@ packages:
     resolution: {integrity: sha512-ISvCdHdlTDlH5IpxQJIex7BWBywFWgjJSVdwst+/iQCoEYnyOaQ95+X1JGshuBjGp6nxKUy1jMgE3zPqN7fQdg==}
     hasBin: true
 
-  astro@5.14.6:
-    resolution: {integrity: sha512-MSdjKt2W2a56x868DqDWgbfw4D689/8EGhHG4465h7eivTI237u1aBx4iJvgI6WfgdUE61+coAvMjUkEvOWbpA==}
+  astro@5.14.7:
+    resolution: {integrity: sha512-vdZmRN2MFf60ZTjFkZNrQQkrmeeZzTI1c6N3ZRQN55rPGHjywM2VplJwJ68q496DfpaoDoAroDBpdm+eTgHUtQ==}
     engines: {node: 18.20.8 || ^20.3.0 || >=22.0.0, npm: '>=9.6.5', pnpm: '>=7.1.0'}
     hasBin: true
 
@@ -791,10 +785,6 @@ packages:
   chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
     engines: {node: '>= 8.10.0'}
-
-  chokidar@4.0.1:
-    resolution: {integrity: sha512-n8enUVCED/KVRQlab1hr3MVpcVMvxtZjmEa956u+4YijlmQED223XMSYj2tLuKvr4jcCTzNNMpQDUer72MMmzA==}
-    engines: {node: '>= 14.16.0'}
 
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
@@ -958,10 +948,6 @@ packages:
     resolution: {integrity: sha512-BXq5mqc8ltbaN34cDqWuYKyNhX8D/Z0J1xdtdQ8UcIIIyJyz+ZMKUt58tF3SrZ85jcfN/PZYhjR5uDQAYNVbuw==}
     engines: {node: '>=18'}
     hasBin: true
-
-  escalade@3.1.2:
-    resolution: {integrity: sha512-ErCHMCae19vR8vQGe50xIsVomy19rg6gFu3+r3jkEO46suLMWBksvVyoGgQV+jOfl84ZSOSlmv6Gxa89PmTGmA==}
-    engines: {node: '>=6'}
 
   escalade@3.2.0:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
@@ -2263,10 +2249,10 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@astrojs/check@0.9.4(typescript@5.9.3)':
+  '@astrojs/check@0.9.5(typescript@5.9.3)':
     dependencies:
       '@astrojs/language-server': 2.15.0(typescript@5.9.3)
-      chokidar: 4.0.1
+      chokidar: 4.0.3
       kleur: 4.1.5
       typescript: 5.9.3
       yargs: 17.7.2
@@ -2274,17 +2260,15 @@ snapshots:
       - prettier
       - prettier-plugin-astro
 
-  '@astrojs/compiler@2.10.3': {}
-
   '@astrojs/compiler@2.12.2': {}
 
   '@astrojs/internal-helpers@0.7.4': {}
 
   '@astrojs/language-server@2.15.0(typescript@5.9.3)':
     dependencies:
-      '@astrojs/compiler': 2.10.3
+      '@astrojs/compiler': 2.12.2
       '@astrojs/yaml2ts': 0.2.1
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.5
       '@volar/kit': 2.4.5(typescript@5.9.3)
       '@volar/language-core': 2.4.5
       '@volar/language-server': 2.4.5
@@ -2329,12 +2313,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@4.3.7(astro@5.14.6(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0))':
+  '@astrojs/mdx@4.3.7(astro@5.14.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0))':
     dependencies:
       '@astrojs/markdown-remark': 6.3.8
       '@mdx-js/mdx': 3.1.1
       acorn: 8.15.0
-      astro: 5.14.6(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0)
+      astro: 5.14.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0)
       es-module-lexer: 1.7.0
       estree-util-visit: 2.0.0
       hast-util-to-html: 9.0.5
@@ -2352,9 +2336,9 @@ snapshots:
     dependencies:
       prismjs: 1.30.0
 
-  '@astrojs/tailwind@6.0.2(astro@5.14.6(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0))(tailwindcss@3.4.18)':
+  '@astrojs/tailwind@6.0.2(astro@5.14.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0))(tailwindcss@3.4.18)':
     dependencies:
-      astro: 5.14.6(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0)
+      astro: 5.14.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0)
       autoprefixer: 10.4.21(postcss@8.5.3)
       postcss: 8.5.3
       postcss-load-config: 4.0.2(postcss@8.5.3)
@@ -2602,8 +2586,6 @@ snapshots:
   '@jridgewell/resolve-uri@3.1.2': {}
 
   '@jridgewell/set-array@1.2.1': {}
-
-  '@jridgewell/sourcemap-codec@1.5.0': {}
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
@@ -2902,7 +2884,7 @@ snapshots:
 
   astring@1.8.6: {}
 
-  astro@5.14.6(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0):
+  astro@5.14.7(@types/node@22.15.17)(jiti@2.4.2)(rollup@4.40.1)(typescript@5.9.3)(yaml@2.5.0):
     dependencies:
       '@astrojs/compiler': 2.12.2
       '@astrojs/internal-helpers': 0.7.4
@@ -3085,10 +3067,6 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  chokidar@4.0.1:
-    dependencies:
-      readdirp: 4.0.2
-
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.0.2
@@ -3251,8 +3229,6 @@ snapshots:
       '@esbuild/win32-arm64': 0.25.0
       '@esbuild/win32-ia32': 0.25.0
       '@esbuild/win32-x64': 0.25.0
-
-  escalade@3.1.2: {}
 
   escalade@3.2.0: {}
 
@@ -4935,7 +4911,7 @@ snapshots:
   yargs@17.7.2:
     dependencies:
       cliui: 8.0.1
-      escalade: 3.1.2
+      escalade: 3.2.0
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3
