@@ -15,7 +15,7 @@
     "@astrojs/tailwind": "6.0.2",
     "astro": "6.3.7",
     "tailwindcss": "4.3.0",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   },
   "packageManager": "pnpm@11.2.2"
 }
