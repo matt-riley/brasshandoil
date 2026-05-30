@@ -1,0 +1,407 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <section class="oracle-shell">
+    <div class="oracle-copy">
+      <p class="oracle-kicker">Nocturnal consultation chamber</p>
+      <h1>Moth Oracle</h1>
+      <p class="oracle-intro">
+        A lantern, a swarm, and a machine for receiving suspiciously poetic advice.
+        Move your pointer through the chamber, then ask the moths what they know.
+      </p>
+
+      <div class="oracle-controls">
+        <button id="oracle-button" type="button">Ask the moths</button>
+        <p id="oracle-response" aria-live="polite">
+          The lantern is warming up. The moths are rehearsing your omen.
+        </p>
+      </div>
+    </div>
+
+    <div id="oracle-stage" class="oracle-stage" aria-hidden="true">
+      <div class="oracle-haze"></div>
+      <div class="oracle-lantern">
+        <div class="oracle-core"></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const stage = document.getElementById("oracle-stage")
+    const button = document.getElementById("oracle-button")
+    const response = document.getElementById("oracle-response")
+
+    const prophecyPool = [
+      "Trust the idea that arrives wearing wet velvet shoes.",
+      "A tiny disaster is only a curtain rising sideways.",
+      "Build the door before you decide what creature lives behind it.",
+      "The best compass today is the thing that glows when ignored.",
+      "Invite one more impossible color into the room.",
+      "If the page feels too polite, give it a weather system.",
+      "The answer is real, but it prefers choreography to bullet points.",
+    ]
+
+    const mothCount = 44
+    type Moth = {
+      element: HTMLDivElement
+      angle: number
+      radius: number
+      drift: number
+      speed: number
+      lift: number
+      x: number
+      y: number
+    }
+
+    const moths: Moth[] = []
+    const pointer = {
+      x: window.innerWidth * 0.5,
+      y: window.innerHeight * 0.4,
+      active: false,
+      energy: 0.25,
+    }
+
+    function randomBetween(min: number, max: number) {
+      return min + Math.random() * (max - min)
+    }
+
+    for (let i = 0; i < mothCount; i += 1) {
+      const element = document.createElement("div")
+      element.className = "moth"
+      stage?.appendChild(element)
+
+      moths.push({
+        element,
+        angle: randomBetween(0, Math.PI * 2),
+        radius: randomBetween(90, 320),
+        drift: randomBetween(0.004, 0.018),
+        speed: randomBetween(0.006, 0.022),
+        lift: randomBetween(-0.8, 0.8),
+        x: randomBetween(window.innerWidth * 0.2, window.innerWidth * 0.8),
+        y: randomBetween(160, 620),
+      })
+    }
+
+    function setProphecy() {
+      const nextLine =
+        prophecyPool[Math.floor(Math.random() * prophecyPool.length)]
+
+      if (response) {
+        response.textContent = nextLine
+      }
+
+      pointer.energy = Math.min(pointer.energy + 0.25, 1)
+      stage?.classList.remove("oracle-flash")
+      void stage?.offsetWidth
+      stage?.classList.add("oracle-flash")
+    }
+
+    button?.addEventListener("click", setProphecy)
+
+    window.addEventListener("pointermove", (event) => {
+      pointer.x = event.clientX
+      pointer.y = event.clientY
+      pointer.active = true
+      pointer.energy = Math.min(pointer.energy + 0.015, 1)
+    })
+
+    window.addEventListener("pointerleave", () => {
+      pointer.active = false
+    })
+
+    let lastFrame = performance.now()
+
+    function animate(now: number) {
+      const delta = Math.min((now - lastFrame) / 16, 3)
+      lastFrame = now
+
+      if (!stage) {
+        requestAnimationFrame(animate)
+        return
+      }
+
+      const bounds = stage.getBoundingClientRect()
+      const anchorX = pointer.active
+        ? pointer.x - bounds.left
+        : bounds.width * 0.5 + Math.sin(now * 0.0003) * 60
+      const anchorY = pointer.active
+        ? pointer.y - bounds.top
+        : bounds.height * 0.42 + Math.cos(now * 0.0002) * 45
+
+      pointer.energy += (0.22 - pointer.energy) * 0.03 * delta
+
+      moths.forEach((moth, index) => {
+        moth.angle += moth.speed * delta + Math.sin(now * 0.0004 + index) * 0.001
+        moth.radius += Math.sin(now * moth.drift * 0.3 + index) * 0.6 * delta
+
+        const orbitX = anchorX + Math.cos(moth.angle) * moth.radius
+        const orbitY = anchorY + Math.sin(moth.angle * 1.7) * (moth.radius * 0.4)
+        moth.x += (orbitX - moth.x) * 0.06 * delta
+        moth.y += (orbitY - moth.y + moth.lift * 18) * 0.08 * delta
+
+        const scale = 0.5 + (index % 7) * 0.08 + pointer.energy * 0.35
+        const rotation = Math.sin(now * 0.01 + index) * 28
+        const opacity = 0.28 + (pointer.energy * 0.5) + ((index % 5) * 0.04)
+
+        moth.element.style.transform =
+          `translate(${moth.x}px, ${moth.y}px) rotate(${rotation}deg) scale(${scale})`
+        moth.element.style.opacity = String(Math.min(opacity, 0.96))
+      })
+
+      stage.style.setProperty("--lamp-x", `${anchorX}px`)
+      stage.style.setProperty("--lamp-y", `${anchorY}px`)
+      stage.style.setProperty("--energy", pointer.energy.toFixed(3))
+
+      requestAnimationFrame(animate)
+    }
+
+    requestAnimationFrame(animate)
+  </script>
+
+  <style>
+    .oracle-shell {
+      min-height: calc(100vh - 5rem);
+      display: grid;
+      grid-template-columns: minmax(0, 28rem) minmax(0, 1fr);
+      gap: 2rem;
+      padding: 2rem;
+      color: #f8f1df;
+    }
+
+    .oracle-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.25rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .oracle-kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: 0.72rem;
+      color: #c0b38d;
+    }
+
+    h1 {
+      font-size: clamp(3.5rem, 10vw, 6.5rem);
+      line-height: 0.92;
+      font-weight: 700;
+      max-width: 8ch;
+    }
+
+    .oracle-intro,
+    #oracle-response {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #eadfc6;
+      max-width: 36ch;
+    }
+
+    .oracle-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    button {
+      width: fit-content;
+      border: 1px solid rgba(248, 241, 223, 0.3);
+      border-radius: 999px;
+      padding: 0.9rem 1.3rem;
+      background:
+        linear-gradient(135deg, rgba(222, 168, 99, 0.36), rgba(76, 46, 15, 0.7));
+      color: #fff7ea;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(255, 179, 71, 0.14);
+    }
+
+    button:hover,
+    button:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 0 38px rgba(255, 196, 101, 0.26);
+      outline: none;
+    }
+
+    .oracle-stage {
+      --lamp-x: 50%;
+      --lamp-y: 42%;
+      --energy: 0.22;
+      min-height: 78vh;
+      position: relative;
+      overflow: hidden;
+      border-radius: 2rem;
+      background:
+        radial-gradient(circle at 50% 25%, rgba(147, 109, 50, 0.22), transparent 35%),
+        radial-gradient(circle at 20% 20%, rgba(79, 64, 107, 0.18), transparent 30%),
+        linear-gradient(180deg, #120f19 0%, #17111e 45%, #0a090f 100%);
+      box-shadow:
+        inset 0 0 80px rgba(0, 0, 0, 0.45),
+        0 30px 80px rgba(0, 0, 0, 0.35);
+      isolation: isolate;
+    }
+
+    .oracle-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          circle 14rem at var(--lamp-x) var(--lamp-y),
+          rgba(255, 201, 118, calc(var(--energy) * 0.38)),
+          rgba(255, 201, 118, 0.08) 35%,
+          transparent 75%
+        );
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .oracle-stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 3rem 3rem;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .oracle-haze,
+    .oracle-lantern {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .oracle-haze::before,
+    .oracle-haze::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(28px);
+      mix-blend-mode: screen;
+    }
+
+    .oracle-haze::before {
+      width: 20rem;
+      height: 20rem;
+      left: 8%;
+      top: 12%;
+      background: rgba(86, 120, 154, 0.14);
+    }
+
+    .oracle-haze::after {
+      width: 28rem;
+      height: 18rem;
+      right: -6%;
+      bottom: -8%;
+      background: rgba(174, 93, 56, 0.14);
+    }
+
+    .oracle-lantern::before {
+      content: "";
+      position: absolute;
+      width: 5.5rem;
+      height: 5.5rem;
+      left: calc(var(--lamp-x) - 2.75rem);
+      top: calc(var(--lamp-y) - 2.75rem);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 235, 181, 0.92) 0%, rgba(255, 180, 94, 0.66) 42%, rgba(255, 180, 94, 0.02) 72%);
+      box-shadow:
+        0 0 24px rgba(255, 207, 133, 0.7),
+        0 0 90px rgba(255, 182, 85, 0.26);
+    }
+
+    .oracle-core {
+      position: absolute;
+      width: 0.95rem;
+      height: 0.95rem;
+      left: calc(var(--lamp-x) - 0.475rem);
+      top: calc(var(--lamp-y) - 0.475rem);
+      border-radius: 50%;
+      background: #fff6db;
+      box-shadow: 0 0 18px rgba(255, 239, 194, 0.9);
+    }
+
+    .moth {
+      position: absolute;
+      width: 1.4rem;
+      height: 0.85rem;
+      border-radius: 999px 999px 50% 50%;
+      background:
+        radial-gradient(circle at 30% 50%, rgba(255, 246, 219, 0.9), rgba(255, 215, 156, 0.65) 55%, rgba(255, 215, 156, 0) 70%),
+        linear-gradient(90deg, rgba(255, 228, 177, 0.8), rgba(112, 82, 47, 0.2));
+      transform-origin: center center;
+      filter: blur(0.2px);
+      mix-blend-mode: screen;
+      box-shadow: 0 0 16px rgba(255, 226, 163, 0.12);
+    }
+
+    .moth::before,
+    .moth::after {
+      content: "";
+      position: absolute;
+      top: 0.05rem;
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 80% 20% 70% 30%;
+      background: rgba(255, 233, 196, 0.75);
+    }
+
+    .moth::before {
+      left: -0.15rem;
+      transform: rotate(-24deg);
+    }
+
+    .moth::after {
+      right: -0.15rem;
+      transform: scaleX(-1) rotate(-24deg);
+    }
+
+    .oracle-flash::before {
+      animation: oracle-bloom 0.9s ease;
+    }
+
+    @keyframes oracle-bloom {
+      0% {
+        opacity: 0.2;
+        transform: scale(0.95);
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1.02);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .oracle-shell {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+
+      .oracle-stage {
+        min-height: 60vh;
+      }
+
+      h1 {
+        max-width: none;
+      }
+    }
+  </style>
+</Base>

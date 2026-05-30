@@ -1,0 +1,20 @@
+{
+  "name": "brasshandoil",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs clients/web/tests/*.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matt-riley/brasshandoil.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matt-riley/brasshandoil/issues"
+  },
+  "homepage": "https://github.com/matt-riley/brasshandoil#readme"
+}

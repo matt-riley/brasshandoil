@@ -1,0 +1,39 @@
+---
+import Base from "@layouts/Base.astro"
+
+const experiments = [
+  {
+    slug: "moth-oracle",
+    title: "Moth Oracle",
+    date: "2026-05-31",
+    description: "A lantern-lit swarm that circles your pointer and dispenses suspiciously poetic advice.",
+  },
+  {
+    slug: "theremin",
+    title: "Theremin",
+    date: "2026-05-31",
+    description: "Mouse-controlled synthesiser with live oscilloscope. X = pitch, Y = volume. Web Audio API.",
+  },
+]
+---
+
+<Base>
+  <div class="py-12 max-w-2xl mx-auto">
+    <h1 class="text-4xl font-bold mb-2">Experiments</h1>
+    <p class="text-gray-500 mb-10">One weird web thing per day.</p>
+
+    <ul class="flex flex-col gap-6">
+      {experiments.map((exp) => (
+        <li>
+          <a href={`/experiments/${exp.slug}`} class="group flex flex-col gap-1 p-5 rounded-xl border border-gray-200 hover:border-gray-400 transition-colors">
+            <div class="flex items-baseline justify-between">
+              <span class="text-xl font-semibold group-hover:underline">{exp.title}</span>
+              <span class="text-xs text-gray-400 font-mono">{exp.date}</span>
+            </div>
+            <p class="text-gray-600 text-sm">{exp.description}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>

@@ -1,0 +1,130 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div id="theremin-root" class="flex flex-col items-center gap-4 py-8 select-none">
+    <h1 class="text-3xl font-bold tracking-tight">Theremin</h1>
+    <p class="text-sm text-gray-500 max-w-sm text-center">
+      Move your mouse. <strong>X</strong> controls pitch &nbsp;·&nbsp; <strong>Y</strong> controls volume.
+      Click anywhere to activate audio.
+    </p>
+
+    <div id="info" class="font-mono text-lg text-gray-700 h-8">—</div>
+
+    <canvas
+      id="oscilloscope"
+      width="640"
+      height="200"
+      class="rounded-xl border border-gray-200 bg-black w-full max-w-2xl"
+    ></canvas>
+
+    <div id="overlay" class="fixed inset-0 flex items-center justify-center bg-black/60 text-white text-xl cursor-pointer z-50">
+      Click to start playing
+    </div>
+  </div>
+
+  <script>
+    // ─── Audio setup ─────────────────────────────────────────────────────────
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+    let ctx: AudioContext | null = null
+    let oscillator: OscillatorNode | null = null
+    let gainNode: GainNode | null = null
+    let analyser: AnalyserNode | null = null
+    let running = false
+
+    function boot() {
+      if (running) return
+      running = true
+
+      ctx = new AudioContextClass()
+
+      analyser = ctx.createAnalyser()
+      analyser.fftSize = 2048
+
+      gainNode = ctx.createGain()
+      gainNode.gain.value = 0
+
+      oscillator = ctx.createOscillator()
+      oscillator.type = "sine"
+      oscillator.frequency.value = 440
+
+      oscillator.connect(analyser)
+      analyser.connect(gainNode)
+      gainNode.connect(ctx.destination)
+      oscillator.start()
+
+      document.getElementById("overlay")!.style.display = "none"
+    }
+
+    // ─── Mouse interaction ────────────────────────────────────────────────────
+    const MIN_FREQ = 80
+    const MAX_FREQ = 1200
+    const NOTES = ["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"]
+
+    function freqToNote(freq: number): string {
+      const midi = Math.round(12 * Math.log2(freq / 440) + 69)
+      const note = NOTES[midi % 12]
+      const octave = Math.floor(midi / 12) - 1
+      return `${note}${octave}`
+    }
+
+    window.addEventListener("mousemove", (e: MouseEvent) => {
+      if (!running || !oscillator || !gainNode || !ctx) return
+
+      const t = ctx.currentTime
+      const xRatio = e.clientX / window.innerWidth
+      const yRatio = 1 - e.clientY / window.innerHeight // invert: top = loud
+
+      const freq = MIN_FREQ * Math.pow(MAX_FREQ / MIN_FREQ, xRatio)
+      const vol = Math.max(0, Math.min(1, yRatio)) * 0.5
+
+      oscillator.frequency.setTargetAtTime(freq, t, 0.02)
+      gainNode.gain.setTargetAtTime(vol, t, 0.02)
+
+      const info = document.getElementById("info")!
+      info.textContent = `${freqToNote(freq)} · ${Math.round(freq)} Hz · vol ${Math.round(vol * 200)}%`
+    })
+
+    document.getElementById("overlay")!.addEventListener("click", boot)
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") { e.preventDefault(); boot() }
+    })
+
+    // ─── Oscilloscope ─────────────────────────────────────────────────────────
+    const canvas = document.getElementById("oscilloscope") as HTMLCanvasElement
+    const canvasCtx = canvas.getContext("2d")!
+
+    function drawScope() {
+      requestAnimationFrame(drawScope)
+      if (!analyser) {
+        canvasCtx.fillStyle = "#000"
+        canvasCtx.fillRect(0, 0, canvas.width, canvas.height)
+        return
+      }
+
+      const buf = new Uint8Array(analyser.frequencyBinCount)
+      analyser.getByteTimeDomainData(buf)
+
+      canvasCtx.fillStyle = "rgba(0,0,0,0.15)"
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height)
+
+      canvasCtx.lineWidth = 2
+      canvasCtx.strokeStyle = "#00ff88"
+      canvasCtx.beginPath()
+
+      const sliceWidth = canvas.width / buf.length
+      let x = 0
+      for (let i = 0; i < buf.length; i++) {
+        const v = buf[i] / 128
+        const y = (v * canvas.height) / 2
+        i === 0 ? canvasCtx.moveTo(x, y) : canvasCtx.lineTo(x, y)
+        x += sliceWidth
+      }
+      canvasCtx.lineTo(canvas.width, canvas.height / 2)
+      canvasCtx.stroke()
+    }
+
+    drawScope()
+  </script>
+</Base>
