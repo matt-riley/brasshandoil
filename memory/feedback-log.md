@@ -19,7 +19,10 @@ Carry Forward:
 Date: 2026-05-31
 Experiment: Moth Oracle
 Feedback:
-- Awaiting first review.
+- The idea and concept landed well.
+- The color contrast for the text was not accessible enough.
+- Future experiments should preserve the creativity while ensuring legible text contrast.
 Carry Forward:
 - Track whether surreal text-plus-motion scenes feel stronger than pure single-API demos.
 - Check in the next review whether the project wants more atmospheric visual work, more sound work, or sharper conceptual constraints.
+- Treat accessible contrast as a default requirement, not a polish step.

@@ -6,6 +6,8 @@
 - Favor one self-contained page per experiment so the daily work stays shippable within an hour.
 - Use Node's built-in test runner for structural TDD checks when full browser automation would be overkill.
 - Build around one clear interaction loop per page, then push the atmosphere hard with gradients, motion, and copy.
+- However strange the page gets, body text, controls, and key labels must maintain legible contrast against their backgrounds.
+- Treat accessibility contrast as part of the creative brief up front, especially for text layered over gradients, haze, or animated lighting.
 
 ## Open Questions
 

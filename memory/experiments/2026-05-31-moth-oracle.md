@@ -22,12 +22,14 @@ A lantern-lit consultation chamber where a swarm of glowing moths circles your p
 
 ## Feedback To Carry Forward
 
-- Awaiting first review.
+- The concept and creativity landed well.
+- The text contrast was not accessible enough and needs to be treated as a hard requirement next time.
 
 ## Skills Or Patterns Learned
 
 - Self-contained spectacle pages work well for the one-hour cadence when the effect is driven by one clear interactive loop.
 - Source-level tests are enough to guard the presence of creative scaffolding before moving to richer visual QA.
+- Atmosphere cannot come at the expense of readable copy; contrast needs to be checked intentionally in motion-heavy scenes.
 
 ## Next Sparks
 
