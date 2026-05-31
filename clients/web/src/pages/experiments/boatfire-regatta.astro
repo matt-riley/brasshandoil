@@ -1,0 +1,662 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="regatta-shell">
+    <canvas
+      id="regatta-canvas"
+      aria-label="A luminous night canal filled with paper boats, flame buoys, and drifting sparks"
+    >
+      Your thought boats are crossing a luminous canal.
+    </canvas>
+
+    <section class="regatta-copy">
+      <p class="eyebrow">Midnight launch window</p>
+      <h1>Boatfire Regatta</h1>
+      <p class="intro">
+        Give one unfinished thought to the current. Guide its paper boat toward the
+        flame buoys and listen for the water to answer.
+      </p>
+
+      <form id="launch-form" class="launcher">
+        <label for="thought-input">Thought for the water</label>
+        <div class="launcher-row">
+          <input
+            id="thought-input"
+            name="thought"
+            maxlength="42"
+            autocomplete="off"
+            placeholder="a small impossible plan"
+          />
+          <button id="launch-button" type="submit">Launch thought</button>
+        </div>
+      </form>
+
+      <div class="readout" aria-live="polite">
+        <p><span id="launch-count">0</span> thoughts afloat</p>
+        <p id="chorus-line">The canal is humming under its breath.</p>
+      </div>
+
+      <p class="hint">Move your pointer across the water to bend the current.</p>
+    </section>
+
+    <div class="moon" aria-hidden="true"></div>
+    <div class="shore-glow shore-glow-left" aria-hidden="true"></div>
+    <div class="shore-glow shore-glow-right" aria-hidden="true"></div>
+  </main>
+
+  <script>
+    const canvasNode = document.getElementById("regatta-canvas")
+    const formNode = document.getElementById("launch-form")
+    const inputNode = document.getElementById("thought-input")
+    const launchCountNode = document.getElementById("launch-count")
+    const chorusLineNode = document.getElementById("chorus-line")
+
+    if (
+      !(canvasNode instanceof HTMLCanvasElement) ||
+      !(formNode instanceof HTMLFormElement) ||
+      !(inputNode instanceof HTMLInputElement) ||
+      !launchCountNode ||
+      !chorusLineNode
+    ) {
+      throw new Error("Boatfire Regatta is missing required DOM nodes")
+    }
+
+    const canvas = canvasNode
+    const form = formNode
+    const input = inputNode
+    const launchCount = launchCountNode
+    const chorusLine = chorusLineNode
+    const canvasContext = canvas.getContext("2d")
+
+    if (!canvasContext) {
+      throw new Error("Boatfire Regatta requires a 2D canvas context")
+    }
+
+    const context = canvasContext
+
+    type Boat = {
+      thought: string
+      x: number
+      y: number
+      size: number
+      speed: number
+      wobble: number
+      color: string
+      lit: boolean
+      ceremonial: boolean
+    }
+
+    type Spark = {
+      x: number
+      y: number
+      vx: number
+      vy: number
+      life: number
+      maxLife: number
+      size: number
+      hue: number
+    }
+
+    type Buoy = {
+      x: number
+      y: number
+      phase: number
+    }
+
+    const boats: Boat[] = []
+    const sparks: Spark[] = []
+    const stars = Array.from({ length: 90 }, (_, index) => ({
+      x: ((index * 79) % 997) / 997,
+      y: ((index * 43) % 431) / 431,
+      radius: 0.5 + (index % 4) * 0.32,
+      phase: index * 0.57,
+    }))
+
+    const chorusPool = [
+      "The water votes for trying the strange version first.",
+      "A little flame has learned the shape of your plan.",
+      "The current says: make room for the magnificent mistake.",
+      "Your thought has joined a choir with very poor supervision.",
+      "The canal insists that uncertainty looks excellent in gold.",
+      "A spark has volunteered to carry the difficult part.",
+    ]
+
+    const colors = ["#ffd36a", "#ff8264", "#8de6ff", "#fb9df6", "#b9ff9a"]
+    const pointer = { x: 0, y: 0, active: false }
+    let width = 0
+    let height = 0
+    let pixelRatio = 1
+    let launched = 0
+    let lastFrame = performance.now()
+
+    function randomBetween(min: number, max: number) {
+      return min + Math.random() * (max - min)
+    }
+
+    function resizeCanvas() {
+      const bounds = canvas.getBoundingClientRect()
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+      width = bounds.width
+      height = bounds.height
+      canvas.width = Math.floor(width * pixelRatio)
+      canvas.height = Math.floor(height * pixelRatio)
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+    }
+
+    function createBoat(thought: string, ceremonial = false) {
+      boats.push({
+        thought,
+        x: ceremonial ? randomBetween(-80, width * 0.55) : -70,
+        y: randomBetween(height * 0.48, height * 0.86),
+        size: ceremonial ? randomBetween(0.65, 0.9) : randomBetween(0.92, 1.22),
+        speed: ceremonial ? randomBetween(18, 28) : randomBetween(33, 48),
+        wobble: randomBetween(0, Math.PI * 2),
+        color: colors[Math.floor(Math.random() * colors.length)],
+        lit: ceremonial && Math.random() > 0.45,
+        ceremonial,
+      })
+    }
+
+    function createSpark(x: number, y: number, hue = 40) {
+      sparks.push({
+        x,
+        y,
+        vx: randomBetween(-18, 18),
+        vy: randomBetween(-42, -10),
+        life: randomBetween(0.8, 1.45),
+        maxLife: 1.45,
+        size: randomBetween(1.2, 3.8),
+        hue,
+      })
+    }
+
+    function getBuoys(): Buoy[] {
+      return [
+        { x: width * 0.31, y: height * 0.66, phase: 0.2 },
+        { x: width * 0.57, y: height * 0.78, phase: 1.4 },
+        { x: width * 0.79, y: height * 0.57, phase: 2.8 },
+      ]
+    }
+
+    function launchThought(thought: string) {
+      createBoat(thought)
+      launched += 1
+      launchCount.textContent = String(launched)
+      chorusLine.textContent = chorusPool[(launched - 1) % chorusPool.length]
+
+      for (let index = 0; index < 24; index += 1) {
+        createSpark(width * 0.12, height * 0.76, 190 + (index % 4) * 14)
+      }
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault()
+      const thought = input.value.trim() || "the plan without a name"
+      launchThought(thought)
+      input.value = ""
+      input.focus()
+    })
+
+    canvas.addEventListener("pointermove", (event) => {
+      const bounds = canvas.getBoundingClientRect()
+      pointer.x = event.clientX - bounds.left
+      pointer.y = event.clientY - bounds.top
+      pointer.active = true
+    })
+
+    canvas.addEventListener("pointerleave", () => {
+      pointer.active = false
+    })
+
+    function drawSky(now: number) {
+      const sky = context.createLinearGradient(0, 0, 0, height)
+      sky.addColorStop(0, "#05051a")
+      sky.addColorStop(0.52, "#101044")
+      sky.addColorStop(1, "#061f38")
+      context.fillStyle = sky
+      context.fillRect(0, 0, width, height)
+
+      for (const star of stars) {
+        const twinkle = 0.24 + Math.sin(now * 0.0018 + star.phase) * 0.18
+        context.fillStyle = `rgba(233, 243, 255, ${twinkle})`
+        context.beginPath()
+        context.arc(star.x * width, star.y * height * 0.55, star.radius, 0, Math.PI * 2)
+        context.fill()
+      }
+
+      const horizon = context.createLinearGradient(0, height * 0.4, 0, height)
+      horizon.addColorStop(0, "rgba(34, 64, 112, 0.04)")
+      horizon.addColorStop(0.34, "rgba(24, 140, 172, 0.28)")
+      horizon.addColorStop(1, "rgba(5, 13, 35, 0.94)")
+      context.fillStyle = horizon
+      context.fillRect(0, height * 0.36, width, height)
+    }
+
+    function drawWater(now: number) {
+      context.save()
+      context.globalCompositeOperation = "screen"
+
+      for (let row = 0; row < 22; row += 1) {
+        const y = height * 0.43 + row * height * 0.027
+        const alpha = 0.08 + row * 0.002
+        context.strokeStyle = `rgba(${54 + row * 2}, ${152 + row * 2}, 215, ${alpha})`
+        context.lineWidth = 1 + (row % 3) * 0.35
+        context.beginPath()
+
+        for (let x = -24; x <= width + 24; x += 20) {
+          const pointerLift =
+            pointer.active
+              ? Math.max(0, 1 - Math.abs(pointer.x - x) / 240) *
+                Math.sin((pointer.y - y) * 0.025) *
+                9
+              : 0
+          const wave = Math.sin(x * 0.018 + now * 0.0018 + row * 0.65) * (3 + row * 0.12)
+          const ripple = Math.cos(x * 0.042 - now * 0.0022 + row) * 2
+          const nextY = y + wave + ripple + pointerLift
+
+          if (x === -24) context.moveTo(x, nextY)
+          else context.lineTo(x, nextY)
+        }
+
+        context.stroke()
+      }
+
+      if (pointer.active) {
+        const pointerGlow = context.createRadialGradient(
+          pointer.x,
+          pointer.y,
+          0,
+          pointer.x,
+          pointer.y,
+          180
+        )
+        pointerGlow.addColorStop(0, "rgba(111, 235, 255, 0.18)")
+        pointerGlow.addColorStop(1, "rgba(111, 235, 255, 0)")
+        context.fillStyle = pointerGlow
+        context.fillRect(pointer.x - 180, pointer.y - 180, 360, 360)
+      }
+
+      context.restore()
+    }
+
+    function drawBuoy(buoy: Buoy, now: number) {
+      const flicker = 1 + Math.sin(now * 0.007 + buoy.phase) * 0.12
+      const glow = context.createRadialGradient(buoy.x, buoy.y, 0, buoy.x, buoy.y, 78 * flicker)
+      glow.addColorStop(0, "rgba(255, 245, 155, 0.62)")
+      glow.addColorStop(0.22, "rgba(255, 139, 68, 0.32)")
+      glow.addColorStop(1, "rgba(255, 88, 48, 0)")
+      context.fillStyle = glow
+      context.fillRect(buoy.x - 90, buoy.y - 90, 180, 180)
+
+      context.fillStyle = "#402045"
+      context.beginPath()
+      context.ellipse(buoy.x, buoy.y + 13, 12, 6, 0, 0, Math.PI * 2)
+      context.fill()
+
+      context.fillStyle = "#ffb24c"
+      context.beginPath()
+      context.moveTo(buoy.x, buoy.y + 7)
+      context.bezierCurveTo(buoy.x - 15, buoy.y - 5, buoy.x - 6, buoy.y - 34 * flicker, buoy.x + 1, buoy.y - 43 * flicker)
+      context.bezierCurveTo(buoy.x + 8, buoy.y - 22, buoy.x + 17, buoy.y - 6, buoy.x, buoy.y + 7)
+      context.fill()
+
+      context.fillStyle = "#fff4a9"
+      context.beginPath()
+      context.moveTo(buoy.x, buoy.y + 2)
+      context.bezierCurveTo(buoy.x - 6, buoy.y - 6, buoy.x, buoy.y - 22, buoy.x + 3, buoy.y - 28)
+      context.bezierCurveTo(buoy.x + 8, buoy.y - 12, buoy.x + 8, buoy.y - 4, buoy.x, buoy.y + 2)
+      context.fill()
+    }
+
+    function drawBoat(boat: Boat, now: number, delta: number) {
+      const steer =
+        pointer.active
+          ? Math.max(0, 1 - Math.abs(pointer.x - boat.x) / 270) * (pointer.y - boat.y) * 0.3
+          : 0
+      boat.x += boat.speed * delta
+      boat.y += Math.sin(now * 0.0024 + boat.wobble) * 4 * delta + steer * delta
+      boat.y = Math.max(height * 0.46, Math.min(boat.y, height * 0.9))
+
+      for (const buoy of getBuoys()) {
+        const distance = Math.hypot(boat.x - buoy.x, boat.y - buoy.y)
+        if (!boat.lit && distance < 72) {
+          boat.lit = true
+          for (let index = 0; index < 18; index += 1) {
+            createSpark(boat.x, boat.y - 8, 24 + (index % 4) * 9)
+          }
+        }
+      }
+
+      if (boat.lit && Math.random() > 0.72) {
+        createSpark(boat.x - 8, boat.y - 8, 35)
+      }
+
+      context.save()
+      context.translate(boat.x, boat.y)
+      context.rotate(Math.sin(now * 0.003 + boat.wobble) * 0.06)
+      context.scale(boat.size, boat.size)
+
+      if (boat.lit) {
+        const boatGlow = context.createRadialGradient(0, 0, 0, 0, 0, 48)
+        boatGlow.addColorStop(0, "rgba(255, 206, 92, 0.38)")
+        boatGlow.addColorStop(1, "rgba(255, 130, 75, 0)")
+        context.fillStyle = boatGlow
+        context.fillRect(-55, -55, 110, 110)
+      }
+
+      context.fillStyle = boat.color
+      context.beginPath()
+      context.moveTo(-31, 0)
+      context.lineTo(29, -1)
+      context.lineTo(17, 13)
+      context.lineTo(-17, 13)
+      context.closePath()
+      context.fill()
+
+      context.fillStyle = "rgba(255, 252, 226, 0.92)"
+      context.beginPath()
+      context.moveTo(-25, -2)
+      context.lineTo(0, -24)
+      context.lineTo(25, -2)
+      context.lineTo(0, 3)
+      context.closePath()
+      context.fill()
+
+      context.fillStyle = "rgba(10, 18, 52, 0.7)"
+      context.font = "700 9px ui-monospace, monospace"
+      context.textAlign = "center"
+      context.fillText(boat.thought.slice(0, 16).toUpperCase(), 0, 9)
+      context.restore()
+    }
+
+    function drawSparks(delta: number) {
+      context.save()
+      context.globalCompositeOperation = "screen"
+
+      for (let index = sparks.length - 1; index >= 0; index -= 1) {
+        const spark = sparks[index]
+        spark.life -= delta
+        spark.x += spark.vx * delta
+        spark.y += spark.vy * delta
+        spark.vy += 14 * delta
+
+        if (spark.life <= 0) {
+          sparks.splice(index, 1)
+          continue
+        }
+
+        const alpha = Math.min(1, spark.life / spark.maxLife)
+        const sparkGlow = context.createRadialGradient(
+          spark.x,
+          spark.y,
+          0,
+          spark.x,
+          spark.y,
+          spark.size * 4
+        )
+        sparkGlow.addColorStop(0, `hsla(${spark.hue}, 100%, 82%, ${alpha})`)
+        sparkGlow.addColorStop(1, `hsla(${spark.hue}, 100%, 54%, 0)`)
+        context.fillStyle = sparkGlow
+        context.fillRect(
+          spark.x - spark.size * 4,
+          spark.y - spark.size * 4,
+          spark.size * 8,
+          spark.size * 8
+        )
+      }
+
+      context.restore()
+    }
+
+    function animate(now: number) {
+      const delta = Math.min((now - lastFrame) / 1000, 0.05)
+      lastFrame = now
+
+      drawSky(now)
+      drawWater(now)
+
+      for (const buoy of getBuoys()) {
+        drawBuoy(buoy, now)
+      }
+
+      for (let index = boats.length - 1; index >= 0; index -= 1) {
+        const boat = boats[index]
+        drawBoat(boat, now, delta)
+        if (boat.x > width + 110) boats.splice(index, 1)
+      }
+
+      drawSparks(delta)
+      requestAnimationFrame(animate)
+    }
+
+    resizeCanvas()
+    window.addEventListener("resize", resizeCanvas)
+
+    for (const thought of ["TRY", "BEGIN", "DRIFT", "AGAIN", "MAYBE"]) {
+      createBoat(thought, true)
+    }
+
+    requestAnimationFrame(animate)
+  </script>
+
+  <style>
+    .regatta-shell {
+      min-height: calc(100vh - 6rem);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      background: #05051a;
+      color: #fff8dc;
+    }
+
+    #regatta-canvas {
+      display: block;
+      width: 100%;
+      min-height: calc(100vh - 6rem);
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .regatta-copy {
+      width: min(34rem, calc(100% - 2rem));
+      position: relative;
+      z-index: 3;
+      padding: clamp(1rem, 4vw, 3.5rem);
+      display: grid;
+      gap: 1rem;
+      pointer-events: none;
+    }
+
+    .eyebrow,
+    .hint,
+    label,
+    .readout {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow {
+      color: #9fe8ff;
+      font-size: 0.72rem;
+    }
+
+    h1 {
+      max-width: 7ch;
+      font-size: clamp(4.2rem, 12vw, 8.8rem);
+      line-height: 0.78;
+      letter-spacing: -0.09em;
+      text-transform: uppercase;
+      text-shadow:
+        0 0 0.4rem rgba(255, 205, 101, 0.5),
+        0 0 2.6rem rgba(255, 107, 74, 0.38);
+    }
+
+    .intro {
+      max-width: 31rem;
+      color: #f5f6ff;
+      font-size: clamp(0.98rem, 2vw, 1.12rem);
+      line-height: 1.65;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.92);
+    }
+
+    .launcher {
+      display: grid;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      pointer-events: auto;
+    }
+
+    label,
+    .hint,
+    .readout {
+      color: #b9e9f7;
+      font-size: 0.66rem;
+      line-height: 1.6;
+    }
+
+    .launcher-row {
+      display: flex;
+      align-items: stretch;
+      gap: 0.45rem;
+      padding: 0.42rem;
+      border: 1px solid rgba(179, 238, 255, 0.34);
+      border-radius: 999px;
+      background: rgba(3, 13, 38, 0.72);
+      box-shadow:
+        0 0 0 1px rgba(255, 221, 125, 0.08),
+        0 1rem 3rem rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(18px);
+    }
+
+    input {
+      min-width: 0;
+      flex: 1;
+      border: 0;
+      padding: 0.76rem 0.85rem;
+      outline: 0;
+      background: transparent;
+      color: #fffbe7;
+    }
+
+    input::placeholder {
+      color: rgba(222, 239, 246, 0.62);
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.76rem 1rem;
+      background: linear-gradient(135deg, #ffe184, #ff7869);
+      color: #18102c;
+      cursor: pointer;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover,
+    button:focus-visible {
+      outline: 2px solid #fff7cf;
+      outline-offset: 3px;
+      box-shadow: 0 0 1.6rem rgba(255, 164, 89, 0.72);
+      transform: translateY(-1px);
+    }
+
+    .readout {
+      display: grid;
+      gap: 0.32rem;
+      width: fit-content;
+      max-width: 31rem;
+      padding: 0.75rem 0.9rem;
+      border-left: 2px solid #ffbc63;
+      background: rgba(3, 13, 38, 0.64);
+      color: #dff8ff;
+      text-shadow: 0 1px 6px #000;
+      backdrop-filter: blur(14px);
+    }
+
+    #launch-count {
+      color: #ffd975;
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    #chorus-line {
+      color: #fff2c2;
+      letter-spacing: 0.04em;
+      text-transform: none;
+    }
+
+    .hint {
+      color: rgba(218, 246, 255, 0.82);
+      text-shadow: 0 1px 6px #000;
+    }
+
+    .moon {
+      width: clamp(7rem, 16vw, 13rem);
+      aspect-ratio: 1;
+      position: absolute;
+      top: 7%;
+      right: 10%;
+      z-index: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff7c9, #ffd474 56%, #fb8e63);
+      box-shadow:
+        0 0 1.5rem rgba(255, 223, 127, 0.52),
+        0 0 8rem rgba(255, 116, 97, 0.38);
+      mix-blend-mode: screen;
+      opacity: 0.94;
+      pointer-events: none;
+    }
+
+    .shore-glow {
+      width: 22rem;
+      aspect-ratio: 1;
+      position: absolute;
+      bottom: -13rem;
+      z-index: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(111, 232, 255, 0.28), transparent 65%);
+      filter: blur(18px);
+      pointer-events: none;
+    }
+
+    .shore-glow-left {
+      left: -7rem;
+    }
+
+    .shore-glow-right {
+      right: -6rem;
+      background: radial-gradient(circle, rgba(255, 118, 160, 0.24), transparent 65%);
+    }
+
+    @media (max-width: 580px) {
+      .regatta-copy {
+        padding: 1.2rem 1rem;
+      }
+
+      h1 {
+        font-size: clamp(4.1rem, 20vw, 6.6rem);
+      }
+
+      .launcher-row {
+        align-items: stretch;
+        border-radius: 1.2rem;
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      button {
+        transition: none;
+      }
+    }
+  </style>
+</Base>

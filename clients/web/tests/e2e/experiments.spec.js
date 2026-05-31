@@ -12,6 +12,61 @@ test("anxiety engine renders and calm down updates the report", async ({ page })
   await expect(page.locator("#ae-message")).not.toHaveText("")
 })
 
+test("boatfire regatta launches a thought and changes its chorus", async ({ page }) => {
+  await page.goto("/experiments/boatfire-regatta")
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Boatfire Regatta" })
+  ).toBeVisible()
+
+  const chorus = page.locator("#chorus-line")
+  const initialChorus = await chorus.textContent()
+
+  await page.getByRole("textbox", { name: "Thought for the water" }).fill("unfinished weather")
+  await page.getByRole("button", { name: "Launch thought" }).click()
+
+  await expect(page.locator("#launch-count")).toHaveText("1")
+  await expect(chorus).not.toHaveText(initialChorus ?? "")
+})
+
+test("red card bloom tugs the braid into a visible warning", async ({ page }) => {
+  await page.goto("/experiments/red-card-bloom")
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Red Card Bloom" })
+  ).toBeVisible()
+
+  const state = page.locator("#bloom-state")
+  await expect(state).toHaveText("The pitch is breathing softly.")
+
+  await page.getByRole("button", { name: "Pull the braid" }).click()
+
+  await expect(page.locator("#tug-count")).toHaveText("1")
+  await expect(state).not.toHaveText("The pitch is breathing softly.")
+})
+
+test("red card bloom flowers red cards after a deep drag", async ({ page }) => {
+  await page.goto("/experiments/red-card-bloom")
+
+  const handle = page.getByRole("button", { name: "Pull the braid" })
+  const bounds = await handle.boundingBox()
+  if (!bounds) throw new Error("Expected the braid handle to be visible")
+
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(
+    bounds.x + bounds.width / 2,
+    bounds.y + bounds.height / 2 + 170,
+    { steps: 8 }
+  )
+  await page.mouse.up()
+
+  await expect(page.locator("#tug-count")).toHaveText("1")
+  await expect(page.locator("#bloom-state")).toHaveText(
+    "Red card weather. The pitch is flowering warnings."
+  )
+})
+
 test("lost and found futures issues a claim and opens its filed details", async ({
   page,
 }) => {
@@ -121,4 +176,3 @@ test("chrono calibration boots from overlay, hovers anchor to open popover, and 
   // Drift variance should align to 0.00%
   await expect(page.locator("#popover-drift-val")).toHaveText("0.00%")
 })
-

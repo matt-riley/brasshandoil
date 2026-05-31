@@ -1,0 +1,628 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="bloom-shell" id="bloom-shell">
+    <svg
+      id="bloom-field"
+      class="bloom-field"
+      viewBox="0 0 1200 760"
+      preserveAspectRatio="xMidYMid slice"
+      aria-label="A moonlit football pitch overgrown with luminous flowing strands and red card petals"
+    >
+      <defs>
+        <radialGradient id="night-sky" cx="50%" cy="23%" r="82%">
+          <stop offset="0%" stop-color="#294668" />
+          <stop offset="42%" stop-color="#102942" />
+          <stop offset="100%" stop-color="#04121d" />
+        </radialGradient>
+        <radialGradient id="moon-core" cx="40%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#fffde7" />
+          <stop offset="58%" stop-color="#ffe78c" />
+          <stop offset="100%" stop-color="#e6a84a" />
+        </radialGradient>
+        <linearGradient id="pitch-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#236f68" />
+          <stop offset="55%" stop-color="#0e5c5c" />
+          <stop offset="100%" stop-color="#074244" />
+        </linearGradient>
+        <linearGradient id="braid-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fff5ae" />
+          <stop offset="55%" stop-color="#ffcb4d" />
+          <stop offset="100%" stop-color="#d47b2d" />
+        </linearGradient>
+        <filter id="field-haze" x="-30%" y="-30%" width="160%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="2" seed="17" />
+          <feDisplacementMap in="SourceGraphic" scale="7" />
+        </filter>
+        <filter id="strand-glow" x="-70%" y="-30%" width="240%" height="180%">
+          <feGaussianBlur stdDeviation="3.4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <filter id="moon-glow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="24" result="moonBlur" />
+          <feMerge>
+            <feMergeNode in="moonBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <pattern id="pitch-stripes" width="112" height="112" patternUnits="userSpaceOnUse">
+          <rect width="56" height="112" fill="rgba(255, 255, 255, 0.045)" />
+        </pattern>
+      </defs>
+
+      <rect width="1200" height="760" fill="url(#night-sky)" />
+      <g class="stars" aria-hidden="true">
+        <circle cx="92" cy="121" r="1.6" /><circle cx="172" cy="190" r="1.2" />
+        <circle cx="259" cy="82" r="1.1" /><circle cx="336" cy="151" r="1.8" />
+        <circle cx="429" cy="65" r="1.1" /><circle cx="498" cy="181" r="1.4" />
+        <circle cx="694" cy="116" r="1.2" /><circle cx="783" cy="58" r="1.7" />
+        <circle cx="862" cy="174" r="1.2" /><circle cx="951" cy="91" r="1.6" />
+        <circle cx="1064" cy="147" r="1.1" /><circle cx="1140" cy="74" r="1.7" />
+      </g>
+
+      <g class="moon" filter="url(#moon-glow)" aria-hidden="true">
+        <circle cx="600" cy="180" r="88" fill="rgba(255, 222, 120, 0.16)" />
+        <circle cx="600" cy="180" r="57" fill="url(#moon-core)" />
+        <path d="M568 160c26 12 47 5 66-14M575 198c21-12 42-10 62 4" fill="none" stroke="rgba(126, 77, 48, 0.18)" stroke-width="8" stroke-linecap="round" />
+      </g>
+
+      <g class="pitch" aria-hidden="true">
+        <ellipse cx="600" cy="676" rx="770" ry="272" fill="url(#pitch-glow)" />
+        <ellipse cx="600" cy="676" rx="770" ry="272" fill="url(#pitch-stripes)" opacity="0.92" />
+        <ellipse cx="600" cy="676" rx="556" ry="196" fill="none" stroke="rgba(184, 255, 220, 0.38)" stroke-width="3" />
+        <ellipse cx="600" cy="676" rx="112" ry="196" fill="none" stroke="rgba(184, 255, 220, 0.3)" stroke-width="3" />
+        <path d="M600 480v392M44 676h1112" fill="none" stroke="rgba(184, 255, 220, 0.32)" stroke-width="3" />
+      </g>
+
+      <path class="horizon-haze" d="M-80 447C192 386 374 469 596 423c231-48 392-45 684 31v171H-80Z" filter="url(#field-haze)" />
+      <g id="strand-layer" class="strand-layer" filter="url(#strand-glow)" aria-hidden="true"></g>
+      <g id="petal-layer" class="petal-layer" aria-hidden="true"></g>
+      <g class="braid-layer" filter="url(#strand-glow)" aria-hidden="true">
+        <path id="braid-shadow" class="braid-shadow" d="M600 235 C540 330 666 406 600 520" />
+        <path id="braid-left" class="braid braid-left" d="M600 235 C540 330 666 406 600 520" />
+        <path id="braid-right" class="braid braid-right" d="M600 235 C660 330 534 406 600 520" />
+        <path id="braid-center" class="braid braid-center" d="M600 235 C574 330 628 406 600 520" />
+      </g>
+    </svg>
+
+    <section class="bloom-copy">
+      <p class="eyebrow">Soft foul in the weather</p>
+      <h1>Red Card Bloom</h1>
+      <p class="intro">The pitch grew hair overnight. Pull gently and see what the sky considers excessive.</p>
+    </section>
+
+    <section class="bloom-readout" aria-label="Bloom reading">
+      <p class="count"><strong id="tug-count">0</strong> ceremonial tugs</p>
+      <p id="bloom-state" aria-live="polite">The pitch is breathing softly.</p>
+    </section>
+
+    <button id="tug-handle" class="tug-handle" type="button" aria-label="Pull the braid">
+      <span class="handle-ring" aria-hidden="true"></span>
+      <span class="handle-core" aria-hidden="true"></span>
+      <span class="handle-label">pull</span>
+    </button>
+
+    <p class="gesture-note">Drag the gold knot downward, or tap to test the weather.</p>
+  </main>
+
+  <script>
+    const shellNode = document.getElementById("bloom-shell")
+    const strandLayerNode = document.getElementById("strand-layer")
+    const petalLayerNode = document.getElementById("petal-layer")
+    const tugHandleNode = document.getElementById("tug-handle")
+    const tugCountNode = document.getElementById("tug-count")
+    const bloomStateNode = document.getElementById("bloom-state")
+    const braidShadowNode = document.getElementById("braid-shadow")
+    const braidLeftNode = document.getElementById("braid-left")
+    const braidRightNode = document.getElementById("braid-right")
+    const braidCenterNode = document.getElementById("braid-center")
+
+    if (
+      !(shellNode instanceof HTMLElement) ||
+      !(strandLayerNode instanceof SVGGElement) ||
+      !(petalLayerNode instanceof SVGGElement) ||
+      !(tugHandleNode instanceof HTMLButtonElement) ||
+      !tugCountNode ||
+      !bloomStateNode ||
+      !(braidShadowNode instanceof SVGPathElement) ||
+      !(braidLeftNode instanceof SVGPathElement) ||
+      !(braidRightNode instanceof SVGPathElement) ||
+      !(braidCenterNode instanceof SVGPathElement)
+    ) {
+      throw new Error("Red Card Bloom is missing required DOM nodes")
+    }
+
+    const shell = shellNode
+    const strandLayer = strandLayerNode
+    const petalLayer = petalLayerNode
+    const tugHandle = tugHandleNode
+    const tugCount = tugCountNode
+    const bloomState = bloomStateNode
+    const braidShadow = braidShadowNode
+    const braids = [braidLeftNode, braidRightNode, braidCenterNode]
+    const svgNamespace = "http://www.w3.org/2000/svg"
+
+    type Strand = {
+      path: SVGPathElement
+      x: number
+      reach: number
+      phase: number
+      sway: number
+      hue: number
+    }
+
+    const strands: Strand[] = []
+    let currentStrain = 0
+    let targetStrain = 0
+    let dragging = false
+    let dragMoved = false
+    let dragStartY = 0
+    let tugTotal = 0
+    let bloomLevel = 0
+
+    function clamp(value: number, minimum = 0, maximum = 1) {
+      return Math.min(maximum, Math.max(minimum, value))
+    }
+
+    for (let index = 0; index < 74; index += 1) {
+      const path = document.createElementNS(svgNamespace, "path")
+      const distance = Math.abs(index - 36.5) / 36.5
+      const x = 92 + index * 13.8
+      const reach = 142 + (1 - distance) * 208 + (index % 7) * 8
+      const hue = 48 + (index % 8) * 6
+
+      path.setAttribute("class", "field-strand")
+      path.setAttribute("fill", "none")
+      path.setAttribute("stroke", `hsla(${hue}, 88%, 72%, ${0.34 + (index % 5) * 0.055})`)
+      path.setAttribute("stroke-width", String(1.2 + (index % 4) * 0.55))
+      path.setAttribute("stroke-linecap", "round")
+      strandLayer.append(path)
+      strands.push({
+        path,
+        x,
+        reach,
+        phase: index * 0.47,
+        sway: 10 + (index % 9) * 2.8,
+        hue,
+      })
+    }
+
+    function setStatus(strength: number) {
+      if (strength > 0.78) {
+        bloomState.textContent = "Red card weather. The pitch is flowering warnings."
+        return
+      }
+      if (strength > 0.42) {
+        bloomState.textContent = "A soft warning is moving through the grass."
+        return
+      }
+      if (strength > 0.08) {
+        bloomState.textContent = "The strands lean in to hear the decision."
+        return
+      }
+      bloomState.textContent = "The pitch is breathing softly."
+    }
+
+    function makeCardPetal(index: number, strength: number) {
+      const petal = document.createElementNS(svgNamespace, "rect")
+      const angle = ((index * 137.5) % 360) * (Math.PI / 180)
+      const distance = 74 + (index % 8) * 19 + strength * 42
+      const x = 600 + Math.cos(angle) * distance
+      const y = 530 + Math.sin(angle) * distance * 0.62
+      const rotation = -24 + (index * 31) % 62
+
+      petal.setAttribute("class", "red-card-petal")
+      petal.setAttribute("x", String(x - 8))
+      petal.setAttribute("y", String(y - 12))
+      petal.setAttribute("width", "16")
+      petal.setAttribute("height", "24")
+      petal.setAttribute("rx", "2")
+      petal.setAttribute("fill", index % 4 === 0 ? "#ffdf67" : "#ff4b5f")
+      petal.setAttribute("transform", `rotate(${rotation} ${x} ${y})`)
+      petalLayer.append(petal)
+
+      const travelX = Math.cos(angle) * (72 + strength * 46)
+      const travelY = Math.sin(angle) * 58 - 38 - (index % 5) * 12
+      const animation = petal.animate(
+        [
+          { opacity: 0, transform: `translate(0 18px) rotate(${rotation - 18}deg) scale(0.3)` },
+          { opacity: 1, offset: 0.18, transform: `translate(0 0) rotate(${rotation}deg) scale(1)` },
+          { opacity: 0, transform: `translate(${travelX}px, ${travelY}px) rotate(${rotation + 120}deg) scale(0.72)` },
+        ],
+        {
+          duration: 1100 + (index % 6) * 120,
+          easing: "cubic-bezier(.17,.67,.38,1)",
+        }
+      )
+
+      animation.finished.finally(() => petal.remove())
+    }
+
+    function burstCards(strength: number) {
+      const cardCount = Math.round(12 + strength * 18)
+      for (let index = 0; index < cardCount; index += 1) {
+        makeCardPetal(index, strength)
+      }
+    }
+
+    function registerTug(strength = 0.66) {
+      tugTotal += 1
+      tugCount.textContent = String(tugTotal)
+      targetStrain = clamp(strength)
+      bloomLevel = Math.max(bloomLevel, strength)
+      setStatus(strength)
+
+      if (strength > 0.48) burstCards(strength)
+
+      window.setTimeout(() => {
+        if (!dragging) targetStrain = 0
+      }, 620)
+    }
+
+    tugHandle.addEventListener("pointerdown", (event) => {
+      dragging = true
+      dragMoved = false
+      dragStartY = event.clientY
+      tugHandle.setPointerCapture(event.pointerId)
+      targetStrain = Math.max(targetStrain, 0.12)
+      shell.classList.add("is-tugging")
+    })
+
+    tugHandle.addEventListener("pointermove", (event) => {
+      if (!dragging) return
+      const distance = Math.max(0, event.clientY - dragStartY)
+      const nextStrain = clamp(0.12 + distance / 168)
+      dragMoved = dragMoved || distance > 10
+      targetStrain = nextStrain
+      setStatus(nextStrain)
+    })
+
+    function finishTug(event: PointerEvent) {
+      if (!dragging) return
+      const releasedStrength = targetStrain
+      dragging = false
+      if (tugHandle.hasPointerCapture(event.pointerId)) {
+        tugHandle.releasePointerCapture(event.pointerId)
+      }
+      shell.classList.remove("is-tugging")
+
+      if (dragMoved) registerTug(Math.max(0.3, releasedStrength))
+      else targetStrain = 0
+    }
+
+    function cancelTug() {
+      dragging = false
+      targetStrain = 0
+      shell.classList.remove("is-tugging")
+    }
+
+    tugHandle.addEventListener("pointerup", finishTug)
+    window.addEventListener("pointerup", finishTug)
+    tugHandle.addEventListener("pointercancel", cancelTug)
+    window.addEventListener("pointercancel", cancelTug)
+
+    tugHandle.addEventListener("click", () => {
+      if (dragMoved) {
+        dragMoved = false
+        return
+      }
+      registerTug(tugTotal % 3 === 2 ? 0.92 : 0.66)
+    })
+
+    tugHandle.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowDown") return
+      event.preventDefault()
+      registerTug(0.94)
+    })
+
+    function updateBraid(strength: number) {
+      const handleY = 520 + strength * 116
+      shell.style.setProperty("--handle-shift", `${strength * 116}px`)
+      braidShadow.setAttribute("d", `M600 235 C540 330 666 406 600 ${handleY}`)
+      braids[0].setAttribute("d", `M600 235 C540 ${322 + strength * 18} 666 ${400 + strength * 34} 600 ${handleY}`)
+      braids[1].setAttribute("d", `M600 235 C660 ${322 + strength * 20} 534 ${400 + strength * 32} 600 ${handleY}`)
+      braids[2].setAttribute("d", `M600 235 C574 ${326 + strength * 16} 628 ${402 + strength * 38} 600 ${handleY}`)
+    }
+
+    function animateField(now: number) {
+      currentStrain += (targetStrain - currentStrain) * 0.09
+      bloomLevel += (currentStrain - bloomLevel) * 0.025
+      const time = now * 0.001
+
+      strands.forEach((strand, index) => {
+        const pullInfluence = Math.max(0, 1 - Math.abs(strand.x - 600) / 580)
+        const lowerY = 692 + Math.sin(time * 0.7 + strand.phase) * 6
+        const topY = lowerY - strand.reach - currentStrain * pullInfluence * 66
+        const sway = Math.sin(time * 1.35 + strand.phase) * strand.sway
+        const tugBend = (600 - strand.x) * currentStrain * pullInfluence * 0.2
+        const shoulder = topY + strand.reach * 0.34
+        const elbow = topY + strand.reach * 0.72
+
+        strand.path.setAttribute(
+          "d",
+          `M${strand.x} ${lowerY} C${strand.x + sway * 0.42} ${elbow}, ${strand.x + sway + tugBend} ${shoulder}, ${strand.x + tugBend * 0.7} ${topY}`
+        )
+        strand.path.setAttribute(
+          "stroke",
+          `hsla(${strand.hue - currentStrain * 24}, 90%, ${70 + currentStrain * 9}%, ${0.34 + (index % 5) * 0.055})`
+        )
+      })
+
+      updateBraid(currentStrain)
+      requestAnimationFrame(animateField)
+    }
+
+    updateBraid(0)
+    requestAnimationFrame(animateField)
+  </script>
+
+  <style>
+    :global(body) {
+      background: #04121d;
+      color: #f7f0d5;
+      overflow-x: hidden;
+    }
+
+    .bloom-shell {
+      --handle-shift: 0px;
+      min-height: calc(100svh - 6rem);
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      background: #04121d;
+    }
+
+    .bloom-field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 42rem;
+    }
+
+    .stars circle {
+      fill: #fffbd2;
+      opacity: 0.78;
+      animation: twinkle 3.2s ease-in-out infinite alternate;
+    }
+
+    .stars circle:nth-child(3n) {
+      animation-delay: -1.4s;
+    }
+
+    .stars circle:nth-child(4n) {
+      animation-delay: -2.1s;
+    }
+
+    .horizon-haze {
+      fill: rgba(95, 235, 188, 0.12);
+    }
+
+    :global(.field-strand) {
+      mix-blend-mode: screen;
+    }
+
+    .braid-shadow {
+      fill: none;
+      stroke: rgba(114, 53, 20, 0.66);
+      stroke-width: 31;
+      stroke-linecap: round;
+    }
+
+    .braid {
+      fill: none;
+      stroke: url(#braid-gold);
+      stroke-width: 11;
+      stroke-linecap: round;
+      stroke-dasharray: 18 7;
+      animation: braid-shimmer 2.4s linear infinite;
+    }
+
+    .braid-right {
+      animation-direction: reverse;
+    }
+
+    .braid-center {
+      stroke-width: 7;
+      stroke: #fff7bb;
+      opacity: 0.84;
+    }
+
+    :global(.red-card-petal) {
+      filter: drop-shadow(0 0 10px rgba(255, 67, 88, 0.74));
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .bloom-copy {
+      position: relative;
+      z-index: 2;
+      max-width: 38rem;
+      padding: clamp(2rem, 5vw, 5rem);
+      pointer-events: none;
+      text-shadow: 0 3px 20px rgba(0, 0, 0, 0.62);
+    }
+
+    .eyebrow,
+    .count,
+    .gesture-note {
+      color: #ffe27a;
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 8ch;
+      margin-top: 0.36rem;
+      color: #fffbd6;
+      font-size: clamp(4.5rem, 12vw, 10rem);
+      font-weight: 900;
+      letter-spacing: -0.095em;
+      line-height: 0.8;
+    }
+
+    .intro {
+      max-width: 31rem;
+      margin-top: 1.5rem;
+      color: #e8f6e9;
+      font-size: clamp(1rem, 2vw, 1.28rem);
+      font-weight: 650;
+      line-height: 1.45;
+    }
+
+    .bloom-readout {
+      position: absolute;
+      z-index: 4;
+      right: clamp(1.25rem, 5vw, 5rem);
+      bottom: clamp(1.25rem, 5vw, 4rem);
+      width: min(25rem, calc(100% - 2.5rem));
+      padding: 1rem 1.15rem;
+      border: 1px solid rgba(215, 255, 221, 0.34);
+      border-radius: 1rem;
+      background: rgba(2, 25, 29, 0.74);
+      box-shadow: 0 14px 56px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(18px);
+    }
+
+    #bloom-state {
+      margin-top: 0.36rem;
+      color: #f3f8e6;
+      font-size: 1rem;
+      font-weight: 680;
+    }
+
+    .tug-handle {
+      position: absolute;
+      z-index: 6;
+      top: calc(66.4% + var(--handle-shift));
+      left: 50%;
+      display: grid;
+      width: 7rem;
+      height: 7rem;
+      padding: 0;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      color: #402310;
+      background: transparent;
+      cursor: grab;
+      touch-action: none;
+      transform: translate(-50%, -50%);
+    }
+
+    .tug-handle:active,
+    .is-tugging .tug-handle {
+      cursor: grabbing;
+    }
+
+    .tug-handle:focus-visible {
+      outline: 4px solid #ffffff;
+      outline-offset: 0.32rem;
+    }
+
+    .handle-ring,
+    .handle-core {
+      position: absolute;
+      border-radius: 50%;
+    }
+
+    .handle-ring {
+      inset: 0.24rem;
+      border: 2px solid rgba(255, 240, 163, 0.88);
+      box-shadow: 0 0 0 8px rgba(255, 204, 77, 0.12), 0 0 42px rgba(255, 212, 92, 0.82);
+      animation: halo 2.2s ease-in-out infinite;
+    }
+
+    .handle-core {
+      inset: 1.18rem;
+      background: radial-gradient(circle at 38% 28%, #fffbd1, #ffcf56 52%, #bd6325);
+      box-shadow: inset -8px -11px 16px rgba(121, 58, 20, 0.48), 0 0 30px rgba(255, 205, 77, 0.72);
+    }
+
+    .handle-label {
+      position: relative;
+      z-index: 1;
+      font-size: 0.73rem;
+      font-weight: 950;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .gesture-note {
+      position: absolute;
+      z-index: 5;
+      left: 50%;
+      bottom: 1.5rem;
+      width: min(32rem, calc(100% - 2rem));
+      color: rgba(255, 246, 198, 0.86);
+      font-size: 0.67rem;
+      line-height: 1.5;
+      text-align: center;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+      transform: translateX(-50%);
+    }
+
+    @keyframes twinkle {
+      from { opacity: 0.35; }
+      to { opacity: 0.95; }
+    }
+
+    @keyframes braid-shimmer {
+      to { stroke-dashoffset: -50; }
+    }
+
+    @keyframes halo {
+      50% { transform: scale(1.09); opacity: 0.68; }
+    }
+
+    @media (max-width: 720px) {
+      .bloom-shell {
+        min-height: calc(100svh - 6rem);
+      }
+
+      .bloom-field {
+        width: 170%;
+        margin-left: -35%;
+      }
+
+      .bloom-copy {
+        padding: 1.6rem 1.25rem;
+      }
+
+      h1 {
+        font-size: clamp(4.5rem, 24vw, 7rem);
+      }
+
+      .intro {
+        max-width: 18rem;
+        font-size: 0.98rem;
+      }
+
+      .bloom-readout {
+        right: 1rem;
+        bottom: 4.15rem;
+        left: 1rem;
+        width: auto;
+      }
+
+      .gesture-note {
+        bottom: 1.25rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stars circle,
+      .braid,
+      .handle-ring {
+        animation: none;
+      }
+    }
+  </style>
+</Base>
