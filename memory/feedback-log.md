@@ -127,3 +127,18 @@ Carry Forward:
 - Ensure Visibility API state changes trigger and resume correctly across mobile browsers.
 - Monitor whether watch streaks and item deficit values compute seamlessly on low-power devices.
 - Treat mobile responsiveness and layout stacking as a default requirement.
+
+### Session Entry
+
+Date: 2026-05-31
+Experiment: Mouse Census
+Feedback:
+- Awaiting review.
+Carry Forward:
+- News-seeded satire works best when the joke lives in the interaction itself; the
+  computer-mouse / rodent-mouse pun let the observer-effect satire land with almost no
+  on-screen explanation.
+- Rotated off the "Bureau" wrapper into a rural/agricultural motif (Field Station 7) to
+  keep the institutional joke fresh, per the Oil Telegraph fatigue note.
+- Hard-cap canvas actor counts (1,100 mice) up front so swarm spectacles stay smooth on
+  mobile rather than treating performance as a later pass.

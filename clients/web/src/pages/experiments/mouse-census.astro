@@ -1,0 +1,533 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div class="mc-shell">
+    <canvas id="census-canvas" class="mc-canvas"></canvas>
+
+    <div class="mc-vignette" aria-hidden="true"></div>
+
+    <header class="mc-panel mc-header">
+      <p class="mc-eyebrow">Mallee District &middot; Field Station 7</p>
+      <h1 class="mc-title">Regional Mouse Census</h1>
+      <p class="mc-instruction">Survey the field. Move across the wheat to count the population.</p>
+    </header>
+
+    <section class="mc-panel mc-readout" aria-live="polite">
+      <div class="mc-stat">
+        <span class="mc-stat-label">Estimated mice per hectare</span>
+        <span id="mouse-count" class="mc-stat-value">0</span>
+      </div>
+      <p id="status-line" class="mc-status">Containment status: nominal. Awaiting survey.</p>
+    </section>
+
+    <div class="mc-panel mc-controls">
+      <button id="mitigate-button" class="mc-btn mc-btn-primary" type="button">
+        Deploy Mitigation
+      </button>
+      <button id="recount-button" class="mc-btn mc-btn-ghost" type="button">
+        Order Official Recount
+      </button>
+      <p id="mc-message" class="mc-message" aria-live="polite"></p>
+    </div>
+
+    <footer class="mc-panel mc-footer">
+      <p>Population figures are an estimate and, by departmental policy, an underestimate.</p>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  :root {
+    --mc-night: #0c1410;
+    --mc-field: #16241a;
+    --mc-grain: #d8b15a;
+    --mc-lamp: #ffd98a;
+    --mc-paper: #f3ecdc;
+    --mc-ink: #14110a;
+    --mc-rule: #5c4f33;
+    --mc-alarm: #e2613a;
+  }
+
+  .mc-shell {
+    position: relative;
+    width: 100%;
+    min-height: calc(100vh - 4rem);
+    overflow: hidden;
+    background: radial-gradient(120% 90% at 50% -10%, #1d3325 0%, var(--mc-night) 60%, #060a08 100%);
+    font-family: "Courier New", Courier, monospace;
+    color: var(--mc-paper);
+  }
+
+  .mc-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .mc-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(75% 60% at 50% 38%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  }
+
+  .mc-panel {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+    max-width: 30rem;
+    margin: 0 auto;
+    padding: 0.85rem 1.1rem;
+    background: rgba(8, 14, 11, 0.74);
+    border: 1px solid rgba(216, 177, 90, 0.35);
+    border-radius: 0.5rem;
+    backdrop-filter: blur(3px);
+    box-shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.45);
+  }
+
+  .mc-header {
+    margin-top: 1.4rem;
+    text-align: center;
+  }
+
+  .mc-eyebrow {
+    margin: 0 0 0.3rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mc-grain);
+  }
+
+  .mc-title {
+    margin: 0 0 0.35rem;
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    letter-spacing: 0.02em;
+    color: var(--mc-lamp);
+    text-shadow: 0 0 1.4rem rgba(255, 217, 138, 0.35);
+  }
+
+  .mc-instruction {
+    margin: 0;
+    font-size: 0.72rem;
+    color: rgba(243, 236, 220, 0.82);
+  }
+
+  .mc-readout {
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .mc-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .mc-stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(216, 177, 90, 0.85);
+  }
+
+  .mc-stat-value {
+    font-size: clamp(2rem, 9vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--mc-paper);
+    font-variant-numeric: tabular-nums;
+    transition: color 0.4s ease;
+  }
+
+  .mc-readout.is-critical .mc-stat-value {
+    color: var(--mc-alarm);
+    animation: mc-pulse 0.9s ease-in-out infinite;
+  }
+
+  @keyframes mc-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .mc-status {
+    margin: 0.5rem 0 0;
+    font-size: 0.72rem;
+    min-height: 1.1em;
+    color: rgba(243, 236, 220, 0.9);
+  }
+
+  .mc-controls {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mc-btn {
+    pointer-events: auto;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.1rem;
+    border-radius: 0.4rem;
+    border: 2px solid;
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.12s ease, background-color 0.2s ease;
+  }
+
+  .mc-btn:active {
+    transform: translateY(2px);
+  }
+
+  .mc-btn-primary {
+    background: var(--mc-alarm);
+    color: #1a0c06;
+    border-color: var(--mc-alarm);
+    box-shadow: 0 0 1rem rgba(226, 97, 58, 0.45);
+  }
+
+  .mc-btn-primary:hover {
+    background: #f07a52;
+  }
+
+  .mc-btn-ghost {
+    background: transparent;
+    color: var(--mc-grain);
+    border-color: rgba(216, 177, 90, 0.6);
+  }
+
+  .mc-btn-ghost:hover {
+    color: var(--mc-lamp);
+    border-color: var(--mc-lamp);
+  }
+
+  .mc-message {
+    flex-basis: 100%;
+    margin: 0.3rem 0 0;
+    text-align: center;
+    font-size: 0.7rem;
+    font-style: italic;
+    min-height: 1.1em;
+    color: var(--mc-grain);
+  }
+
+  .mc-footer {
+    margin: 1rem auto 1.4rem;
+    text-align: center;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .mc-footer p {
+    margin: 0;
+    font-size: 0.62rem;
+    font-style: italic;
+    color: rgba(216, 177, 90, 0.6);
+  }
+
+  @media (max-width: 600px) {
+    .mc-panel {
+      max-width: calc(100% - 1.5rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mc-readout.is-critical .mc-stat-value {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const canvas = document.getElementById("census-canvas") as HTMLCanvasElement | null
+  const countEl = document.getElementById("mouse-count")
+  const statusEl = document.getElementById("status-line")
+  const messageEl = document.getElementById("mc-message")
+  const readoutEl = document.querySelector<HTMLElement>(".mc-readout")
+  const mitigateBtn = document.getElementById("mitigate-button")
+  const recountBtn = document.getElementById("recount-button")
+
+  if (canvas && countEl && statusEl && readoutEl) {
+    const stage = canvas
+    const ctx = stage.getContext("2d")
+
+    if (ctx) {
+      const draw = ctx
+      const readout = readoutEl
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+      // The plague has a hard ceiling so the field never tips into jank.
+      const MAX_MICE = 1100
+      const BASELINE = 6
+      const HECTARE_FACTOR = 9 // mice on screen -> "estimated mice per hectare"
+
+      let width = 0
+      let height = 0
+      let dpr = 1
+
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2)
+        width = stage.clientWidth
+        height = stage.clientHeight
+        stage.width = Math.round(width * dpr)
+        stage.height = Math.round(height * dpr)
+        draw.setTransform(dpr, 0, 0, dpr, 0, 0)
+      }
+
+      interface Mouse {
+        x: number
+        y: number
+        vx: number
+        vy: number
+        wander: number
+        size: number
+        tone: number
+        phase: number
+      }
+
+      const mice: Mouse[] = []
+      const pointer = { x: -999, y: -999, active: false }
+
+      function spawnMouse(x: number, y: number): void {
+        if (mice.length >= MAX_MICE) return
+        const angle = Math.random() * Math.PI * 2
+        const spread = 8 + Math.random() * 26
+        mice.push({
+          x: x + Math.cos(angle) * spread,
+          y: y + Math.sin(angle) * spread,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6,
+          wander: Math.random() * Math.PI * 2,
+          size: 2.4 + Math.random() * 1.8,
+          tone: 0.55 + Math.random() * 0.35,
+          phase: Math.random() * Math.PI * 2,
+        })
+      }
+
+      // Breeding: each survey movement stimulates the population.
+      function breed(x: number, y: number, count: number): void {
+        for (let i = 0; i < count; i++) spawnMouse(x, y)
+      }
+
+      function seedField(): void {
+        mice.length = 0
+        for (let i = 0; i < BASELINE; i++) {
+          spawnMouse(Math.random() * width, height * (0.4 + Math.random() * 0.5))
+        }
+      }
+
+      function hectareEstimate(): number {
+        return Math.round(mice.length * HECTARE_FACTOR + BASELINE * HECTARE_FACTOR)
+      }
+
+      function statusFor(n: number): string {
+        if (n < 80) return "Containment status: nominal. Survey in progress."
+        if (n < 400) return "Containment status: elevated. Population responding to survey."
+        if (n < 1500) return "Containment status: significant. Recommend further surveying."
+        if (n < 4000) return "Containment status: severe. Field largely consumed."
+        return "Containment status: PLAGUE. The census has outgrown the field."
+      }
+
+      let lastReadout = -1
+      function updateReadout(): void {
+        const est = hectareEstimate()
+        if (est === lastReadout) return
+        lastReadout = est
+        if (countEl) countEl.textContent = est.toLocaleString("en-GB")
+        if (statusEl) statusEl.textContent = statusFor(est)
+        readout.classList.toggle("is-critical", est >= 1500)
+        document.title = `${est.toLocaleString("en-GB")} mice/ha \u00b7 Mouse Census`
+      }
+
+      const mitigationLines = [
+        "Mitigation deployed. The mice have noted your interest and multiplied.",
+        "Bait stations distributed. Mice report the bait was delicious. More arrive.",
+        "Containment surge authorised. Surge consisted mostly of additional mice.",
+        "Field Station 7 confirms the plague is being managed at record volume.",
+        "Mitigation complete. As a side effect, the population has been doubled.",
+      ]
+      let mitigationIndex = 0
+
+      function pointerToField(clientX: number, clientY: number): void {
+        const rect = stage.getBoundingClientRect()
+        pointer.x = clientX - rect.left
+        pointer.y = clientY - rect.top
+        pointer.active = true
+      }
+
+      function onPointerMove(e: PointerEvent): void {
+        const before = pointer.active
+        pointerToField(e.clientX, e.clientY)
+        if (!before) return
+        // The faster you survey, the more vigorously the field breeds.
+        const speed = Math.hypot(e.movementX || 0, e.movementY || 0)
+        const broods = 1 + Math.min(4, Math.floor(speed / 14))
+        breed(pointer.x, pointer.y, broods)
+      }
+
+      function onPointerLeave(): void {
+        pointer.active = false
+        pointer.x = -999
+        pointer.y = -999
+      }
+
+      stage.addEventListener("pointermove", onPointerMove)
+      stage.addEventListener("pointerdown", onPointerMove)
+      stage.addEventListener("pointerleave", onPointerLeave)
+
+      mitigateBtn?.addEventListener("click", () => {
+        // Mitigation makes the plague worse: a surge that doubles the swarm.
+        const surge = Math.min(MAX_MICE - mice.length, Math.max(40, mice.length))
+        const cx = pointer.active ? pointer.x : width / 2
+        const cy = pointer.active ? pointer.y : height / 2
+        for (let i = 0; i < surge; i++) {
+          spawnMouse(cx + (Math.random() - 0.5) * width * 0.8, cy + (Math.random() - 0.5) * height * 0.4)
+        }
+        if (messageEl) {
+          messageEl.textContent = ""
+          void messageEl.offsetWidth
+          messageEl.textContent = mitigationLines[mitigationIndex % mitigationLines.length]
+          mitigationIndex++
+        }
+        updateReadout()
+      })
+
+      recountBtn?.addEventListener("click", () => {
+        seedField()
+        if (messageEl) {
+          messageEl.textContent = ""
+          void messageEl.offsetWidth
+          messageEl.textContent = "Official recount filed. Baseline restored to the approved minimum."
+        }
+        updateReadout()
+      })
+
+      function drawField(): void {
+        draw.clearRect(0, 0, width, height)
+
+        // Wheat rows receding toward a warm field-station lamp.
+        const lampX = width / 2
+        const lampY = height * 0.16
+        const glow = draw.createRadialGradient(lampX, lampY, 10, lampX, lampY, height * 0.9)
+        glow.addColorStop(0, "rgba(255, 217, 138, 0.20)")
+        glow.addColorStop(0.4, "rgba(60, 80, 50, 0.10)")
+        glow.addColorStop(1, "rgba(6, 10, 8, 0)")
+        draw.fillStyle = glow
+        draw.fillRect(0, 0, width, height)
+
+        draw.strokeStyle = "rgba(216, 177, 90, 0.06)"
+        draw.lineWidth = 1
+        const rows = 26
+        for (let r = 1; r <= rows; r++) {
+          const t = r / rows
+          const y = lampY + t * t * (height - lampY)
+          draw.beginPath()
+          draw.moveTo(0, y)
+          draw.lineTo(width, y)
+          draw.stroke()
+        }
+      }
+
+      let last = performance.now()
+      function frame(now: number): void {
+        const dt = Math.min((now - last) / 16.67, 3)
+        last = now
+
+        drawField()
+
+        for (let i = 0; i < mice.length; i++) {
+          const m = mice[i]
+          m.phase += 0.2 * dt
+          m.wander += (Math.random() - 0.5) * 0.4
+
+          // Mice are drawn toward the surveyor: the observer worsens the swarm.
+          if (pointer.active) {
+            const dx = pointer.x - m.x
+            const dy = pointer.y - m.y
+            const dist = Math.hypot(dx, dy) || 1
+            const pull = dist > 60 ? 0.05 : -0.08 // crowd in, then jostle away
+            m.vx += (dx / dist) * pull * dt
+            m.vy += (dy / dist) * pull * dt
+          }
+
+          m.vx += Math.cos(m.wander) * 0.08 * dt
+          m.vy += Math.sin(m.wander) * 0.08 * dt
+          m.vx *= 0.94
+          m.vy *= 0.94
+
+          const sp = Math.hypot(m.vx, m.vy)
+          const maxSp = reduceMotion ? 1.1 : 2.2
+          if (sp > maxSp) {
+            m.vx = (m.vx / sp) * maxSp
+            m.vy = (m.vy / sp) * maxSp
+          }
+
+          m.x += m.vx * dt
+          m.y += m.vy * dt
+
+          // Wrap softly within the field.
+          if (m.x < -10) m.x = width + 10
+          if (m.x > width + 10) m.x = -10
+          if (m.y < height * 0.12) m.y = height * 0.12
+          if (m.y > height + 10) m.y = height * 0.2
+
+          const dir = Math.atan2(m.vy, m.vx)
+          const scurry = Math.sin(m.phase) * 0.6 + 1
+
+          draw.save()
+          draw.translate(m.x, m.y)
+          draw.rotate(dir)
+
+          // Tail.
+          draw.strokeStyle = `rgba(40, 30, 20, ${0.5 * m.tone})`
+          draw.lineWidth = 0.8
+          draw.beginPath()
+          draw.moveTo(-m.size, 0)
+          draw.lineTo(-m.size * 3.2, Math.sin(m.phase) * m.size * 0.7)
+          draw.stroke()
+
+          // Body.
+          draw.fillStyle = `rgb(${Math.round(120 * m.tone)}, ${Math.round(104 * m.tone)}, ${Math.round(86 * m.tone)})`
+          draw.beginPath()
+          draw.ellipse(0, 0, m.size * 1.7, m.size * scurry, 0, 0, Math.PI * 2)
+          draw.fill()
+
+          // Ears.
+          draw.beginPath()
+          draw.arc(m.size * 1.1, -m.size * 0.7, m.size * 0.6, 0, Math.PI * 2)
+          draw.arc(m.size * 1.1, m.size * 0.7, m.size * 0.6, 0, Math.PI * 2)
+          draw.fill()
+
+          // Eye glint catching the lamp.
+          draw.fillStyle = "rgba(255, 217, 138, 0.9)"
+          draw.beginPath()
+          draw.arc(m.size * 1.7, 0, 0.7, 0, Math.PI * 2)
+          draw.fill()
+
+          draw.restore()
+        }
+
+        updateReadout()
+        requestAnimationFrame(frame)
+      }
+
+      window.addEventListener("resize", resize)
+      resize()
+      seedField()
+      updateReadout()
+      requestAnimationFrame(frame)
+    }
+  }
+</script>
