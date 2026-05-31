@@ -129,11 +129,12 @@ import Base from "@layouts/Base.astro"
       if (!audioCtx || !lowpassFilter) return;
       
       const freqs = baseChordFreqs[chordIndex];
-      const now = audioCtx.currentTime;
+      const ctx = audioCtx;
+      const now = ctx.currentTime;
 
-      freqs.forEach((freq, idx) => {
-        const osc = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
+      freqs.forEach((freq) => {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
 
         // High crystal chime tones
         osc.type = 'sine';
@@ -144,7 +145,7 @@ import Base from "@layouts/Base.astro"
         gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
 
         osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
+        gainNode.connect(ctx.destination);
         
         osc.start(now);
         osc.stop(now + 1.6);

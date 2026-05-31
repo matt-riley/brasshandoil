@@ -21,5 +21,6 @@ The project memory lives in [memory/README.md](/Users/mattriley/Documents/projec
 ## Commands
 
 - `npm test`
+- `npm run test:e2e`
 - `cd clients/web && pnpm dev`
 - `cd clients/web && pnpm build`

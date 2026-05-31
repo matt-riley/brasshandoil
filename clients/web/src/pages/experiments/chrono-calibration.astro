@@ -1,0 +1,1182 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <style is:inline>
+    :root {
+      --neon-cyan: oklch(75% 0.2 190);
+      --neon-violet: oklch(70% 0.25 290);
+      --neon-amber: oklch(78% 0.18 70);
+      --neon-rose: oklch(70% 0.22 350);
+      --bg-void: #06050b;
+      --panel-bg: rgba(12, 10, 24, 0.85);
+      --border-glow: rgba(255, 255, 255, 0.12);
+    }
+
+    body {
+      background-color: var(--bg-void);
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: var(--font-sans);
+    }
+  </style>
+
+  <section class="calibration-shell" id="calibration-shell">
+    <!-- Starfield/Grid Background -->
+    <div class="space-grid" aria-hidden="true"></div>
+
+    <header class="bureau-header">
+      <div class="bureau-badge">BUREAU OF CHRONO-SPATIAL LOGISTICS</div>
+      <h1 class="bureau-title text-gradient">Chrono-Spatial Calibration Desk</h1>
+      <p class="bureau-subtitle">Regulate temporal drifts and harmonize dimensional variances.</p>
+    </header>
+
+    <!-- Calibration Chamber (Stage) -->
+    <div id="calibration-chamber" class="calibration-chamber" aria-label="Temporal Resonance Chamber">
+      <!-- Gravity Well (Singularity Core) -->
+      <div id="singularity-core" class="singularity-core">
+        <div class="core-pulse"></div>
+        <div class="core-aura"></div>
+      </div>
+
+      <!-- Pointer Gravity Projection -->
+      <div id="gravity-pointer" class="gravity-pointer">
+        <div class="pointer-ping"></div>
+      </div>
+
+      <!-- Temporal Anchors -->
+      <button 
+        class="temporal-anchor" 
+        id="anchor-tl-902" 
+        data-id="tl-902" 
+        popovertarget="chrono-popover"
+        style="--x: 22%; --y: 35%; --color: var(--neon-cyan);"
+      >
+        <div class="anchor-node">
+          <span class="anchor-ping"></span>
+          <span class="anchor-label">TL-902</span>
+        </div>
+      </button>
+
+      <button 
+        class="temporal-anchor" 
+        id="anchor-tl-314" 
+        data-id="tl-314" 
+        popovertarget="chrono-popover"
+        style="--x: 78%; --y: 28%; --color: var(--neon-violet);"
+      >
+        <div class="anchor-node">
+          <span class="anchor-ping"></span>
+          <span class="anchor-label">TL-314</span>
+        </div>
+      </button>
+
+      <button 
+        class="temporal-anchor" 
+        id="anchor-tl-042" 
+        data-id="tl-042" 
+        popovertarget="chrono-popover"
+        style="--x: 28%; --y: 72%; --color: var(--neon-amber);"
+      >
+        <div class="anchor-node">
+          <span class="anchor-ping"></span>
+          <span class="anchor-label">TL-042</span>
+        </div>
+      </button>
+
+      <button 
+        class="temporal-anchor" 
+        id="anchor-tl-777" 
+        data-id="tl-777" 
+        popovertarget="chrono-popover"
+        style="--x: 74%; --y: 65%; --color: var(--neon-rose);"
+      >
+        <div class="anchor-node">
+          <span class="anchor-ping"></span>
+          <span class="anchor-label">TL-777</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- HUD Overlay for Controls -->
+    <div class="hud-controls glass">
+      <div class="hud-header">
+        <span class="hud-status">CALIBRATION MATRIX ACTIVE</span>
+      </div>
+      <div class="control-row">
+        <div class="control-group">
+          <label for="intensity-slider">Gravity Warp</label>
+          <div class="slider-wrapper">
+            <input type="range" id="intensity-slider" min="0" max="100" value="50" class="hud-slider" aria-label="Gravity Warp Intensity" />
+            <span id="intensity-val" class="hud-val">50%</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label for="frequency-slider">Scan Frequency</label>
+          <div class="slider-wrapper">
+            <input type="range" id="frequency-slider" min="5" max="50" value="25" class="hud-slider" aria-label="Scan Frequency" />
+            <span id="frequency-val" class="hud-val">2.5 Hz</span>
+          </div>
+        </div>
+      </div>
+      <div class="control-actions">
+        <button id="stabilize-btn" class="hud-btn glow-btn" type="button">Stabilize Matrix</button>
+        <button id="mute-btn" class="hud-btn toggle-btn" aria-label="Mute Audio" type="button">
+          <svg class="sound-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path class="speaker" d="M11 5L6 9H2v6h4l5 4V5z"/>
+            <path class="waves" d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tethered Popover with CSS Anchor Positioning -->
+    <div id="chrono-popover" popover="manual" class="chrono-popover glass">
+      <div class="popover-header">
+        <span class="popover-title" id="popover-title">TIMELINE IDENTIFIED</span>
+        <span class="popover-status" id="popover-status">CALIBRATING</span>
+      </div>
+      <div class="popover-body">
+        <p class="popover-desc" id="popover-desc">Awaiting anchor telemetry...</p>
+        <div class="popover-drift">
+          <span>Drift Variance:</span>
+          <strong id="popover-drift-val">0.00%</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio Permission Overlay -->
+    <div id="audio-overlay" class="audio-overlay">
+      <div class="overlay-card glass">
+        <h2 class="overlay-title">Chrono-Spatial Calibration Desk</h2>
+        <p class="overlay-text">Initialize temporal resonance sensors (audio synthesis).</p>
+        <button id="init-audio-btn" class="overlay-btn" type="button">ACTIVATE CORE</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Conditionally install the anchor positioning polyfill if unsupported
+    if (!("anchorName" in document.documentElement.style)) {
+      // @ts-ignore
+      import("https://unpkg.com/@oddbird/css-anchor-positioning").catch(() => {});
+    }
+
+    // Timeline telemetry pool
+    const timelines: Record<string, { title: string; desc: string; drift: string }> = {
+      "tl-902": {
+        title: "TIMELINE ALPHA-902",
+        desc: "High-steam pressure atmosphere detected. Steampunk airship traffic dominates the upper layers. Metal rust levels elevated by 14%.",
+        drift: "+0.04%"
+      },
+      "tl-314": {
+        title: "TIMELINE PI-314",
+        desc: "Slick, neon-flooded cyber metropolis operating under strict mathematical ratios. Ambient rain contains 2.3% silicon particles.",
+        drift: "+1.23%"
+      },
+      "tl-042": {
+        title: "TIMELINE OMEGA-042",
+        desc: "Reverse temporal flow registered. Individuals enter existence at dotage and depart as newborn infants. Proceed with extreme caution.",
+        drift: "-0.87%"
+      },
+      "tl-777": {
+        title: "TIMELINE GAMMA-777",
+        desc: "Bioluminescent flora and sentient shadows forming local networks. Ambient light exhibits complex wave-particle duality shifts.",
+        drift: "+2.51%"
+      }
+    };
+
+    // DOM Elements
+    const shell = document.getElementById("calibration-shell")!;
+    const chamber = document.getElementById("calibration-chamber")!;
+    const core = document.getElementById("singularity-core")!;
+    const pointer = document.getElementById("gravity-pointer")!;
+    const popover = document.getElementById("chrono-popover") as HTMLElement;
+    const popoverTitle = document.getElementById("popover-title")!;
+    const popoverDesc = document.getElementById("popover-desc")!;
+    const popoverDrift = document.getElementById("popover-drift-val")!;
+    const popoverStatus = document.getElementById("popover-status")!;
+    
+    const intensitySlider = document.getElementById("intensity-slider") as HTMLInputElement;
+    const intensityVal = document.getElementById("intensity-val")!;
+    const frequencySlider = document.getElementById("frequency-slider") as HTMLInputElement;
+    const frequencyVal = document.getElementById("frequency-val")!;
+    const stabilizeBtn = document.getElementById("stabilize-btn")!;
+    const muteBtn = document.getElementById("mute-btn")!;
+    const audioOverlay = document.getElementById("audio-overlay")!;
+    const initAudioBtn = document.getElementById("init-audio-btn")!;
+
+    // State Variables
+    let audioCtx: AudioContext | null = null;
+    let mainGain: GainNode | null = null;
+    let droneOsc1: OscillatorNode | null = null;
+    let droneOsc2: OscillatorNode | null = null;
+    let droneFilter: BiquadFilterNode | null = null;
+    let lfo: OscillatorNode | null = null;
+    let lfoGain: GainNode | null = null;
+    
+    let isMuted = false;
+    let currentActiveAnchor: string | null = null;
+    let isStabilizing = false;
+
+    // Simulation & Physics state
+    const gravitySource = { x: 0, y: 0, targetX: 0, targetY: 0, active: false };
+    const corePos = { x: 0, y: 0 };
+    
+    // Configurable warp coefficients
+    let gravityWarp = 0.5; // 0 to 1
+    let scanFrequency = 2.5; // 0.5 to 5 Hz
+
+    // Temporal Anchor nodes coordinate offset trackers
+    interface AnchorNodeState {
+      element: HTMLElement;
+      id: string;
+      bx: number; // base fractional x (0-1)
+      by: number; // base fractional y (0-1)
+      x: number;  // current actual px x
+      y: number;  // current actual px y
+      vx: number; // velocity x
+      vy: number; // velocity y
+      ox: number; // offset x (applied via transform)
+      oy: number; // offset y (applied via transform)
+    }
+
+    const anchors: AnchorNodeState[] = [];
+
+    // Parse anchors from DOM
+    document.querySelectorAll(".temporal-anchor").forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      const id = htmlEl.getAttribute("data-id")!;
+      const xPercent = parseFloat(htmlEl.style.getPropertyValue("--x") || "50");
+      const yPercent = parseFloat(htmlEl.style.getPropertyValue("--y") || "50");
+      
+      anchors.push({
+        element: htmlEl,
+        id,
+        bx: xPercent / 100,
+        by: yPercent / 100,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        ox: 0,
+        oy: 0
+      });
+    });
+
+    // Resize and positioning
+    function resize() {
+      if (!chamber) return;
+      const rect = chamber.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+
+      // Reset base coordinates
+      anchors.forEach((anchor) => {
+        anchor.x = rect.width * anchor.bx;
+        anchor.y = rect.height * anchor.by;
+      });
+
+      if (!gravitySource.active) {
+        gravitySource.targetX = cx;
+        gravitySource.targetY = cy;
+        gravitySource.x = cx;
+        gravitySource.y = cy;
+      }
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    // Mouse/Pointer events
+    chamber.addEventListener("pointermove", (e) => {
+      const rect = chamber.getBoundingClientRect();
+      gravitySource.targetX = e.clientX - rect.left;
+      gravitySource.targetY = e.clientY - rect.top;
+      gravitySource.active = true;
+      pointer.style.opacity = "1";
+    });
+
+    chamber.addEventListener("pointerleave", () => {
+      gravitySource.active = false;
+      const rect = chamber.getBoundingClientRect();
+      gravitySource.targetX = rect.width / 2;
+      gravitySource.targetY = rect.height / 2;
+      pointer.style.opacity = "0";
+    });
+
+    // Handle Anchor Hover (Tether popover)
+    anchors.forEach((anchor) => {
+      anchor.element.addEventListener("pointerenter", () => {
+        currentActiveAnchor = anchor.id;
+        
+        // Dynamic Anchor Positioning Binding
+        popover.style.setProperty("--active-anchor", `--anchor-${anchor.id}`);
+        
+        // Telemetry read
+        const info = timelines[anchor.id];
+        if (info) {
+          popoverTitle.textContent = info.title;
+          popoverDesc.textContent = info.desc;
+          popoverDrift.textContent = info.drift;
+          
+          const driftVal = parseFloat(info.drift);
+          if (Math.abs(driftVal) < 0.1) {
+            popoverStatus.textContent = "ALIGNED";
+            popoverStatus.className = "popover-status aligned";
+          } else {
+            popoverStatus.textContent = "DRIFTING";
+            popoverStatus.className = "popover-status drifting";
+          }
+        }
+
+        // Show Popover
+        try {
+          popover.showPopover();
+        } catch(err) {}
+
+        // Play spatialized chime
+        if (audioCtx && !isMuted) {
+          const rect = chamber.getBoundingClientRect();
+          const pan = (anchor.x + anchor.ox - rect.width / 2) / (rect.width / 2);
+          playChime(anchor.id, Math.max(-1, Math.min(1, pan)));
+        }
+      });
+
+      // Clear telemetry when pointer leaves
+      anchor.element.addEventListener("pointerleave", () => {
+        if (currentActiveAnchor === anchor.id) {
+          currentActiveAnchor = null;
+          try {
+            popover.hidePopover();
+          } catch(err) {}
+        }
+      });
+    });
+
+    // Control Inputs
+    intensitySlider.addEventListener("input", (e) => {
+      const val = parseInt((e.target as HTMLInputElement).value);
+      gravityWarp = val / 100;
+      intensityVal.textContent = `${val}%`;
+      
+      // Modulate low-drone frequency dynamically based on gravity warp!
+      if (droneOsc1 && droneOsc2 && audioCtx) {
+        const baseFreq = 55 + (gravityWarp * 30); // 55Hz to 85Hz
+        const now = audioCtx.currentTime;
+        droneOsc1.frequency.setTargetAtTime(baseFreq, now, 0.1);
+        droneOsc2.frequency.setTargetAtTime(baseFreq + 0.5, now, 0.1);
+      }
+    });
+
+    frequencySlider.addEventListener("input", (e) => {
+      const val = parseInt((e.target as HTMLInputElement).value);
+      scanFrequency = val / 10;
+      frequencyVal.textContent = `${scanFrequency.toFixed(1)} Hz`;
+
+      // Modulate LFO speed based on scan frequency
+      if (lfo && audioCtx) {
+        lfo.frequency.setTargetAtTime(scanFrequency / 10, audioCtx.currentTime, 0.1);
+      }
+    });
+
+    stabilizeBtn.addEventListener("click", () => {
+      if (isStabilizing) return;
+      isStabilizing = true;
+      stabilizeBtn.classList.add("loading");
+      stabilizeBtn.textContent = "STABILIZING...";
+
+      // Trigger Web Audio sweep
+      if (audioCtx && !isMuted) {
+        const sweep = audioCtx.createOscillator();
+        const sweepGain = audioCtx.createGain();
+        sweep.type = "sine";
+        
+        sweep.frequency.setValueAtTime(120, audioCtx.currentTime);
+        sweep.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 1.5);
+        
+        sweepGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        sweepGain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.1);
+        sweepGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.5);
+        
+        sweep.connect(sweepGain);
+        sweepGain.connect(audioCtx.destination);
+        
+        sweep.start();
+        sweep.stop(audioCtx.currentTime + 1.5);
+      }
+
+      // Smoothly drift drift percentages to ~0.00%
+      Object.keys(timelines).forEach((key) => {
+        timelines[key].drift = "0.00%";
+      });
+
+      // Update popover details directly (ensures the DOM is updated immediately even if the mouse left the anchor to click the button)
+      popoverDrift.textContent = "0.00%";
+      popoverStatus.textContent = "ALIGNED";
+      popoverStatus.className = "popover-status aligned";
+
+      // Restore button status after 1.5s
+      setTimeout(() => {
+        isStabilizing = false;
+        stabilizeBtn.classList.remove("loading");
+        stabilizeBtn.textContent = "STABILIZE MATRIX";
+      }, 1500);
+    });
+
+    // Mute Audio
+    muteBtn.addEventListener("click", () => {
+      isMuted = !isMuted;
+      if (isMuted) {
+        muteBtn.classList.add("muted");
+        if (mainGain && audioCtx) {
+          mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+        }
+      } else {
+        muteBtn.classList.remove("muted");
+        if (mainGain && audioCtx) {
+          mainGain.gain.setTargetAtTime(1, audioCtx.currentTime, 0.05);
+        }
+      }
+    });
+
+    // ─── Web Audio Setup ───────────────────────────────────────────────────
+    function initAudio() {
+      if (audioCtx) return;
+      
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      audioCtx = new AudioCtxClass();
+      
+      mainGain = audioCtx.createGain();
+      mainGain.gain.value = isMuted ? 0 : 1;
+      mainGain.connect(audioCtx.destination);
+
+      // Low space-drone oscillator 1 (Triangle)
+      droneOsc1 = audioCtx.createOscillator();
+      droneOsc1.type = "triangle";
+      droneOsc1.frequency.value = 55 + (gravityWarp * 30); // 70Hz baseline
+
+      // Low space-drone oscillator 2 (Detuned Sawtooth)
+      droneOsc2 = audioCtx.createOscillator();
+      droneOsc2.type = "sawtooth";
+      droneOsc2.frequency.value = 55.5 + (gravityWarp * 30);
+
+      // Lowpass resonant filter for drone
+      droneFilter = audioCtx.createBiquadFilter();
+      droneFilter.type = "lowpass";
+      droneFilter.frequency.value = 160;
+      droneFilter.Q.value = 6;
+
+      const droneGain = audioCtx.createGain();
+      droneGain.gain.value = 0.06; // Subdued drone volume
+
+      // LFO modulation for the filter cutoff
+      lfo = audioCtx.createOscillator();
+      lfo.frequency.value = scanFrequency / 10; // 0.25 Hz baseline
+
+      lfoGain = audioCtx.createGain();
+      lfoGain.gain.value = 50; // modulates filter cutoff between 110Hz and 210Hz
+
+      // Bind LFO
+      lfo.connect(lfoGain);
+      lfoGain.connect(droneFilter.frequency);
+
+      // Bind drone paths
+      droneOsc1.connect(droneFilter);
+      droneOsc2.connect(droneFilter);
+      droneFilter.connect(droneGain);
+      droneGain.connect(mainGain);
+
+      // Start drone
+      droneOsc1.start();
+      droneOsc2.start();
+      lfo.start();
+
+      // Hide permission overlay
+      audioOverlay.style.display = "none";
+    }
+
+    // Audio trigger listener
+    initAudioBtn.addEventListener("click", initAudio);
+
+    // FM Chime synthesis function
+    function playChime(id: string, panValue: number) {
+      if (!audioCtx || isMuted) return;
+
+      const freqs: Record<string, number> = {
+        "tl-902": 293.66, // D4
+        "tl-314": 440.00, // A4
+        "tl-042": 523.25, // C5
+        "tl-777": 659.25  // E5
+      };
+      
+      const baseFreq = freqs[id] || 440;
+      const now = audioCtx.currentTime;
+
+      const carrier = audioCtx.createOscillator();
+      const modulator = audioCtx.createOscillator();
+      const modGainNode = audioCtx.createGain();
+      const volumeGain = audioCtx.createGain();
+      
+      // Stereo panning
+      let panner: StereoPannerNode | null = null;
+      if (audioCtx.createStereoPanner) {
+        panner = audioCtx.createStereoPanner();
+        panner.pan.setValueAtTime(panValue, now);
+      }
+
+      // FM Setup
+      carrier.type = "sine";
+      carrier.frequency.setValueAtTime(baseFreq, now);
+
+      modulator.type = "sine";
+      modulator.frequency.setValueAtTime(baseFreq * 1.5, now); // Harmonic modulator ratio
+      modGainNode.gain.setValueAtTime(baseFreq * 2.5, now); // Metallic timbre index
+
+      // Volume Envelope
+      volumeGain.gain.setValueAtTime(0, now);
+      volumeGain.gain.linearRampToValueAtTime(0.18, now + 0.005);
+      volumeGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+
+      // Modulator -> Carrier modulation
+      modulator.connect(modGainNode);
+      modGainNode.connect(carrier.frequency);
+
+      // Routing
+      if (panner) {
+        carrier.connect(panner);
+        panner.connect(volumeGain);
+      } else {
+        carrier.connect(volumeGain);
+      }
+      volumeGain.connect(mainGain!);
+
+      // Start & Stop
+      carrier.start(now);
+      modulator.start(now);
+      carrier.start(now);
+      
+      carrier.stop(now + 1.5);
+      modulator.stop(now + 1.5);
+    }
+
+    // ─── Main Animation Loop ───────────────────────────────────────────────
+    let lastTime = performance.now();
+
+    function animate(time: number) {
+      // Register requestAnimationFrame loop
+      requestAnimationFrame(animate);
+
+      const dt = Math.min((time - lastTime) / 16, 2);
+      lastTime = time;
+
+      if (!chamber) return;
+
+      const rect = chamber.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+
+      // 1. Lerp pointer coordinates (smooth pointer lag)
+      gravitySource.x += (gravitySource.targetX - gravitySource.x) * 0.12 * dt;
+      gravitySource.y += (gravitySource.targetY - gravitySource.y) * 0.12 * dt;
+
+      // Position visual gravity indicator
+      pointer.style.transform = `translate3d(${gravitySource.x}px, ${gravitySource.y}px, 0)`;
+
+      // 2. Modulate Singularity Core slightly
+      corePos.x += (gravitySource.x - cx) * 0.08 * dt;
+      corePos.y += (gravitySource.y - cy) * 0.08 * dt;
+      
+      // Pull core back to center
+      corePos.x += (cx - corePos.x) * 0.04 * dt;
+      corePos.y += (cy - corePos.y) * 0.04 * dt;
+
+      core.style.transform = `translate3d(${corePos.x}px, ${corePos.y}px, 0)`;
+
+      // 3. Update Anchor offsets (physics simulation)
+      // Floating sinusoidal motion + gravity warp pull
+      const timeSecs = time / 1000;
+      
+      anchors.forEach((anchor, index) => {
+        // Calculate raw base coordinate in px
+        const bxPx = rect.width * anchor.bx;
+        const byPx = rect.height * anchor.by;
+
+        // Base sine wave wobble (scan frequency controls pace)
+        const wobbleSpeed = scanFrequency * 0.8;
+        const wobbleX = Math.sin(timeSecs * wobbleSpeed + index) * 15;
+        const wobbleY = Math.cos(timeSecs * wobbleSpeed * 0.9 + index) * 15;
+
+        // Vector from pointer to anchor
+        const dx = gravitySource.x - (bxPx + wobbleX);
+        const dy = gravitySource.y - (byPx + wobbleY);
+        const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+
+        // Pull strength based on distance and gravity warp factor
+        // Stronger pull when closer, but with limit to avoid slingshots
+        const pullLimit = 350;
+        let pullFactor = 0;
+        if (distance < pullLimit) {
+          // Exponential pull
+          pullFactor = Math.pow((pullLimit - distance) / pullLimit, 2) * gravityWarp * 90;
+        }
+
+        const pullX = (dx / distance) * pullFactor;
+        const pullY = (dy / distance) * pullFactor;
+
+        // Target offset combines wobble and pull
+        const targetOx = wobbleX + pullX;
+        const targetOy = wobbleY + pullY;
+
+        // Lerp offsets (avoids layout jitter and visually anchors the element hit-box)
+        anchor.ox += (targetOx - anchor.ox) * 0.1 * dt;
+        anchor.oy += (targetOy - anchor.oy) * 0.1 * dt;
+
+        // Assign GPU transition translation
+        anchor.element.style.transform = `translate3d(${anchor.ox}px, ${anchor.oy}px, 0)`;
+      });
+    }
+
+    // Begin Animation Loop
+    requestAnimationFrame(animate);
+  </script>
+
+  <style>
+    /* Absolute visual container */
+    .calibration-shell {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 6rem);
+      background: #050409;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Spatial Grid overlay */
+    .space-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: center;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.85;
+    }
+
+    /* Bureau Header styling */
+    .bureau-header {
+      position: relative;
+      z-index: 10;
+      padding: var(--spacing-6) var(--spacing-6) 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .bureau-badge {
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.25em;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px oklch(75% 0.2 190 / 0.5);
+      margin-bottom: var(--spacing-2);
+      border: 1px solid oklch(75% 0.2 190 / 0.3);
+      padding: 3px 12px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 240, 255, 0.04);
+    }
+
+    .bureau-title {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+
+    .bureau-subtitle {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin: var(--spacing-1) 0 0;
+    }
+
+    /* Resonance Chamber Stage */
+    .calibration-chamber {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      cursor: crosshair;
+      z-index: 2;
+    }
+
+    /* Singularity core at center of stage */
+    .singularity-core {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      left: calc(50% - 16px);
+      top: calc(50% - 16px);
+      border-radius: var(--radius-full);
+      background: #ffffff;
+      box-shadow: 
+        0 0 20px #ffffff,
+        0 0 40px var(--neon-violet),
+        0 0 80px oklch(70% 0.25 290 / 0.3);
+      pointer-events: none;
+      will-change: transform;
+      z-index: 3;
+    }
+
+    .core-pulse {
+      position: absolute;
+      inset: -8px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      animation: core-ripple 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+
+    @keyframes core-ripple {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(3.5); opacity: 0; }
+    }
+
+    /* Pointer indicator */
+    .gravity-pointer {
+      position: absolute;
+      width: 0;
+      height: 0;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      will-change: transform;
+      z-index: 4;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .pointer-ping {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      left: -6px;
+      top: -6px;
+      border: 1px solid var(--neon-cyan);
+      border-radius: var(--radius-full);
+      animation: pointer-wave 1s linear infinite;
+    }
+
+    @keyframes pointer-wave {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    /* Floating Anchors */
+    .temporal-anchor {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      will-change: transform;
+      z-index: 5;
+      outline: none;
+      anchor-name: var(--anchor-name-binding);
+    }
+
+    /* Explicit Anchor Bindings for CSS Anchor Positioning */
+    #anchor-tl-902 { --anchor-name-binding: --anchor-tl-902; }
+    #anchor-tl-314 { --anchor-name-binding: --anchor-tl-314; }
+    #anchor-tl-042 { --anchor-name-binding: --anchor-tl-042; }
+    #anchor-tl-777 { --anchor-name-binding: --anchor-tl-777; }
+
+    .anchor-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      transform: translate(-50%, -50%);
+    }
+
+    .anchor-ping {
+      display: block;
+      width: 14px;
+      height: 14px;
+      background: var(--color);
+      border-radius: var(--radius-full);
+      box-shadow: 0 0 12px var(--color);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .temporal-anchor:hover .anchor-ping {
+      transform: scale(1.4);
+      background: #ffffff;
+      box-shadow: 0 0 16px var(--color), 0 0 30px var(--color);
+    }
+
+    .anchor-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: rgba(5, 4, 10, 0.85);
+      border: 1px solid var(--color);
+      color: var(--color);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+      transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+    }
+
+    .temporal-anchor:hover .anchor-label {
+      color: #ffffff;
+      border-color: #ffffff;
+      background: var(--color);
+    }
+
+    /* Control HUD HUD panels */
+    .hud-controls {
+      position: relative;
+      z-index: 10;
+      margin: var(--spacing-6) auto;
+      width: 90%;
+      max-width: 580px;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-glow);
+    }
+
+    .hud-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 6px;
+    }
+
+    .hud-status {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      letter-spacing: 0.1em;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-4);
+    }
+
+    @media (max-width: 480px) {
+      .control-row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-2);
+      }
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-group label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+    }
+
+    .hud-slider {
+      flex: 1;
+      accent-color: var(--neon-cyan);
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .hud-val {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #ffffff;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .control-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--spacing-4);
+      margin-top: 4px;
+    }
+
+    .hud-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border-radius: var(--radius-full);
+      padding: var(--spacing-2) var(--spacing-6);
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+    }
+
+    .hud-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .hud-btn:active {
+      transform: scale(0.97);
+    }
+
+    .glow-btn {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .glow-btn:hover {
+      background: #eaeaea;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.35);
+    }
+
+    .glow-btn.loading {
+      background: rgba(255, 255, 255, 0.25);
+      color: rgba(255, 255, 255, 0.7);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .toggle-btn {
+      padding: var(--spacing-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1;
+    }
+
+    .sound-icon {
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+
+    .toggle-btn.muted {
+      color: rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-btn.muted .waves {
+      display: none;
+    }
+
+    /* Polyfill Fallback and Default Overlay position for CSS Anchor Positioning */
+    .chrono-popover {
+      /* Native Popover resets */
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      overflow: visible;
+      
+      /* Fallback/Centering layout when anchor is unsupported */
+      position: fixed;
+      inset: auto;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      
+      /* Visual styling of HUD panel */
+      width: 280px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.7),
+        0 0 25px rgba(0, 240, 255, 0.1);
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Native CSS Anchor Positioning Bindings */
+    @supports (anchor-name: --foo) {
+      .chrono-popover {
+        position: absolute;
+        position-anchor: var(--active-anchor, --anchor-tl-902);
+        top: anchor(bottom);
+        left: anchor(center);
+        transform: translate(-50%, 10px);
+        margin: 0;
+        
+        /* Transition properties */
+        transition: display 0.25s allow-discrete, overlay 0.25s allow-discrete, transform 0.25s, opacity 0.25s;
+        opacity: 0;
+        transform: translate(-50%, 15px);
+      }
+
+      /* Native Entry Transitions on Popover Open */
+      .chrono-popover:popover-open {
+        opacity: 1;
+        transform: translate(-50%, 10px);
+      }
+
+      @starting-style {
+        .chrono-popover:popover-open {
+          opacity: 0;
+          transform: translate(-50%, 15px);
+        }
+      }
+    }
+
+    .popover-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-4) var(--spacing-2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .popover-title {
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .popover-status {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: var(--radius-sm);
+    }
+
+    .popover-status.drifting {
+      background: rgba(244, 63, 94, 0.1);
+      color: var(--neon-rose);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+    }
+
+    .popover-status.aligned {
+      background: rgba(16, 185, 129, 0.15);
+      color: oklch(75% 0.15 150);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .popover-body {
+      padding: var(--spacing-3) var(--spacing-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-3);
+    }
+
+    .popover-desc {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.4;
+    }
+
+    .popover-drift {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .popover-drift strong {
+      color: #ffffff;
+      font-family: var(--font-mono);
+    }
+
+    /* Web Audio Initialization Permission Overlay */
+    .audio-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 4, 10, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .overlay-card {
+      width: 90%;
+      max-width: 440px;
+      padding: var(--spacing-8);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border-glow);
+    }
+
+    .overlay-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--spacing-3);
+      background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .overlay-text {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.6;
+      margin-bottom: var(--spacing-6);
+    }
+
+    .overlay-btn {
+      width: 100%;
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: var(--spacing-3) var(--spacing-6);
+      font-weight: 800;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .overlay-btn:hover {
+      background: #eaeaea;
+    }
+
+    .overlay-btn:active {
+      transform: scale(0.98);
+    }
+  </style>
+</Base>

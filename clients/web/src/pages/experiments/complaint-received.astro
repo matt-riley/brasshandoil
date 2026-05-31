@@ -1,0 +1,675 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div class="dept-wrapper">
+
+    <!-- Letterhead -->
+    <header class="dept-header">
+      <div class="dept-seal" aria-hidden="true">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="55" fill="none" stroke="currentColor" stroke-width="3"/>
+          <circle cx="60" cy="60" r="45" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="60" y="35" text-anchor="middle" font-size="7" letter-spacing="2" fill="currentColor">DEPARTMENT OF</text>
+          <text x="60" y="47" text-anchor="middle" font-size="7" letter-spacing="2" fill="currentColor">UNRESOLVED</text>
+          <text x="60" y="59" text-anchor="middle" font-size="7" letter-spacing="2" fill="currentColor">MATTERS</text>
+          <text x="60" y="88" text-anchor="middle" font-size="6" letter-spacing="1" fill="currentColor">EST. NEVER</text>
+          <!-- Star decorations -->
+          <text x="60" y="76" text-anchor="middle" font-size="10" fill="currentColor">★ ★ ★</text>
+        </svg>
+      </div>
+      <div class="dept-title-block">
+        <p class="dept-subtitle">FORM UM-7 (REV. 4)</p>
+        <h1 class="dept-title">COMPLAINT<br/>RECEIVED</h1>
+        <p class="dept-tagline">Your concern has been noted, categorised, misfiled, and noted again.</p>
+      </div>
+    </header>
+
+    <!-- Divider -->
+    <div class="ruled-line" aria-hidden="true">
+      ——————————————————————————————————————————
+    </div>
+
+    <!-- Complaint Form -->
+    <section class="form-section">
+      <form id="complaint-form" autocomplete="off">
+        <div class="field-group">
+          <label class="field-label" for="complaint-input">
+            NATURE OF COMPLAINT
+            <span class="field-note">(be specific; vagueness will be returned unread)</span>
+          </label>
+          <textarea
+            id="complaint-input"
+            name="complaint"
+            rows="4"
+            placeholder="Describe your concern in full. Attach a notarised photograph of your concern if applicable."
+          ></textarea>
+        </div>
+
+        <div class="quick-fills">
+          <p class="quick-label">COMMON GRIEVANCES (click to pre-populate):</p>
+          <div class="quick-grid">
+            <button type="button" class="quick-fill">My shadow has started arriving before me.</button>
+            <button type="button" class="quick-fill">I have misplaced Tuesday.</button>
+            <button type="button" class="quick-fill">My reflection disagrees with me politically.</button>
+            <button type="button" class="quick-fill">The concept of "later" is not working.</button>
+            <button type="button" class="quick-fill">I am receiving memories I did not order.</button>
+            <button type="button" class="quick-fill">My neighbour appears to be a weather system.</button>
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <button type="submit" class="submit-btn" id="submit-btn">
+            SUBMIT COMPLAINT
+          </button>
+          <p class="submission-note">
+            Processing time: 6–8 business decades. Priority cases: 4–5 business decades.
+          </p>
+        </div>
+      </form>
+    </section>
+
+    <!-- Processing State -->
+    <div id="processing-panel" class="processing-panel" hidden>
+      <div class="processing-inner">
+        <div class="stamp-anim" aria-hidden="true" id="stamp-anim">RECEIVED</div>
+        <p id="processing-status" class="processing-status">ROUTING TO COMMITTEE 7B…</p>
+      </div>
+    </div>
+
+    <!-- Response Section -->
+    <section id="response-section" class="response-section" hidden>
+      <div class="ruled-line" aria-hidden="true">——————————————————————————————————————————</div>
+
+      <div class="response-header">
+        <p class="response-ref">
+          RE: YOUR COMPLAINT — CASE NO. <span id="case-number">—</span>
+        </p>
+        <p class="response-classification">CLASSIFICATION: <span id="response-classification">PENDING</span></p>
+      </div>
+
+      <div id="complaint-response" class="complaint-response" aria-live="polite"></div>
+
+      <div class="response-footer">
+        <p class="footer-sig">
+          Yours bureaucratically,<br/>
+          <strong>J. Morble, Acting Deputy Assistant Sub-Director</strong><br/>
+          Department of Unresolved Matters<br/>
+          <em>Office closed Mondays, Wednesdays, and during existential crises.</em>
+        </p>
+        <div class="speaking-indicator" id="speaking-indicator" hidden>
+          <span class="speaker-dot"></span>
+          <span class="speaker-dot"></span>
+          <span class="speaker-dot"></span>
+          <span class="speaker-label">RESPONSE BEING READ ALOUD</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</Base>
+
+<style>
+  /* ── Palette ─────────────────────────────────────────────────────────────── */
+  :root {
+    --parchment: #f5f0e4;
+    --parchment-dark: #e8e0cc;
+    --ink: #1a1408;
+    --ink-faded: #4a3f2a;
+    --stamp-red: #8b1a1a;
+    --stamp-blue: #1a2e5a;
+    --rule: #c8b89a;
+  }
+
+  /* ── Layout ──────────────────────────────────────────────────────────────── */
+  .dept-wrapper {
+    font-family: "Courier New", Courier, monospace;
+    background: var(--parchment);
+    color: var(--ink);
+    max-width: 760px;
+    margin: 2rem auto;
+    padding: 3rem 3rem 2rem;
+    border: 3px double var(--rule);
+    box-shadow:
+      0 0 0 6px var(--parchment),
+      0 0 0 7px var(--rule),
+      4px 4px 24px rgba(0,0,0,0.25);
+    position: relative;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────────────── */
+  .dept-header {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .dept-seal {
+    flex: 0 0 100px;
+    width: 100px;
+    color: var(--ink-faded);
+    opacity: 0.75;
+  }
+
+  .dept-title-block {
+    flex: 1;
+  }
+
+  .dept-subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    margin: 0 0 0.25rem;
+  }
+
+  .dept-title {
+    font-family: "Courier New", Courier, monospace;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    margin: 0 0 0.5rem;
+    color: var(--ink);
+  }
+
+  .dept-tagline {
+    font-size: 0.75rem;
+    color: var(--ink-faded);
+    font-style: italic;
+    margin: 0;
+  }
+
+  /* ── Ruled lines ─────────────────────────────────────────────────────────── */
+  .ruled-line {
+    color: var(--rule);
+    font-size: 0.8rem;
+    letter-spacing: 0;
+    overflow: hidden;
+    margin: 1rem 0;
+    white-space: nowrap;
+  }
+
+  /* ── Form ────────────────────────────────────────────────────────────────── */
+  .form-section {
+    margin-top: 1rem;
+  }
+
+  .field-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    margin-bottom: 0.4rem;
+  }
+
+  .field-note {
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    font-weight: normal;
+    font-style: italic;
+    color: var(--rule);
+  }
+
+  textarea#complaint-input {
+    width: 100%;
+    background: rgba(255,255,255,0.5);
+    border: 1.5px solid var(--rule);
+    border-bottom: 2px solid var(--ink-faded);
+    color: var(--ink);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.9rem;
+    padding: 0.75rem;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+
+  textarea#complaint-input:focus {
+    border-color: var(--ink);
+    background: rgba(255,255,255,0.8);
+  }
+
+  /* ── Quick fills ─────────────────────────────────────────────────────────── */
+  .quick-fills {
+    margin-bottom: 1.5rem;
+  }
+
+  .quick-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    margin: 0 0 0.5rem;
+  }
+
+  .quick-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .quick-fill {
+    background: transparent;
+    border: 1px dashed var(--rule);
+    color: var(--ink-faded);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+
+  .quick-fill:hover {
+    background: var(--parchment-dark);
+    border-color: var(--ink-faded);
+    color: var(--ink);
+  }
+
+  /* ── Submit ──────────────────────────────────────────────────────────────── */
+  .submit-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .submit-btn {
+    background: var(--stamp-blue);
+    color: var(--parchment);
+    border: none;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background: var(--ink);
+    transform: translateY(-1px);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .submission-note {
+    font-size: 0.6rem;
+    font-style: italic;
+    color: var(--ink-faded);
+    margin: 0;
+    max-width: 280px;
+  }
+
+  /* ── Processing Panel ────────────────────────────────────────────────────── */
+  .processing-panel {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .processing-inner {
+    display: inline-block;
+  }
+
+  .stamp-anim {
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    color: var(--stamp-red);
+    border: 4px solid var(--stamp-red);
+    padding: 0.5rem 1.5rem;
+    display: inline-block;
+    transform: rotate(-12deg);
+    opacity: 0;
+    animation: stampIn 0.4s 0.3s cubic-bezier(0.2, 0.8, 0.3, 1.4) forwards;
+    font-family: "Courier New", Courier, monospace;
+    text-transform: uppercase;
+  }
+
+  @keyframes stampIn {
+    0%   { transform: rotate(-12deg) scale(2.5); opacity: 0; }
+    60%  { opacity: 1; }
+    100% { transform: rotate(-12deg) scale(1); opacity: 0.85; }
+  }
+
+  .processing-status {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    margin-top: 1rem;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0.3; }
+  }
+
+  /* ── Response Section ────────────────────────────────────────────────────── */
+  .response-section {
+    margin-top: 1.5rem;
+  }
+
+  .response-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  #case-number {
+    font-weight: bold;
+    color: var(--stamp-red);
+  }
+
+  #response-classification {
+    font-weight: bold;
+  }
+
+  .complaint-response {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--ink);
+    min-height: 6em;
+    white-space: pre-wrap;
+    position: relative;
+  }
+
+  .complaint-response::before {
+    content: "OFFICIAL RESPONSE:";
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--ink-faded);
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── Response Footer ─────────────────────────────────────────────────────── */
+  .response-footer {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-sig {
+    font-size: 0.75rem;
+    color: var(--ink-faded);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ── Speaking Indicator ──────────────────────────────────────────────────── */
+  .speaking-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--stamp-blue);
+  }
+
+  .speaker-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--stamp-blue);
+    border-radius: 50%;
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  .speaker-dot:nth-child(2) { animation-delay: 0.2s; }
+  .speaker-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.4); opacity: 1; }
+  }
+</style>
+
+<script>
+  const COMPLAINTS = [
+    "My shadow has started arriving before me.",
+    "I have misplaced Tuesday.",
+    "My reflection disagrees with me politically.",
+    "The concept of 'later' is not working.",
+    "I am receiving memories I did not order.",
+    "My neighbour appears to be a weather system.",
+  ]
+
+  const PROCESSING_STEPS = [
+    "ROUTING TO COMMITTEE 7B…",
+    "FORWARDING TO SUB-COMMITTEE 7B(ii)…",
+    "AWAITING SIGNATURE FROM COMMITTEE CHAIR (CURRENTLY ON SABBATICAL)…",
+    "CROSS-REFERENCING WITH THE ARCHIVE OF UNLIKELY CONCERNS…",
+    "APPLYING STANDARD NON-RESOLUTION PROTOCOL…",
+    "GENERATING OFFICIAL RESPONSE…",
+  ]
+
+  const CLASSIFICATIONS = [
+    "METAPHYSICALLY ADJACENT",
+    "TEMPORALLY AMBIGUOUS",
+    "OF MODERATE BUREAUCRATIC INTEREST",
+    "FILED UNDER: PROBABLY FINE",
+    "UNVERIFIABLE AT THIS TIME",
+    "CLASSIFIED: EXISTENTIAL (MILD)",
+    "CHRONIC BUT NON-ACTIONABLE",
+    "REFERRED TO A DEPARTMENT THAT NO LONGER EXISTS",
+  ]
+
+  const RESPONSES = [
+    `Thank you for your complaint, reference {CASE}.
+
+After careful deliberation spanning {DAYS} working days, the Department of Unresolved Matters has concluded that your concern — while noted in triplicate — falls outside the jurisdiction of this office, all adjacent offices, and the theoretical office we considered establishing in 1987 before running out of paperclips.
+
+Your complaint has been forwarded to the Bureau of Liminal Difficulties, which was dissolved in 2003. Their legacy voicemail box is still active and accepts messages up to 14 seconds in length.
+
+We appreciate your patience and remind you that patience is legally required under Statute 44(c) of the Unresolved Matters Act.
+
+Please retain this correspondence for your records. Or do not. We cannot compel you.`,
+
+    `Dear Concerned Party,
+
+Your submission (Case No. {CASE}) has been reviewed by a committee of seven, of whom four were fully awake. The outcome of their deliberations is as follows:
+
+The committee acknowledges that something has occurred. They are unable to confirm whether the something is the something you described, as the documentation provided did not include a notarised sketch, a sworn affidavit from an impartial clock, or evidence that the concern began on a weekday.
+
+We are prepared to offer you a Provisional Acknowledgement of Possible Disturbance (Form UA-12), which carries no legal weight but has a satisfying texture when printed on card stock.
+
+Please do not reply to this message. We have replied to your reply before it arrived and it was inconclusive.
+
+Yours in administrative perpetuity,`,
+
+    `OFFICIAL NON-FINDING — Case {CASE}
+
+The Department has investigated your concern and found the following:
+
+1. The concern exists.
+2. The concern continues to exist.
+3. The concern will, in all probability, continue to exist indefinitely, regardless of intervention.
+
+As a result, the Department recommends the following course of non-action: acceptance, or alternatively, the submission of a secondary complaint regarding the primary complaint, which will be processed within 6–8 business decades.
+
+We note with some interest that {DAYS} other individuals have submitted similar concerns this fiscal period. We have not told them about each other. This is standard procedure.
+
+No further action is required from you at this time. No further action will be required from us at any time.`,
+
+    `To Whom It Continues to Concern,
+
+We have received your complaint (Case Reference: {CASE}), reviewed it briefly, set it aside, found it again under a jar of rubber bands, reviewed it again more thoroughly, and arrived at the following position:
+
+The Department neither confirms nor denies that your experience is real. This is not a judgment. It is merely the Department's default epistemological stance, adopted in 1962 following the Incident of the Disappearing Filing Cabinet (Case No. 0001-A, status: unresolved).
+
+A resolution to your matter would require resources that have been allocated elsewhere — specifically, to the ongoing investigation into where resources go when they are allocated.
+
+We wish you well in a non-binding and purely administrative sense.`,
+
+    `RESPONSE TO SUBMISSION {CASE}
+
+This department has consulted its records, its sub-records, and the unofficial records kept in a shoebox under Desk 4C, and can confirm that your complaint is the {N}th of its kind received this quarter.
+
+The previous {N_MINUS} submissions remain open, pending, and in excellent health.
+
+We would like to offer you a resolution but are currently out of resolutions. A new shipment was expected in March. It is currently {MONTH}.
+
+In the meantime, we suggest documenting your concern in a personal journal, storing the journal in a cool, dry location, and periodically reading the journal aloud to yourself to maintain the complaint's vitality.
+
+The Department thanks you for your continued participation in the process of having concerns.`,
+  ]
+
+  let caseCounter = 10000 + Math.floor(Math.random() * 89999)
+
+  const form = document.getElementById("complaint-form")
+  const submitBtn = document.getElementById("submit-btn")
+  const complainInput = document.getElementById("complaint-input")
+  const processingPanel = document.getElementById("processing-panel")
+  const processingStatus = document.getElementById("processing-status")
+  const responseSection = document.getElementById("response-section")
+  const complaintResponse = document.getElementById("complaint-response")
+  const caseNumberEl = document.getElementById("case-number")
+  const classificationEl = document.getElementById("response-classification")
+  const speakingIndicator = document.getElementById("speaking-indicator")
+  const stampAnim = document.getElementById("stamp-anim")
+
+  // Quick-fill buttons
+  document.querySelectorAll(".quick-fill").forEach((btn, i) => {
+    btn.addEventListener("click", () => {
+      complainInput.value = COMPLAINTS[i] ?? btn.textContent.trim()
+      complainInput.focus()
+    })
+  })
+
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)]
+  }
+
+  async function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms))
+  }
+
+  function generateResponse(caseNum) {
+    const template = pick(RESPONSES)
+    const days = Math.floor(Math.random() * 847) + 12
+    const n = Math.floor(Math.random() * 2000) + 3
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+    const month = months[new Date().getMonth()]
+
+    return template
+      .replace(/{CASE}/g, caseNum)
+      .replace(/{DAYS}/g, days)
+      .replace(/{N_MINUS}/g, n - 1)
+      .replace(/{N}/g, n)
+      .replace(/{MONTH}/g, month)
+  }
+
+  function speakResponse(text) {
+    if (!window.speechSynthesis) return
+
+    window.speechSynthesis.cancel()
+
+    const utter = new SpeechSynthesisUtterance(text)
+    utter.rate = 0.85
+    utter.pitch = 0.7
+    utter.volume = 0.9
+
+    // Prefer a dry, bureaucratic-sounding voice
+    const voices = window.speechSynthesis.getVoices()
+    const preferred = voices.find(v =>
+      /daniel|fred|albert|google uk|english uk/i.test(v.name)
+    ) || voices.find(v => /en/i.test(v.lang)) || voices[0]
+    if (preferred) utter.voice = preferred
+
+    speakingIndicator.hidden = false
+
+    utter.onend = () => {
+      speakingIndicator.hidden = true
+    }
+    utter.onerror = () => {
+      speakingIndicator.hidden = true
+    }
+
+    window.speechSynthesis.speak(utter)
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault()
+    const complaint = complainInput.value.trim()
+    if (!complaint) return
+
+    // Disable form
+    submitBtn.disabled = true
+    submitBtn.textContent = "PROCESSING…"
+    responseSection.hidden = true
+
+    // Show processing
+    processingPanel.hidden = false
+
+    // Restart stamp animation
+    stampAnim.style.animation = "none"
+    void stampAnim.offsetWidth // reflow
+    stampAnim.style.animation = ""
+
+    // Cycle through statuses
+    for (const step of PROCESSING_STEPS) {
+      processingStatus.textContent = step
+      await sleep(600)
+    }
+
+    await sleep(400)
+
+    // Hide processing, show response
+    processingPanel.hidden = true
+
+    caseCounter++
+    const caseNum = `UM-${caseCounter}-${new Date().getFullYear()}`
+    const responseText = generateResponse(caseNum)
+    const classification = pick(CLASSIFICATIONS)
+
+    caseNumberEl.textContent = caseNum
+    classificationEl.textContent = classification
+    complaintResponse.textContent = responseText
+
+    responseSection.hidden = false
+
+    // Read it aloud
+    speakResponse(responseText)
+
+    // Re-enable form
+    submitBtn.disabled = false
+    submitBtn.textContent = "SUBMIT ANOTHER COMPLAINT"
+    complainInput.value = ""
+    complainInput.focus()
+  })
+
+  // Ensure voices load (browsers lazy-load them)
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices()
+    window.speechSynthesis.addEventListener("voiceschanged", () => {
+      window.speechSynthesis.getVoices()
+    })
+  }
+</script>

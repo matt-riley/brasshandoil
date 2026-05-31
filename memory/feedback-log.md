@@ -49,3 +49,29 @@ Feedback:
 Carry Forward:
 - Limit layout wrappers to 100% width rather than viewport-stretching `100vw` inside layout constraints to prevent offset clipping.
 - Continually explore cutting-edge APIs (like Scroll-Driven Animations, @starting-style, etc.) for creative coding.
+
+### Session Entry
+
+Date: 2026-05-31
+Experiment: Lost & Found Futures
+Feedback:
+- Loved the idea.
+- The interactions did not feel like the promised effects were actually working.
+- Experiments should not explain what technologies or APIs they are using inside the artwork itself.
+Carry Forward:
+- Check whether the high-contrast bureaucratic direction still feels playful enough.
+- See if native UI primitives like Popover and View Transitions feel meaningfully fresh to you, or if the next experiment should chase a different class of browser weirdness.
+- User feedback should always be captured in the project memory without exception.
+- If an effect is conceptually central, it needs to read clearly in the browser rather than only existing in implementation details.
+
+### Session Entry
+
+Date: 2026-05-31
+Experiment: Chrono-Spatial Calibration
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Ensure the popovers stay positioned cleanly near anchors in both standard and polyfilled settings.
+- Monitor whether multi-dimensional resonance and FM synth timbres feel engaging.
+- Ensure no implementation leakage exists in user-facing HUD panels.
+

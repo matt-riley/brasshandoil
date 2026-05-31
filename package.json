@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test tests/*.test.mjs clients/web/tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs clients/web/tests/*.test.mjs",
+    "test:e2e": "cd clients/web && pnpm test:e2e"
   },
   "repository": {
     "type": "git",

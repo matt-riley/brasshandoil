@@ -1,0 +1,479 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <section class="bureau-shell">
+    <div class="bureau-copy">
+      <p class="bureau-kicker">Municipal temporal recovery office</p>
+      <h1>Lost &amp; Found Futures</h1>
+      <p class="bureau-intro">
+        The Claims Desk has recovered several futures that slipped out of people’s
+        pockets. Press the button to issue one, then open the claim ticket to inspect
+        its consequences.
+      </p>
+
+      <div class="bureau-controls">
+        <button id="issue-button" type="button">Issue a future</button>
+        <p class="bureau-note">
+          High-contrast, low-trust paperwork for the end of certainty.
+        </p>
+      </div>
+    </div>
+
+    <div class="claims-desk">
+      <div class="desk-header">
+        <p class="desk-label">Claims Desk</p>
+        <p class="desk-meta">Recovered items are stamped, filed, and occasionally glowing.</p>
+      </div>
+
+      <ul id="claims-list" class="claims-list" aria-live="polite"></ul>
+
+      <div id="future-popover" class="future-popover" popover="auto">
+        <p class="popover-label">Filed details</p>
+        <h2 id="popover-title">Pending claim</h2>
+        <p id="popover-body">
+          Open a claim card to inspect the recovered future.
+        </p>
+        <button id="close-popover" type="button">
+          Close file
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    type FutureClaimTemplate = {
+      title: string
+      summary: string
+      consequence: string
+      urgency: string
+    }
+
+    type FutureClaim = FutureClaimTemplate & {
+      id: number
+    }
+
+    const futurePool: FutureClaimTemplate[] = [
+      {
+        title: "Pocket of Applause",
+        summary: "A standing ovation follows you into one mildly inconvenient room.",
+        consequence: "Side effect: all ordinary errands gain closing-night energy.",
+        urgency: "Recover before Thursday becomes theatrical.",
+      },
+      {
+        title: "Provisional Moon Certificate",
+        summary: "You are briefly placed in charge of the moon’s softer decisions.",
+        consequence: "Expect several tides to become more emotionally articulate.",
+        urgency: "Sign before the water notices.",
+      },
+      {
+        title: "Emergency Second Draft",
+        summary: "A cleaner version of your next sentence is waiting in a velvet tray.",
+        consequence: "Speaking may suddenly sound rehearsed by a kinder ghost.",
+        urgency: "Best opened before your next tiny crisis meeting.",
+      },
+      {
+        title: "Unattended Parade Fragment",
+        summary: "A brass section keeps trying to congratulate your better instincts.",
+        consequence: "Crosswalks may feel overproduced for the rest of the day.",
+        urgency: "Store away from weather and self-doubt.",
+      },
+      {
+        title: "Spare Tomorrow, Folded",
+        summary: "One backup tomorrow has been found behind a radiator.",
+        consequence: "May cause punctual deja vu and mysterious optimism.",
+        urgency: "Claim before someone else accidentally lives it.",
+      },
+      {
+        title: "Certified Soft Catastrophe",
+        summary: "A disaster has been downgraded to decorative inconvenience.",
+        consequence: "Objects nearby may begin resolving with suspicious elegance.",
+        urgency: "File immediately if beauty becomes administratively excessive.",
+      },
+    ]
+
+    const claimsList = document.getElementById("claims-list")
+    const issueButton = document.getElementById("issue-button") as HTMLButtonElement | null
+    const futurePopover = document.getElementById("future-popover") as HTMLElement | null
+    const popoverTitle = document.getElementById("popover-title")
+    const popoverBody = document.getElementById("popover-body")
+    const closePopoverButton = document.getElementById("close-popover") as HTMLButtonElement | null
+
+    let issueCount = 0
+
+    function openFuturePopover() {
+      if (!futurePopover) return
+
+      const popoverElement = futurePopover as HTMLElement & {
+        showPopover?: () => void
+      }
+
+      if (typeof popoverElement.showPopover === "function") {
+        popoverElement.showPopover()
+        return
+      }
+
+      popoverElement.setAttribute("data-open", "true")
+    }
+
+    function closeFuturePopover() {
+      if (!futurePopover) return
+
+      const popoverElement = futurePopover as HTMLElement & {
+        hidePopover?: () => void
+      }
+
+      if (typeof popoverElement.hidePopover === "function") {
+        popoverElement.hidePopover()
+        return
+      }
+
+      popoverElement.removeAttribute("data-open")
+    }
+
+    let transitionInFlight = false
+
+    function nextClaim(): FutureClaim {
+      const id = issueCount + 1
+      const claim = futurePool[issueCount % futurePool.length]
+      issueCount = id
+      return {
+        ...claim,
+        id,
+      }
+    }
+
+    function renderClaim(claim: FutureClaim) {
+      const card = document.createElement("li")
+      card.className = "claim-card"
+      card.style.viewTransitionName = `claim-${claim.id}`
+
+      card.innerHTML = `
+        <article>
+          <p class="claim-number">Form TF-${String(claim.id).padStart(3, "0")}</p>
+          <h3>${claim.title}</h3>
+          <p class="claim-summary">${claim.summary}</p>
+          <div class="claim-footer">
+            <span class="urgency-pill">${claim.urgency}</span>
+            <button type="button" class="inspect-button">Inspect claim</button>
+          </div>
+        </article>
+      `
+
+      const inspectButton = card.querySelector(".inspect-button") as HTMLButtonElement
+      inspectButton.addEventListener("click", () => {
+        if (popoverTitle) {
+          popoverTitle.textContent = claim.title
+        }
+
+        if (popoverBody) {
+          popoverBody.textContent = `${claim.summary} ${claim.consequence} ${claim.urgency}`
+        }
+
+        openFuturePopover()
+      })
+
+      claimsList?.prepend(card)
+
+      requestAnimationFrame(() => {
+        card.dataset.entered = "true"
+      })
+    }
+
+    function clearTransitionName(card: HTMLElement) {
+      window.setTimeout(() => {
+        card.style.viewTransitionName = "none"
+      }, 320)
+    }
+
+    function issueFuture(useTransition = true) {
+      const claim = nextClaim()
+
+      const commit = () => {
+        renderClaim(claim)
+        const newestCard = claimsList?.firstElementChild
+        if (newestCard instanceof HTMLElement) {
+          clearTransitionName(newestCard)
+        }
+      }
+
+      const canTransition =
+        useTransition &&
+        !transitionInFlight &&
+        "startViewTransition" in document
+
+      if (!canTransition) {
+        commit()
+        return
+      }
+
+      transitionInFlight = true
+
+      const transition = (
+        document as Document & {
+          startViewTransition: (callback: () => void) => {
+            finished?: Promise<unknown>
+          }
+        }
+      ).startViewTransition(commit)
+
+      transition.finished
+        ?.catch(() => {})
+        .finally(() => {
+          transitionInFlight = false
+        })
+    }
+
+    issueButton?.addEventListener("click", () => issueFuture())
+    closePopoverButton?.addEventListener("click", closeFuturePopover)
+
+    futurePopover?.addEventListener("click", (event) => {
+      if (event.target === futurePopover) {
+        closeFuturePopover()
+      }
+    })
+
+    for (let i = 0; i < 2; i += 1) {
+      issueFuture(false)
+    }
+  </script>
+
+  <style>
+    :root {
+      --ink: #111111;
+      --paper: #faf4e8;
+      --paper-strong: #fffdf8;
+      --line: #262626;
+      --accent: #b53518;
+      --accent-soft: #ffd8bf;
+      --muted: #5c5448;
+      --shadow: rgba(17, 17, 17, 0.18);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, #fff3d8 0, rgba(255, 243, 216, 0) 28%),
+        linear-gradient(180deg, #f4ead7 0%, #eadfca 100%);
+      color: var(--ink);
+    }
+
+    .bureau-shell {
+      min-height: calc(100vh - 4rem);
+      display: grid;
+      grid-template-columns: minmax(18rem, 28rem) minmax(0, 1fr);
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .bureau-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .bureau-kicker,
+    .desk-label,
+    .popover-label,
+    .claim-number {
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    h1 {
+      font-size: clamp(3rem, 9vw, 5.4rem);
+      line-height: 0.93;
+      max-width: 8ch;
+      color: var(--ink);
+    }
+
+    .bureau-intro,
+    .bureau-note,
+    .desk-meta,
+    .claim-summary,
+    #popover-body {
+      font-size: 1rem;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+
+    .bureau-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    button {
+      appearance: none;
+      border: 2px solid var(--line);
+      background: var(--ink);
+      color: var(--paper-strong);
+      border-radius: 999px;
+      padding: 0.9rem 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      width: fit-content;
+      cursor: pointer;
+      transition:
+        transform 160ms ease,
+        background-color 160ms ease,
+        color 160ms ease;
+    }
+
+    button:hover,
+    button:focus-visible {
+      background: var(--accent);
+      transform: translateY(-1px);
+      outline: 3px solid var(--accent-soft);
+      outline-offset: 2px;
+    }
+
+    .claims-desk {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.25rem;
+      border: 2px solid var(--line);
+      border-radius: 1.8rem;
+      background: rgba(255, 253, 248, 0.82);
+      box-shadow: 0 30px 60px var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .desk-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: baseline;
+      border-bottom: 2px dashed rgba(17, 17, 17, 0.25);
+      padding-bottom: 0.75rem;
+    }
+
+    .claims-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+      gap: 1rem;
+    }
+
+    .claim-card {
+      border: 2px solid var(--line);
+      border-radius: 1.35rem;
+      background: var(--paper);
+      box-shadow: 0 12px 28px rgba(17, 17, 17, 0.1);
+      overflow: clip;
+      opacity: 0;
+      transform: translateY(1rem) rotate(-1deg) scale(0.98);
+      transition:
+        opacity 260ms ease,
+        transform 260ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .claim-card[data-entered="true"] {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg) scale(1);
+    }
+
+    .claim-card article {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      min-height: 100%;
+      padding: 1rem;
+    }
+
+    .claim-card h3,
+    #popover-title {
+      font-size: 1.55rem;
+      line-height: 1.05;
+      color: var(--ink);
+    }
+
+    .claim-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+
+    .urgency-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--ink);
+      border: 1px solid rgba(17, 17, 17, 0.15);
+      font-size: 0.82rem;
+      font-weight: 700;
+      max-width: 18ch;
+    }
+
+    .inspect-button {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .inspect-button:hover,
+    .inspect-button:focus-visible {
+      color: var(--paper-strong);
+    }
+
+    .future-popover {
+      display: none;
+      max-width: 34rem;
+      border: 2px solid var(--line);
+      border-radius: 1.4rem;
+      background: var(--paper-strong);
+      color: var(--ink);
+      padding: 1.25rem;
+      box-shadow: 0 28px 80px rgba(17, 17, 17, 0.28);
+    }
+
+    .future-popover[data-open="true"] {
+      position: fixed;
+      inset: auto 1rem 1rem auto;
+      width: min(34rem, calc(100vw - 2rem));
+      display: block;
+      z-index: 40;
+    }
+
+    .future-popover:popover-open {
+      display: block;
+    }
+
+    .future-popover::backdrop {
+      background: rgba(17, 17, 17, 0.5);
+      backdrop-filter: blur(3px);
+    }
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 240ms;
+    }
+
+    @media (max-width: 900px) {
+      .bureau-shell {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+
+      .desk-header {
+        flex-direction: column;
+      }
+    }
+  </style>
+</Base>
