@@ -1,0 +1,61 @@
+10:45:48 [@astrojs/cloudflare] Enabling sessions with Cloudflare KV with the "SESSION" KV binding.
+10:45:48 [@astrojs/cloudflare] If you see the error "Invalid binding `SESSION`" in your build output, you need to add the binding to your wrangler config file.
+10:45:48 [WARN] The adapter @astrojs/cloudflare uses `entrypointResolution: "explicit"` by default, which is deprecated and will be removed in a future major version.
+10:45:48 [WARN] Update your adapter to use `entrypointResolution: "auto"` or contact the maintainers to update.
+10:45:48 [WARN] [adapter] Cloudflare does not support sharp at runtime. However, you can configure `imageService: "compile"` to optimize images with sharp on prerendered pages during build time.
+10:45:48 [content] Syncing content
+10:45:48 [content] Synced content
+10:45:48 [types] Generated 226ms
+10:45:48 [check] Getting diagnostics for Astro files in /Users/mattriley/Documents/projects/personal/brasshandoil/clients/web...
+[96msrc/layouts/Base.astro[0m:[93m36[0m:[93m20[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'webkitAudioContext' may not exist on type 'Window & typeof globalThis'. Did you mean 'AudioContext'?
+
+[7m36[0m             window.webkitAudioContext = TrackedAudioContext;
+[7m  [0m [93m                   ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/layouts/Base.astro[0m:[93m35[0m:[93m22[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'webkitAudioContext' may not exist on type 'Window & typeof globalThis'. Did you mean 'AudioContext'?
+
+[7m35[0m           if (window.webkitAudioContext) {
+[7m  [0m [93m                     ~~~~~~~~~~~~~~~~~~[0m
+[96msrc/layouts/Base.astro[0m:[93m28[0m:[93m17[0m - [93mwarning[0m[90m ts(80002): [0mThis constructor function may be converted to a class declaration.
+
+[7m28[0m           const TrackedAudioContext = function(...args) {
+[7m  [0m [93m                ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/layouts/Base.astro[0m:[93m26[0m:[93m68[0m - [93mwarning[0m[90m ts(2568): [0mProperty 'webkitAudioContext' may not exist on type 'Window & typeof globalThis'. Did you mean 'AudioContext'?
+
+[7m26[0m         const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+[7m  [0m [93m                                                                   ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/pages/experiments/chrono-calibration.astro[0m:[93m193[0m:[93m11[0m - [93mwarning[0m[90m ts(6133): [0m'shell' is declared but its value is never read.
+
+[7m193[0m     const shell = document.getElementById("calibration-shell")!;
+[7m   [0m [93m          ~~~~~[0m
+
+[96msrc/pages/experiments/complaint-received.astro[0m:[93m592[0m:[93m24[0m - [91merror[0m[90m ts(2769): [0mNo overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'number' is not assignable to parameter of type '(substring: string, ...args: any[]) => string'.
+
+[7m592[0m       .replace(/{N}/g, n)
+[7m   [0m [91m                       ~[0m
+[96msrc/pages/experiments/complaint-received.astro[0m:[93m591[0m:[93m30[0m - [91merror[0m[90m ts(2769): [0mNo overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'number' is not assignable to parameter of type '(substring: string, ...args: any[]) => string'.
+
+[7m591[0m       .replace(/{N_MINUS}/g, n - 1)
+[7m   [0m [91m                             ~~~~~[0m
+[96msrc/pages/experiments/complaint-received.astro[0m:[93m590[0m:[93m27[0m - [91merror[0m[90m ts(2769): [0mNo overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'number' is not assignable to parameter of type '(substring: string, ...args: any[]) => string'.
+
+[7m590[0m       .replace(/{DAYS}/g, days)
+[7m   [0m [91m                          ~~~~[0m
+
+[96mtests/e2e/complaint-received.spec.js[0m:[93m82[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'quickText' is declared but its value is never read.
+
+[7m82[0m   const quickText = await firstQuickFill.textContent()
+[7m  [0m [93m        ~~~~~~~~~[0m
+
+Result (32 files): 
+- 3 errors
+- 0 warnings
+- 6 hints
+
+[ELIFECYCLE] Command failed with exit code 1.

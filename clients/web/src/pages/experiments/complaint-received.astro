@@ -543,17 +543,24 @@ The Department thanks you for your continued participation in the process of hav
 
   let caseCounter = 10000 + Math.floor(Math.random() * 89999)
 
-  const form = document.getElementById("complaint-form")
-  const submitBtn = document.getElementById("submit-btn")
-  const complainInput = document.getElementById("complaint-input")
-  const processingPanel = document.getElementById("processing-panel")
-  const processingStatus = document.getElementById("processing-status")
-  const responseSection = document.getElementById("response-section")
-  const complaintResponse = document.getElementById("complaint-response")
-  const caseNumberEl = document.getElementById("case-number")
-  const classificationEl = document.getElementById("response-classification")
-  const speakingIndicator = document.getElementById("speaking-indicator")
-  const stampAnim = document.getElementById("stamp-anim")
+  const form = document.getElementById("complaint-form") as HTMLFormElement | null
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement | null
+  const complainInput = document.getElementById("complaint-input") as HTMLInputElement | null
+  const processingPanel = document.getElementById("processing-panel") as HTMLElement | null
+  const processingStatus = document.getElementById("processing-status") as HTMLElement | null
+  const responseSection = document.getElementById("response-section") as HTMLElement | null
+  const complaintResponse = document.getElementById("complaint-response") as HTMLElement | null
+  const caseNumberEl = document.getElementById("case-number") as HTMLElement | null
+  const classificationEl = document.getElementById("response-classification") as HTMLElement | null
+  const speakingIndicator = document.getElementById("speaking-indicator") as HTMLElement | null
+  const stampAnim = document.getElementById("stamp-anim") as HTMLElement | null
+
+  if (!form || !submitBtn || !complainInput || !processingPanel || !processingStatus ||
+      !responseSection || !complaintResponse || !caseNumberEl || !classificationEl ||
+      !speakingIndicator || !stampAnim) {
+    console.error("complaint-received: missing required DOM elements")
+    throw new Error("Missing required DOM elements")
+  }
 
   // Quick-fill buttons
   document.querySelectorAll(".quick-fill").forEach((btn, i) => {
@@ -563,15 +570,15 @@ The Department thanks you for your continued participation in the process of hav
     })
   })
 
-  function pick(arr) {
+  function pick<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)]
   }
 
-  async function sleep(ms) {
+  async function sleep(ms: number) {
     return new Promise(r => setTimeout(r, ms))
   }
 
-  function generateResponse(caseNum) {
+  function generateResponse(caseNum: string) {
     const template = pick(RESPONSES)
     const days = Math.floor(Math.random() * 847) + 12
     const n = Math.floor(Math.random() * 2000) + 3
@@ -580,13 +587,13 @@ The Department thanks you for your continued participation in the process of hav
 
     return template
       .replace(/{CASE}/g, caseNum)
-      .replace(/{DAYS}/g, days)
-      .replace(/{N_MINUS}/g, n - 1)
-      .replace(/{N}/g, n)
+      .replace(/{DAYS}/g, String(days))
+      .replace(/{N_MINUS}/g, String(n - 1))
+      .replace(/{N}/g, String(n))
       .replace(/{MONTH}/g, month)
   }
 
-  function speakResponse(text) {
+  function speakResponse(text: string) {
     if (!window.speechSynthesis) return
 
     window.speechSynthesis.cancel()
@@ -603,13 +610,13 @@ The Department thanks you for your continued participation in the process of hav
     ) || voices.find(v => /en/i.test(v.lang)) || voices[0]
     if (preferred) utter.voice = preferred
 
-    speakingIndicator.hidden = false
+    speakingIndicator!.hidden = false
 
     utter.onend = () => {
-      speakingIndicator.hidden = true
+      speakingIndicator!.hidden = true
     }
     utter.onerror = () => {
-      speakingIndicator.hidden = true
+      speakingIndicator!.hidden = true
     }
 
     window.speechSynthesis.speak(utter)
