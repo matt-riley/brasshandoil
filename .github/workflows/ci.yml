@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  root-tests:
+    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@v1
+    with:
+      node-version: "22"
+      package-manager: pnpm
+      working-directory: .
+      run-lint: false
+      run-test: true
+      run-build: false
+      require-lockfile: true
+      cancel-in-progress: true
+      concurrency-suffix: root-tests
+
+  web-build:
+    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@v1
+    with:
+      node-version: "22"
+      package-manager: pnpm
+      working-directory: clients/web
+      run-lint: false
+      run-test: false
+      run-build: true
+      require-lockfile: true
+      cancel-in-progress: true
+      concurrency-suffix: web-build
