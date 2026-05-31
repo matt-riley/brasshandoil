@@ -123,27 +123,48 @@ const items = [
       const streakEl = document.getElementById("watch-streak");
       const noticeEl = document.getElementById("return-notice");
       const demoBtn = document.getElementById("demonstrate-btn");
+      if (
+        !(inventoryEl instanceof HTMLUListElement) ||
+        !(ledgerEl instanceof HTMLOListElement) ||
+        !(remainingEl instanceof HTMLElement) ||
+        !(deficitEl instanceof HTMLElement) ||
+        !(streakEl instanceof HTMLElement) ||
+        !(noticeEl instanceof HTMLElement) ||
+        !(demoBtn instanceof HTMLButtonElement)
+      ) {
+        return;
+      }
+      const inventoryList: HTMLUListElement = inventoryEl;
+      const ledgerList: HTMLOListElement = ledgerEl;
+      const remainingCountEl: HTMLElement = remainingEl;
+      const deficitReadoutEl: HTMLElement = deficitEl;
+      const streakCountEl: HTMLElement = streakEl;
+      const returnNoticeEl: HTMLElement = noticeEl;
+      const demonstrateButton: HTMLButtonElement = demoBtn;
+
+      const appWindow = window as Window & {
+        __officeSimulateReturn?: (seconds: number) => void;
+      };
       const originalTitle = document.title;
-      const startTime = Date.now();
 
       let watchStartedAt = Date.now();
       let totalDeficit = 0;
-      let hiddenAt = null;
-      let pleaTimer = null;
+      let hiddenAt: number | null = null;
+      let pleaTimer: ReturnType<typeof setInterval> | null = null;
       let pleaIndex = 0;
 
-      function remainingItems() {
+      function remainingItems(): HTMLElement[] {
         return Array.from(
-          inventoryEl.querySelectorAll(".inventory-item:not(.evaporating)")
+          inventoryList.querySelectorAll(".inventory-item:not(.evaporating)")
         );
       }
 
       function updateMeters() {
         const items = remainingItems();
-        remainingEl.textContent = String(items.length);
-        deficitEl.textContent = totalDeficit.toFixed(2);
+        remainingCountEl.textContent = String(items.length);
+        deficitReadoutEl.textContent = totalDeficit.toFixed(2);
         const elapsed = Math.floor((Date.now() - watchStartedAt) / 1000);
-        streakEl.textContent = String(elapsed);
+        streakCountEl.textContent = String(elapsed);
         if (items.length === 0) {
           declareUnfit();
         }
@@ -158,16 +179,16 @@ const items = [
           '<p>You are no longer permitted to look. ' +
           'The Office has relocated to your absence. ' +
           'Please remain where you are. Someone, somewhere, is no longer.</p>';
-        inventoryEl.replaceWith(banner);
+        inventoryList.replaceWith(banner);
       }
 
-      function evaporateOne(reason) {
+      function evaporateOne(reason: string): string | null {
         const items = remainingItems();
         if (items.length === 0) return null;
         const idx = Math.floor(Math.random() * items.length);
         const victim = items[idx];
-        const label = victim.querySelector(".item-label").textContent;
-        const tag = victim.querySelector(".item-tag").textContent;
+        const label = victim.querySelector(".item-label")?.textContent ?? "Unknown item";
+        const tag = victim.querySelector(".item-tag")?.textContent ?? "No. ???";
 
         victim.classList.add("evaporating");
         // Wait for transition before removing.
@@ -190,7 +211,7 @@ const items = [
           '<span class="ledger-tag">' + tag + "</span>" +
           '<span class="ledger-label">' + label + "</span>" +
           '<span class="ledger-reason">' + reason + "</span>";
-        ledgerEl.prepend(entry);
+        ledgerList.prepend(entry);
 
         return label;
       }
@@ -220,10 +241,10 @@ const items = [
         handleAbsence(awaySeconds, false);
       }
 
-      function handleAbsence(awaySeconds, fromSimulation) {
+      function handleAbsence(awaySeconds: number, fromSimulation: boolean) {
         const losses = Math.floor(awaySeconds / SECONDS_PER_EVAPORATION);
         totalDeficit += awaySeconds * 0.1; // decisteyes
-        const evaporated = [];
+        const evaporated: string[] = [];
         for (let i = 0; i < losses; i += 1) {
           const lost = evaporateOne("(while you were elsewhere)");
           if (lost) evaporated.push(lost);
@@ -233,8 +254,8 @@ const items = [
         updateMeters();
       }
 
-      function renderReturnNotice(awaySeconds, evaporated, fromSimulation) {
-        noticeEl.hidden = false;
+      function renderReturnNotice(awaySeconds: number, evaporated: string[], fromSimulation: boolean) {
+        returnNoticeEl.hidden = false;
         const headline = fromSimulation
           ? "SIMULATED ABSENCE FILED"
           : "RETURN NOTICE";
@@ -246,14 +267,14 @@ const items = [
             (evaporated.length === 0
               ? "Nothing evaporated in that span, although a few items have grown noticeably less convinced of themselves."
               : "In your absence the following ceased: " +
-                evaporated.map(function (e) { return '"' + e + '"'; }).join("; ") +
+                evaporated.map(function (e: string) { return '"' + e + '"'; }).join("; ") +
                 ".") +
             "</p>",
           "<p class=\"notice-foot\">Filed at " +
             new Date().toLocaleTimeString() +
             ". Your Watchfulness Deficit has been updated.</p>",
         ];
-        noticeEl.innerHTML = lines.join("");
+        returnNoticeEl.innerHTML = lines.join("");
       }
 
       document.addEventListener("visibilitychange", function () {
@@ -261,11 +282,11 @@ const items = [
         else onVisible();
       });
 
-      demoBtn.addEventListener("click", function () {
+      demonstrateButton.addEventListener("click", function () {
         const lost = evaporateOne("(controlled blink)");
         if (lost) {
-          noticeEl.hidden = false;
-          noticeEl.innerHTML =
+          returnNoticeEl.hidden = false;
+          returnNoticeEl.innerHTML =
             "<strong>TRAINING NOTICE</strong>" +
             '<p>One item — "' + lost + '" — was deliberately unlooked-at ' +
             "for instructional purposes. It is no longer.</p>";
@@ -276,7 +297,7 @@ const items = [
       setInterval(updateMeters, 1000);
 
       // Exposed for tests and curious users.
-      window.__officeSimulateReturn = function (seconds) {
+      appWindow.__officeSimulateReturn = function (seconds: number) {
         handleAbsence(Number(seconds) || 0, true);
       };
 

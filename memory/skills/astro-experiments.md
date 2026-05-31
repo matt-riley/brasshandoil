@@ -14,6 +14,8 @@
 - Do not explain the implementation inside the experiment's visible copy; the piece should stand on its own as an experience.
 - Effects should be judged by whether they read clearly to a human in the browser, not just by whether the underlying API is technically present.
 - User feedback should always be recorded in repo memory and promoted into reusable skills when it becomes a pattern.
+- In inline Astro scripts, guard required DOM nodes once with `instanceof` checks, then copy them into explicitly typed non-null aliases (`const x: HTMLDivElement = rawX`) so TypeScript keeps the narrowing across nested closures and helper functions.
+- When exposing debug/test hooks on `window` (for example `__officeSimulateReturn`), cast `window` to a narrow local type (`Window & { hook?: fn }`) instead of relying on implicit `any`.
 
 ## Open Questions
 
