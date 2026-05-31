@@ -37,6 +37,14 @@ Declaring `@property --name { syntax: "<angle>"; inherits: false; initial-value:
 #### Web Speech API — SpeechSynthesis
 `window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))` reads text aloud. Voices load asynchronously — listen for `voiceschanged` before calling `getVoices()`. Control pacing with `utterance.rate` (0.1–10), `utterance.pitch` (0–2), `utterance.volume`. Call `speechSynthesis.cancel()` before speaking to avoid queuing. In Playwright tests, stub the entire API with an `addInitScript` since headless Chrome has no audio output.
 
+### 2026-05-31 — Office of Evaporated Things
+**Concept:** A Borgesian lost-property bureau where you are appointed "Night Looker." Items in the inventory only exist while you regard them — switch tabs and they begin evaporating; the document title pleads with you to return; coming back files a bureaucratic "Return Notice" itemising what ceased while you were elsewhere.
+**Technique:** Page Visibility API (`document.hidden`, `visibilitychange`) combined with live `document.title` mutation as an out-of-tab communication channel.
+**File:** clients/web/src/pages/experiments/office-evaporated-things.astro
+
+#### Page Visibility API + live document.title as a notification channel
+`document.addEventListener("visibilitychange", ...)` fires when the tab loses or gains visibility; `document.hidden` (or `document.visibilityState`) tells you which. While hidden, you can mutate `document.title` on a timer — the user sees the new title in their tab strip even though the page is backgrounded, which is a surprisingly powerful "speak through the chrome" channel. Pair with a `Date.now()` snapshot at `hidden` to compute elapsed away-time when visibility returns. In Playwright, simulate hidden state with `Object.defineProperty(document, "hidden", { configurable: true, get: () => true })` then dispatch a synthetic `visibilitychange` event — `document.hidden` is read-only so direct assignment is a no-op.
+
 ## Feedback from Matt
 
 ### 2026-05-31 — COMPLAINT RECEIVED
