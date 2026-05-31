@@ -1,0 +1,457 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div class="frame">
+    <header class="header">
+      <h1 class="title text-gradient">Oil Telegraph</h1>
+      <p class="subtitle">
+        Press the key. Send viscosity through time. The Bureau will misread it lovingly.
+      </p>
+    </header>
+
+    <main id="telegraph-stage" class="stage glass">
+      <div class="panel">
+        <div class="status">
+          <span class="label">Line</span>
+          <span id="line-state" class="value">IDLE</span>
+        </div>
+        <div class="status">
+          <span class="label">Calibration</span>
+          <span id="calibration" class="value">—</span>
+        </div>
+        <div class="status">
+          <span class="label">Archive</span>
+          <span id="archive-count" class="value">0</span>
+        </div>
+      </div>
+
+      <section class="key-area">
+        <button id="telegraph-key" class="key" type="button" aria-describedby="key-help">
+          <span class="key-face">PRESS</span>
+          <span class="key-sub">Transmit oil</span>
+        </button>
+        <p id="key-help" class="help">
+          Short presses become <span class="mono">·</span>. Long presses become <span class="mono">—</span>.
+          Pauses break letters.
+        </p>
+      </section>
+
+      <section class="readouts">
+        <div class="readout">
+          <h2 class="readout-title">Signal</h2>
+          <pre id="signal-readout" class="readout-body" aria-live="polite"></pre>
+        </div>
+        <div class="readout">
+          <h2 class="readout-title">Bureau Translation</h2>
+          <div id="bureau-output" class="readout-body prose" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <style>
+    .frame {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 18px 80px;
+    }
+    .header {
+      display: grid;
+      gap: 10px;
+      margin: 8px 0 18px;
+    }
+    .title {
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .subtitle {
+      opacity: 0.85;
+      max-width: 70ch;
+    }
+
+    .stage {
+      padding: 18px;
+      border: 1px solid color-mix(in oklab, var(--text) 18%, transparent);
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .status {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid color-mix(in oklab, var(--text) 16%, transparent);
+      background: color-mix(in oklab, var(--bg) 75%, transparent);
+      display: grid;
+      gap: 6px;
+    }
+    .label {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    .value {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .key-area {
+      display: grid;
+      place-items: center;
+      gap: 10px;
+      padding: 10px 0;
+    }
+    .key {
+      width: min(520px, 100%);
+      padding: 18px 14px;
+      border-radius: 18px;
+      border: 1px solid color-mix(in oklab, var(--text) 22%, transparent);
+      background: radial-gradient(
+        120% 140% at 50% 0%,
+        color-mix(in oklab, var(--accent) 26%, transparent),
+        color-mix(in oklab, var(--bg) 70%, transparent) 55%,
+        color-mix(in oklab, var(--bg) 88%, black)
+      );
+      color: var(--text);
+      display: grid;
+      gap: 6px;
+      text-align: center;
+      user-select: none;
+      touch-action: manipulation;
+      position: relative;
+      overflow: hidden;
+      transition: transform 120ms ease;
+    }
+    .key:focus-visible {
+      outline: 2px solid color-mix(in oklab, var(--accent) 70%, white);
+      outline-offset: 3px;
+    }
+    .key-face {
+      font-weight: 900;
+      letter-spacing: 0.16em;
+    }
+    .key-sub {
+      font-size: 12px;
+      opacity: 0.7;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .key::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: conic-gradient(
+        from 180deg,
+        transparent,
+        color-mix(in oklab, var(--accent) 16%, transparent),
+        transparent
+      );
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 160ms ease;
+      pointer-events: none;
+    }
+    .key[data-pressed="true"] {
+      transform: translateY(1px) scale(0.995);
+    }
+    .key[data-pressed="true"]::before {
+      opacity: 1;
+    }
+
+    .help {
+      font-size: 13px;
+      opacity: 0.75;
+      text-align: center;
+      max-width: 66ch;
+      line-height: 1.4;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+      font-weight: 700;
+    }
+
+    .readouts {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 860px) {
+      .readouts {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .readout {
+      border-radius: 16px;
+      padding: 12px;
+      border: 1px solid color-mix(in oklab, var(--text) 16%, transparent);
+      background: color-mix(in oklab, var(--bg) 76%, transparent);
+      display: grid;
+      gap: 10px;
+      min-height: 160px;
+    }
+    .readout-title {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin: 0;
+    }
+    .readout-body {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    pre.readout-body {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+      font-size: 13px;
+    }
+    .prose {
+      font-size: 14px;
+    }
+  </style>
+
+  <script type="module">
+    const stage = document.getElementById("telegraph-stage")
+    const key = document.getElementById("telegraph-key")
+    const lineState = document.getElementById("line-state")
+    const calibrationEl = document.getElementById("calibration")
+    const archiveCount = document.getElementById("archive-count")
+    const signalReadout = document.getElementById("signal-readout")
+    const bureauOutput = document.getElementById("bureau-output")
+
+    if (!(stage && key && lineState && calibrationEl && archiveCount && signalReadout && bureauOutput)) {
+      throw new Error("Oil Telegraph missing required DOM nodes")
+    }
+
+    const storageKey = "brasshandoil:oiltel:archive:v1"
+    const calibrationKey = "brasshandoil:oiltel:calibration:v1"
+
+    const defaultCalibration = {
+      dotMs: 170,
+      letterGapMs: 260,
+      wordGapMs: 750,
+    }
+
+    function safeJsonParse(raw, fallback) {
+      try {
+        return JSON.parse(raw)
+      } catch {
+        return fallback
+      }
+    }
+
+    const archive = safeJsonParse(localStorage.getItem(storageKey) ?? "[]", [])
+    const calibration = safeJsonParse(localStorage.getItem(calibrationKey) ?? "null", null) ?? defaultCalibration
+
+    function persist() {
+      localStorage.setItem(storageKey, JSON.stringify(archive.slice(-40)))
+      localStorage.setItem(calibrationKey, JSON.stringify(calibration))
+    }
+
+    function updateHeader() {
+      calibrationEl.textContent = `${Math.round(calibration.dotMs)}ms dot`
+      archiveCount.textContent = `${archive.length}`
+    }
+
+    updateHeader()
+
+    const phrasePool = [
+      "TRANSMISSION RECEIVED: your hands are not a crime scene, only a weather report.",
+      "OFFICIAL NOTE: viscosity is not evidence. It is a motive.",
+      "BUREAU RESPONSE: we regret to inform you that your message has become an object.",
+      "LINE CLEAR: proceed with tenderness. It will be misfiled correctly.",
+      "ARCHIVE STAMPED: the oil remembers the path; the path does not remember you.",
+      "CONFIDENTIAL: a small shimmer has been assigned to your case number.",
+      "REDACTED: the sentence you wanted is now a fragrance. Congratulations.",
+    ]
+
+    function choose(arr) {
+      return arr[Math.floor(Math.random() * arr.length)]
+    }
+
+    let audioContext = null
+    let oscillator = null
+    let gain = null
+    let pressStart = 0
+    let lastUp = 0
+    let pressed = false
+    let raf = 0
+
+    const events = []
+    const current = []
+
+    function ensureAudio() {
+      if (audioContext) return audioContext
+      audioContext = new AudioContext()
+      gain = audioContext.createGain()
+      gain.gain.value = 0
+      gain.connect(audioContext.destination)
+      return audioContext
+    }
+
+    function startTone() {
+      const ctx = ensureAudio()
+      if (ctx.state === "suspended") ctx.resume()
+
+      oscillator = new OscillatorNode(ctx, { type: "triangle", frequency: 640 })
+      oscillator.connect(gain)
+      oscillator.start()
+      gain.gain.setTargetAtTime(0.10, ctx.currentTime, 0.015)
+    }
+
+    function stopTone() {
+      if (!audioContext || !oscillator || !gain) return
+      gain.gain.setTargetAtTime(0.0, audioContext.currentTime, 0.02)
+      const o = oscillator
+      oscillator = null
+      setTimeout(() => {
+        try {
+          o.stop()
+          o.disconnect()
+        } catch {}
+      }, 80)
+    }
+
+    function vibrate(pattern) {
+      if (!("vibrate" in navigator)) return
+      navigator.vibrate(pattern)
+    }
+
+    function pushSymbol(symbol) {
+      current.push(symbol)
+      events.push({ t: Date.now(), kind: "symbol", symbol })
+      render()
+    }
+
+    function breakLetter() {
+      if (current.length === 0) return
+      current.push(" ")
+      events.push({ t: Date.now(), kind: "gap", gap: "letter" })
+      render()
+    }
+
+    function breakWord() {
+      if (current.length === 0) return
+      current.push(" / ")
+      events.push({ t: Date.now(), kind: "gap", gap: "word" })
+      render()
+    }
+
+    function decodeSignal(signal) {
+      const intensity = Math.min(1, signal.replace(/\s|\/+/g, "").length / 14)
+      const index = Math.min(phrasePool.length - 1, Math.floor(intensity * phrasePool.length))
+      const rotated = phrasePool.slice(index).concat(phrasePool.slice(0, index))
+      return choose(rotated)
+    }
+
+    function render() {
+      const signal = current.join("").trim()
+      signalReadout.textContent = signal || "…"
+      bureauOutput.textContent = signal ? decodeSignal(signal) : "Awaiting oil."
+    }
+
+    render()
+
+    function now() {
+      return performance.now()
+    }
+
+    function tick() {
+      raf = requestAnimationFrame(tick)
+      const t = now()
+
+      if (!pressed && lastUp > 0) {
+        const elapsed = t - lastUp
+        if (elapsed > calibration.wordGapMs) {
+          breakWord()
+          lastUp = 0
+        } else if (elapsed > calibration.letterGapMs) {
+          breakLetter()
+          lastUp = 0
+        }
+      }
+    }
+
+    function beginPress() {
+      if (pressed) return
+      pressed = true
+      pressStart = now()
+      key.dataset.pressed = "true"
+      lineState.textContent = "LIVE"
+      startTone()
+      vibrate(18)
+    }
+
+    function endPress() {
+      if (!pressed) return
+      pressed = false
+      key.dataset.pressed = "false"
+      lineState.textContent = "IDLE"
+      stopTone()
+
+      const duration = now() - pressStart
+      const symbol = duration >= calibration.dotMs * 2.6 ? "—" : "·"
+      pushSymbol(symbol)
+
+      lastUp = now()
+      vibrate(symbol === "—" ? [10, 40, 10] : 10)
+
+      calibration.dotMs = calibration.dotMs * 0.88 + duration * 0.12
+      persist()
+      updateHeader()
+    }
+
+    key.addEventListener("pointerdown", (event) => {
+      event.preventDefault()
+      key.setPointerCapture(event.pointerId)
+      beginPress()
+      if (!raf) raf = requestAnimationFrame(tick)
+    })
+
+    key.addEventListener("pointerup", (event) => {
+      event.preventDefault()
+      try {
+        key.releasePointerCapture(event.pointerId)
+      } catch {}
+      endPress()
+    })
+
+    key.addEventListener("pointercancel", () => {
+      endPress()
+    })
+
+    window.addEventListener("keydown", (event) => {
+      if (event.code !== "Space") return
+      event.preventDefault()
+      beginPress()
+      if (!raf) raf = requestAnimationFrame(tick)
+    })
+
+    window.addEventListener("keyup", (event) => {
+      if (event.code !== "Space") return
+      event.preventDefault()
+      endPress()
+    })
+
+    window.addEventListener("beforeunload", () => {
+      if (current.length) {
+        archive.push({
+          at: new Date().toISOString(),
+          signal: current.join("").trim(),
+        })
+        persist()
+      }
+    })
+  </script>
+</Base>
+
