@@ -109,8 +109,10 @@ Feedback:
 - The concept is interesting and the core idea landed.
 - The dragging/pulling interaction feels limited in scope and distance.
 - The design could improve by becoming more realistic and more absurd at the same time.
+- Mobile performance is poor; on a top-of-the-range iPhone it feels very sluggish.
 - Overall, the experiment was done fairly well.
 Carry Forward:
 - Give the primary gesture a larger expressive range and a more dramatic visual consequence.
 - Ground surreal scenes in more convincing physical detail, then exaggerate the payoff further.
+- Treat mobile performance as a first-class acceptance criterion for SVG-heavy scenes (reduce path count, reduce per-frame work, consider quality modes).
 - Continue using recent source stories as material for a satirical point of view.

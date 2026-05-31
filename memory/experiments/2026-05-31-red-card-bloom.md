@@ -32,6 +32,7 @@ News seed:
 - The concept and core idea landed; the result was interesting and fairly well executed.
 - The dragging/pulling interaction felt constrained in scope and maximum distance.
 - The scene needs a stronger combination of realism and absurdity.
+- Mobile performance is poor; even on a top-of-the-range iPhone it feels very sluggish.
 - Future primary gestures should have a larger expressive envelope and a more dramatic consequence.
 - Ground surreal scenes in convincing physical detail, then exaggerate the payoff further.
 
