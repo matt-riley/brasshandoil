@@ -75,3 +75,42 @@ Carry Forward:
 - Monitor whether multi-dimensional resonance and FM synth timbres feel engaging.
 - Ensure no implementation leakage exists in user-facing HUD panels.
 
+### Session Entry
+
+Date: 2026-05-31
+Experiment: Oil Telegraph
+Feedback:
+- Not very attractive to look at; it reads like a plain box with text.
+- The “Bureau” framing is showing up too often now; the joke is wearing thin.
+- Future concepts should pull from recent news (reliable sources like the BBC) to broaden idea space beyond the dystopian Bureau arc.
+Carry Forward:
+- Treat “visual delight” as a first-class acceptance criterion (shape, motion, light, texture), not a later polish pass.
+- Avoid repeating the same narrative wrapper back-to-back; rotate motifs (nature, sports, science, local oddities, etc.).
+- Start each daily experiment by scanning 1–3 BBC stories and extracting one concrete constraint (object, place, verb) to anchor the concept.
+
+### Session Entry
+
+Date: 2026-05-31
+Experiment: Boatfire Regatta
+Feedback:
+- Creative; the visual direction landed well.
+- Make future experiments more satirical while preserving the inventive presentation.
+Carry Forward:
+- The move from text-box UI to a full-canvas spectacle addressed the Oil Telegraph visual feedback.
+- Keep news inspiration in memory notes rather than explaining the source inside the artwork.
+- Preserve immediate semantic feedback even when the main payoff is visual and animated.
+- Use the source story as material for a satirical point of view, not only as a bag of visual objects.
+
+### Session Entry
+
+Date: 2026-05-31
+Experiment: Red Card Bloom
+Feedback:
+- The concept is interesting and the core idea landed.
+- The dragging/pulling interaction feels limited in scope and distance.
+- The design could improve by becoming more realistic and more absurd at the same time.
+- Overall, the experiment was done fairly well.
+Carry Forward:
+- Give the primary gesture a larger expressive range and a more dramatic visual consequence.
+- Ground surreal scenes in more convincing physical detail, then exaggerate the payoff further.
+- Continue using recent source stories as material for a satirical point of view.

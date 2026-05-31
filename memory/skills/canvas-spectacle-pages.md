@@ -1,0 +1,27 @@
+# Canvas Spectacle Pages With Testable Contracts
+
+## When To Use
+
+- Use a canvas when the page needs many moving particles, custom light fields, or fluid
+  atmosphere that would become awkward as a large DOM tree.
+- Keep controls and visible state in semantic HTML layered above the canvas.
+
+## Daily Experiment Pattern
+
+1. Test for the canvas stage, one clear action, one visible state change, and the core drawing
+   primitives before implementation.
+2. Make the first frame attractive before interaction: ambient actors, texture, and one strong
+   light source should already be visible.
+3. Give the interaction an immediate DOM response while the canvas animation continues its
+   longer payoff.
+4. Keep user-facing text high contrast and compact. The artwork should not explain its own
+   implementation.
+5. Validate queried DOM nodes, then assign fresh non-null aliases before canvas helpers capture
+   them so Astro TypeScript checks remain clean.
+
+## Review Questions
+
+- Is the primary visual effect obvious within three seconds?
+- Does interaction visibly alter the canvas and a semantic readout?
+- Does the page still look intentional before the first interaction?
+- Can the narrow viewport preserve readable copy and a clear launch control?

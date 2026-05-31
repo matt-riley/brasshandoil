@@ -21,7 +21,9 @@ A high-contrast telegraph key that turns press durations into oily Morse (· / �
 ## Feedback To Carry Forward
 
 - “Weird UI” works best when the instructions are tiny and the payoff is immediate (signal readout updates on every press).
-- Keep “Bureau voice” short and declarative; long paragraphs read like explanations.
+- Visual note: it currently reads as “a box with text” rather than an attractive object.
+- Narrative note: the recurring “Bureau” wrapper across multiple experiments is wearing thin; avoid repeating it back-to-back.
+- Concept sourcing: use recent news (reliable sources like the BBC) to seed constraints/themes beyond the Bureau arc.
 
 ## Skills Or Patterns Learned
 
@@ -32,4 +34,3 @@ A high-contrast telegraph key that turns press durations into oily Morse (· / �
 
 - Let archived signals “bleed” into the UI as faint background stamps (CSS-only, no canvas).
 - Add a “retransmit last” control that replays the signal as haptics + audio.
-
