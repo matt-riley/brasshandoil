@@ -4,4 +4,4 @@ compatibility_flags = ["nodejs_compat"]
 main = "dist/_worker.js"
 
 [assets]
-directory = "dist"
+directory = "dist/client"
