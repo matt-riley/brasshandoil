@@ -656,7 +656,8 @@ The Department thanks you for your continued participation in the process of hav
     responseSection.hidden = false
 
     // Read it aloud
-    speakResponse(responseText)
+    const signature = `Yours bureaucratically, J. Morble, Acting Deputy Assistant Sub-Director, Department of Unresolved Matters. Office closed Mondays, Wednesdays, and during existential crises.`
+    speakResponse(responseText + "\n\n" + signature)
 
     // Re-enable form
     submitBtn.disabled = false
