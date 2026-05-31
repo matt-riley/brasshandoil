@@ -217,7 +217,7 @@ import Base from "@layouts/Base.astro"
       transform: translateX(-50%);
       width: 100%;
       max-width: 1200px;
-      height: calc(100vh - 6rem);
+      height: calc(100dvh - 6rem);
       z-index: 1;
       display: flex;
       align-items: center;
@@ -228,8 +228,8 @@ import Base from "@layouts/Base.astro"
 
     .mandala-container {
       position: relative;
-      width: 600px;
-      height: 600px;
+      width: min(580px, 90vw);
+      height: min(580px, 90vw);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -253,25 +253,25 @@ import Base from "@layouts/Base.astro"
     }
 
     .ring-outer {
-      width: 580px;
-      height: 580px;
-      font-size: 0.9rem;
+      width: 100%;
+      height: 100%;
+      font-size: clamp(0.6rem, 2vw, 0.9rem);
       animation: counter-rotate-self linear both;
       animation-timeline: scroll();
     }
 
     .ring-middle {
-      width: 420px;
-      height: 420px;
-      font-size: 0.75rem;
+      width: 72%;
+      height: 72%;
+      font-size: clamp(0.5rem, 1.5vw, 0.75rem);
       animation: rotate-self linear both;
       animation-timeline: scroll();
     }
 
     .ring-inner {
-      width: 260px;
-      height: 260px;
-      font-size: 0.65rem;
+      width: 45%;
+      height: 45%;
+      font-size: clamp(0.4rem, 1.2vw, 0.65rem);
       animation: counter-rotate-self linear both;
       animation-timeline: scroll();
     }

@@ -493,6 +493,14 @@ import Base from "@layouts/Base.astro"
   }
 
   @media (max-width: 600px) {
+    .ae-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+    .ae-date-block {
+      text-align: left;
+    }
     .ae-gauge-row {
       grid-template-columns: 1fr;
     }
@@ -500,6 +508,16 @@ import Base from "@layouts/Base.astro"
       width: 100%;
     }
     .ae-gauge-pct {
+      text-align: left;
+    }
+    .ae-total-row {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .ae-total-gauge {
+      width: 100%;
+    }
+    .ae-total-pct {
       text-align: left;
     }
   }

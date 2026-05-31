@@ -111,6 +111,10 @@ import Base from "@layouts/Base.astro"
       pointer.active = false
     })
 
+    window.addEventListener("pointerup", () => {
+      pointer.active = false
+    })
+
     let lastFrame = performance.now()
 
     function animate(now: number) {

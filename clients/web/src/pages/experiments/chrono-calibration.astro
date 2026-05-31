@@ -300,13 +300,16 @@ import Base from "@layouts/Base.astro"
       pointer.style.opacity = "1";
     });
 
-    chamber.addEventListener("pointerleave", () => {
+    function releaseGravity() {
       gravitySource.active = false;
       const rect = chamber.getBoundingClientRect();
       gravitySource.targetX = rect.width / 2;
       gravitySource.targetY = rect.height / 2;
       pointer.style.opacity = "0";
-    });
+    }
+
+    chamber.addEventListener("pointerleave", releaseGravity);
+    chamber.addEventListener("pointerup", releaseGravity);
 
     // Handle Anchor Hover (Tether popover)
     anchors.forEach((anchor) => {
@@ -649,7 +652,7 @@ import Base from "@layouts/Base.astro"
     .calibration-shell {
       position: relative;
       width: 100%;
-      height: calc(100vh - 6rem);
+      height: calc(100dvh - 6rem);
       background: #050409;
       display: flex;
       flex-direction: column;
@@ -884,6 +887,10 @@ import Base from "@layouts/Base.astro"
       .control-row {
         grid-template-columns: 1fr;
         gap: var(--spacing-2);
+      }
+      .hud-controls {
+        margin: var(--spacing-3) auto;
+        padding: var(--spacing-3);
       }
     }
 

@@ -449,6 +449,35 @@ import Base from "@layouts/Base.astro"
     0%, 100% { transform: scale(1); opacity: 0.5; }
     50% { transform: scale(1.4); opacity: 1; }
   }
+
+  @media (max-width: 600px) {
+    .dept-wrapper {
+      margin: 1rem;
+      padding: 1.5rem 1rem 1.5rem;
+      box-shadow: 4px 4px 16px rgba(0,0,0,0.25);
+    }
+    .dept-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+    }
+    .dept-seal {
+      margin-bottom: 0.5rem;
+    }
+    .submit-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+    .submit-btn {
+      width: 100%;
+    }
+    .submission-note {
+      max-width: none;
+      text-align: center;
+    }
+  }
 </style>
 
 <script>

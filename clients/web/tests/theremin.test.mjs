@@ -34,8 +34,11 @@ test("page uses OscillatorNode for tone generation", () => {
   assert.ok(source.includes("createOscillator"), "Should create an oscillator")
 })
 
-test("page responds to mousemove events", () => {
-  assert.ok(source.includes("mousemove"), "Should listen for mousemove events")
+test("page responds to pointermove or mousemove events", () => {
+  assert.ok(
+    source.includes("pointermove") || source.includes("mousemove"),
+    "Should listen for pointermove or mousemove events"
+  )
 })
 
 test("page has a title/heading", () => {

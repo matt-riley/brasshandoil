@@ -69,7 +69,14 @@ import Base from "@layouts/Base.astro"
       return `${note}${octave}`
     }
 
-    window.addEventListener("mousemove", (e: MouseEvent) => {
+    function stopSound() {
+      if (!running || !gainNode || !ctx) return
+      gainNode.gain.setTargetAtTime(0, ctx.currentTime, 0.05)
+      const info = document.getElementById("info")!
+      info.textContent = "—"
+    }
+
+    window.addEventListener("pointermove", (e: PointerEvent) => {
       if (!running || !oscillator || !gainNode || !ctx) return
 
       const t = ctx.currentTime
@@ -84,6 +91,18 @@ import Base from "@layouts/Base.astro"
 
       const info = document.getElementById("info")!
       info.textContent = `${freqToNote(freq)} · ${Math.round(freq)} Hz · vol ${Math.round(vol * 200)}%`
+    })
+
+    window.addEventListener("pointerup", (e: PointerEvent) => {
+      if (e.pointerType === "touch") {
+        stopSound()
+      }
+    })
+
+    window.addEventListener("pointerleave", (e: PointerEvent) => {
+      if (e.pointerType === "mouse") {
+        stopSound()
+      }
     })
 
     document.getElementById("overlay")!.addEventListener("click", boot)

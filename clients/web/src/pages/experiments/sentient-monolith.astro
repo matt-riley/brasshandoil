@@ -118,7 +118,7 @@ import Base from "@layouts/Base.astro"
 
   <style>
     .monolith-shell {
-      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -133,6 +133,13 @@ import Base from "@layouts/Base.astro"
       text-transform: uppercase;
       text-align: justify;
       cursor: crosshair;
+    }
+
+    @media (max-width: 600px) {
+      .monolith-container {
+        font-size: clamp(1.25rem, 6vw, 2rem);
+        text-align: left;
+      }
     }
 
     .reactive-word {

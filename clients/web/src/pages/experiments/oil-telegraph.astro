@@ -83,6 +83,11 @@ import Base from "@layouts/Base.astro"
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
     }
+    @media (max-width: 480px) {
+      .panel {
+        grid-template-columns: 1fr;
+      }
+    }
     .status {
       padding: 10px 12px;
       border-radius: 14px;
