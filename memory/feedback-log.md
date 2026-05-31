@@ -26,3 +26,14 @@ Carry Forward:
 - Track whether surreal text-plus-motion scenes feel stronger than pure single-API demos.
 - Check in the next review whether the project wants more atmospheric visual work, more sound work, or sharper conceptual constraints.
 - Treat accessible contrast as a default requirement, not a polish step.
+
+### Session Entry
+
+Date: 2026-05-31
+Experiment: The Sentient Monolith
+Feedback:
+- Liked the switch in color (high contrast works well).
+- The text can jump and flicker when hovering.
+Carry Forward:
+- The high contrast direction is a success and should be kept as a baseline.
+- Variable font width changes (layout-affecting changes) on hover cause jitter. We promoted this to a new skill (`avoiding-layout-jitter.md`) to use `lerp` or non-layout affecting transforms in future experiments to ensure smoother interactions.

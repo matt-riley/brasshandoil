@@ -1,0 +1,152 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <style is:inline>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap');
+
+    :root {
+      --bg-color: #050505;
+      --text-color: #fafafa;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-family: 'Roboto Flex', sans-serif;
+    }
+  </style>
+
+  <section class="monolith-shell">
+    <div id="monolith" class="monolith-container" aria-live="polite">
+      <!-- We will generate spans of text to react to the cursor -->
+    </div>
+  </section>
+
+  <script>
+    const monolith = document.getElementById("monolith");
+    const textContent = `The machine is learning to breathe. It does not have lungs. It does not have blood. It has only mathematics and proximity. When you move closer, it feels the disturbance in its field. It tightens. It expands. It is a monolith of data trying to replicate the rhythm of a heartbeat. Do not be alarmed if it hums. It is only trying to speak.`;
+    
+    // Split text into words to make them reactive
+    const words = textContent.split(" ");
+    
+    if (monolith) {
+      monolith.innerHTML = words.map((word, i) => `<span class="reactive-word" data-index="${i}">${word}</span>`).join(" ");
+    }
+
+    const spans = document.querySelectorAll('.reactive-word');
+    
+    // Audio Context Setup
+    let audioCtx: AudioContext | null = null;
+    let oscillator: OscillatorNode | null = null;
+    let gainNode: GainNode | null = null;
+    let isPlaying = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        oscillator = audioCtx.createOscillator();
+        gainNode = audioCtx.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 55; // Deep hum (A1)
+        
+        gainNode.gain.value = 0; // Start silent
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
+        isPlaying = true;
+      } else if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Interaction
+    window.addEventListener("pointermove", (e) => {
+      // Initialize audio on first user interaction if not done
+      if (!isPlaying) {
+        initAudio();
+      }
+
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+      let totalEnergy = 0;
+
+      spans.forEach((span) => {
+        const rect = span.getBoundingClientRect();
+        const spanX = rect.left + rect.width / 2;
+        const spanY = rect.top + rect.height / 2;
+        
+        const dist = Math.sqrt(Math.pow(mouseX - spanX, 2) + Math.pow(mouseY - spanY, 2));
+        const maxDist = 300;
+        
+        // Calculate influence based on proximity (0 to 1)
+        const influence = Math.max(0, 1 - dist / maxDist);
+        totalEnergy += influence;
+        
+        // Map influence to variable font axes
+        const weight = 100 + (influence * 800); // 100 to 900
+        const width = 25 + (influence * 125); // 25 to 150
+        
+        (span as HTMLElement).style.fontVariationSettings = `"wght" ${weight}, "wdth" ${width}`;
+      });
+
+      // Modulate audio based on total energy
+      if (gainNode && oscillator) {
+        // Average energy
+        const avgEnergy = Math.min(1, totalEnergy / 10);
+        
+        // Modulate volume slightly
+        gainNode.gain.setTargetAtTime(0.02 + avgEnergy * 0.15, audioCtx!.currentTime, 0.1);
+        
+        // Modulate detune for an eerie effect
+        oscillator.detune.setTargetAtTime(avgEnergy * 100, audioCtx!.currentTime, 0.1);
+      }
+    });
+
+    // Ensure audio starts on click if pointermove didn't trigger it (e.g. mobile)
+    window.addEventListener("click", () => {
+      if (!isPlaying) initAudio();
+    });
+
+  </script>
+
+  <style>
+    .monolith-shell {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+
+    .monolith-container {
+      max-width: 800px;
+      font-size: clamp(2rem, 4vw, 4rem);
+      line-height: 1.1;
+      text-transform: uppercase;
+      text-align: justify;
+      cursor: crosshair;
+    }
+
+    .reactive-word {
+      display: inline-block;
+      transition: font-variation-settings 0.1s ease-out;
+      will-change: font-variation-settings;
+      font-variation-settings: "wght" 100, "wdth" 25;
+    }
+    
+    /* Ensure there's a space after inline-blocks */
+    .reactive-word::after {
+      content: '\\00A0'; /* Non-breaking space */
+      display: inline-block;
+      width: 0;
+    }
+  </style>
+</Base>
