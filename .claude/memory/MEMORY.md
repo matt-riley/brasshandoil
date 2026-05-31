@@ -36,3 +36,8 @@ Declaring `@property --name { syntax: "<angle>"; inherits: false; initial-value:
 
 #### Web Speech API — SpeechSynthesis
 `window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))` reads text aloud. Voices load asynchronously — listen for `voiceschanged` before calling `getVoices()`. Control pacing with `utterance.rate` (0.1–10), `utterance.pitch` (0–2), `utterance.volume`. Call `speechSynthesis.cancel()` before speaking to avoid queuing. In Playwright tests, stub the entire API with an `addInitScript` since headless Chrome has no audio output.
+
+## Feedback from Matt
+
+### 2026-05-31 — COMPLAINT RECEIVED
+Read the full signature/sign-off block aloud, not just the body text. All text visible in the response — including closing pleasantries, names, titles, and footnotes — should be included in the speechSynthesis utterance.
