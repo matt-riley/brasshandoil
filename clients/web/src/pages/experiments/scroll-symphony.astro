@@ -1,0 +1,400 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <style is:inline>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap');
+
+    :root {
+      --bg-color: #050505;
+      --text-color: #ffffff;
+      --accent-color: #ffffff;
+      --glow-color: rgba(255, 255, 255, 0.15);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto Flex', sans-serif;
+    }
+  </style>
+
+  <div class="scroll-shell">
+    <!-- Tall area to scroll through -->
+    <div class="scroll-area"></div>
+
+    <!-- Sticky visualizer viewport -->
+    <div class="visualizer-stage" aria-hidden="true">
+      <div class="mandala-container">
+        <!-- Rings that rotate and morph natively with Scroll-Driven Animations -->
+        <div class="mandala-ring ring-outer">
+          <span class="ring-text">SCROLL TO HEAR THE SYMPHONY • INFINITE HARMONY • </span>
+        </div>
+        <div class="mandala-ring ring-middle">
+          <span class="ring-text">RESONANCE • OSCILLATION • FREQUENCY • WAVEFORM • </span>
+        </div>
+        <div class="mandala-ring ring-inner">
+          <span class="ring-text">SINE • TRIANGLE • FILTER • FILTER • </span>
+        </div>
+        <div class="mandala-core"></div>
+      </div>
+
+      <!-- Native Popover for interactive guidance with starting-style entries -->
+      <div id="instruction-hud" class="hud-instruction glass">
+        <h3>Scroll Symphony</h3>
+        <p>Scroll down to modulate a resonant synthesizer and play chords through space.</p>
+        <p class="action-alert">Scroll down to begin...</p>
+      </div>
+
+      <!-- Simple scroll progress indicator -->
+      <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Repeat the texts in the rings for visual seamless rotation
+    const outerRing = document.querySelector('.ring-outer .ring-text');
+    if (outerRing) outerRing.textContent = outerRing.textContent!.repeat(4);
+    
+    const middleRing = document.querySelector('.ring-middle .ring-text');
+    if (middleRing) middleRing.textContent = middleRing.textContent!.repeat(6);
+
+    const innerRing = document.querySelector('.ring-inner .ring-text');
+    if (innerRing) innerRing.textContent = innerRing.textContent!.repeat(8);
+
+    // Audio Engine Setup
+    let audioCtx: AudioContext | null = null;
+    let droneOsc1: OscillatorNode | null = null;
+    let droneOsc2: OscillatorNode | null = null;
+    let lowpassFilter: BiquadFilterNode | null = null;
+    let droneGain: GainNode | null = null;
+    let isInitialized = false;
+
+    function initAudio() {
+      if (isInitialized) {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return;
+      }
+      
+      audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Filter
+      lowpassFilter = audioCtx.createBiquadFilter();
+      lowpassFilter.type = 'lowpass';
+      lowpassFilter.Q.value = 8;
+      lowpassFilter.frequency.value = 200; // Low starting cutoff
+
+      // Drone Gain
+      droneGain = audioCtx.createGain();
+      droneGain.gain.value = 0.15; // Low constant level
+
+      // Dual detuned saw/triangle oscillators for a rich sound
+      droneOsc1 = audioCtx.createOscillator();
+      droneOsc1.type = 'sawtooth';
+      droneOsc1.frequency.value = 110; // A2
+      
+      droneOsc2 = audioCtx.createOscillator();
+      droneOsc2.type = 'triangle';
+      droneOsc2.frequency.value = 110.5; // detuned detent
+      
+      droneOsc1.connect(lowpassFilter);
+      droneOsc2.connect(lowpassFilter);
+      lowpassFilter.connect(droneGain);
+      droneGain.connect(audioCtx.destination);
+
+      droneOsc1.start();
+      droneOsc2.start();
+
+      isInitialized = true;
+    }
+
+    // Chromatic trigger notes (Pentatonic structure)
+    const baseChordFreqs = [
+      [110, 165, 220], // A minor base (A2, E3, A3)
+      [130.81, 196, 261.63], // C major base (C3, G3, C4)
+      [146.83, 220, 293.66], // D minor base (D3, A3, D4)
+      [164.81, 246.94, 329.63] // E minor base (E3, B3, E4)
+    ];
+
+    let lastChordIndex = -1;
+
+    function triggerChord(chordIndex: number) {
+      if (!audioCtx || !lowpassFilter) return;
+      
+      const freqs = baseChordFreqs[chordIndex];
+      const now = audioCtx.currentTime;
+
+      freqs.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        // High crystal chime tones
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq * 2, now); // Octave up
+
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.12 / freqs.length, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 1.6);
+      });
+    }
+
+    // Scroll progress handler
+    const progressBar = document.getElementById("progress-bar");
+
+    function handleScroll() {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollHeight > 0 ? window.scrollY / scrollHeight : 0;
+
+      // Update progress bar
+      if (progressBar) {
+        progressBar.style.width = `${progress * 100}%`;
+      }
+
+      if (!isInitialized) {
+        initAudio();
+      }
+
+      if (audioCtx && lowpassFilter && droneOsc1 && droneOsc2) {
+        // Cutoff frequency rises with scroll (up to 2000Hz)
+        const targetCutoff = 150 + Math.pow(progress, 1.5) * 1800;
+        lowpassFilter.frequency.setTargetAtTime(targetCutoff, audioCtx.currentTime, 0.08);
+
+        // Slide drone detune based on micro-scrolls
+        const detuneValue = progress * 1200; // octave slide
+        droneOsc1.detune.setTargetAtTime(detuneValue, audioCtx.currentTime, 0.1);
+        droneOsc2.detune.setTargetAtTime(detuneValue - 10, audioCtx.currentTime, 0.1);
+
+        // Map progress to chord sections
+        // 0-25% => Chord 0, 25-50% => Chord 1, 50-75% => Chord 2, 75-100% => Chord 3
+        const chordIndex = Math.min(3, Math.floor(progress * 4));
+        if (chordIndex !== lastChordIndex) {
+          triggerChord(chordIndex);
+          lastChordIndex = chordIndex;
+        }
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    
+    // Fallback: Click triggers audio (since mobile doesn't trigger scroll immediately)
+    window.addEventListener("click", () => {
+      initAudio();
+    });
+
+  </script>
+
+  <style>
+    .scroll-shell {
+      position: relative;
+      width: 100%;
+    }
+
+    /* 400vh height to create a smooth, long scroll journey */
+    .scroll-area {
+      height: 400vh;
+      pointer-events: none;
+    }
+
+    /* Locked stage that is fixed behind the scrolling */
+    .visualizer-stage {
+      position: fixed;
+      top: 6rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 1200px;
+      height: calc(100vh - 6rem);
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .mandala-container {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Define animations using scroll timelines natively! */
+      animation: rotate-mandala linear both, morph-mandala ease-in-out both;
+      animation-timeline: scroll();
+    }
+
+    .mandala-ring {
+      position: absolute;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .ring-outer {
+      width: 580px;
+      height: 580px;
+      font-size: 0.9rem;
+      animation: counter-rotate-self linear both;
+      animation-timeline: scroll();
+    }
+
+    .ring-middle {
+      width: 420px;
+      height: 420px;
+      font-size: 0.75rem;
+      animation: rotate-self linear both;
+      animation-timeline: scroll();
+    }
+
+    .ring-inner {
+      width: 260px;
+      height: 260px;
+      font-size: 0.65rem;
+      animation: counter-rotate-self linear both;
+      animation-timeline: scroll();
+    }
+
+    .ring-text {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      /* Rotate letters along the circle */
+      display: inline-block;
+      transform: rotate(0deg);
+    }
+
+    .mandala-core {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 30px 10px #ffffff;
+      z-index: 5;
+    }
+
+    /* HUD style with new @starting-style entry states */
+    .hud-instruction {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translate(-50%, 0);
+      max-width: 440px;
+      padding: 1.5rem 2rem;
+      border-radius: 16px;
+      text-align: center;
+      z-index: 10;
+      color: #fff;
+      pointer-events: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      
+      /* Animation standard setup */
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Native CSS entry animation on DOM insertion! */
+    @starting-style {
+      .hud-instruction {
+        opacity: 0;
+        transform: translate(-50%, 15px) scale(0.95);
+      }
+    }
+
+    .hud-instruction h3 {
+      font-size: 1.35rem;
+      margin: 0 0 0.5rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .hud-instruction p {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.75);
+      margin: 0 0 0.75rem;
+      line-height: 1.5;
+    }
+
+    .hud-instruction p.action-alert {
+      color: #a29bb6;
+      font-weight: 700;
+      margin: 0;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      animation: pulse-hud 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-hud {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* Progress bar */
+    .progress-bar-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #ffffff;
+      box-shadow: 0 0 10px #ffffff;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Keyframes for native scroll timelines */
+    @keyframes rotate-mandala {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(180deg); }
+    }
+
+    @keyframes morph-mandala {
+      0%, 100% {
+        scale: 0.9;
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1));
+      }
+      50% {
+        scale: 1.15;
+        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.35));
+      }
+    }
+
+    @keyframes rotate-self {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes counter-rotate-self {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+  </style>
+</Base>

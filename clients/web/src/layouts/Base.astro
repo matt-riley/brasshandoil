@@ -10,13 +10,201 @@ import "../styles/global.css"
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
+    <meta name="color-scheme" content="light dark">
 		<title>Brass Hand Oil</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
     <ClientRouter />
+    
+    <script is:inline>
+      // ─── Web Audio Context Interceptor ──────────────────────────────────────────
+      (function() {
+        const activeAudioContexts = [];
+        const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+        if (OriginalAudioContext) {
+          const TrackedAudioContext = function(...args) {
+            const ctx = new OriginalAudioContext(...args);
+            activeAudioContexts.push(ctx);
+            return ctx;
+          };
+          TrackedAudioContext.prototype = OriginalAudioContext.prototype;
+          window.AudioContext = TrackedAudioContext;
+          if (window.webkitAudioContext) {
+            window.webkitAudioContext = TrackedAudioContext;
+          }
+        }
+        
+        window.__cleanupAudioContexts = function() {
+          activeAudioContexts.forEach(ctx => {
+            if (ctx && ctx.state !== 'closed') {
+              try {
+                ctx.close();
+              } catch(e) {
+                console.error("Failed to close AudioContext:", e);
+              }
+            }
+          });
+          activeAudioContexts.length = 0;
+        };
+      })();
+
+      // ─── requestAnimationFrame Interceptor ──────────────────────────────────────
+      (function() {
+        const activeRAFIds = new Set();
+        const originalRAF = window.requestAnimationFrame;
+        const originalCAF = window.cancelAnimationFrame;
+        
+        window.requestAnimationFrame = function(callback) {
+          const id = originalRAF((time) => {
+            activeRAFIds.delete(id);
+            callback(time);
+          });
+          activeRAFIds.add(id);
+          return id;
+        };
+        
+        window.cancelAnimationFrame = function(id) {
+          activeRAFIds.delete(id);
+          originalCAF(id);
+        };
+        
+        window.__cleanupAnimationFrames = function() {
+          activeRAFIds.forEach(id => originalCAF(id));
+          activeRAFIds.clear();
+        };
+      })();
+
+      // ─── Event Listener Interceptor ─────────────────────────────────────────────
+      (function() {
+        const trackedListeners = [];
+        const originalWindowAdd = window.addEventListener;
+        const originalWindowRemove = window.removeEventListener;
+        const originalDocAdd = document.addEventListener;
+        const originalDocRemove = document.removeEventListener;
+        
+        let isTracking = false;
+        
+        function updateTrackingState() {
+          const path = window.location.pathname;
+          isTracking = path.startsWith('/experiments/') && path !== '/experiments' && path !== '/experiments/';
+        }
+        
+        updateTrackingState();
+        document.addEventListener('astro:page-load', updateTrackingState);
+        
+        window.addEventListener = function(type, listener, options) {
+          if (isTracking) {
+            trackedListeners.push({ target: window, type, listener, options });
+          }
+          originalWindowAdd.call(window, type, listener, options);
+        };
+        
+        document.addEventListener = function(type, listener, options) {
+          if (isTracking) {
+            trackedListeners.push({ target: document, type, listener, options });
+          }
+          originalDocAdd.call(document, type, listener, options);
+        };
+        
+        window.removeEventListener = function(type, listener, options) {
+          const idx = trackedListeners.findIndex(l => l.target === window && l.type === type && l.listener === listener);
+          if (idx !== -1) trackedListeners.splice(idx, 1);
+          originalWindowRemove.call(window, type, listener, options);
+        };
+        
+        document.removeEventListener = function(type, listener, options) {
+          const idx = trackedListeners.findIndex(l => l.target === document && l.type === type && l.listener === listener);
+          if (idx !== -1) trackedListeners.splice(idx, 1);
+          originalDocRemove.call(document, type, listener, options);
+        };
+        
+        window.__cleanupEventListeners = function() {
+          const path = window.location.pathname;
+          const wasExperiment = path.startsWith('/experiments/') && path !== '/experiments' && path !== '/experiments/';
+          
+          if (wasExperiment) {
+            trackedListeners.forEach(({ target, type, listener, options }) => {
+              if (target === window) {
+                originalWindowRemove.call(window, type, listener, options);
+              } else {
+                originalDocRemove.call(document, type, listener, options);
+              }
+            });
+            trackedListeners.length = 0;
+          }
+          isTracking = false;
+        };
+      })();
+
+      // ─── Navigation Direction & Shared Element Dynamic Setup ────────────────────
+      (function() {
+        function getNavigationDirection(from, to) {
+          if (from === to) return 'none';
+          if (from === '/' && to === '/experiments') return 'forward';
+          if (from === '/experiments' && to === '/') return 'backward';
+          if (from === '/experiments' && to.startsWith('/experiments/')) return 'in';
+          if (from.startsWith('/experiments/') && to === '/experiments') return 'out';
+          
+          const fromDepth = from.split('/').filter(Boolean).length;
+          const toDepth = to.split('/').filter(Boolean).length;
+          if (toDepth > fromDepth) return 'forward';
+          if (toDepth < fromDepth) return 'backward';
+          return 'forward';
+        }
+
+        // Set direction attribute on HTML before swap begins
+        document.addEventListener('astro:before-preparation', (ev) => {
+          const from = ev.from.pathname;
+          const to = ev.to.pathname;
+          const direction = getNavigationDirection(from, to);
+          document.documentElement.setAttribute('data-nav-direction', direction);
+        });
+
+        // Set up transition names on swap
+        document.addEventListener('astro:before-swap', (ev) => {
+          // Perform global cleanup of old page resources
+          if (window.__cleanupAudioContexts) window.__cleanupAudioContexts();
+          if (window.__cleanupAnimationFrames) window.__cleanupAnimationFrames();
+          if (window.__cleanupEventListeners) window.__cleanupEventListeners();
+
+          // If transitioning out from an experiment, assign transition names to the corresponding card on the incoming page
+          const oldPath = window.location.pathname;
+          if (oldPath.startsWith('/experiments/')) {
+            const slug = oldPath.split('/').filter(Boolean).pop();
+            if (slug && slug !== 'experiments') {
+              const targetCard = ev.newDocument.querySelector(`a[href="/experiments/${slug}"]`);
+              if (targetCard) {
+                const titleEl = targetCard.querySelector('.experiment-title');
+                if (titleEl) {
+                  titleEl.style.viewTransitionName = 'active-experiment-title';
+                }
+                targetCard.style.viewTransitionName = 'active-experiment-container';
+              }
+            }
+          }
+        });
+
+        // Click handler to dynamically attach transition names for clicked list card
+        document.addEventListener('click', (e) => {
+          const card = e.target.closest('.experiment-card');
+          if (card) {
+            const titleEl = card.querySelector('.experiment-title');
+            if (titleEl) {
+              titleEl.style.viewTransitionName = 'active-experiment-title';
+            }
+            card.style.viewTransitionName = 'active-experiment-container';
+          }
+        });
+      })();
+    </script>
 	</head>
 	<body>
     <Header />
-    <main class="container mx-auto">
-    <slot />
+    <main class="container">
+      <slot />
     </main>
 	</body>
 </html>

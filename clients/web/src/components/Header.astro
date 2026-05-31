@@ -1,14 +1,20 @@
 ---
-
 const links = [
   {slug: "experiments", text: "Experiments"},
 ]
-
 ---
 
-<header class="flex flex-row gap-2 items-center px-4 w-screen h-24">
-  <a href="/"><h1 class="text-4xl font-black uppercase">Brass Hand Oil</h1></a>
-  <div class="flex flex-row gap-2">
-    {links.map(link => (<a href=`/${link.slug}`><h2 class="font-black uppercase">{link.text}</h2></a>))}
-  </div>
+<header class="header glass">
+  <a href="/" class="logo-link">
+    <h1 class="logo-text text-gradient">Brass Hand Oil</h1>
+  </a>
+  <nav class="nav-links">
+    {links.map(link => (
+      <a href={`/${link.slug}`} class="nav-link">
+        <h2 class="nav-text">{link.text}</h2>
+      </a>
+    ))}
+  </nav>
 </header>
+
+

@@ -1,0 +1,673 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div class="ae-shell">
+    <header class="ae-header">
+      <div class="ae-stamp">CLASSIFIED</div>
+      <div class="ae-title-block">
+        <p class="ae-dept">Department of Ambient Dread — Form AX-7 (Revised)</p>
+        <h1 class="ae-title">The Anxiety Engine</h1>
+        <p class="ae-subtitle">Official Report on Your Current Generalized Concerns</p>
+      </div>
+      <div class="ae-date-block">
+        <p class="ae-field-label">Report Date</p>
+        <p id="ae-date" class="ae-field-value">—</p>
+        <p class="ae-field-label">Threat Level</p>
+        <p id="ae-threat" class="ae-field-value ae-threat">ELEVATED</p>
+      </div>
+    </header>
+
+    <section class="ae-section">
+      <h2 class="ae-section-title">Section 1: Domestic Anxieties</h2>
+      <div class="ae-gauges" id="gauges-domestic">
+        <div class="ae-gauge-row" data-category="domestic" data-speed="0.7">
+          <span class="ae-gauge-label">Probability the stove is currently on</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="62"></div></div>
+          <span class="ae-gauge-pct">62%</span>
+        </div>
+        <div class="ae-gauge-row" data-category="domestic" data-speed="0.4">
+          <span class="ae-gauge-label">Likelihood a door is unlocked somewhere</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="41"></div></div>
+          <span class="ae-gauge-pct">41%</span>
+        </div>
+        <div class="ae-gauge-row" data-category="domestic" data-speed="0.9">
+          <span class="ae-gauge-label">Times you've mentally revisited that one thing you said in 2011</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="88"></div></div>
+          <span class="ae-gauge-pct">88%</span>
+        </div>
+        <div class="ae-gauge-row" data-category="domestic" data-speed="0.3">
+          <span class="ae-gauge-label">Certainty that appliance is making a new sound</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="55"></div></div>
+          <span class="ae-gauge-pct">55%</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ae-section">
+      <h2 class="ae-section-title">Section 2: Digital Correspondence</h2>
+      <div class="ae-gauges">
+        <div class="ae-gauge-row" data-category="email" data-speed="1.2">
+          <span class="ae-gauge-label">Percentage of unread emails that are somehow your fault</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="77"></div></div>
+          <span class="ae-gauge-pct">77%</span>
+        </div>
+        <div class="ae-gauge-row" data-category="email" data-speed="0.5">
+          <span class="ae-gauge-label">Notifications you're pretending not to see</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="93"></div></div>
+          <span class="ae-gauge-pct">93%</span>
+        </div>
+        <div class="ae-gauge-row" data-category="email" data-speed="0.8">
+          <span class="ae-gauge-label">Messages you replied to "too quickly" and now regret</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="34"></div></div>
+          <span class="ae-gauge-pct">34%</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ae-section">
+      <h2 class="ae-section-title">Section 3: Existential Concerns (Miscellaneous)</h2>
+      <div class="ae-gauges">
+        <div class="ae-gauge-row" data-category="exist" data-speed="0.2">
+          <span class="ae-gauge-label">Vague sense that you were supposed to be somewhere today</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="48"></div></div>
+          <span class="ae-gauge-pct">48%</span>
+        </div>
+        <div class="ae-gauge-row" data-category="exist" data-speed="1.5">
+          <span class="ae-gauge-label">Likelihood this progress bar is measuring something real</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="0"></div></div>
+          <span class="ae-gauge-pct">0%</span>
+        </div>
+        <div class="ae-gauge-row" data-category="exist" data-speed="0.6">
+          <span class="ae-gauge-label">Feeling that you are not keeping up with the correct number of things</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="71"></div></div>
+          <span class="ae-gauge-pct">71%</span>
+        </div>
+        <div class="ae-gauge-row" data-category="exist" data-speed="1.1">
+          <span class="ae-gauge-label">Confidence in current life decisions (inverted)</span>
+          <div class="ae-gauge-track"><div class="ae-gauge-fill" data-base="29"></div></div>
+          <span class="ae-gauge-pct">29%</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="ae-total-row">
+      <div class="ae-total-label">
+        <p>AGGREGATE ANXIETY INDEX</p>
+        <p class="ae-total-sub">(weighted by the Bureau)</p>
+      </div>
+      <div class="ae-total-gauge">
+        <div class="ae-total-fill" id="ae-total-fill"></div>
+      </div>
+      <span class="ae-total-pct" id="ae-total-pct">—</span>
+    </div>
+
+    <div class="ae-actions">
+      <button id="ae-calm-btn" class="ae-btn ae-btn-calm" type="button">
+        CALM DOWN
+      </button>
+      <button id="ae-reset-btn" class="ae-btn ae-btn-reset" type="button">
+        Reset to Baseline Dread
+      </button>
+      <p id="ae-message" class="ae-message" aria-live="polite"></p>
+    </div>
+
+    <footer class="ae-footer">
+      <p>This report is generated automatically. Accuracy is guaranteed by the Bureau and therefore meaningless.</p>
+      <p>Form AX-7 must be completed in triplicate. The other two copies have already been filed.</p>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  /* ============================================================
+     CSS @property — registered custom properties
+     Allows animating values that CSS cannot normally interpolate:
+     hue angles, raw numbers used in gradient stops, etc.
+     Without @property, --hue: 0 → 360 in a transition does nothing.
+     With it, the browser knows the type and can tween correctly.
+  ============================================================ */
+
+  @property --ae-hue {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  @property --ae-fill-pct {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+  }
+
+  @property --ae-bg-shift {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 135deg;
+  }
+
+  :root {
+    --ae-paper: #f5f0e8;
+    --ae-ink: #1a1209;
+    --ae-red: #c0392b;
+    --ae-muted: #7a6f60;
+    --ae-rule: #c8bfaa;
+    --ae-green-ok: #2ecc71;
+    --ae-amber: #e67e22;
+    --ae-critical: #c0392b;
+  }
+
+  .ae-shell {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    background: var(--ae-paper);
+    color: var(--ae-ink);
+    font-family: "Courier New", Courier, monospace;
+    min-height: 100vh;
+
+    /* Use the registered --ae-bg-shift for a very slow background drift */
+    --ae-bg-shift: 135deg;
+    background-image: repeating-linear-gradient(
+      var(--ae-bg-shift),
+      transparent,
+      transparent 48px,
+      rgba(0,0,0,0.03) 48px,
+      rgba(0,0,0,0.03) 49px
+    );
+    animation: bg-drift 30s linear infinite;
+  }
+
+  @keyframes bg-drift {
+    from { --ae-bg-shift: 135deg; }
+    to   { --ae-bg-shift: 495deg; } /* 135 + 360 */
+  }
+
+  /* ---- Header ---- */
+  .ae-header {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    border-bottom: 3px double var(--ae-rule);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .ae-stamp {
+    background: var(--ae-red);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    padding: 0.25rem 0.5rem;
+    transform: rotate(-8deg);
+    border: 2px solid var(--ae-red);
+    white-space: nowrap;
+    align-self: center;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  }
+
+  .ae-title-block {
+    flex: 1;
+  }
+
+  .ae-dept {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ae-muted);
+    margin: 0 0 0.25rem;
+  }
+
+  .ae-title {
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: bold;
+    margin: 0 0 0.2rem;
+    letter-spacing: -0.02em;
+  }
+
+  .ae-subtitle {
+    font-size: 0.7rem;
+    color: var(--ae-muted);
+    margin: 0;
+    font-style: italic;
+  }
+
+  .ae-date-block {
+    text-align: right;
+    font-size: 0.65rem;
+  }
+
+  .ae-field-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ae-muted);
+    margin: 0;
+  }
+
+  .ae-field-value {
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin: 0 0 0.4rem;
+  }
+
+  .ae-threat {
+    color: var(--ae-red);
+    animation: threat-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes threat-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ---- Sections ---- */
+  .ae-section {
+    margin-bottom: 2rem;
+  }
+
+  .ae-section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ae-muted);
+    border-bottom: 1px solid var(--ae-rule);
+    padding-bottom: 0.25rem;
+    margin: 0 0 1rem;
+  }
+
+  /* ---- Gauges ---- */
+  .ae-gauges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .ae-gauge-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .ae-gauge-label {
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+
+  .ae-gauge-track {
+    width: 140px;
+    height: 10px;
+    background: var(--ae-rule);
+    border: 1px solid #b0a490;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ae-gauge-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.6s ease, background-color 0.6s ease;
+    background: var(--ae-amber);
+    position: relative;
+  }
+
+  /* Jittery animation overlaid via pseudo-element */
+  .ae-gauge-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: white;
+    opacity: 0.5;
+    animation: gauge-shimmer 0.15s steps(1) infinite;
+  }
+
+  @keyframes gauge-shimmer {
+    0%   { opacity: 0.5; transform: scaleY(1); }
+    33%  { opacity: 0; }
+    66%  { opacity: 0.8; transform: scaleY(0.5); }
+    100% { opacity: 0.5; }
+  }
+
+  .ae-gauge-pct {
+    font-size: 0.75rem;
+    font-weight: bold;
+    width: 3.5rem;
+    text-align: right;
+    transition: color 0.6s ease;
+  }
+
+  /* ---- Aggregate ---- */
+  .ae-total-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 0.75rem;
+    border-top: 3px double var(--ae-rule);
+    border-bottom: 3px double var(--ae-rule);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+
+  .ae-total-label p {
+    margin: 0;
+    font-weight: bold;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .ae-total-sub {
+    font-size: 0.6rem !important;
+    color: var(--ae-muted);
+    font-weight: normal !important;
+    font-style: italic;
+  }
+
+  .ae-total-gauge {
+    width: 140px;
+    height: 14px;
+    background: var(--ae-rule);
+    border: 1px solid #b0a490;
+    overflow: hidden;
+  }
+
+  .ae-total-fill {
+    height: 100%;
+    width: 0%;
+    /* Use @property registered --ae-hue for animatable hue */
+    --ae-hue: 120deg;
+    background: hsl(var(--ae-hue) 70% 40%);
+    transition: width 1s ease, --ae-hue 1s ease;
+  }
+
+  .ae-total-pct {
+    font-size: 1rem;
+    font-weight: bold;
+    width: 3.5rem;
+    text-align: right;
+  }
+
+  /* ---- Actions ---- */
+  .ae-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .ae-btn {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.25rem;
+    border: 2px solid;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .ae-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none !important;
+  }
+
+  .ae-btn-calm {
+    background: var(--ae-paper);
+    color: var(--ae-red);
+    border-color: var(--ae-red);
+    box-shadow: 3px 3px 0 var(--ae-red);
+    animation: calm-jitter 4s ease-in-out infinite;
+  }
+
+  @keyframes calm-jitter {
+    0%, 90%, 100% { transform: none; }
+    92% { transform: translateX(-1px); }
+    94% { transform: translateX(2px) rotate(0.5deg); }
+    96% { transform: translateX(-1px); }
+    98% { transform: translateX(1px); }
+  }
+
+  .ae-btn-reset {
+    background: transparent;
+    color: var(--ae-muted);
+    border-color: var(--ae-muted);
+  }
+
+  .ae-btn-reset:hover {
+    color: var(--ae-ink);
+    border-color: var(--ae-ink);
+  }
+
+  .ae-message {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: var(--ae-red);
+    margin: 0;
+    flex-basis: 100%;
+    min-height: 1.2em;
+    animation: message-in 0.3s ease;
+  }
+
+  @keyframes message-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ---- Footer ---- */
+  .ae-footer {
+    font-size: 0.6rem;
+    color: var(--ae-muted);
+    border-top: 1px solid var(--ae-rule);
+    padding-top: 1rem;
+    font-style: italic;
+  }
+
+  .ae-footer p { margin: 0.25rem 0; }
+
+  /* ---- Escalated state ---- */
+  .ae-shell.escalated .ae-gauge-fill {
+    animation: gauge-twitch 0.08s steps(1) infinite;
+  }
+
+  @keyframes gauge-twitch {
+    0%   { transform: scaleX(1) translateX(0); }
+    25%  { transform: scaleX(1.01) translateX(1px); }
+    75%  { transform: scaleX(0.99) translateX(-1px); }
+    100% { transform: scaleX(1) translateX(0); }
+  }
+
+  .ae-shell.max-anxiety .ae-title {
+    animation: title-shake 0.05s linear infinite;
+  }
+
+  @keyframes title-shake {
+    0%   { transform: translate(0, 0) rotate(0); }
+    25%  { transform: translate(1px, -1px) rotate(0.2deg); }
+    75%  { transform: translate(-1px, 1px) rotate(-0.2deg); }
+    100% { transform: translate(0, 0) rotate(0); }
+  }
+
+  @media (max-width: 600px) {
+    .ae-gauge-row {
+      grid-template-columns: 1fr;
+    }
+    .ae-gauge-track {
+      width: 100%;
+    }
+    .ae-gauge-pct {
+      text-align: left;
+    }
+  }
+</style>
+
+<script>
+  // --- Set report date ---
+  const dateEl = document.getElementById("ae-date")
+  if (dateEl) {
+    dateEl.textContent = new Date().toLocaleDateString("en-GB", {
+      day: "2-digit", month: "short", year: "numeric"
+    })
+  }
+
+  // --- Gauge animation state ---
+  interface GaugeState {
+    row: HTMLElement
+    fill: HTMLElement
+    pctEl: HTMLElement
+    base: number
+    current: number
+    target: number
+    speed: number
+    drift: number    // slow random drift direction
+    driftTimer: number
+  }
+
+  const gaugeStates: GaugeState[] = []
+  let escalationLevel = 0  // 0=normal, 1=escalated, 2=max
+
+  const calmMessages = [
+    "The Bureau notes your request. Anxiety levels have been increased by 12% for administrative reasons.",
+    "CALM DOWN protocol initiated. Protocol requires 6-8 weeks to process. Anxiety amplified in the meantime.",
+    "Your calm has been registered. Unfortunately calm is not recognized by this department. Please resubmit as dread.",
+    "Error: CALM_DOWN requires prior approval from the Bureau of Heightened Concerns. Try again later.",
+    "Relaxation request denied. You have insufficient dread credits. Current balance: -47.",
+    "The engine has noted your distress about your distress. This has been added to your file.",
+    "Calm achieved temporarily. The stove, however, remains ambiguous.",
+    "You pressed CALM DOWN. This data has been forwarded to the Department of Suspicious Behaviour.",
+  ]
+
+  let messageIndex = 0
+
+  document.querySelectorAll<HTMLElement>(".ae-gauge-row").forEach(row => {
+    const fill = row.querySelector<HTMLElement>(".ae-gauge-fill")
+    const pctEl = row.querySelector<HTMLElement>(".ae-gauge-pct")
+    if (!fill || !pctEl) return
+
+    const base = parseInt(fill.dataset.base ?? "50", 10)
+    const speed = parseFloat(row.dataset.speed ?? "0.5")
+
+    const state: GaugeState = {
+      row, fill, pctEl,
+      base, current: 0, target: base,
+      speed, drift: 1, driftTimer: 0
+    }
+    gaugeStates.push(state)
+  })
+
+  function getColor(pct: number): string {
+    if (pct < 40) return "#2ecc71"
+    if (pct < 70) return "#e67e22"
+    return "#c0392b"
+  }
+
+  function updateTotalGauge() {
+    if (gaugeStates.length === 0) return
+    const avg = gaugeStates.reduce((s, g) => s + g.current, 0) / gaugeStates.length
+    const totalFill = document.getElementById("ae-total-fill")
+    const totalPct = document.getElementById("ae-total-pct")
+    if (totalFill) {
+      totalFill.style.width = avg.toFixed(1) + "%"
+      // Animate hue: green (120deg) at 0%, red (0deg) at 100%
+      const hue = Math.round(120 - avg * 1.2)
+      totalFill.style.setProperty("--ae-hue", hue + "deg")
+    }
+    if (totalPct) {
+      totalPct.textContent = Math.round(avg) + "%"
+      totalPct.style.color = getColor(avg)
+    }
+
+    // Update threat level text
+    const threat = document.getElementById("ae-threat")
+    if (threat) {
+      if (avg < 30) threat.textContent = "MANAGEABLE"
+      else if (avg < 55) threat.textContent = "ELEVATED"
+      else if (avg < 75) threat.textContent = "HIGH"
+      else if (avg < 90) threat.textContent = "CRITICAL"
+      else threat.textContent = "MAXIMUM DREAD"
+    }
+  }
+
+  // Animate gauges — slow oscillation with jitter
+  let lastTime = 0
+  function animate(ts: number) {
+    const dt = Math.min((ts - lastTime) / 1000, 0.1)
+    lastTime = ts
+
+    gaugeStates.forEach(state => {
+      // Pick a new random target occasionally
+      state.driftTimer -= dt
+      if (state.driftTimer <= 0) {
+        const spread = 8 + escalationLevel * 6
+        state.target = Math.min(100, Math.max(0,
+          state.base + (Math.random() * spread * 2 - spread) + escalationLevel * 8
+        ))
+        state.driftTimer = 2 + Math.random() * 3 / state.speed
+      }
+
+      // Move toward target
+      const diff = state.target - state.current
+      state.current += diff * dt * state.speed * (1 + escalationLevel * 0.5)
+
+      const pct = Math.round(state.current)
+      state.fill.style.width = state.current.toFixed(2) + "%"
+      state.fill.style.backgroundColor = getColor(state.current)
+      state.pctEl.textContent = pct + "%"
+      state.pctEl.style.color = getColor(state.current)
+    })
+
+    updateTotalGauge()
+    requestAnimationFrame(animate)
+  }
+
+  requestAnimationFrame(ts => { lastTime = ts; requestAnimationFrame(animate) })
+
+  // --- CALM DOWN button — makes things worse ---
+  const calmBtn = document.getElementById("ae-calm-btn")
+  const resetBtn = document.getElementById("ae-reset-btn")
+  const messageEl = document.getElementById("ae-message")
+  const shell = document.querySelector<HTMLElement>(".ae-shell")
+
+  calmBtn?.addEventListener("click", () => {
+    escalationLevel = Math.min(escalationLevel + 1, 2)
+
+    // Bump all bases upward
+    gaugeStates.forEach(state => {
+      state.base = Math.min(100, state.base + 10 + Math.random() * 8)
+      state.target = Math.min(100, state.target + 15)
+      // Amplify any jitter targets to increase
+    })
+
+    if (messageEl) {
+      // Force re-animation of message
+      messageEl.textContent = ""
+      void messageEl.offsetWidth // reflow
+      messageEl.textContent = calmMessages[messageIndex % calmMessages.length]
+      messageIndex++
+    }
+
+    if (shell) {
+      shell.classList.remove("escalated", "max-anxiety")
+      void shell.offsetWidth
+      shell.classList.add(escalationLevel >= 2 ? "max-anxiety" : "escalated")
+    }
+  })
+
+  resetBtn?.addEventListener("click", () => {
+    escalationLevel = 0
+    if (shell) shell.classList.remove("escalated", "max-anxiety")
+    if (messageEl) messageEl.textContent = ""
+
+    // Restore original bases from DOM data
+    document.querySelectorAll<HTMLElement>(".ae-gauge-fill").forEach((fill, i) => {
+      if (gaugeStates[i]) {
+        gaugeStates[i].base = parseInt(fill.dataset.base ?? "50", 10)
+        gaugeStates[i].target = gaugeStates[i].base
+      }
+    })
+  })
+</script>

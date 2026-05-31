@@ -1,0 +1,471 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <style is:inline>
+    :root {
+      --bg-color: #030303;
+      --text-color: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.2);
+      --glow-color: rgba(255, 255, 255, 0.4);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Outfit', 'Inter', sans-serif;
+    }
+  </style>
+
+  <section class="gravity-shell">
+    <div class="hud">
+      <h1 class="hud-title">Orbital Harmonics</h1>
+      <p class="hud-instructions">Type a word and press <kbd>Space</kbd> or <kbd>Enter</kbd> to launch it into orbit.</p>
+      
+      <div class="input-wrapper glass">
+        <input 
+          type="text" 
+          id="text-input" 
+          placeholder="Type something..." 
+          autocomplete="off"
+          aria-label="Word launcher"
+        />
+        <button id="launch-btn" type="button">Launch</button>
+      </div>
+    </div>
+
+    <div id="gravity-stage" class="gravity-stage" aria-hidden="true">
+      <div id="gravity-well" class="gravity-well">
+        <div class="well-core"></div>
+        <div class="well-orbit-line"></div>
+      </div>
+      <div id="meridian-line" class="meridian-line"></div>
+    </div>
+  </section>
+
+  <script>
+    const stage = document.getElementById("gravity-stage") as HTMLElement;
+    const well = document.getElementById("gravity-well") as HTMLElement;
+    const input = document.getElementById("text-input") as HTMLInputElement;
+    const launchBtn = document.getElementById("launch-btn") as HTMLButtonElement;
+
+    // Physics constants
+    const G = 1500; // Gravitational constant
+    const friction = 0.9995; // Very low drag to keep orbit stable
+    const minOrbitRadius = 40;
+    
+    interface Planet {
+      element: HTMLDivElement;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      prevX: number;
+      word: string;
+      frequency: number;
+      color: string;
+    }
+
+    const planets: Planet[] = [];
+    const gravitySource = { x: 0, y: 0, targetX: 0, targetY: 0, active: false };
+
+    // Initial position of gravity well
+    function resize() {
+      if (!stage) return;
+      const rect = stage.getBoundingClientRect();
+      gravitySource.targetX = rect.width / 2;
+      gravitySource.targetY = rect.height / 2;
+      if (!gravitySource.active) {
+        gravitySource.x = gravitySource.targetX;
+        gravitySource.y = gravitySource.targetY;
+      }
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    // Track mouse
+    stage?.addEventListener("pointermove", (e) => {
+      const rect = stage.getBoundingClientRect();
+      gravitySource.targetX = e.clientX - rect.left;
+      gravitySource.targetY = e.clientY - rect.top;
+      gravitySource.active = true;
+    });
+
+    stage?.addEventListener("pointerleave", () => {
+      gravitySource.active = false;
+      if (stage) {
+        const rect = stage.getBoundingClientRect();
+        gravitySource.targetX = rect.width / 2;
+        gravitySource.targetY = rect.height / 2;
+      }
+    });
+
+    // Web Audio Setup
+    let audioCtx: AudioContext | null = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      } else if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playChime(freq: number, panValue: number) {
+      if (!audioCtx) return;
+      
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      // Attempt spatial panning if supported
+      let panner: StereoPannerNode | null = null;
+      if (audioCtx.createStereoPanner) {
+        panner = audioCtx.createStereoPanner();
+        panner.pan.setValueAtTime(panValue, audioCtx.currentTime);
+      }
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+      // Clean, bell-like envelope
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
+
+      if (panner) {
+        osc.connect(panner);
+        panner.connect(gainNode);
+      } else {
+        osc.connect(gainNode);
+      }
+      gainNode.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.8);
+    }
+
+    function spawnWord(word: string) {
+      if (!word.trim() || !stage) return;
+      initAudio();
+
+      const el = document.createElement("div");
+      el.className = "orbital-word";
+      el.textContent = word;
+      stage.appendChild(el);
+
+      // Calculate initial orbital state relative to current gravity center
+      const stageRect = stage.getBoundingClientRect();
+      const spawnDist = Math.max(120, Math.min(stageRect.width, stageRect.height) * 0.25);
+      const angle = Math.random() * Math.PI * 2;
+
+      // Position relative to well
+      const px = gravitySource.x + Math.cos(angle) * spawnDist;
+      const py = gravitySource.y + Math.sin(angle) * spawnDist;
+
+      // Perpendicular orbital speed formula: v = sqrt(G*M / r)
+      const speed = Math.sqrt(G / spawnDist) * 1.2;
+      const vx = -Math.sin(angle) * speed;
+      const vy = Math.cos(angle) * speed;
+
+      // Calculate note frequency based on character length
+      // Mapped to a pleasant pentatonic scale (A minor pentatonic: A, C, D, E, G)
+      const pentatonic = [220, 261.63, 293.66, 329.63, 392.00, 440, 523.25, 587.33, 659.25, 783.99, 880];
+      const index = (word.length * 3 + word.charCodeAt(0)) % pentatonic.length;
+      const freq = pentatonic[index];
+
+      planets.push({
+        element: el,
+        x: px,
+        y: py,
+        vx,
+        vy,
+        prevX: px - gravitySource.x,
+        word,
+        frequency: freq,
+        color: `hsl(${(word.charCodeAt(0) * 12) % 360}, 90%, 75%)`
+      });
+
+      el.style.color = `hsl(${(word.charCodeAt(0) * 12) % 360}, 90%, 75%)`;
+      el.style.textShadow = `0 0 8px hsl(${(word.charCodeAt(0) * 12) % 360}, 90%, 40%)`;
+    }
+
+    function handleLaunch() {
+      const val = input.value.trim();
+      if (val) {
+        const words = val.split(/\s+/);
+        words.forEach(spawnWord);
+        input.value = "";
+      }
+    }
+
+    // Input listeners
+    input?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleLaunch();
+      }
+    });
+
+    launchBtn?.addEventListener("click", handleLaunch);
+
+    // Physics & Animation Loop
+    let lastTime = performance.now();
+
+    function update(time: number) {
+      const dt = Math.min((time - lastTime) / 16, 2);
+      lastTime = time;
+
+      if (!stage) {
+        requestAnimationFrame(update);
+        return;
+      }
+
+      const rect = stage.getBoundingClientRect();
+
+      // Lerp gravity well coordinates (avoids jitter)
+      gravitySource.x += (gravitySource.targetX - gravitySource.x) * 0.1 * dt;
+      gravitySource.y += (gravitySource.targetY - gravitySource.y) * 0.1 * dt;
+
+      if (well) {
+        well.style.transform = `translate3d(${gravitySource.x}px, ${gravitySource.y}px, 0)`;
+      }
+
+      for (let i = planets.length - 1; i >= 0; i--) {
+        const p = planets[i];
+
+        // Gravitational force vector
+        const dx = gravitySource.x - p.x;
+        const dy = gravitySource.y - p.y;
+        const distSq = dx * dx + dy * dy;
+        const dist = Math.sqrt(distSq);
+
+        if (dist < minOrbitRadius - 10) {
+          // Crashed into gravity well, remove
+          p.element.remove();
+          planets.splice(i, 1);
+          continue;
+        }
+
+        // F = G / r^2
+        const force = G / (distSq + 200);
+        const ax = (dx / dist) * force;
+        const ay = (dy / dist) * force;
+
+        p.vx = (p.vx + ax * dt) * friction;
+        p.vy = (p.vy + ay * dt) * friction;
+
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        // Position on GPU using translate3d
+        p.element.style.transform = `translate3d(${p.x}px, ${p.y}px, 0) translate(-50%, -50%)`;
+
+        // Check vertical meridian crossing relative to gravity well coordinates
+        const localX = p.x - gravitySource.x;
+        const localY = p.y - gravitySource.y;
+
+        // If localX crossed 0 (sign change)
+        if (Math.sign(p.prevX) !== Math.sign(localX) && dist < Math.max(rect.width, rect.height) * 0.6) {
+          // Play spatial sound
+          // Pan value is ratio of Y offset relative to screen height (-1 to 1)
+          const pan = Math.max(-1, Math.min(1, localY / (rect.height / 2)));
+          playChime(p.frequency, pan);
+
+          // Visual flash indicator
+          p.element.classList.remove("flash-chime");
+          void p.element.offsetWidth; // Trigger reflow only on this single absolute element
+          p.element.classList.add("flash-chime");
+        }
+
+        p.prevX = localX;
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    requestAnimationFrame(update);
+
+  </script>
+
+  <style>
+    .gravity-shell {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 6rem);
+      background: radial-gradient(circle at center, #110d1c 0%, #030206 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .hud {
+      position: relative;
+      z-index: 10;
+      padding: 3rem 2rem 1.5rem;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hud-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 0%, #a29bb6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hud-instructions {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0 2rem;
+      max-width: 40ch;
+    }
+
+    kbd {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.8rem;
+      font-family: monospace;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+      pointer-events: auto;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .input-wrapper input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .input-wrapper input::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .input-wrapper button {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      border-radius: 999px;
+      padding: 0.6rem 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: transform 0.1s ease, background-color 0.2s ease;
+    }
+
+    .input-wrapper button:hover {
+      background: #e2e2e2;
+    }
+
+    .input-wrapper button:active {
+      transform: scale(0.97);
+    }
+
+    .gravity-stage {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .gravity-well {
+      position: absolute;
+      width: 0;
+      height: 0;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    .well-core {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: -8px;
+      top: -8px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 20px 6px #ffffff, 0 0 40px 12px rgba(255,255,255,0.4);
+    }
+
+    .well-orbit-line {
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      left: -120px;
+      top: -120px;
+      border: 1px dashed rgba(255, 255, 255, 0.07);
+      border-radius: 50%;
+    }
+
+    .meridian-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.05) 80%, transparent);
+      pointer-events: none;
+      transform: translateY(-50%);
+    }
+
+    .orbital-word {
+      position: absolute;
+      top: 0;
+      left: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      white-space: nowrap;
+      pointer-events: none;
+      will-change: transform;
+      user-select: none;
+      transition: filter 0.15s ease;
+    }
+
+    .flash-chime {
+      animation: text-flash 0.4s ease-out;
+    }
+
+    @keyframes text-flash {
+      0% {
+        filter: brightness(2) drop-shadow(0 0 12px currentColor);
+        transform: scale(1.15);
+      }
+      100% {
+        filter: brightness(1) drop-shadow(0 0 0px transparent);
+        transform: scale(1);
+      }
+    }
+  </style>
+</Base>
