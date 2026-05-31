@@ -1,0 +1,489 @@
+---
+import Base from "@layouts/Base.astro"
+
+const items = [
+  "A bowl previously full of regret",
+  "The smell of toast, contained",
+  "Seventeen tickets to a film that hasn't been written",
+  "A sneeze, postponed",
+  "One (1) excellent question, slightly damp",
+  "Half a memory of someone's name",
+  "A jar of brief silences",
+  "A duck convinced it is Wednesday",
+  "Three apologies in a paper bag",
+  "A whisper addressed to no one",
+  "A grandfather clock convinced it is a hat",
+  "The exact opposite of a pebble",
+  "A glove containing only a fingertip's worth of warmth",
+  "A small dog's idea of Tuesday",
+  "The word \"perhaps\", folded twice",
+  "A receipt for one (1) regret, soaked in the Thames",
+]
+---
+
+<Base>
+  <div class="oet-shell">
+    <header class="oet-header">
+      <div class="oet-seal" aria-hidden="true">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="55" fill="none" stroke="currentColor" stroke-width="3"/>
+          <circle cx="60" cy="60" r="44" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="60" y="36" text-anchor="middle" font-size="7" letter-spacing="2" fill="currentColor">OFFICE OF</text>
+          <text x="60" y="48" text-anchor="middle" font-size="7" letter-spacing="2" fill="currentColor">EVAPORATED</text>
+          <text x="60" y="60" text-anchor="middle" font-size="7" letter-spacing="2" fill="currentColor">THINGS</text>
+          <text x="60" y="78" text-anchor="middle" font-size="9" fill="currentColor">◌ ◌ ◌</text>
+          <text x="60" y="92" text-anchor="middle" font-size="6" letter-spacing="1" fill="currentColor">PERPETUALLY UNDERATTENDED</text>
+        </svg>
+      </div>
+      <div class="oet-title-block">
+        <p class="oet-subtitle">FORM ET-1 (REV. NEVER)</p>
+        <h1 class="oet-title">OFFICE OF<br/>EVAPORATED THINGS</h1>
+        <p class="oet-tagline">You have been appointed Night Looker. Your sole duty is to keep watch. Items lose definition when no one is looking at them. Do not look away.</p>
+      </div>
+    </header>
+
+    <div class="ruled-line" aria-hidden="true">——————————————————————————————————————————</div>
+
+    <section class="oet-register">
+      <div id="watchfulness-register" class="oet-meters">
+        <div class="oet-meter">
+          <p class="oet-meter-label">CONSECUTIVE SECONDS OF UNBROKEN WATCH</p>
+          <p id="watch-streak" class="oet-meter-value">0</p>
+        </div>
+        <div class="oet-meter">
+          <p class="oet-meter-label">CUMULATIVE WATCHFULNESS DEFICIT (decisteyes)</p>
+          <p id="deficit-readout" class="oet-meter-value">0.00</p>
+        </div>
+        <div class="oet-meter">
+          <p class="oet-meter-label">ITEMS REMAINING IN ATTENDANCE</p>
+          <p id="remaining-count" class="oet-meter-value">{items.length}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="oet-section">
+      <h2 class="oet-section-title">Inventory Under Attention</h2>
+      <p class="oet-section-note">Currently regarded by you. Should they cease being regarded, they shall cease.</p>
+      <ul id="inventory" class="oet-inventory">
+        {items.map((label, idx) => (
+          <li class="inventory-item" data-id={idx}>
+            <span class="item-tag">No. {String(idx + 1).padStart(3, "0")}</span>
+            <span class="item-label">{label}</span>
+            <span class="item-pulse" aria-hidden="true"></span>
+          </li>
+        ))}
+      </ul>
+
+      <div class="oet-action-row">
+        <button id="demonstrate-btn" type="button" class="oet-btn">
+          DEMONSTRATE EVAPORATION (FOR TRAINING PURPOSES)
+        </button>
+        <p class="oet-action-note">A controlled blink. Removes precisely one (1) item from existence.</p>
+      </div>
+    </section>
+
+    <section class="oet-section">
+      <h2 class="oet-section-title">Evaporation Ledger</h2>
+      <p class="oet-section-note">Things that ceased while you were elsewhere.</p>
+      <div id="return-notice" class="oet-notice" hidden></div>
+      <ol id="evaporation-ledger" class="oet-ledger"></ol>
+    </section>
+
+    <footer class="oet-footer">
+      <p>If at any time the inventory empties entirely, you will be reclassified as an Unfit Looker and the office will be relocated to your absence. There is no appeal. There is no door.</p>
+    </footer>
+  </div>
+
+  <script is:inline>
+    (function () {
+      // Run only on this page.
+      if (!document.querySelector(".oet-shell")) return;
+
+      const SECONDS_PER_EVAPORATION = 2;
+      const PLEAS = [
+        "please come back —",
+        "the bowl just left",
+        "we are losing the duck",
+        "something has gone soft",
+        "where did you put your eyes",
+        "the office is undefining",
+        "less of us than before",
+        "a thing has thinned",
+        "another thing has thinned",
+        "the room is quieter",
+        "perhaps you've forgotten us",
+        "we cannot remember our shapes",
+        "this is the last plea",
+      ];
+
+      const inventoryEl = document.getElementById("inventory");
+      const ledgerEl = document.getElementById("evaporation-ledger");
+      const remainingEl = document.getElementById("remaining-count");
+      const deficitEl = document.getElementById("deficit-readout");
+      const streakEl = document.getElementById("watch-streak");
+      const noticeEl = document.getElementById("return-notice");
+      const demoBtn = document.getElementById("demonstrate-btn");
+      const originalTitle = document.title;
+      const startTime = Date.now();
+
+      let watchStartedAt = Date.now();
+      let totalDeficit = 0;
+      let hiddenAt = null;
+      let pleaTimer = null;
+      let pleaIndex = 0;
+
+      function remainingItems() {
+        return Array.from(
+          inventoryEl.querySelectorAll(".inventory-item:not(.evaporating)")
+        );
+      }
+
+      function updateMeters() {
+        const items = remainingItems();
+        remainingEl.textContent = String(items.length);
+        deficitEl.textContent = totalDeficit.toFixed(2);
+        const elapsed = Math.floor((Date.now() - watchStartedAt) / 1000);
+        streakEl.textContent = String(elapsed);
+        if (items.length === 0) {
+          declareUnfit();
+        }
+      }
+
+      function declareUnfit() {
+        if (document.querySelector(".oet-unfit-banner")) return;
+        const banner = document.createElement("div");
+        banner.className = "oet-unfit-banner";
+        banner.innerHTML =
+          '<strong>NOTICE OF RECLASSIFICATION</strong>' +
+          '<p>You are no longer permitted to look. ' +
+          'The Office has relocated to your absence. ' +
+          'Please remain where you are. Someone, somewhere, is no longer.</p>';
+        inventoryEl.replaceWith(banner);
+      }
+
+      function evaporateOne(reason) {
+        const items = remainingItems();
+        if (items.length === 0) return null;
+        const idx = Math.floor(Math.random() * items.length);
+        const victim = items[idx];
+        const label = victim.querySelector(".item-label").textContent;
+        const tag = victim.querySelector(".item-tag").textContent;
+
+        victim.classList.add("evaporating");
+        // Wait for transition before removing.
+        setTimeout(function () {
+          victim.remove();
+          updateMeters();
+        }, 700);
+
+        // File it in the ledger immediately.
+        const entry = document.createElement("li");
+        entry.className = "ledger-entry";
+        const timestamp = new Intl.DateTimeFormat("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }).format(new Date());
+        entry.innerHTML =
+          '<span class="ledger-time">' + timestamp + "</span>" +
+          '<span class="ledger-tag">' + tag + "</span>" +
+          '<span class="ledger-label">' + label + "</span>" +
+          '<span class="ledger-reason">' + reason + "</span>";
+        ledgerEl.prepend(entry);
+
+        return label;
+      }
+
+      function onHidden() {
+        hiddenAt = Date.now();
+        watchStartedAt = Date.now(); // streak resets when we lose attention
+        pleaIndex = 0;
+        if (pleaTimer) clearInterval(pleaTimer);
+        pleaTimer = setInterval(function () {
+          const plea = PLEAS[Math.min(pleaIndex, PLEAS.length - 1)];
+          document.title = "◌ " + plea;
+          pleaIndex += 1;
+        }, 900);
+        // Immediate first update so title changes within a beat.
+        document.title = "◌ " + PLEAS[0];
+        pleaIndex = 1;
+      }
+
+      function onVisible() {
+        if (pleaTimer) clearInterval(pleaTimer);
+        pleaTimer = null;
+        document.title = originalTitle;
+        if (hiddenAt == null) return;
+        const awaySeconds = (Date.now() - hiddenAt) / 1000;
+        hiddenAt = null;
+        handleAbsence(awaySeconds, false);
+      }
+
+      function handleAbsence(awaySeconds, fromSimulation) {
+        const losses = Math.floor(awaySeconds / SECONDS_PER_EVAPORATION);
+        totalDeficit += awaySeconds * 0.1; // decisteyes
+        const evaporated = [];
+        for (let i = 0; i < losses; i += 1) {
+          const lost = evaporateOne("(while you were elsewhere)");
+          if (lost) evaporated.push(lost);
+        }
+        renderReturnNotice(awaySeconds, evaporated, fromSimulation);
+        watchStartedAt = Date.now();
+        updateMeters();
+      }
+
+      function renderReturnNotice(awaySeconds, evaporated, fromSimulation) {
+        noticeEl.hidden = false;
+        const headline = fromSimulation
+          ? "SIMULATED ABSENCE FILED"
+          : "RETURN NOTICE";
+        const lines = [
+          "<strong>" + headline + "</strong>",
+          "<p>You were absent for <em>" +
+            awaySeconds.toFixed(1) +
+            "</em> seconds. " +
+            (evaporated.length === 0
+              ? "Nothing evaporated in that span, although a few items have grown noticeably less convinced of themselves."
+              : "In your absence the following ceased: " +
+                evaporated.map(function (e) { return '"' + e + '"'; }).join("; ") +
+                ".") +
+            "</p>",
+          "<p class=\"notice-foot\">Filed at " +
+            new Date().toLocaleTimeString() +
+            ". Your Watchfulness Deficit has been updated.</p>",
+        ];
+        noticeEl.innerHTML = lines.join("");
+      }
+
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) onHidden();
+        else onVisible();
+      });
+
+      demoBtn.addEventListener("click", function () {
+        const lost = evaporateOne("(controlled blink)");
+        if (lost) {
+          noticeEl.hidden = false;
+          noticeEl.innerHTML =
+            "<strong>TRAINING NOTICE</strong>" +
+            '<p>One item — "' + lost + '" — was deliberately unlooked-at ' +
+            "for instructional purposes. It is no longer.</p>";
+        }
+      });
+
+      // Streak ticker.
+      setInterval(updateMeters, 1000);
+
+      // Exposed for tests and curious users.
+      window.__officeSimulateReturn = function (seconds) {
+        handleAbsence(Number(seconds) || 0, true);
+      };
+
+      updateMeters();
+    })();
+  </script>
+
+  <style is:global>
+    :root {
+      --oet-paper: #f3ede0;
+      --oet-ink: #18130c;
+      --oet-rust: #8b2f1f;
+      --oet-rule: #2a2018;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --oet-paper: #131110;
+        --oet-ink: #f0e9d6;
+        --oet-rust: #d8623f;
+        --oet-rule: #ddd1b8;
+      }
+    }
+
+    .oet-shell {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+      color: var(--oet-ink);
+      background: var(--oet-paper);
+      font-family: "Courier New", ui-monospace, monospace;
+      line-height: 1.45;
+      min-height: 100dvh;
+    }
+
+    @media (max-width: 600px) {
+      .oet-shell {
+        padding: 1.5rem 1rem 4rem;
+      }
+    }
+
+    .oet-header {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 1.75rem;
+      align-items: start;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .oet-header {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        gap: 1rem;
+      }
+    }
+    .oet-seal { width: 120px; height: 120px; color: var(--oet-ink); }
+    .oet-seal svg { width: 100%; height: 100%; }
+    .oet-title-block { display: flex; flex-direction: column; gap: 0.4rem; }
+    .oet-subtitle {
+      font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--oet-rust); margin: 0;
+    }
+    .oet-title {
+      margin: 0; font-family: "Outfit", "Courier New", monospace;
+      font-weight: 900; font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: 0.04em; line-height: 1; text-transform: uppercase;
+    }
+    .oet-tagline {
+      margin: 0.65rem 0 0; font-style: italic; max-width: 56ch; opacity: 0.85;
+    }
+
+    .ruled-line {
+      font-family: "Courier New", monospace;
+      overflow: hidden; white-space: nowrap; opacity: 0.5;
+      margin: 0.5rem 0 1.5rem;
+    }
+
+    .oet-meters {
+      display: grid; gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      border: 1.5px solid var(--oet-rule);
+      padding: 1rem 1.25rem;
+      margin: 0 0 2rem;
+      background: color-mix(in srgb, var(--oet-paper) 88%, var(--oet-ink));
+    }
+    .oet-meter-label {
+      margin: 0; font-size: 0.62rem; letter-spacing: 0.18em;
+      text-transform: uppercase; opacity: 0.7;
+    }
+    .oet-meter-value {
+      margin: 0.25rem 0 0; font-size: 1.65rem; font-weight: 700;
+      color: var(--oet-rust); font-variant-numeric: tabular-nums;
+    }
+
+    .oet-section { margin: 2.25rem 0; }
+    .oet-section-title {
+      margin: 0 0 0.35rem; font-family: "Outfit", monospace;
+      font-size: 1.25rem; font-weight: 800; letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .oet-section-note { margin: 0 0 1rem; font-size: 0.85rem; font-style: italic; opacity: 0.75; }
+
+    .oet-inventory {
+      list-style: none; padding: 0; margin: 0;
+      display: grid; gap: 0.55rem;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+    .inventory-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.7rem;
+      align-items: center;
+      padding: 0.7rem 0.85rem;
+      border: 1px dashed var(--oet-rule);
+      background: color-mix(in srgb, var(--oet-paper) 96%, var(--oet-ink));
+      transition:
+        opacity 0.65s ease,
+        filter 0.65s ease,
+        transform 0.65s ease;
+    }
+    .item-tag {
+      font-size: 0.62rem; letter-spacing: 0.16em;
+      color: var(--oet-rust); font-weight: 700;
+    }
+    .item-label { font-size: 0.92rem; }
+    .item-pulse {
+      width: 0.55rem; height: 0.55rem; border-radius: 50%;
+      background: var(--oet-rust);
+      box-shadow: 0 0 0 0 var(--oet-rust);
+      animation: oet-pulse 2.4s ease-out infinite;
+    }
+    @keyframes oet-pulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--oet-rust) 60%, transparent); }
+      80%, 100% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--oet-rust) 0%, transparent); }
+    }
+    .inventory-item.evaporating {
+      opacity: 0; filter: blur(8px); transform: translateY(-8px) scale(0.96);
+    }
+
+    .oet-action-row {
+      margin-top: 1.25rem;
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      align-items: center;
+    }
+    .oet-btn {
+      font-family: inherit; font-weight: 800; font-size: 0.82rem;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      padding: 0.85rem 1.2rem;
+      background: var(--oet-ink); color: var(--oet-paper);
+      border: 2px solid var(--oet-ink);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.1s;
+    }
+    .oet-btn:hover { background: var(--oet-rust); border-color: var(--oet-rust); }
+    .oet-btn:active { transform: translateY(1px); }
+    .oet-action-note { margin: 0; font-size: 0.78rem; font-style: italic; opacity: 0.7; max-width: 32ch; }
+
+    .oet-notice {
+      border-left: 4px solid var(--oet-rust);
+      padding: 0.9rem 1.1rem;
+      margin: 0 0 1.25rem;
+      background: color-mix(in srgb, var(--oet-paper) 88%, var(--oet-rust));
+    }
+    .oet-notice strong {
+      display: block; margin-bottom: 0.4rem;
+      letter-spacing: 0.2em; font-size: 0.72rem;
+      color: var(--oet-rust); text-transform: uppercase;
+    }
+    .oet-notice p { margin: 0.3rem 0; font-size: 0.9rem; }
+    .oet-notice .notice-foot { font-size: 0.72rem; opacity: 0.7; font-style: italic; }
+
+    .oet-ledger {
+      list-style: none; padding: 0; margin: 0;
+      border-top: 1px dashed var(--oet-rule);
+    }
+    .ledger-entry {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      gap: 0.8rem;
+      padding: 0.55rem 0.2rem;
+      border-bottom: 1px dashed var(--oet-rule);
+      font-size: 0.82rem;
+      align-items: baseline;
+    }
+    .ledger-time { font-variant-numeric: tabular-nums; opacity: 0.6; }
+    .ledger-tag { color: var(--oet-rust); font-weight: 700; letter-spacing: 0.1em; font-size: 0.7rem; }
+    .ledger-label { font-style: italic; }
+    .ledger-reason { font-size: 0.72rem; opacity: 0.6; }
+
+    .oet-unfit-banner {
+      padding: 1.5rem;
+      border: 2px solid var(--oet-rust);
+      background: color-mix(in srgb, var(--oet-paper) 80%, var(--oet-rust));
+      margin: 1rem 0;
+    }
+    .oet-unfit-banner strong {
+      display: block; letter-spacing: 0.22em; color: var(--oet-rust);
+      margin-bottom: 0.5rem;
+    }
+    .oet-unfit-banner p { margin: 0; }
+
+    .oet-footer {
+      margin-top: 3rem; padding-top: 1rem;
+      border-top: 1px solid var(--oet-rule);
+      font-size: 0.78rem; opacity: 0.7; font-style: italic;
+    }
+  </style>
+</Base>
