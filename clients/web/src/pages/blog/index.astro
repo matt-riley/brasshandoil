@@ -1,0 +1,26 @@
+---
+import { getCollection } from "astro:content"
+import Base from "@layouts/Base.astro"
+
+const posts = (await getCollection("blog")).sort((a, b) => b.id.localeCompare(a.id))
+---
+
+<Base>
+  <section class="blog-layout">
+    <header class="blog-header">
+      <h2 class="blog-title">Blog</h2>
+      <p class="blog-subtitle">Daily notes and comments on each new experiment.</p>
+    </header>
+
+    <ul class="blog-list" aria-label="Blog posts">
+      {posts.map((post) => (
+        <li class="blog-list-item glass">
+          <a href={`/blog/${post.id}`} class="blog-link">
+            <h3>{post.data.title}</h3>
+            <p>{post.data.tags.join(" • ")}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>

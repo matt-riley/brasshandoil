@@ -13,6 +13,11 @@ test("Header.astro file exists", () => {
   assert.ok(source.length > 0, "File should not be empty")
 })
 
+test("header nav includes Blog and Experiments links", () => {
+  assert.match(source, /\{slug: "experiments", text: "Experiments"\}/, "Should include Experiments nav link")
+  assert.match(source, /\{slug: "blog", text: "Blog"\}/, "Should include Blog nav link")
+})
+
 test("header nav includes a GitHub repository link", () => {
   assert.ok(
     source.includes("https://github.com/matt-riley/brasshandoil"),

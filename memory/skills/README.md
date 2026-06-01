@@ -8,3 +8,6 @@ Use one file per theme when a lesson becomes durable enough to guide future expe
 - interaction patterns that felt magical
 - browser APIs worth revisiting
 - anti-patterns to avoid next time
+
+## Recent additions
+- [astro-blog-local-comments.md](astro-blog-local-comments.md)

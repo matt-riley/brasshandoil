@@ -582,3 +582,57 @@ html[data-nav-direction="out"]::view-transition-new(root) {
     animation: none !important;
   }
 }
+
+@layer components {
+  .blog-layout,
+  .blog-post {
+    max-inline-size: 800px;
+    margin-inline: auto;
+    padding-block: var(--spacing-8);
+  }
+
+  .blog-header {
+    margin-block-end: var(--spacing-6);
+  }
+
+  .blog-title,
+  .blog-post-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-block-end: var(--spacing-2);
+  }
+
+  .blog-subtitle,
+  .blog-post-tags {
+    opacity: 0.8;
+  }
+
+  .blog-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--spacing-4);
+  }
+
+  .blog-list-item {
+    border-radius: var(--radius-md);
+  }
+
+  .blog-link {
+    display: block;
+    padding: var(--spacing-4);
+    text-decoration: none;
+  }
+
+  .blog-back {
+    display: inline-block;
+    margin-block-end: var(--spacing-4);
+    color: var(--color-brass);
+    font-weight: 700;
+  }
+
+  .blog-content {
+    margin-block-start: var(--spacing-4);
+    padding: var(--spacing-6);
+    border-radius: var(--radius-md);
+  }
+}
