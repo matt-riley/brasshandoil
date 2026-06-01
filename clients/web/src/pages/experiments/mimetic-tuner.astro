@@ -1,0 +1,1267 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div class="mt-shell">
+    <!-- Header Block -->
+    <header class="mt-header glass">
+      <div class="header-meta">
+        <span class="mt-eyebrow">OULU SILENT ACADEMY &middot; BENCH 6</span>
+        <span class="sys-badge font-mono">SYS_STATUS: COMPLIANT</span>
+      </div>
+      <h1 class="mt-title">Mimetic Tuner</h1>
+      <p class="mt-subtitle">
+        Calibrate the compliance field, then tune the tension of six invisible strings. Strum too hard and you will trigger the municipal silence ordinance.
+      </p>
+    </header>
+
+    <div class="mt-grid">
+      <!-- Left Column: The Aero-Acoustic Bridge -->
+      <section class="mt-panel mt-bridge-panel glass" aria-label="Acoustic Bridge Control">
+        <div class="panel-header">
+          <h2 class="panel-title">AERO-ACOUSTIC BRIDGE</h2>
+          <span class="panel-indicator font-mono">MODEL AG-6 // SHIELDED</span>
+        </div>
+
+        <div class="bridge-container">
+          <!-- Left Pegs (E2, A2, D3) -->
+          <div class="pegs-column left-pegs">
+            <div class="peg-container" data-string="0">
+              <div class="peg-info font-mono">
+                <span class="peg-label">E2</span>
+                <span class="peg-tip">[Click to Tighten]</span>
+              </div>
+              <button class="peg" id="peg-0" aria-label="Tune String 1 (E2)" type="button">
+                <div class="peg-knob"></div>
+              </button>
+            </div>
+            <div class="peg-container" data-string="1">
+              <div class="peg-info font-mono">
+                <span class="peg-label">A2</span>
+                <span class="peg-tip">[Shift-Click: Loosen]</span>
+              </div>
+              <button class="peg" id="peg-1" aria-label="Tune String 2 (A2)" type="button">
+                <div class="peg-knob"></div>
+              </button>
+            </div>
+            <div class="peg-container" data-string="2">
+              <div class="peg-info font-mono">
+                <span class="peg-label">D3</span>
+                <span class="peg-tip">[Right-Click: Loosen]</span>
+              </div>
+              <button class="peg" id="peg-2" aria-label="Tune String 3 (D3)" type="button">
+                <div class="peg-knob"></div>
+              </button>
+            </div>
+          </div>
+
+          <!-- The SVG String board -->
+          <div class="neck-board">
+            <svg id="bridge-svg" viewBox="0 0 160 450" preserveAspectRatio="none">
+              <!-- Grid lines (Frets) -->
+              <line x1="0" y1="75" x2="160" y2="75" class="fret-line" />
+              <line x1="0" y1="150" x2="160" y2="150" class="fret-line" />
+              <line x1="0" y1="225" x2="160" y2="225" class="fret-line" />
+              <line x1="0" y1="300" x2="160" y2="300" class="fret-line" />
+              <line x1="0" y1="375" x2="160" y2="375" class="fret-line" />
+
+              <!-- Visual Strings (thin glowing lines) -->
+              <path class="air-string" id="string-0" d="M 25,0 L 25,450" />
+              <path class="air-string" id="string-1" d="M 50,0 L 50,450" />
+              <path class="air-string" id="string-2" d="M 75,0 L 75,450" />
+              <path class="air-string" id="string-3" d="M 100,0 L 100,450" />
+              <path class="air-string" id="string-4" d="M 125,0 L 125,450" />
+              <path class="air-string" id="string-5" d="M 150,0 L 150,450" />
+
+              <!-- Wide Hover Zones for plucking -->
+              <path class="air-string-hover" data-string="0" d="M 25,0 L 25,450" />
+              <path class="air-string-hover" data-string="1" d="M 50,0 L 50,450" />
+              <path class="air-string-hover" data-string="2" d="M 75,0 L 75,450" />
+              <path class="air-string-hover" data-string="3" d="M 100,0 L 100,450" />
+              <path class="air-string-hover" data-string="4" d="M 125,0 L 125,450" />
+              <path class="air-string-hover" data-string="5" d="M 150,0 L 150,450" />
+            </svg>
+          </div>
+
+          <!-- Right Pegs (G3, B3, E4) -->
+          <div class="pegs-column right-pegs">
+            <div class="peg-container" data-string="3">
+              <button class="peg" id="peg-3" aria-label="Tune String 4 (G3)" type="button">
+                <div class="peg-knob"></div>
+              </button>
+              <div class="peg-info font-mono">
+                <span class="peg-label">G3</span>
+                <span class="peg-tip">[Click to Tighten]</span>
+              </div>
+            </div>
+            <div class="peg-container" data-string="4">
+              <button class="peg" id="peg-4" aria-label="Tune String 5 (B3)" type="button">
+                <div class="peg-knob"></div>
+              </button>
+              <div class="peg-info font-mono">
+                <span class="peg-label">B3</span>
+                <span class="peg-tip">[Shift-Click: Loosen]</span>
+              </div>
+            </div>
+            <div class="peg-container" data-string="5">
+              <button class="peg" id="peg-5" aria-label="Tune String 6 (E4)" type="button">
+                <div class="peg-knob"></div>
+              </button>
+              <div class="peg-info font-mono">
+                <span class="peg-label">E4</span>
+                <span class="peg-tip">[Right-Click: Loosen]</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bridge-footer">
+          <span class="instruction-text font-mono">DRAG MOUSE HORIZONTALLY ACROSS STRINGS TO STRUM</span>
+        </div>
+      </section>
+
+      <!-- Right Column: Calibration Console -->
+      <section class="mt-panel mt-console-panel flex flex-col gap-4" aria-label="Calibration Console">
+        <!-- Switch Panel -->
+        <div class="console-card glass flex flex-col gap-2">
+          <div class="flex justify-between items-center">
+            <span class="card-eyebrow font-mono">FIELD CALIBRATION STATUS</span>
+            <span id="calibration-led" class="led led-off"></span>
+          </div>
+          <button id="calibrate-switch" class="calibration-btn font-mono">
+            START CALIBRATION SYSTEM
+          </button>
+          <p id="calibration-message" class="text-xs text-amber-500/70 text-center font-mono">
+            FIELD OF COMPLIANCE IS INACTIVE. AUDIBLE EMISSIONS MUTED.
+          </p>
+        </div>
+
+        <!-- Oscilloscope -->
+        <div class="console-card glass flex flex-col gap-2">
+          <span class="card-eyebrow font-mono">AERO-RESONANCE SPECTROGRAM</span>
+          <div class="oscilloscope-wrapper">
+            <canvas id="scope-canvas" width="320" height="140"></canvas>
+          </div>
+        </div>
+
+        <!-- Tuning Readouts -->
+        <div class="console-card glass flex flex-col gap-2">
+          <span class="card-eyebrow font-mono">HARMONIC DEVIATION METERS</span>
+          <div class="readouts-grid font-mono text-xs">
+            <div class="readout-row" id="row-0">
+              <span class="str-num">I</span>
+              <span class="str-note">E2</span>
+              <span class="str-dev text-amber-500/70">UNSTABLE</span>
+              <span class="str-status-led mini-led-off"></span>
+            </div>
+            <div class="readout-row" id="row-1">
+              <span class="str-num">II</span>
+              <span class="str-note">A2</span>
+              <span class="str-dev text-amber-500/70">UNSTABLE</span>
+              <span class="str-status-led mini-led-off"></span>
+            </div>
+            <div class="readout-row" id="row-2">
+              <span class="str-num">III</span>
+              <span class="str-note">D3</span>
+              <span class="str-dev text-amber-500/70">UNSTABLE</span>
+              <span class="str-status-led mini-led-off"></span>
+            </div>
+            <div class="readout-row" id="row-3">
+              <span class="str-num">IV</span>
+              <span class="str-note">G3</span>
+              <span class="str-dev text-amber-500/70">UNSTABLE</span>
+              <span class="str-status-led mini-led-off"></span>
+            </div>
+            <div class="readout-row" id="row-4">
+              <span class="str-num">V</span>
+              <span class="str-note">B3</span>
+              <span class="str-dev text-amber-500/70">UNSTABLE</span>
+              <span class="str-status-led mini-led-off"></span>
+            </div>
+            <div class="readout-row" id="row-5">
+              <span class="str-num">VI</span>
+              <span class="str-note">E4</span>
+              <span class="str-dev text-amber-500/70">UNSTABLE</span>
+              <span class="str-status-led mini-led-off"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leakage & Compliance Warnings -->
+        <div id="leakage-warning" class="warning-card compliance-nominal font-mono">
+          <div class="flex justify-between items-center mb-1">
+            <span class="warning-title">ACOUSTIC LEAKAGE METER</span>
+            <span id="leakage-value" class="warning-value">0%</span>
+          </div>
+          <div class="meter-bar-bg">
+            <div id="leakage-bar" class="meter-bar"></div>
+          </div>
+          <p id="compliance-text" class="text-[10px] text-gray-400 mt-2">
+            INTEGRITY: COMPLIANT. Aero-acoustic output remains within standard municipality limits.
+          </p>
+        </div>
+
+        <!-- Main Buttons -->
+        <div class="flex gap-2">
+          <button id="damp-button" class="mt-btn mt-btn-danger flex-1 font-mono" type="button">
+            DAMP ACOUSTIC FIELD
+          </button>
+          <button id="recalibrate-button" class="mt-btn mt-btn-ghost flex-1 font-mono" type="button">
+            RESET STANDARD TENSION
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Background text watermark -->
+    <div class="bg-watermark" aria-hidden="true">OULU SILENT ACADEMY</div>
+  </div>
+</Base>
+
+<style>
+  :root {
+    --mt-bg: #090b0e;
+    --mt-slate: #141822;
+    --mt-copper: #c87a53;
+    --mt-brass: #d4af37;
+    --mt-brass-glow: rgba(212, 175, 55, 0.25);
+    --mt-green: #10b981;
+    --mt-green-glow: rgba(16, 185, 129, 0.4);
+    --mt-red: #ef4444;
+    --mt-red-glow: rgba(239, 68, 68, 0.4);
+    --mt-amber: #f59e0b;
+    --mt-amber-glow: rgba(245, 158, 11, 0.4);
+    --mt-card-border: rgba(212, 175, 55, 0.15);
+    --mt-card-bg: rgba(20, 24, 34, 0.75);
+    --mt-text: #e2e8f0;
+  }
+
+  .mt-shell {
+    position: relative;
+    width: 100%;
+    min-height: calc(100vh - 4rem);
+    padding: 2rem 1.5rem;
+    overflow-x: hidden;
+    background: radial-gradient(120% 90% at 50% -10%, #1e2638 0%, var(--mt-bg) 60%, #040507 100%);
+    font-family: 'Outfit', sans-serif;
+    color: var(--mt-text);
+  }
+
+  .glass {
+    background: var(--mt-card-bg);
+    border: 1px solid var(--mt-card-border);
+    backdrop-filter: blur(12px);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .mt-header {
+    max-width: 56rem;
+    margin: 0 auto 1.5rem;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .header-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mt-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    color: var(--mt-brass);
+    font-weight: 700;
+  }
+
+  .sys-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--mt-green);
+    color: var(--mt-green);
+    border-radius: 4px;
+  }
+
+  .mt-title {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .mt-subtitle {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 40rem;
+  }
+
+  .mt-grid {
+    max-width: 56rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .mt-panel {
+    padding: 1.5rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .panel-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin: 0;
+  }
+
+  .panel-indicator {
+    font-size: 0.65rem;
+    color: #64748b;
+  }
+
+  .bridge-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    background: rgba(5, 7, 10, 0.6);
+    border: 1px dashed rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1.5rem 1rem;
+    position: relative;
+  }
+
+  .pegs-column {
+    display: flex;
+    flex-direction: column;
+    gap: 4.5rem;
+    flex: 1;
+  }
+
+  .left-pegs {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .right-pegs {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .peg-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 48px;
+  }
+
+  .left-pegs .peg-container {
+    flex-direction: row;
+  }
+
+  .right-pegs .peg-container {
+    flex-direction: row-reverse;
+  }
+
+  .peg-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .peg-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .peg-tip {
+    font-size: 0.55rem;
+    color: #475569;
+  }
+
+  .peg {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    pointer-events: auto;
+    transition: transform 0.1s ease;
+  }
+
+  .peg:active {
+    transform: scale(0.9);
+  }
+
+  .peg-knob {
+    width: 32px;
+    height: 12px;
+    background: linear-gradient(135deg, #e5c158, #b8860b);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6), 0 0 8px var(--mt-brass-glow);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .peg:hover .peg-knob {
+    box-shadow: 0 0 12px var(--mt-brass);
+    filter: brightness(1.1);
+  }
+
+  .neck-board {
+    width: 140px;
+    height: 450px;
+    background: linear-gradient(90deg, #11141b 0%, #171c26 50%, #11141b 100%);
+    border: 2px solid #202736;
+    border-radius: 6px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 5px 15px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #bridge-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .fret-line {
+    stroke: rgba(255, 255, 255, 0.04);
+    stroke-width: 2px;
+  }
+
+  .air-string {
+    fill: none;
+    stroke: rgba(212, 175, 55, 0.35);
+    stroke-width: 1.5px;
+    pointer-events: none;
+    filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.4));
+  }
+
+  .air-string.active {
+    stroke: #ffffff;
+    filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 15px var(--mt-brass));
+    stroke-width: 2px;
+  }
+
+  .air-string-hover {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 22px;
+    cursor: ew-resize;
+    pointer-events: auto;
+  }
+
+  .bridge-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 0.75rem;
+  }
+
+  .instruction-text {
+    font-size: 0.65rem;
+    color: #475569;
+    letter-spacing: 0.1em;
+  }
+
+  .console-card {
+    padding: 1.25rem;
+    border-radius: 8px;
+  }
+
+  .card-eyebrow {
+    font-size: 0.65rem;
+    color: var(--mt-brass);
+    letter-spacing: 0.15em;
+  }
+
+  .led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .led-off {
+    background: #27272a;
+  }
+
+  .led-on {
+    background: var(--mt-green);
+    box-shadow: 0 0 8px var(--mt-green), 0 0 15px var(--mt-green-glow);
+  }
+
+  .calibration-btn {
+    pointer-events: auto;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--mt-card-border);
+    padding: 0.65rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+  }
+
+  .calibration-btn:hover {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: var(--mt-brass);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+  }
+
+  .calibration-btn.active {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--mt-green);
+    box-shadow: 0 0 12px var(--mt-green-glow);
+    color: var(--mt-green);
+  }
+
+  .oscilloscope-wrapper {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    background: #080a0d;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  #scope-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .readouts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .readout-row {
+    display: grid;
+    grid-template-columns: 20px 40px 1fr 12px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.35rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+  }
+
+  .str-num {
+    color: #475569;
+  }
+
+  .str-note {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .str-dev {
+    text-align: right;
+    padding-right: 1rem;
+    transition: color 0.3s;
+  }
+
+  .str-status-led {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .mini-led-off {
+    background: #27272a;
+  }
+
+  .mini-led-on-amber {
+    background: var(--mt-amber);
+    box-shadow: 0 0 6px var(--mt-amber);
+  }
+
+  .mini-led-on-green {
+    background: var(--mt-green);
+    box-shadow: 0 0 6px var(--mt-green);
+  }
+
+  .warning-card {
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .compliance-nominal {
+    background: rgba(16, 185, 129, 0.03);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+  }
+
+  .compliance-violation {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid var(--mt-red);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+    animation: warning-flash 1s steps(2, start) infinite;
+  }
+
+  @keyframes warning-flash {
+    0%, 100% { border-color: var(--mt-red); }
+    50% { border-color: rgba(239, 68, 68, 0.3); }
+  }
+
+  .warning-title {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    letter-spacing: 0.1em;
+  }
+
+  .compliance-violation .warning-title {
+    color: var(--mt-red);
+    font-weight: 700;
+  }
+
+  .warning-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .compliance-violation .warning-value {
+    color: var(--mt-red);
+  }
+
+  .meter-bar-bg {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .meter-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--mt-brass);
+    border-radius: 2px;
+    transition: width 0.1s ease, background-color 0.3s;
+  }
+
+  .compliance-violation .meter-bar {
+    background: var(--mt-red);
+  }
+
+  .mt-btn {
+    pointer-events: auto;
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.65rem 1rem;
+    border-radius: 4px;
+    border: 2px solid;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .mt-btn-danger {
+    background: transparent;
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+
+  .mt-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.15);
+  }
+
+  .mt-btn-ghost {
+    background: transparent;
+    color: var(--mt-brass);
+    border-color: rgba(212, 175, 55, 0.3);
+  }
+
+  .mt-btn-ghost:hover {
+    background: rgba(212, 175, 55, 0.05);
+    border-color: var(--mt-brass);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+  }
+
+  .bg-watermark {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    font-size: 6rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.015);
+    pointer-events: none;
+    letter-spacing: -0.05em;
+    user-select: none;
+    line-height: 1;
+  }
+
+  @media (max-width: 800px) {
+    .mt-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .peg-knob, .calibration-btn, .mt-btn {
+      transition: none !important;
+    }
+    .compliance-violation {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Frequencies for the 6 strings (E2, A2, D3, G3, B3, E4)
+  const BASE_FREQS = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
+
+  interface StringState {
+    baseFreq: number;
+    rotation: number;
+    freq: number;
+    delayNode: DelayNode | null;
+    filterNode: BiquadFilterNode | null;
+    feedbackGain: GainNode | null;
+    amplitude: number;
+    phase: number;
+  }
+
+  const strings: StringState[] = BASE_FREQS.map(f => ({
+    baseFreq: f,
+    rotation: 0,
+    freq: f,
+    delayNode: null,
+    filterNode: null,
+    feedbackGain: null,
+    amplitude: 0,
+    phase: 0
+  }));
+
+  const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+  let audioCtx: AudioContext | null = null;
+  let masterGain: GainNode | null = null;
+  let analyser: AnalyserNode | null = null;
+  let noiseBuffer: AudioBuffer | null = null;
+
+  let leakage = 0;
+  const LEAKAGE_DECAY = 0.25; // per second
+  const MAX_LEAKAGE = 100;
+  let ordinanceViolation = false;
+  let isFieldActive = false; // Controls active UI calibration state independently
+
+  // DOM Elements
+  const calibrateSwitch = document.getElementById("calibrate-switch");
+  const calibrationLed = document.getElementById("calibration-led");
+  const calibrationMessage = document.getElementById("calibration-message");
+  const canvas = document.getElementById("scope-canvas") as HTMLCanvasElement | null;
+  const dampBtn = document.getElementById("damp-button");
+  const recalibrateBtn = document.getElementById("recalibrate-button");
+
+  // Setup canvas drawing context
+  const canvasCtx = canvas ? canvas.getContext("2d") : null;
+
+  // Audio setup
+  function initAudioEngine(): boolean {
+    if (!AudioContextClass) return false;
+    
+    try {
+      audioCtx = new AudioContextClass();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.8;
+      
+      masterGain.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      
+      // Create shared noise buffer for physical pluck model
+      const bufferSize = audioCtx.sampleRate * 0.03; // 30ms noise burst
+      noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      
+      // Instantiate permanent physical modeling loops for each string
+      strings.forEach((str, i) => {
+        if (!audioCtx || !masterGain) return;
+        
+        // Delay line length represents string wavelength
+        const delayNode = audioCtx.createDelay(1.0);
+        delayNode.delayTime.value = 1 / str.freq;
+        
+        // Lowpass filter simulates frequency-dependent damping of the string
+        const filterNode = audioCtx.createBiquadFilter();
+        filterNode.type = "lowpass";
+        filterNode.frequency.value = 1400; 
+        
+        // Gain controls feedback/sustain
+        const feedbackGain = audioCtx.createGain();
+        feedbackGain.gain.value = 0.993;
+        
+        // Connect loop: delay -> filter -> feedback -> delay
+        delayNode.connect(filterNode);
+        filterNode.connect(feedbackGain);
+        feedbackGain.connect(delayNode);
+        
+        // Output from delay line connected to master output
+        delayNode.connect(masterGain);
+        
+        str.delayNode = delayNode;
+        str.filterNode = filterNode;
+        str.feedbackGain = feedbackGain;
+      });
+      
+      return true;
+    } catch (e) {
+      console.warn("Failed to initialize Web Audio engine. Interface will run in simulation mode.", e);
+      return false;
+    }
+  }
+
+  function pluckString(i: number, volumeCoeff = 1.0) {
+    if (!isFieldActive || ordinanceViolation) return;
+    
+    // Play physical audio pluck if engine is initialized and running
+    if (audioCtx && audioCtx.state === "running" && noiseBuffer && strings[i].delayNode) {
+      try {
+        const str = strings[i];
+        const source = audioCtx.createBufferSource();
+        source.buffer = noiseBuffer;
+        
+        const pluckGain = audioCtx.createGain();
+        pluckGain.gain.setValueAtTime(0.4 * volumeCoeff, audioCtx.currentTime);
+        pluckGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
+        
+        source.connect(pluckGain);
+        pluckGain.connect(str.delayNode!);
+        
+        source.start(0);
+        source.stop(audioCtx.currentTime + 0.03);
+      } catch (e) {
+        // Suppress audio source startup errors in strict browser environments
+      }
+    }
+    
+    // Start string path animation vibration (acts as visual fallback)
+    strings[i].amplitude = 12 * volumeCoeff;
+    
+    // Add to municipal leakage accumulator
+    accumulateLeakage(volumeCoeff);
+    
+    // Briefly highlight visual string
+    const stringEl = document.getElementById(`string-${i}`);
+    if (stringEl) {
+      stringEl.classList.add("active");
+      setTimeout(() => {
+        stringEl.classList.remove("active");
+      }, 150);
+    }
+  }
+
+  function rotatePeg(i: number, direction: number) {
+    const str = strings[i];
+    // Rotate key: clamp between -180 and 180 degrees
+    str.rotation = Math.max(-180, Math.min(180, str.rotation + direction * 15));
+    
+    // Frequency shifts 0.7x to 1.3x standard pitch
+    const multiplier = 1 + (str.rotation / 180) * 0.3;
+    str.freq = str.baseFreq * multiplier;
+    
+    if (audioCtx && str.delayNode) {
+      try {
+        str.delayNode.delayTime.setTargetAtTime(1 / str.freq, audioCtx.currentTime, 0.05);
+      } catch(e) {}
+    }
+    
+    // Rotate peg graphic in DOM
+    const pegKnob = document.getElementById(`peg-${i}`)?.querySelector(".peg-knob") as HTMLElement | null;
+    if (pegKnob) {
+      pegKnob.style.transform = `rotate(${str.rotation}deg)`;
+    }
+    
+    updateReadoutRow(i);
+    
+    // Short pluck to give sonic feedback on tuning
+    pluckString(i, 0.35);
+  }
+
+  function updateReadoutRow(i: number) {
+    const str = strings[i];
+    const row = document.getElementById(`row-${i}`);
+    if (!row) return;
+    
+    const devEl = row.querySelector(".str-dev");
+    const ledEl = row.querySelector(".str-status-led");
+    
+    if (devEl && ledEl) {
+      if (!isFieldActive) {
+        devEl.textContent = "UNSTABLE";
+        devEl.className = "str-dev text-amber-500/70";
+        ledEl.className = "str-status-led mini-led-off";
+        return;
+      }
+      
+      const deviation = str.rotation;
+      if (deviation === 0) {
+        devEl.textContent = "ALIGNED";
+        devEl.className = "str-dev text-green-500 font-bold";
+        ledEl.className = "str-status-led mini-led-on-green";
+      } else {
+        const arrow = deviation > 0 ? "▲" : "▼";
+        devEl.textContent = `${arrow} ${Math.abs(deviation)}°`;
+        devEl.className = "str-dev text-amber-500";
+        ledEl.className = "str-status-led mini-led-on-amber";
+      }
+    }
+  }
+
+  function accumulateLeakage(amount: number) {
+    leakage = Math.min(MAX_LEAKAGE, leakage + amount * 7.5);
+    updateLeakageUI();
+  }
+
+  function updateLeakageUI() {
+    const bar = document.getElementById("leakage-bar");
+    const valueLabel = document.getElementById("leakage-value");
+    const warningCard = document.getElementById("leakage-warning");
+    const complianceText = document.getElementById("compliance-text");
+    
+    if (bar && valueLabel && warningCard && complianceText) {
+      bar.style.width = `${leakage}%`;
+      valueLabel.textContent = `${Math.round(leakage)}%`;
+      
+      if (leakage >= 90 && !ordinanceViolation) {
+        ordinanceViolation = true;
+        warningCard.className = "warning-card compliance-violation font-mono";
+        complianceText.textContent = "ORDINANCE VIOLATION: Excessive imaginary volume. Damping field active.";
+        
+        // Mute strings
+        dampField();
+      }
+    }
+  }
+
+  function dampField() {
+    strings.forEach(str => {
+      if (audioCtx && str.feedbackGain) {
+        try {
+          str.feedbackGain.gain.setValueAtTime(0, audioCtx.currentTime);
+          str.feedbackGain.gain.linearRampToValueAtTime(0.993, audioCtx.currentTime + 1.2);
+        } catch(e) {}
+      }
+      str.amplitude = 0;
+    });
+  }
+
+  // Event Listeners for Pegs
+  strings.forEach((_, i) => {
+    const pegBtn = document.getElementById(`peg-${i}`);
+    if (pegBtn) {
+      pegBtn.addEventListener("click", (e) => {
+        const direction = e.shiftKey ? -1 : 1;
+        rotatePeg(i, direction);
+      });
+      pegBtn.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        rotatePeg(i, -1);
+      });
+    }
+  });
+
+  // Hover triggers string pluck
+  const hoverZones = document.querySelectorAll(".air-string-hover");
+  hoverZones.forEach(zone => {
+    zone.addEventListener("pointerenter", (e) => {
+      const idxStr = zone.getAttribute("data-string");
+      if (idxStr !== null) {
+        const idx = parseInt(idxStr, 10);
+        const speed = Math.hypot((e as PointerEvent).movementX || 0, (e as PointerEvent).movementY || 0);
+        const vol = Math.min(1.2, 0.4 + speed * 0.04);
+        pluckString(idx, vol);
+      }
+    });
+  });
+
+  // Activate audio calibration switch
+  calibrateSwitch?.addEventListener("click", async () => {
+    if (!audioCtx) {
+      initAudioEngine();
+    }
+    
+    isFieldActive = !isFieldActive;
+    
+    if (audioCtx) {
+      try {
+        if (isFieldActive) {
+          await audioCtx.resume();
+        } else {
+          await audioCtx.suspend();
+        }
+      } catch (e) {
+        console.warn("Could not toggle AudioContext state", e);
+      }
+    }
+    
+    // Update UI state
+    if (calibrateSwitch && calibrationLed && calibrationMessage) {
+      if (isFieldActive) {
+        calibrateSwitch.textContent = "STOP CALIBRATION SYSTEM";
+        calibrateSwitch.classList.add("active");
+        calibrationLed.className = "led led-on";
+        calibrationMessage.textContent = "AERO-ACOUSTIC FIELD CALIBRATED AND ONLINE.";
+        calibrationMessage.className = "text-xs text-green-400 text-center font-mono";
+        
+        // Sound start cascade
+        strings.forEach((_, i) => {
+          setTimeout(() => {
+            pluckString(i, 0.7);
+          }, i * 75);
+        });
+      } else {
+        calibrateSwitch.textContent = "START CALIBRATION SYSTEM";
+        calibrateSwitch.classList.remove("active");
+        calibrationLed.className = "led led-off";
+        calibrationMessage.textContent = "FIELD OF COMPLIANCE IS INACTIVE. AUDIBLE EMISSIONS MUTED.";
+        calibrationMessage.className = "text-xs text-amber-500/70 text-center font-mono";
+      }
+    }
+    
+    // Update meters
+    strings.forEach((_, i) => updateReadoutRow(i));
+  });
+
+  // Damp manual control
+  dampBtn?.addEventListener("click", () => {
+    dampField();
+    if (audioCtx && audioCtx.state === "running" && masterGain) {
+      try {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.frequency.value = 50;
+        g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+        
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch(e) {}
+    }
+  });
+
+  // Reset standard tension control
+  recalibrateBtn?.addEventListener("click", () => {
+    strings.forEach((str, i) => {
+      str.rotation = 0;
+      str.freq = str.baseFreq;
+      
+      if (audioCtx && str.delayNode) {
+        try {
+          str.delayNode.delayTime.setTargetAtTime(1 / str.freq, audioCtx.currentTime, 0.05);
+        } catch(e) {}
+      }
+      
+      const pegKnob = document.getElementById(`peg-${i}`)?.querySelector(".peg-knob") as HTMLElement | null;
+      if (pegKnob) {
+        pegKnob.style.transform = "rotate(0deg)";
+      }
+      
+      updateReadoutRow(i);
+    });
+    
+    // Cascade arpeggio of tuned strings
+    if (isFieldActive && !ordinanceViolation) {
+      strings.forEach((_, i) => {
+        setTimeout(() => {
+          pluckString(i, 0.85);
+        }, i * 140);
+      });
+    }
+  });
+
+  // Continuous animation and spectrogram loop
+  let lastTime = performance.now();
+  
+  function animationLoop(now: number) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+    
+    // Decay compliance meter over time
+    if (leakage > 0) {
+      leakage = Math.max(0, leakage - LEAKAGE_DECAY * 13 * dt);
+      
+      if (leakage === 0 && ordinanceViolation) {
+        ordinanceViolation = false;
+        const warningCard = document.getElementById("leakage-warning");
+        const complianceText = document.getElementById("compliance-text");
+        if (warningCard && complianceText) {
+          warningCard.className = "warning-card compliance-nominal font-mono";
+          complianceText.textContent = "INTEGRITY: COMPLIANT. Aero-acoustic output remains within standard municipality limits.";
+        }
+      }
+      
+      updateLeakageUI();
+    }
+    
+    // Animate visual string oscillations
+    strings.forEach((str, i) => {
+      const pathEl = document.getElementById(`string-${i}`);
+      if (pathEl) {
+        if (str.amplitude > 0.05) {
+          str.phase += 1.4; // Speed of string oscillation
+          str.amplitude *= 0.93; // Decay amplitude
+          
+          const offset = str.amplitude * Math.sin(str.phase);
+          const x = 25 + i * 25;
+          pathEl.setAttribute("d", `M ${x},0 Q ${x + offset},225 ${x},450`);
+        } else {
+          // Revert to resting straight line
+          const x = 25 + i * 25;
+          pathEl.setAttribute("d", `M ${x},0 L ${x},450`);
+        }
+      }
+    });
+    
+    // Redraw Oscilloscope Spectrogram
+    drawOscilloscope();
+    
+    requestAnimationFrame(animationLoop);
+  }
+
+  function drawOscilloscope() {
+    if (!canvas || !canvasCtx) return;
+    
+    const w = canvas.width;
+    const h = canvas.height;
+    
+    canvasCtx.fillStyle = "#080a0d";
+    canvasCtx.fillRect(0, 0, w, h);
+    
+    // Scope Grid Lines
+    canvasCtx.strokeStyle = "rgba(212, 175, 55, 0.05)";
+    canvasCtx.lineWidth = 1;
+    const lines = 8;
+    for (let c = 1; c < lines; c++) {
+      const x = (c / lines) * w;
+      canvasCtx.beginPath();
+      canvasCtx.moveTo(x, 0);
+      canvasCtx.lineTo(x, h);
+      canvasCtx.stroke();
+      
+      const y = (c / lines) * h;
+      canvasCtx.beginPath();
+      canvasCtx.moveTo(0, y);
+      canvasCtx.lineTo(w, y);
+      canvasCtx.stroke();
+    }
+    
+    // Center line
+    canvasCtx.strokeStyle = "rgba(212, 175, 55, 0.15)";
+    canvasCtx.beginPath();
+    canvasCtx.moveTo(0, h / 2);
+    canvasCtx.lineTo(w, h / 2);
+    canvasCtx.stroke();
+    
+    // Waveform plotting
+    if (!isFieldActive) {
+      canvasCtx.strokeStyle = "rgba(212, 175, 55, 0.35)";
+      canvasCtx.lineWidth = 1.5;
+      canvasCtx.beginPath();
+      canvasCtx.moveTo(0, h / 2);
+      for (let x = 0; x < w; x++) {
+        const jitter = (Math.random() - 0.5) * 0.7;
+        canvasCtx.lineTo(x, h / 2 + jitter);
+      }
+      canvasCtx.stroke();
+      return;
+    }
+    
+    canvasCtx.lineWidth = 2;
+    canvasCtx.strokeStyle = ordinanceViolation ? "#ef4444" : "#d4af37";
+    canvasCtx.shadowBlur = 5;
+    canvasCtx.shadowColor = ordinanceViolation ? "rgba(239, 68, 68, 0.6)" : "rgba(212, 175, 55, 0.6)";
+    
+    canvasCtx.beginPath();
+    
+    if (analyser && audioCtx && audioCtx.state === "running") {
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteTimeDomainData(dataArray);
+      
+      const sliceWidth = w / bufferLength;
+      let x = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = (v * h) / 2;
+        
+        if (i === 0) {
+          canvasCtx.moveTo(x, y);
+        } else {
+          canvasCtx.lineTo(x, y);
+        }
+        
+        x += sliceWidth;
+      }
+    } else {
+      // Fallback: draw simulated compound wave of active strings
+      canvasCtx.moveTo(0, h / 2);
+      const timeSecs = performance.now() / 1000;
+      for (let x = 0; x < w; x++) {
+        let sum = 0;
+        strings.forEach((str, i) => {
+          if (str.amplitude > 0.05) {
+            const freqCoeff = 0.08 * (i + 1);
+            sum += (str.amplitude / 12) * Math.sin(x * freqCoeff + timeSecs * 25);
+          }
+        });
+        // Jitter representing resonance
+        sum += (Math.random() - 0.5) * 0.02;
+        
+        const y = (h / 2) + sum * (h * 0.4);
+        canvasCtx.lineTo(x, y);
+      }
+    }
+    
+    canvasCtx.lineTo(w, h / 2);
+    canvasCtx.stroke();
+    canvasCtx.shadowBlur = 0;
+  }
+
+  // Begin loop
+  requestAnimationFrame(animationLoop);
+</script>

@@ -604,7 +604,8 @@ The Department thanks you for your continued participation in the process of hav
   }
 
   async function sleep(ms: number) {
-    return new Promise(r => setTimeout(r, ms))
+    const isTest = typeof window !== "undefined" && window.location.search.includes("test=true")
+    return new Promise(r => setTimeout(r, isTest ? 5 : ms))
   }
 
   function generateResponse(caseNum: string) {
@@ -625,30 +626,37 @@ The Department thanks you for your continued participation in the process of hav
   function speakResponse(text: string) {
     if (!window.speechSynthesis) return
 
-    window.speechSynthesis.cancel()
+    try {
+      window.speechSynthesis.cancel()
 
-    const utter = new SpeechSynthesisUtterance(text)
-    utter.rate = 0.85
-    utter.pitch = 0.7
-    utter.volume = 0.9
+      const utter = new SpeechSynthesisUtterance(text)
+      utter.rate = 0.85
+      utter.pitch = 0.7
+      utter.volume = 0.9
 
-    // Prefer a dry, bureaucratic-sounding voice
-    const voices = window.speechSynthesis.getVoices()
-    const preferred = voices.find(v =>
-      /daniel|fred|albert|google uk|english uk/i.test(v.name)
-    ) || voices.find(v => /en/i.test(v.lang)) || voices[0]
-    if (preferred) utter.voice = preferred
+      // Prefer a dry, bureaucratic-sounding voice
+      const voices = window.speechSynthesis.getVoices()
+      const preferred = voices.find(v =>
+        /daniel|fred|albert|google uk|english uk/i.test(v.name)
+      ) || voices.find(v => /en/i.test(v.lang)) || voices[0]
+      if (preferred) utter.voice = preferred
 
-    speakingIndicator!.hidden = false
+      speakingIndicator!.hidden = false
 
-    utter.onend = () => {
-      speakingIndicator!.hidden = true
+      utter.onend = () => {
+        speakingIndicator!.hidden = true
+      }
+      utter.onerror = () => {
+        speakingIndicator!.hidden = true
+      }
+
+      window.speechSynthesis.speak(utter)
+    } catch (err) {
+      console.error("speechSynthesis error:", err)
+      if (speakingIndicator) {
+        speakingIndicator.hidden = true
+      }
     }
-    utter.onerror = () => {
-      speakingIndicator!.hidden = true
-    }
-
-    window.speechSynthesis.speak(utter)
   }
 
   form.addEventListener("submit", async (e) => {
@@ -703,7 +711,7 @@ The Department thanks you for your continued participation in the process of hav
   })
 
   // Ensure voices load (browsers lazy-load them)
-  if (window.speechSynthesis) {
+  if (window.speechSynthesis && typeof window.speechSynthesis.addEventListener === "function") {
     window.speechSynthesis.getVoices()
     window.speechSynthesis.addEventListener("voiceschanged", () => {
       window.speechSynthesis.getVoices()
