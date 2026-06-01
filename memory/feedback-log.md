@@ -142,3 +142,16 @@ Carry Forward:
   keep the institutional joke fresh, per the Oil Telegraph fatigue note.
 - Hard-cap canvas actor counts (1,100 mice) up front so swarm spectacles stay smooth on
   mobile rather than treating performance as a later pass.
+
+### Session Entry
+
+Date: 2026-06-01
+Experiment: Abyssal Naming Committee
+Feedback:
+- Awaiting review.
+Carry Forward:
+- A canvas atmosphere can stay cheap while a central DOM specimen carries the visual
+  detail, glow, and interaction response.
+- Keep the satire in the primary gesture: classifying the orb visibly lowers certainty
+  and reveals more inconvenient siblings.
+- Preserve explicit animation ceilings and reduced-motion variants from the first pass.

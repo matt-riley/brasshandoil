@@ -18,6 +18,9 @@
    implementation.
 5. Validate queried DOM nodes, then assign fresh non-null aliases before canvas helpers capture
    them so Astro TypeScript checks remain clean.
+6. Let canvas carry cheap atmosphere while a small number of layered DOM props carry the focal
+   detail. CSS gradients, shadows, and transitions can make one hero object feel rich without
+   adding per-frame drawing work.
 
 ## Review Questions
 
@@ -25,3 +28,4 @@
 - Does interaction visibly alter the canvas and a semantic readout?
 - Does the page still look intentional before the first interaction?
 - Can the narrow viewport preserve readable copy and a clear launch control?
+- Is the focal prop visually strong without forcing the canvas loop to redraw unnecessary detail?

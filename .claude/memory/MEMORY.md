@@ -45,6 +45,14 @@ Declaring `@property --name { syntax: "<angle>"; inherits: false; initial-value:
 #### Page Visibility API + live document.title as a notification channel
 `document.addEventListener("visibilitychange", ...)` fires when the tab loses or gains visibility; `document.hidden` (or `document.visibilityState`) tells you which. While hidden, you can mutate `document.title` on a timer — the user sees the new title in their tab strip even though the page is backgrounded, which is a surprisingly powerful "speak through the chrome" channel. Pair with a `Date.now()` snapshot at `hidden` to compute elapsed away-time when visibility returns. In Playwright, simulate hidden state with `Object.defineProperty(document, "hidden", { configurable: true, get: () => true })` then dispatch a synthetic `visibilitychange` event — `document.hidden` is read-only so direct assignment is a no-op.
 
+### 2026-06-01 — The Backrooms
+**Concept:** Inspired by the BBC story about the Backrooms getting a Hollywood film. A first-person liminal space corridor navigator — endless yellow corridors, buzzing fluorescents, damp carpet. Arrow keys to move. Step counter climbs. Cryptic wall notes appear every 5 steps. There is no exit.
+**Technique:** CSS 3D transforms — `perspective`, `transform-style: preserve-3d`, `translateZ()` for creating a navigable 3D corridor entirely from DOM elements. `requestAnimationFrame` eased camera movement with perspective-origin bob for a walking feel.
+**File:** clients/web/src/pages/experiments/backrooms.astro
+
+#### CSS 3D Corridor (perspective + preserve-3d)
+Set `perspective: 400px` on a container, then child elements with `rotateX(90deg)` / `rotateY(90deg)` + `translateZ()` form floor/ceiling/walls. Move "forward" by translating a segments container along Z. Eased animation via `requestAnimationFrame` + quadratic easing gives a walking feel. `perspective-origin` shifts create head-bob and look-left/right. Gotcha: `transform-style: preserve-3d` must be on every ancestor between the perspective container and the 3D-transformed children, or the 3D collapses.
+
 ## Feedback from Matt
 
 ### 2026-05-31 — COMPLAINT RECEIVED
