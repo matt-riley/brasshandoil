@@ -21,6 +21,10 @@
 6. Let canvas carry cheap atmosphere while a small number of layered DOM props carry the focal
    detail. CSS gradients, shadows, and transitions can make one hero object feel rich without
    adding per-frame drawing work.
+7. For nested perspective scenes, paint the distant fill once and then layer surfaces from far
+   to near. Filling every ring interior will let the nearest pass erase the depth behind it.
+8. Cap redraw frequency when an atmospheric loop creates gradients or other expensive paint
+   work. A steady 30 FPS is often enough for ambience and leaves interaction responsive.
 
 ## Review Questions
 

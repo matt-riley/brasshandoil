@@ -208,7 +208,6 @@ import Base from "@layouts/Base.astro"
   let steps = 0;
   let animating = false;
   let offset = 0; // 0..1 interpolation within a step
-  let targetOffset = 0;
   let lookX = 0; // -1..1 horizontal look
   let lookTarget = 0;
   let noteCount = 0;
@@ -293,15 +292,17 @@ import Base from "@layouts/Base.astro"
     const cy = h / 2 + 10; // slightly below center for more floor
     const rings = 16;
 
+    // Paint the distant wall once. Repainting each ring's interior would erase
+    // the perspective surfaces drawn behind the nearest ring.
+    const farWall = ringAt(rings, cx, cy, w, h, rings);
+    ctx.fillStyle = rgb(180 * farWall.bright, 165 * farWall.bright, 90 * farWall.bright);
+    ctx.fillRect(farWall.left, farWall.top, farWall.right - farWall.left, farWall.bottom - farWall.top);
+
     // Draw from back to front
-    for (let i = rings; i >= 0; i--) {
+    for (let i = rings - 1; i >= 0; i--) {
       const outer = ringAt(i, cx, cy, w, h, rings);
       const inner = ringAt(i + 1, cx, cy, w, h, rings);
       const b = outer.bright;
-
-      // Back wall fill
-      ctx.fillStyle = rgb(180 * b, 165 * b, 90 * b);
-      ctx.fillRect(inner.left, inner.top, inner.right - inner.left, inner.bottom - inner.top);
 
       // Ceiling — lighter yellow
       quad(
@@ -559,7 +560,14 @@ import Base from "@layouts/Base.astro"
   });
 
   // Render loop
-  function frame(): void {
+  let lastFrame = 0;
+  function frame(now: number): void {
+    if (now - lastFrame < 1000 / 30) {
+      requestAnimationFrame(frame);
+      return;
+    }
+
+    lastFrame = now;
     lookX += (lookTarget - lookX) * 0.1;
     drawCorridor();
     requestAnimationFrame(frame);

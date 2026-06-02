@@ -36,6 +36,37 @@ test("corridor contains fluorescent lights", async ({ page }) => {
   await expect(page.locator(".fluorescent-light").first()).toBeVisible()
 })
 
+test("corridor renders visible perspective depth", async ({ page }) => {
+  await page.goto("/experiments/backrooms")
+  await expect(page.locator("#corridor")).toBeVisible()
+  await page.waitForTimeout(100)
+
+  const depthBands = await page.locator("#corridor").evaluate((canvas) => {
+    const context = canvas.getContext("2d")
+    const x = Math.floor(canvas.width / 2)
+    let bands = 0
+    let previous = null
+
+    for (let y = 0; y < canvas.height; y += 4) {
+      const current = context.getImageData(x, y, 1, 1).data
+      if (
+        previous &&
+        Math.abs(current[0] - previous[0]) +
+          Math.abs(current[1] - previous[1]) +
+          Math.abs(current[2] - previous[2]) >
+          8
+      ) {
+        bands++
+      }
+      previous = current
+    }
+
+    return bands
+  })
+
+  expect(depthBands).toBeGreaterThan(8)
+})
+
 test("wall notes appear after enough steps", async ({ page }) => {
   await page.goto("/experiments/backrooms")
   await expect(page.locator("#corridor")).toBeVisible()
