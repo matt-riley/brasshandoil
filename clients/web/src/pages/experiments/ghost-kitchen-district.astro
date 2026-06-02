@@ -1,0 +1,712 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="gkd-shell">
+    <canvas id="steam-canvas" aria-label="Steam drifting above a midnight delivery district"></canvas>
+    <div class="gkd-moon" aria-hidden="true"></div>
+    <div class="gkd-haze" aria-hidden="true"></div>
+
+    <header class="gkd-header">
+      <p class="gkd-kicker">Midnight Delivery Zone &middot; Block 404</p>
+      <h1>Ghost Kitchen District</h1>
+      <p class="gkd-intro">
+        Your dinner is being prepared by a rapidly expanding family of restaurants
+        sharing one suspiciously dark doorway.
+      </p>
+    </header>
+
+    <section id="kitchen-block" class="gkd-block" aria-label="Ghost kitchen storefront aliases">
+      <div class="gkd-building building-one" aria-hidden="true"></div>
+      <div class="gkd-building building-two" aria-hidden="true"></div>
+      <div class="gkd-building building-three" aria-hidden="true"></div>
+      <div class="gkd-wire wire-one" aria-hidden="true"></div>
+      <div class="gkd-wire wire-two" aria-hidden="true"></div>
+      <div class="gkd-aliases" id="alias-field"></div>
+      <div class="gkd-door">
+        <span>UNIT 0</span>
+        <small>ALL COLLECTIONS</small>
+      </div>
+      <div id="courier-lane" class="gkd-courier-lane" aria-hidden="true"></div>
+      <div class="gkd-road" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </section>
+
+    <section class="gkd-panel gkd-readout" aria-live="polite">
+      <p class="gkd-panel-label">Visible restaurant aliases</p>
+      <strong id="kitchen-count" class="gkd-number">3</strong>
+      <div class="gkd-rule"></div>
+      <p class="gkd-panel-label">Meals successfully delivered</p>
+      <strong id="meal-count" class="gkd-number gkd-number-cold">0</strong>
+      <p class="gkd-footnote">Estimated arrival: recursively soon</p>
+    </section>
+
+    <section class="gkd-panel gkd-actions">
+      <p class="gkd-panel-label">Your order is almost conceptual</p>
+      <p id="dispatch-line" class="gkd-dispatch" aria-live="polite">
+        Three restaurants accepted your order from the same unlit stairwell.
+      </p>
+      <button id="place-order" type="button">Place Another Order</button>
+      <p class="gkd-footnote">Every tap improves your selection without involving food.</p>
+    </section>
+
+    <footer class="gkd-footer">Tonight's special: infinite choice, served empty.</footer>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #090712;
+  }
+
+  .gkd-shell {
+    position: relative;
+    min-height: calc(100vh - 4rem);
+    overflow: hidden;
+    isolation: isolate;
+    color: #f7eee2;
+    background:
+      radial-gradient(circle at 83% 12%, rgba(250, 185, 102, 0.12), transparent 18rem),
+      linear-gradient(180deg, #100c22 0%, #160d21 52%, #080710 100%);
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  #steam-canvas,
+  .gkd-haze {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  #steam-canvas {
+    z-index: 2;
+  }
+
+  .gkd-haze {
+    z-index: 7;
+    background:
+      linear-gradient(180deg, transparent 38%, rgba(244, 111, 99, 0.08) 70%, rgba(0, 0, 0, 0.38)),
+      radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.54) 100%);
+  }
+
+  .gkd-moon {
+    position: absolute;
+    top: 9%;
+    right: 8%;
+    z-index: 1;
+    width: clamp(4rem, 9vw, 7rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #f8bd77;
+    box-shadow: 0 0 1.5rem rgba(249, 181, 111, 0.45), 0 0 7rem rgba(241, 98, 98, 0.22);
+  }
+
+  .gkd-header,
+  .gkd-panel,
+  .gkd-footer {
+    position: absolute;
+    z-index: 12;
+  }
+
+  .gkd-header {
+    top: clamp(1rem, 3vw, 2rem);
+    left: clamp(1rem, 4vw, 3rem);
+    max-width: 38rem;
+    text-shadow: 0 0 1rem rgba(0, 0, 0, 0.95);
+  }
+
+  .gkd-kicker,
+  .gkd-panel-label,
+  .gkd-footnote,
+  .gkd-footer {
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .gkd-kicker {
+    margin: 0 0 0.45rem;
+    color: #ffb77d;
+    font-size: 0.6rem;
+  }
+
+  h1 {
+    max-width: 34rem;
+    margin: 0;
+    color: #fff1d6;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.4rem, 7vw, 5.8rem);
+    font-weight: 400;
+    letter-spacing: -0.075em;
+    line-height: 0.86;
+    text-shadow: 0 0 2rem rgba(255, 124, 109, 0.45);
+  }
+
+  .gkd-intro {
+    max-width: 30rem;
+    margin: 0.85rem 0 0;
+    color: rgba(255, 239, 220, 0.82);
+    font-size: clamp(0.72rem, 1.4vw, 0.9rem);
+    line-height: 1.55;
+  }
+
+  .gkd-block {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+  }
+
+  .gkd-building {
+    position: absolute;
+    bottom: 8rem;
+    border: 1px solid rgba(255, 175, 121, 0.15);
+    background:
+      repeating-linear-gradient(90deg, transparent 0 2.5rem, rgba(255, 176, 104, 0.08) 2.55rem 3rem),
+      repeating-linear-gradient(0deg, #100b19 0 2.8rem, #1e1226 2.85rem 3.15rem);
+    box-shadow: inset 0 0 5rem rgba(0, 0, 0, 0.58), 0 0 3rem rgba(0, 0, 0, 0.3);
+  }
+
+  .building-one {
+    left: -2%;
+    width: 28%;
+    height: 33%;
+  }
+
+  .building-two {
+    left: 20%;
+    width: 54%;
+    height: 47%;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 3.5rem, rgba(255, 176, 104, 0.09) 3.6rem 4.2rem),
+      repeating-linear-gradient(0deg, #120b19 0 3.2rem, #281329 3.3rem 3.8rem);
+  }
+
+  .building-three {
+    right: -4%;
+    width: 33%;
+    height: 38%;
+  }
+
+  .gkd-wire {
+    position: absolute;
+    z-index: 2;
+    top: 26%;
+    left: -5%;
+    width: 112%;
+    height: 10%;
+    border-top: 2px solid rgba(20, 15, 28, 0.9);
+    border-radius: 50%;
+    transform: rotate(-3deg);
+  }
+
+  .wire-two {
+    top: 32%;
+    transform: rotate(2deg);
+  }
+
+  .gkd-aliases {
+    position: absolute;
+    right: 5%;
+    bottom: 17.5rem;
+    left: 5%;
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: center;
+    gap: clamp(0.28rem, 0.8vw, 0.6rem);
+    pointer-events: none;
+  }
+
+  .gkd-alias {
+    width: clamp(6.5rem, 12vw, 10rem);
+    padding: 0.48rem 0.5rem;
+    border: 1px solid var(--sign-color);
+    color: var(--sign-color);
+    background: rgba(17, 9, 22, 0.88);
+    box-shadow:
+      0 0 0.6rem color-mix(in srgb, var(--sign-color), transparent 45%),
+      inset 0 0 1rem rgba(0, 0, 0, 0.5);
+    font-size: clamp(0.5rem, 1.1vw, 0.67rem);
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: uppercase;
+    animation: sign-arrival 0.52s cubic-bezier(0.2, 0.8, 0.2, 1) both, sign-flicker 5s step-end infinite;
+  }
+
+  .gkd-alias small {
+    display: block;
+    margin-top: 0.22rem;
+    color: rgba(255, 236, 213, 0.58);
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+
+  .gkd-door {
+    position: absolute;
+    bottom: 8rem;
+    left: 50%;
+    z-index: 6;
+    display: grid;
+    place-content: center;
+    width: clamp(5rem, 9vw, 7rem);
+    height: clamp(8rem, 15vw, 11rem);
+    transform: translateX(-50%);
+    border: 1px solid #ff9c78;
+    color: #ffb58b;
+    background:
+      radial-gradient(circle at 50% 32%, rgba(124, 238, 205, 0.18), transparent 38%),
+      #080711;
+    box-shadow: 0 0 2rem rgba(245, 108, 103, 0.3), inset 0 0 2rem rgba(0, 0, 0, 0.9);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-align: center;
+  }
+
+  .gkd-door small {
+    display: block;
+    margin-top: 0.48rem;
+    color: rgba(137, 239, 211, 0.72);
+    font-size: 0.44rem;
+    line-height: 1.35;
+  }
+
+  .gkd-courier-lane {
+    position: absolute;
+    right: 0;
+    bottom: 9.6rem;
+    left: 0;
+    z-index: 8;
+    height: 4rem;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .gkd-courier {
+    position: absolute;
+    bottom: 0.65rem;
+    left: -8rem;
+    width: 4.8rem;
+    height: 1.6rem;
+    animation: courier-run var(--courier-speed) linear forwards;
+  }
+
+  .gkd-bike {
+    position: absolute;
+    bottom: 0;
+    left: 0.3rem;
+    width: 3.3rem;
+    height: 0.9rem;
+    border-bottom: 2px solid #7ce7c7;
+    transform: skewX(-18deg);
+  }
+
+  .gkd-bike::before,
+  .gkd-bike::after {
+    position: absolute;
+    bottom: -0.55rem;
+    width: 0.84rem;
+    aspect-ratio: 1;
+    border: 2px solid #f4cf8f;
+    border-radius: 50%;
+    content: "";
+  }
+
+  .gkd-bike::before { left: -0.22rem; }
+  .gkd-bike::after { right: -0.35rem; }
+
+  .gkd-bag {
+    position: absolute;
+    right: 0;
+    bottom: 0.28rem;
+    width: 1.55rem;
+    height: 1.55rem;
+    border: 1px solid #ff9c78;
+    color: #ffb58b;
+    background: rgba(43, 19, 36, 0.94);
+    box-shadow: 0 0 0.75rem rgba(244, 103, 103, 0.55);
+    font-size: 0.42rem;
+    line-height: 1.5rem;
+    text-align: center;
+  }
+
+  .gkd-road {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 4;
+    display: flex;
+    justify-content: space-around;
+    height: 8rem;
+    overflow: hidden;
+    border-top: 1px solid rgba(249, 189, 126, 0.28);
+    background:
+      linear-gradient(90deg, transparent 0 48%, rgba(255, 206, 139, 0.28) 49% 51%, transparent 52%) 0 58% / 10rem 0.18rem repeat-x,
+      linear-gradient(180deg, #100d19, #06060d);
+  }
+
+  .gkd-road span {
+    width: 0.1rem;
+    height: 12rem;
+    background: rgba(255, 183, 125, 0.1);
+    transform: rotate(61deg);
+  }
+
+  .gkd-panel {
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(255, 168, 118, 0.32);
+    background: rgba(15, 9, 24, 0.78);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(9px);
+  }
+
+  .gkd-readout {
+    bottom: clamp(1rem, 3vw, 2.25rem);
+    left: clamp(1rem, 4vw, 3rem);
+    width: min(14rem, calc(100% - 2rem));
+  }
+
+  .gkd-actions {
+    right: clamp(1rem, 4vw, 3rem);
+    bottom: clamp(1rem, 3vw, 2.25rem);
+    width: min(22rem, calc(100% - 2rem));
+  }
+
+  .gkd-panel-label,
+  .gkd-footnote {
+    margin: 0;
+    color: #ffb887;
+    font-size: 0.54rem;
+    line-height: 1.5;
+  }
+
+  .gkd-number {
+    color: #ffe4b5;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    line-height: 1;
+    text-shadow: 0 0 1rem rgba(253, 175, 111, 0.48);
+  }
+
+  .gkd-number-cold {
+    color: #91eed1;
+  }
+
+  .gkd-rule {
+    height: 1px;
+    margin: 0.62rem 0;
+    background: rgba(255, 178, 124, 0.2);
+  }
+
+  .gkd-dispatch {
+    min-height: 2.5rem;
+    margin: 0.45rem 0 0.7rem;
+    color: #fff0d5;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  button {
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid #ffaf7e;
+    color: #130c1b;
+    background: linear-gradient(135deg, #ffbf83, #f47f73);
+    font: 700 0.68rem/1 "Courier New", Courier, monospace;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: filter 160ms ease, transform 160ms ease;
+  }
+
+  button:hover,
+  button:focus-visible {
+    filter: brightness(1.12);
+    transform: translateY(-2px);
+  }
+
+  button:focus-visible {
+    outline: 2px solid #91eed1;
+    outline-offset: 3px;
+  }
+
+  .gkd-footnote {
+    margin-top: 0.55rem;
+    color: rgba(255, 211, 168, 0.6);
+    letter-spacing: 0.09em;
+  }
+
+  .gkd-footer {
+    right: 2rem;
+    bottom: 0.28rem;
+    color: rgba(255, 210, 172, 0.52);
+    font-size: 0.49rem;
+  }
+
+  @keyframes sign-arrival {
+    from { opacity: 0; transform: translateY(2rem) scale(0.6); }
+  }
+
+  @keyframes sign-flicker {
+    0%, 92%, 95%, 100% { opacity: 1; }
+    93%, 96% { opacity: 0.45; }
+  }
+
+  @keyframes courier-run {
+    to { transform: translateX(calc(100vw + 12rem)); }
+  }
+
+  @media (max-width: 720px) {
+    .gkd-shell {
+      min-height: 54rem;
+    }
+
+    .gkd-header {
+      right: 1rem;
+    }
+
+    .gkd-intro {
+      max-width: 22rem;
+    }
+
+    .gkd-aliases {
+      right: 2%;
+      bottom: 18.5rem;
+      left: 2%;
+    }
+
+    .gkd-alias {
+      width: clamp(5rem, 23vw, 7rem);
+    }
+
+    .gkd-panel {
+      right: 1rem;
+      left: 1rem;
+      width: auto;
+    }
+
+    .gkd-readout {
+      bottom: 10rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.2rem 1rem;
+      align-items: center;
+    }
+
+    .gkd-readout .gkd-rule {
+      grid-column: 1 / -1;
+      width: 100%;
+      margin: 0.18rem 0;
+    }
+
+    .gkd-readout .gkd-footnote {
+      grid-column: 1 / -1;
+    }
+
+    .gkd-actions {
+      bottom: 1rem;
+    }
+
+    .gkd-footer {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gkd-alias,
+    .gkd-courier {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const steamCanvas = document.querySelector<HTMLCanvasElement>("#steam-canvas")
+  const aliasField = document.querySelector<HTMLElement>("#alias-field")
+  const courierLane = document.querySelector<HTMLElement>("#courier-lane")
+  const kitchenValue = document.querySelector<HTMLElement>("#kitchen-count")
+  const mealValue = document.querySelector<HTMLElement>("#meal-count")
+  const dispatchLine = document.querySelector<HTMLElement>("#dispatch-line")
+  const placeOrder = document.querySelector<HTMLButtonElement>("#place-order")
+
+  if (
+    steamCanvas &&
+    aliasField &&
+    courierLane &&
+    kitchenValue &&
+    mealValue &&
+    dispatchLine &&
+    placeOrder
+  ) {
+    const canvas = steamCanvas
+    const aliases = aliasField
+    const couriers = courierLane
+    const kitchenReadout = kitchenValue
+    const mealReadout = mealValue
+    const dispatch = dispatchLine
+    const orderButton = placeOrder
+    const context = canvas.getContext("2d")
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const MAX_STEAM = 54
+    const MAX_KITCHENS = 21
+    const MAX_COURIERS = 12
+    const colors = ["#ff9d77", "#8be7cc", "#ffd18d", "#e799ff", "#ff6f91"]
+    const restaurantNames = [
+      "Moon Wok",
+      "Pasta Portal",
+      "Burger Echo",
+      "Phantom Tacos",
+      "Almost Ramen",
+      "Pizza Shadow",
+      "Curry Mirror",
+      "Bao After Dark",
+      "Spectral Wings",
+      "Noodle Alias",
+      "Kebab Mirage",
+      "Sushi Duplicate",
+      "Invisible Brunch",
+      "Cloud Dumpling",
+      "Midnight Falafel",
+      "The Empty Ladle",
+      "Recursive Toast",
+      "Conceptual Chips",
+      "Parallel Pancake",
+      "Nocturnal Nachos",
+      "Dinner Pending",
+    ]
+    const dispatches = [
+      "A new cuisine has appeared behind the same door. Your rider is circling with confidence.",
+      "Two more menus accepted the order. The stairwell declined to comment.",
+      "Your meal is being prepared simultaneously by several names and no visible people.",
+      "A courier has collected the idea of your dinner. Physical food remains optional.",
+      "The district expanded its choice architecture. Your appetite has been escalated.",
+      "Another restaurant opened inside the previous restaurant. Estimated arrival remains recursive.",
+    ]
+    let kitchenCount = 0
+    let mealCount = 0
+    let orderCount = 0
+    let courierCount = 0
+
+    const addGhostKitchen = () => {
+      if (kitchenCount >= MAX_KITCHENS) return
+      const alias = document.createElement("article")
+      const name = restaurantNames[kitchenCount % restaurantNames.length]
+      alias.className = "gkd-alias"
+      alias.style.setProperty("--sign-color", colors[kitchenCount % colors.length])
+      alias.style.animationDelay = `${(kitchenCount % 7) * 90}ms`
+      alias.innerHTML = `${name}<small>collection: unit 0</small>`
+      aliases.append(alias)
+      kitchenCount = Math.min(MAX_KITCHENS, kitchenCount + 1)
+      kitchenReadout.textContent = String(kitchenCount)
+    }
+
+    const addCourier = () => {
+      if (courierCount >= MAX_COURIERS) return
+      const courier = document.createElement("span")
+      courier.className = "gkd-courier"
+      courier.style.setProperty("--courier-speed", `${4.2 + (courierCount % 5) * 0.65}s`)
+      courier.style.bottom = `${0.4 + (courierCount % 3) * 0.74}rem`
+      courier.innerHTML = '<span class="gkd-bike"></span><span class="gkd-bag">?</span>'
+      couriers.append(courier)
+      courierCount += 1
+      courier.addEventListener("animationend", () => {
+        courier.remove()
+        courierCount = Math.max(0, courierCount - 1)
+      })
+    }
+
+    for (let index = 0; index < 3; index += 1) addGhostKitchen()
+    addCourier()
+
+    orderButton.addEventListener("click", () => {
+      orderCount += 1
+      const aliasTarget = Math.min(MAX_KITCHENS, kitchenCount + 2)
+      while (kitchenCount < aliasTarget) addGhostKitchen()
+      for (let index = 0; index < Math.min(2 + orderCount, 5); index += 1) addCourier()
+      mealCount = 0
+      mealReadout.textContent = String(mealCount)
+      dispatch.textContent = dispatches[(orderCount - 1) % dispatches.length]
+    })
+
+    if (context) {
+      type SteamPuff = {
+        x: number
+        y: number
+        radius: number
+        velocity: number
+        drift: number
+        alpha: number
+      }
+
+      let puffs: SteamPuff[] = []
+      let width = 0
+      let height = 0
+      let animationFrame = 0
+
+      const makePuff = (): SteamPuff => ({
+        x: width * (0.22 + Math.random() * 0.58),
+        y: height * (0.48 + Math.random() * 0.33),
+        radius: 10 + Math.random() * 34,
+        velocity: 0.16 + Math.random() * 0.42,
+        drift: -0.14 + Math.random() * 0.28,
+        alpha: 0.025 + Math.random() * 0.065,
+      })
+
+      const resize = () => {
+        const ratio = Math.min(window.devicePixelRatio || 1, 2)
+        width = canvas.clientWidth
+        height = canvas.clientHeight
+        canvas.width = Math.floor(width * ratio)
+        canvas.height = Math.floor(height * ratio)
+        context.setTransform(ratio, 0, 0, ratio, 0, 0)
+        puffs = Array.from({ length: reducedMotion.matches ? 18 : MAX_STEAM }, makePuff)
+      }
+
+      const draw = () => {
+        context.clearRect(0, 0, width, height)
+        for (const puff of puffs) {
+          const gradient = context.createRadialGradient(
+            puff.x,
+            puff.y,
+            0,
+            puff.x,
+            puff.y,
+            puff.radius
+          )
+          gradient.addColorStop(0, `rgba(255, 190, 153, ${puff.alpha})`)
+          gradient.addColorStop(1, "rgba(255, 165, 153, 0)")
+          context.fillStyle = gradient
+          context.beginPath()
+          context.arc(puff.x, puff.y, puff.radius, 0, Math.PI * 2)
+          context.fill()
+
+          if (!reducedMotion.matches) {
+            puff.x += puff.drift
+            puff.y -= puff.velocity
+            puff.radius += 0.026
+            if (puff.y + puff.radius < 0) Object.assign(puff, makePuff())
+          }
+        }
+        if (!reducedMotion.matches) animationFrame = requestAnimationFrame(draw)
+      }
+
+      const restart = () => {
+        cancelAnimationFrame(animationFrame)
+        resize()
+        draw()
+      }
+
+      window.addEventListener("resize", resize)
+      reducedMotion.addEventListener("change", restart)
+      resize()
+      draw()
+    }
+  }
+</script>

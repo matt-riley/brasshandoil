@@ -1,0 +1,809 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="dc-shell">
+    <canvas id="garden-canvas" aria-label="A dark digital garden with floating NPM package nodes"></canvas>
+    <div class="dc-vignette" aria-hidden="true"></div>
+
+    <header class="dc-header">
+      <p class="dc-kicker">Dependency Accretion Terminal &middot; Field Study</p>
+      <h1>Dependency Caterpillar</h1>
+      <p class="dc-intro">A local project caterpillar crawls through the digital garden, consuming node modules to defend its architectural integrity.</p>
+    </header>
+
+    <div id="caterpillar" class="caterpillar-stage" aria-hidden="true">
+      <div id="caterpillar-head" class="caterpillar-head">
+        <span class="eye eye-left"></span>
+        <span class="eye eye-right"></span>
+      </div>
+      <div id="caterpillar-body">
+        <!-- Initial segments will be loaded dynamically -->
+        <div class="caterpillar-segment" style="transform: translate3d(200px, 200px, 0)">
+          <span class="segment-label">root</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Readout metrics HUD -->
+    <section class="dc-panel dc-readout" aria-live="polite">
+      <p class="dc-panel-label">Performance Rating</p>
+      <div class="dc-meter" aria-hidden="true"><span id="perf-bar"></span></div>
+      <strong id="performance-rating" class="dc-rating-value text-glow-green">Excellent</strong>
+      <div class="dc-rule"></div>
+      
+      <div class="dc-stat-row">
+        <div>
+          <p class="dc-panel-label">Total Dependencies</p>
+          <strong id="dependency-count" class="dc-number">1</strong>
+        </div>
+        <div>
+          <p class="dc-panel-label">Bundle Weight</p>
+          <strong id="bundle-size" class="dc-number dc-number-amber">0.05 MB</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optimization Panel -->
+    <section class="dc-panel dc-actions">
+      <p class="dc-panel-label">Module Optimization controls</p>
+      <p id="status-line" class="dc-status" aria-live="polite">
+        Caterpillar is lightweight. Snappy responsiveness detected.
+      </p>
+      <button id="optimize-btn" type="button">Optimize Project</button>
+      <p class="dc-fineprint">Warning: Optimization downloads nested helper wrappers. Results may vary.</p>
+    </section>
+
+    <footer class="dc-footer">
+      Move your pointer to steer the codebase.
+    </footer>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #040d0a;
+  }
+
+  .dc-shell {
+    --pointer-x: 50vw;
+    --pointer-y: 50vh;
+    position: relative;
+    min-height: calc(100vh - 4rem);
+    overflow: hidden;
+    isolation: isolate;
+    color: #e2f5ee;
+    background:
+      radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(16, 185, 129, 0.08), transparent 30rem),
+      linear-gradient(180deg, #051611 0%, #030d0a 100%);
+    font-family: "Courier New", Courier, monospace;
+    user-select: none;
+    touch-action: none;
+  }
+
+  #garden-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .dc-vignette {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
+  }
+
+  .dc-header,
+  .dc-panel,
+  .dc-footer {
+    position: absolute;
+    z-index: 8;
+  }
+
+  .dc-header {
+    top: clamp(1rem, 3vw, 2rem);
+    left: clamp(1rem, 4vw, 3rem);
+    max-width: 32rem;
+    text-shadow: 0 0 1rem rgba(0, 0, 0, 0.9);
+  }
+
+  .dc-kicker,
+  .dc-panel-label,
+  .dc-fineprint,
+  .dc-footer {
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .dc-kicker {
+    margin: 0 0 0.45rem;
+    color: #52b788;
+    font-size: 0.6rem;
+  }
+
+  h1 {
+    margin: 0;
+    color: #a3f7bf;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2rem, 5.5vw, 4.2rem);
+    font-weight: 400;
+    letter-spacing: -0.05em;
+    line-height: 0.95;
+    text-shadow: 0 0 2rem rgba(52, 211, 153, 0.25);
+  }
+
+  .dc-intro {
+    margin: 0.75rem 0 0;
+    color: rgba(226, 245, 238, 0.75);
+    font-size: clamp(0.7rem, 1.6vw, 0.86rem);
+    line-height: 1.5;
+  }
+
+  /* Caterpillar Styling */
+  .caterpillar-stage {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .caterpillar-head {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    background: radial-gradient(circle at 35% 35%, #52b788, #1b4332);
+    border: 2px solid #74c69d;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(82, 183, 136, 0.6);
+    z-index: 10;
+  }
+
+  .eye {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    top: 14px;
+    box-shadow: 0 0 4px #fff;
+  }
+
+  .eye::after {
+    content: "";
+    position: absolute;
+    width: 2.5px;
+    height: 2.5px;
+    background: #000;
+    border-radius: 50%;
+    top: 1.5px;
+    left: 1.5px;
+  }
+
+  .eye-left { left: 12px; }
+  .eye-right { right: 12px; }
+
+  .caterpillar-segment {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    background: radial-gradient(circle at 35% 35%, rgba(45, 106, 79, 0.85), rgba(8, 28, 21, 0.95));
+    border: 1px solid rgba(82, 183, 136, 0.4);
+    border-radius: 50%;
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 8px rgba(45, 106, 79, 0.3);
+    transition: transform 0.05s linear;
+  }
+
+  .segment-label {
+    font-size: 8px;
+    color: #74c69d;
+    max-width: 32px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
+  /* HUD Panels */
+  .dc-panel {
+    padding: 0.9rem 1.1rem;
+    border: 1px solid rgba(82, 183, 136, 0.25);
+    background: rgba(4, 20, 15, 0.8);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+  }
+
+  .dc-readout {
+    left: clamp(1rem, 4vw, 3rem);
+    bottom: clamp(2.4rem, 5vw, 3.4rem);
+    width: min(16rem, calc(100% - 2rem));
+  }
+
+  .dc-actions {
+    right: clamp(1rem, 4vw, 3rem);
+    bottom: clamp(2.4rem, 5vw, 3.4rem);
+    width: min(22rem, calc(100% - 2rem));
+  }
+
+  .dc-panel-label,
+  .dc-fineprint {
+    margin: 0;
+    color: #74c69d;
+    font-size: 0.55rem;
+    line-height: 1.5;
+  }
+
+  .dc-meter {
+    height: 0.35rem;
+    margin: 0.5rem 0 0.35rem;
+    overflow: hidden;
+    background: rgba(82, 183, 136, 0.12);
+    border-radius: 2px;
+  }
+
+  .dc-meter span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform-origin: left center;
+  }
+
+  .dc-rating-value {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 2rem;
+    font-weight: 400;
+  }
+
+  .text-glow-green {
+    color: #52b788;
+    text-shadow: 0 0 10px rgba(82, 183, 136, 0.4);
+  }
+  .text-glow-amber {
+    color: #f59e0b;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  }
+  .text-glow-red {
+    color: #ef4444;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  }
+
+  .dc-rule {
+    height: 1px;
+    margin: 0.75rem 0;
+    background: rgba(82, 183, 136, 0.18);
+  }
+
+  .dc-stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .dc-number {
+    color: #a3f7bf;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+  }
+
+  .dc-number-amber {
+    color: #fdd87f;
+  }
+
+  .dc-status {
+    min-height: 2.8rem;
+    margin: 0.55rem 0 0.65rem;
+    color: #d8f3dc;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  #optimize-btn {
+    width: 100%;
+    border: 1px solid #1b4332;
+    padding: 0.75rem 1rem;
+    color: #04100c;
+    background: linear-gradient(180deg, #52b788, #2d6a4f);
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.4);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: transform 0.1s ease, filter 0.15s ease;
+  }
+
+  #optimize-btn:hover {
+    filter: brightness(1.15);
+  }
+
+  #optimize-btn:active {
+    transform: translateY(2px);
+  }
+
+  .dc-fineprint {
+    margin-top: 0.7rem;
+    color: rgba(116, 198, 157, 0.6);
+    font-size: 0.48rem;
+  }
+
+  .dc-footer {
+    right: 1.5rem;
+    bottom: 0.8rem;
+    color: rgba(116, 198, 157, 0.4);
+    font-size: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .dc-readout {
+      left: 0.75rem;
+      bottom: 12rem;
+      width: min(15rem, calc(100% - 1.5rem));
+    }
+
+    .dc-actions {
+      right: 0.75rem;
+      bottom: 1.8rem;
+      width: min(22rem, calc(100% - 1.5rem));
+    }
+
+    .dc-footer {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .caterpillar-segment,
+    .caterpillar-head {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  // Ensure we get semantic DOM nodes
+  const shell = document.querySelector(".dc-shell") as HTMLElement | null
+  const canvas = document.getElementById("garden-canvas") as HTMLCanvasElement | null
+  const optimizeBtn = document.getElementById("optimize-btn") as HTMLButtonElement | null
+  const statusLine = document.getElementById("status-line") as HTMLParagraphElement | null
+  const dependencyCount = document.getElementById("dependency-count") as HTMLElement | null
+  const bundleSize = document.getElementById("bundle-size") as HTMLElement | null
+  const performanceRating = document.getElementById("performance-rating") as HTMLElement | null
+  const perfBar = document.getElementById("perf-bar") as HTMLSpanElement | null
+  const caterpillar = document.getElementById("caterpillar") as HTMLElement | null
+  const caterpillarHead = document.getElementById("caterpillar-head") as HTMLElement | null
+  const caterpillarBody = document.getElementById("caterpillar-body") as HTMLElement | null
+
+  if (
+    shell instanceof HTMLElement &&
+    canvas instanceof HTMLCanvasElement &&
+    optimizeBtn instanceof HTMLButtonElement &&
+    statusLine instanceof HTMLParagraphElement &&
+    dependencyCount instanceof HTMLElement &&
+    bundleSize instanceof HTMLElement &&
+    performanceRating instanceof HTMLElement &&
+    perfBar instanceof HTMLSpanElement &&
+    caterpillar instanceof HTMLElement &&
+    caterpillarHead instanceof HTMLElement &&
+    caterpillarBody instanceof HTMLElement
+  ) {
+    const activeShell = shell
+    const activeCanvas = canvas
+    const activeOptimizeBtn = optimizeBtn
+    const activeStatusLine = statusLine
+    const activeDependencyCount = dependencyCount
+    const activeBundleSize = bundleSize
+    const activePerformanceRating = performanceRating
+    const activePerfBar = perfBar
+    const activeCaterpillar = caterpillar
+    const activeCaterpillarHead = caterpillarHead
+    const activeCaterpillarBody = caterpillarBody
+
+    const ctx = activeCanvas.getContext("2d")
+    if (ctx) {
+      const activeCtx = ctx
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      
+      // News constraints: The caterpillar eats dependencies to shield itself (like "Bone Collector" Caterpillar).
+      // Satire: "Optimizing" actually bloats the code with wrapper packages.
+      const packagesPool = [
+        "left-pad",
+        "is-even",
+        "is-odd",
+        "lodash.clonedeep",
+        "react-compat-layer",
+        "tailwindcss-injector",
+        "sentry-error-swallower",
+        "moment-timezone-data-2012",
+        "jquery-bootstrap-bridge",
+        "clean-webpack-plugin-wrapper",
+        "lighthouse-score-booster",
+        "object-assign-polyfill",
+        "axios-retry-interceptor",
+        "regenerator-runtime",
+        "core-js-pure-stable",
+        "babel-polyfill-helper",
+        "optimise-package-helper",
+        "unused-assets-hoarder",
+        "safe-buffer-utils",
+        "es6-promise-shim",
+        "chalk-ansi-strip-compat",
+        "ts-loader-config-decorator"
+      ]
+
+      const statuses = [
+        "Caterpillar is lightweight. Snappy responsiveness detected.",
+        "Added wrapper modules. Memory is starting to feel warm.",
+        "Deeper call stack detected. Jitter limits rising.",
+        "Optimization layer 4 engaged. Motion lag simulation active.",
+        "Heavy defensive shielding. Architectural bloat rating: high.",
+        "Warning: critical package gravity. Bundle weight threatens locally hosted file systems.",
+        "Optimization complete. Codebase is now a static sculpture."
+      ]
+
+      let width = 0
+      let height = 0
+      let dpr = 1
+      
+      // Stats state
+      let packageList = ["root"]
+      let currentSize = 0.05 // MB
+      let currentPerf = 100 // %
+
+      // Physics state
+      let pointerX = window.innerWidth / 2
+      let pointerY = window.innerHeight / 2
+      
+      // Smooth tail positions
+      interface Segment {
+        x: number
+        y: number
+        element: HTMLElement
+        label: string
+      }
+
+      // Initialize list of segments
+      const segments: Segment[] = []
+
+      // Create initial body segments
+      const initialElements = activeCaterpillarBody.querySelectorAll(".caterpillar-segment")
+      initialElements.forEach((el, index) => {
+        const segmentEl = el as HTMLElement
+        segments.push({
+          x: pointerX - (index + 1) * 30,
+          y: pointerY,
+          element: segmentEl,
+          label: "root"
+        })
+      })
+
+      let headX = pointerX
+      let headY = pointerY
+
+      // Garden canvas debris (floating uninstalled nodes)
+      interface Mote {
+        x: number
+        y: number
+        size: number
+        speed: number
+        text: string
+        angle: number
+        rotationSpeed: number
+      }
+
+      let motes: Mote[] = []
+      const MAX_MOTES = 25
+
+      function makeMote(): Mote {
+        return {
+          x: Math.random() * width,
+          y: height + 20,
+          size: 8 + Math.random() * 12,
+          speed: 0.4 + Math.random() * 0.8,
+          text: packagesPool[Math.floor(Math.random() * packagesPool.length)],
+          angle: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.02
+        }
+      }
+
+      function resize() {
+        const rect = activeCanvas.getBoundingClientRect()
+        width = rect.width
+        height = rect.height
+        dpr = Math.min(window.devicePixelRatio || 1, 2)
+        activeCanvas.width = Math.floor(width * dpr)
+        activeCanvas.height = Math.floor(height * dpr)
+        activeCtx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+        if (motes.length === 0) {
+          motes = Array.from({ length: reduceMotion ? 8 : MAX_MOTES }, () => {
+            const mote = makeMote()
+            mote.y = Math.random() * height
+            return mote
+          })
+        }
+      }
+
+      // Play pluck sound using simple oscillator
+      let audioCtx: AudioContext | null = null
+
+      function playPluck(frequency: number, duration: number) {
+        try {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+          }
+          if (audioCtx.state === "suspended") {
+            audioCtx.resume()
+          }
+
+          const osc = audioCtx.createOscillator()
+          const gainNode = audioCtx.createGain()
+
+          osc.type = "sine"
+          // Pitch gets lower (heavier) as size grows
+          const count = packageList.length
+          const pitchFactor = Math.max(0.2, 1 - count * 0.04)
+          osc.frequency.setValueAtTime(frequency * pitchFactor, audioCtx.currentTime)
+
+          // Karplus-strong acoustic pluck imitation: quick attack, exponential decay
+          gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime)
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration)
+
+          osc.connect(gainNode)
+          gainNode.connect(audioCtx.destination)
+
+          osc.start()
+          osc.stop(audioCtx.currentTime + duration)
+        } catch (e) {
+          // Web Audio blocked or not supported
+        }
+      }
+
+      function addDependency() {
+        const newPackage = packagesPool[(packageList.length - 1) % packagesPool.length]
+        packageList.push(newPackage)
+
+        // Increment counts
+        const count = packageList.length
+        
+        // Satirical accretion formulas
+        // Weight goes up non-linearly
+        const weightIncrease = Math.max(0.1, Math.min(12.4, Math.pow(count, 1.2) * 0.15))
+        currentSize += weightIncrease
+
+        // Performance drops
+        currentPerf = Math.max(3, 100 - count * 4.5)
+
+        // Update readouts
+        activeDependencyCount.textContent = `${count}`
+        activeBundleSize.textContent = `${currentSize.toFixed(2)} MB`
+        
+        // Update bar chart
+        activePerfBar.style.transform = `scaleX(${currentPerf / 100})`
+
+        // Rating rating text
+        let ratingStr = "Excellent"
+        let statusIdx = 0
+        if (currentPerf > 85) {
+          ratingStr = "Excellent"
+          activePerformanceRating.className = "dc-rating-value text-glow-green"
+          statusIdx = 0
+        } else if (currentPerf > 65) {
+          ratingStr = "Satisfactory"
+          activePerformanceRating.className = "dc-rating-value text-glow-green"
+          statusIdx = 1
+        } else if (currentPerf > 45) {
+          ratingStr = "Degraded"
+          activePerformanceRating.className = "dc-rating-value text-glow-amber"
+          statusIdx = 2
+        } else if (currentPerf > 25) {
+          ratingStr = "Critical Lag"
+          activePerformanceRating.className = "dc-rating-value text-glow-amber"
+          statusIdx = 3
+        } else if (currentPerf > 10) {
+          ratingStr = "Excessive Bloat"
+          activePerformanceRating.className = "dc-rating-value text-glow-red"
+          statusIdx = 4
+        } else {
+          ratingStr = "Static Sculpture"
+          activePerformanceRating.className = "dc-rating-value text-glow-red"
+          statusIdx = 5
+        }
+
+        if (count > 15) {
+          statusIdx = 6
+        }
+
+        activePerformanceRating.textContent = ratingStr
+        activeStatusLine.textContent = statuses[statusIdx]
+
+        // Create new DOM segment
+        const newSegEl = document.createElement("div")
+        newSegEl.className = "caterpillar-segment"
+        
+        // Randomise HSL colors to look like layered defensive shields
+        // As it grows, the segments look heavier and turn slightly rust-red or gold
+        const hue = Math.max(20, 140 - count * 5)
+        newSegEl.style.border = `1px solid hsl(${hue}, 70%, 55%)`
+        newSegEl.style.boxShadow = `0 0 12px hsla(${hue}, 70%, 50%, 0.4)`
+        
+        const labelSpan = document.createElement("span")
+        labelSpan.className = "segment-label"
+        labelSpan.textContent = newPackage
+        newSegEl.appendChild(labelSpan)
+        
+        activeCaterpillarBody.appendChild(newSegEl)
+
+        // Find last segment coordinate or stack at head
+        const lastSeg = segments[segments.length - 1]
+        segments.push({
+          x: lastSeg ? lastSeg.x - 20 : headX - 20,
+          y: lastSeg ? lastSeg.y : headY,
+          element: newSegEl,
+          label: newPackage
+        })
+
+        // Sound feedback: Pluck pitch is based on package count
+        playPluck(220, 0.8)
+      }
+
+      activeOptimizeBtn.addEventListener("click", () => {
+        addDependency()
+      })
+
+      // Steer codebase
+      activeShell.addEventListener("pointermove", (e) => {
+        const rect = activeShell.getBoundingClientRect()
+        pointerX = e.clientX - rect.left
+        pointerY = e.clientY - rect.top
+        activeShell.style.setProperty("--pointer-x", `${pointerX}px`)
+        activeShell.style.setProperty("--pointer-y", `${pointerY}px`)
+      })
+
+      // Support canvas motes drawing
+      function drawGarden() {
+        activeCtx.clearRect(0, 0, width, height)
+
+        // Draw connections between motes that are close (dependency graph style)
+        if (!reduceMotion) {
+          activeCtx.strokeStyle = "rgba(82, 183, 136, 0.04)"
+          activeCtx.lineWidth = 1
+          for (let i = 0; i < motes.length; i++) {
+            for (let j = i + 1; j < motes.length; j++) {
+              const dx = motes[i].x - motes[j].x
+              const dy = motes[i].y - motes[j].y
+              const d = Math.hypot(dx, dy)
+              if (d < 120) {
+                activeCtx.beginPath()
+                activeCtx.moveTo(motes[i].x, motes[i].y)
+                activeCtx.lineTo(motes[j].x, motes[j].y)
+                activeCtx.stroke()
+              }
+            }
+          }
+        }
+
+        // Draw motes
+        for (const mote of motes) {
+          mote.y -= mote.speed
+          mote.angle += mote.rotationSpeed
+          
+          if (mote.y < -30) {
+            Object.assign(mote, makeMote())
+          }
+
+          activeCtx.save()
+          activeCtx.translate(mote.x, mote.y)
+          activeCtx.rotate(mote.angle)
+
+          // Node shape: leaf or code brackets
+          activeCtx.strokeStyle = "rgba(82, 183, 136, 0.16)"
+          activeCtx.fillStyle = "rgba(45, 106, 79, 0.08)"
+          activeCtx.lineWidth = 1.5
+
+          activeCtx.beginPath()
+          activeCtx.arc(0, 0, mote.size, 0, Math.PI * 2)
+          activeCtx.fill()
+          activeCtx.stroke()
+
+          // Draw a small node core
+          activeCtx.fillStyle = "rgba(116, 198, 157, 0.3)"
+          activeCtx.beginPath()
+          activeCtx.arc(0, 0, 3, 0, Math.PI * 2)
+          activeCtx.fill()
+
+          // Draw package name tag
+          activeCtx.font = "9px monospace"
+          activeCtx.fillStyle = "rgba(116, 198, 157, 0.45)"
+          activeCtx.textAlign = "center"
+          activeCtx.fillText(mote.text, 0, mote.size + 11)
+
+          activeCtx.restore()
+        }
+      }
+
+      function animate() {
+        drawGarden()
+
+        // Physics tick: head follows pointer with lerp.
+        // As packages accumulate, lerp slows down (heavy lag)
+        const count = packageList.length
+        const baseLerp = 0.16
+        // Strong inverse relationship simulates massive lag
+        const lerpFactor = baseLerp / (1 + (count - 1) * 0.18)
+
+        // Make the head shake a little bit if it's struggling/heavy
+        let shakeX = 0
+        let shakeY = 0
+        if (count > 5 && !reduceMotion) {
+          const shakeMag = Math.min(8, (count - 5) * 0.5)
+          shakeX = (Math.random() - 0.5) * shakeMag
+          shakeY = (Math.random() - 0.5) * shakeMag
+        }
+
+        headX += (pointerX - headX) * lerpFactor
+        headY += (pointerY - headY) * lerpFactor
+
+        activeCaterpillarHead.style.transform = `translate3d(${headX - 23 + shakeX}px, ${headY - 23 + shakeY}px, 0)`
+
+        // Body segments follow the head / segment in front of them
+        let prevX = headX
+        let prevY = headY
+        
+        for (let i = 0; i < segments.length; i++) {
+          const seg = segments[i]
+          const dx = prevX - seg.x
+          const dy = prevY - seg.y
+          const dist = Math.hypot(dx, dy)
+          
+          // As caterpillar gets heavier, distance between segments expands slightly (bloating)
+          const targetDist = 26 + Math.min(10, count * 0.3)
+          
+          if (dist > targetDist) {
+            const ratio = targetDist / dist
+            seg.x = prevX - dx * ratio
+            seg.y = prevY - dy * ratio
+          }
+          
+          seg.element.style.transform = `translate3d(${seg.x - 19}px, ${seg.y - 19}px, 0)`
+          
+          prevX = seg.x
+          prevY = seg.y
+        }
+
+        requestAnimationFrame(animate)
+      }
+
+      window.addEventListener("resize", resize)
+      
+      // Seed initial segment positions snappily
+      headX = pointerX
+      headY = pointerY
+      segments.forEach(seg => {
+        seg.x = pointerX
+        seg.y = pointerY
+      })
+
+      resize()
+      animate()
+    }
+  }
+</script>
