@@ -120,8 +120,22 @@ test("scroll symphony responds to scroll progress in the rendered page", async (
   await expect(page.locator("#instruction-hud")).toContainText("Scroll Symphony")
   await expect(page.locator("#progress-bar")).toHaveCSS("width", "0px")
 
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-  await expect(page.locator("#progress-bar")).not.toHaveCSS("width", "0px")
+  await page.evaluate(() => {
+    const scrollTarget = document.documentElement.scrollHeight - window.innerHeight
+    window.scrollTo(0, scrollTarget)
+    window.dispatchEvent(new Event("scroll"))
+  })
+
+  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  await expect
+    .poll(async () => {
+      const width = await page.locator("#progress-bar").evaluate((element) => {
+        return Number.parseFloat(getComputedStyle(element).width)
+      })
+
+      return width
+    })
+    .toBeGreaterThan(0)
 })
 
 test("sentient monolith renders reactive text in the browser", async ({ page }) => {
