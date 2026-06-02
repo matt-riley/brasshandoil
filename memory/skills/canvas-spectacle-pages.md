@@ -25,6 +25,10 @@
    to near. Filling every ring interior will let the nearest pass erase the depth behind it.
 8. Cap redraw frequency when an atmospheric loop creates gradients or other expensive paint
    work. A steady 30 FPS is often enough for ambience and leaves interaction responsive.
+9. Keep structural perspective bands anchored during walk animations. Move the camera with a
+   small eased bob instead of sliding dark ribs toward the viewer, which can read as flashing.
+10. Full-bleed experiment stages should still fit below shared site chrome. Size the canvas from
+   its stage element and keep HUD layers local to that stage rather than the browser viewport.
 
 ## Review Questions
 

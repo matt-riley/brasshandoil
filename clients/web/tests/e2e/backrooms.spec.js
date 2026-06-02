@@ -67,6 +67,27 @@ test("corridor renders visible perspective depth", async ({ page }) => {
   expect(depthBands).toBeGreaterThan(8)
 })
 
+test("corridor fits below the shared site header", async ({ page }) => {
+  await page.goto("/experiments/backrooms")
+  await expect(page.locator("#corridor")).toBeVisible()
+
+  const layout = await page.evaluate(() => {
+    const header = document.querySelector("body > header")
+    const shell = document.querySelector("#backrooms-shell")
+    const canvas = document.querySelector("#corridor")
+
+    return {
+      headerBottom: header?.getBoundingClientRect().bottom,
+      shellTop: shell?.getBoundingClientRect().top,
+      shellHeight: shell?.clientHeight,
+      canvasCssHeight: canvas?.getBoundingClientRect().height,
+    }
+  })
+
+  expect(layout.shellTop).toBeGreaterThanOrEqual(layout.headerBottom)
+  expect(layout.canvasCssHeight).toBe(layout.shellHeight)
+})
+
 test("wall notes appear after enough steps", async ({ page }) => {
   await page.goto("/experiments/backrooms")
   await expect(page.locator("#corridor")).toBeVisible()

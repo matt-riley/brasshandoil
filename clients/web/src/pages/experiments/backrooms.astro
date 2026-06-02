@@ -28,7 +28,7 @@ import Base from "@layouts/Base.astro"
 
   #backrooms-shell {
     position: fixed;
-    inset: 0;
+    inset: 6rem 0 0;
     overflow: hidden;
     background: #4a4228;
     font-family: 'VT323', monospace;
@@ -56,7 +56,7 @@ import Base from "@layouts/Base.astro"
   }
 
   #hud {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -94,7 +94,7 @@ import Base from "@layouts/Base.astro"
   }
 
   #notes-overlay {
-    position: fixed;
+    position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 6;
@@ -112,7 +112,7 @@ import Base from "@layouts/Base.astro"
   }
 
   #vignette {
-    position: fixed;
+    position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 5;
@@ -125,7 +125,7 @@ import Base from "@layouts/Base.astro"
 
   #mobile-controls {
     display: none;
-    position: fixed;
+    position: absolute;
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
@@ -178,6 +178,12 @@ import Base from "@layouts/Base.astro"
       font-size: 36px;
     }
   }
+
+  @media (max-width: 600px) {
+    #backrooms-shell {
+      inset-block-start: 5rem;
+    }
+  }
 </style>
 
 <script>
@@ -221,17 +227,17 @@ import Base from "@layouts/Base.astro"
   }
 
   function resize(): void {
-    canvas.width = window.innerWidth * window.devicePixelRatio;
-    canvas.height = window.innerHeight * window.devicePixelRatio;
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
+    canvas.width = shell.clientWidth * window.devicePixelRatio;
+    canvas.height = shell.clientHeight * window.devicePixelRatio;
+    canvas.style.width = shell.clientWidth + "px";
+    canvas.style.height = shell.clientHeight + "px";
     ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
   }
   resize();
   window.addEventListener("resize", resize);
 
-  const W = (): number => window.innerWidth;
-  const H = (): number => window.innerHeight;
+  const W = (): number => shell.clientWidth;
+  const H = (): number => shell.clientHeight;
 
   function rgb(r: number, g: number, b: number): string {
     return `rgb(${Math.floor(r)}, ${Math.floor(g)}, ${Math.floor(b)})`;
@@ -263,19 +269,17 @@ import Base from "@layouts/Base.astro"
   }
 
   function ringAt(i: number, cx: number, cy: number, w: number, h: number, rings: number): Ring {
-    const t = (i - offset) / rings;
+    const t = i / rings;
     const depth = Math.pow(Math.max(0, t), 1.4);
     const rw = 6 + (w / 2 - 6) * (1 - depth);
     const rh = 6 + (h / 2 - 6) * (1 - depth);
     const brightness = 0.35 + 0.65 * (1 - depth);
-    const flickerSeed = (i + steps) * 7.3;
-    const flicker = Math.sin(flickerSeed + performance.now() * 0.003) > 0.93 ? 0.4 : 1;
     return {
       left: cx - rw,
       right: cx + rw,
       top: cy - rh,
       bottom: cy + rh,
-      bright: brightness * flicker,
+      bright: brightness,
     };
   }
 
@@ -288,8 +292,9 @@ import Base from "@layouts/Base.astro"
     ctx.fillStyle = "#4a4228";
     ctx.fillRect(0, 0, w, h);
 
+    const walkBob = Math.sin(offset * Math.PI);
     const cx = w / 2 + lookX * 80;
-    const cy = h / 2 + 10; // slightly below center for more floor
+    const cy = h / 2 + 10 + walkBob * 4; // footstep bob without moving structural bands
     const rings = 16;
 
     // Paint the distant wall once. Repainting each ring's interior would erase
@@ -385,17 +390,18 @@ import Base from "@layouts/Base.astro"
         const ceilMidY = (outer.top + inner.top) / 2;
         const lightW = (outer.right - outer.left) * 0.25;
         const lightH = Math.max(3, (outer.bottom - outer.top) * 0.012);
+        const flicker = Math.sin(i * 7.3 + performance.now() * 0.003) > 0.97 ? 0.7 : 1;
 
         // Big glow
         const glow = ctx.createRadialGradient(lx, ceilMidY, 0, lx, ceilMidY, lightW * 3);
-        glow.addColorStop(0, `rgba(255, 255, 220, ${0.25 * b})`);
-        glow.addColorStop(0.5, `rgba(255, 255, 200, ${0.08 * b})`);
+        glow.addColorStop(0, `rgba(255, 255, 220, ${0.25 * b * flicker})`);
+        glow.addColorStop(0.5, `rgba(255, 255, 200, ${0.08 * b * flicker})`);
         glow.addColorStop(1, "rgba(255, 255, 200, 0)");
         ctx.fillStyle = glow;
         ctx.fillRect(lx - lightW * 3, ceilMidY - lightW * 2, lightW * 6, lightW * 4);
 
         // Light tube — bright white-yellow
-        ctx.fillStyle = `rgba(255, 255, 235, ${0.95 * b})`;
+        ctx.fillStyle = `rgba(255, 255, 235, ${0.95 * b * flicker})`;
         ctx.fillRect(lx - lightW / 2, ceilMidY - lightH / 2, lightW, lightH);
         // Tube border
         ctx.strokeStyle = `rgba(200, 200, 180, ${0.5 * b})`;
