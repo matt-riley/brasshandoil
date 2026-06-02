@@ -55,10 +55,10 @@ test("turning pegs alters alignment displays", async ({ page }) => {
 
 test("strumming strings accumulates compliance leakage", async ({ page }) => {
   await page.goto("/experiments/mimetic-tuner")
-  await page.locator("#calibrate-switch").click()
-
   const meterVal = page.locator("#leakage-value")
   await expect(meterVal).toHaveText("0%")
+
+  await page.locator("#calibrate-switch").click()
 
   // Move pointer over a string hover zone to trigger a pluck
   const stringHover = page.locator('.air-string-hover[data-string="2"]')
@@ -66,8 +66,9 @@ test("strumming strings accumulates compliance leakage", async ({ page }) => {
   expect(box).not.toBeNull()
   const b = box ?? { x: 0, y: 0, width: 20, height: 400 }
 
-  // Hover over the string zone
-  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2)
+  // Strum across the string zone
+  await page.mouse.move(b.x - 10, b.y + b.height / 2)
+  await page.mouse.move(b.x + 30, b.y + b.height / 2, { steps: 5 })
   await page.waitForTimeout(100)
 
   // Meter value should have increased

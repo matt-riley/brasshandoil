@@ -484,6 +484,25 @@ const items = [
       font-size: 0.82rem;
       align-items: baseline;
     }
+    @media (max-width: 600px) {
+      .ledger-entry {
+        grid-template-columns: auto 1fr;
+        gap: 0.25rem 0.6rem;
+      }
+      .ledger-time {
+        grid-column: 1;
+      }
+      .ledger-tag {
+        grid-column: 2;
+      }
+      .ledger-label {
+        grid-column: 1 / -1;
+      }
+      .ledger-reason {
+        grid-column: 1 / -1;
+        opacity: 0.5;
+      }
+    }
     .ledger-time { font-variant-numeric: tabular-nums; opacity: 0.6; }
     .ledger-tag { color: var(--oet-rust); font-weight: 700; letter-spacing: 0.1em; font-size: 0.7rem; }
     .ledger-label { font-style: italic; }

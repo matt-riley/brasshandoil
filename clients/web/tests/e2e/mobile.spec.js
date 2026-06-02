@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test"
 
 const pages = [
   "/",
+  "/blog",
+  "/blog/post-1",
   "/experiments",
   "/experiments/abyssal-naming-committee",
   "/experiments/anxiety-engine",
@@ -9,6 +11,8 @@ const pages = [
   "/experiments/boatfire-regatta",
   "/experiments/chrono-calibration",
   "/experiments/complaint-received",
+  "/experiments/dependency-caterpillar",
+  "/experiments/ghost-kitchen-district",
   "/experiments/lost-and-found-futures",
   "/experiments/mimetic-tuner",
   "/experiments/moth-oracle",

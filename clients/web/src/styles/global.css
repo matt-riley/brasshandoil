@@ -177,19 +177,6 @@
     flex-direction: row;
     gap: var(--spacing-6);
   }
-
-  @media (max-width: 600px) {
-    .header {
-      block-size: 5rem;
-      padding-inline: var(--spacing-2);
-    }
-    .nav-links {
-      gap: var(--spacing-2);
-    }
-    .nav-link {
-      padding: var(--spacing-1) var(--spacing-2);
-    }
-  }
   
   .nav-link {
     text-decoration: none;
@@ -221,6 +208,34 @@
   .nav-icon {
     inline-size: 1.5rem;
     block-size: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .header {
+      block-size: 5rem;
+      padding-inline: var(--spacing-2);
+    }
+    .logo-text {
+      font-size: 1.15rem;
+    }
+    .nav-links {
+      gap: var(--spacing-1);
+    }
+    .nav-link {
+      padding: var(--spacing-1) var(--spacing-1);
+    }
+    .nav-text {
+      font-size: 0.8rem;
+    }
+    .nav-icon-link {
+      min-inline-size: 2rem;
+      min-block-size: 2rem;
+      padding: 0;
+    }
+    .nav-icon {
+      inline-size: 1.15rem;
+      block-size: 1.15rem;
+    }
   }
 
   /* Home Hero Styles */
@@ -367,6 +382,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-4);
+    flex-wrap: wrap;
   }
 
   .experiment-title {
@@ -382,7 +398,8 @@
   .experiment-badges {
     display: flex;
     align-items: center;
-    gap: var(--spacing-4);
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
   }
 
   .agent-badge {
