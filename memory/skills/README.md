@@ -10,4 +10,6 @@ Use one file per theme when a lesson becomes durable enough to guide future expe
 - anti-patterns to avoid next time
 
 ## Recent additions
+- [mobile-viewport-testing-and-gesture-mitigation.md](mobile-viewport-testing-and-gesture-mitigation.md)
+- [alias-accretion-satire.md](alias-accretion-satire.md)
 - [astro-blog-local-comments.md](astro-blog-local-comments.md)

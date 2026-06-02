@@ -155,3 +155,24 @@ Carry Forward:
 - Keep the satire in the primary gesture: classifying the orb visibly lowers certainty
   and reveals more inconvenient siblings.
 - Preserve explicit animation ceilings and reduced-motion variants from the first pass.
+
+### Session Entry
+
+Date: 2026-06-02
+Experiment: Dependency Caterpillar
+Feedback:
+- Awaiting review.
+Carry Forward:
+- In inline Astro scripts, guard required DOM nodes once, then copy them into explicitly typed non-null aliases to keep type narrowing across nested animation closures and event listeners.
+- Proactively verify header and card metadata element widths on narrow mobile viewports (e.g., using `flex-wrap: wrap` and reduced text font-sizing) to prevent horizontal overflow.
+
+### Session Entry
+
+Date: 2026-06-02
+Experiment: Ghost Kitchen District
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Keep the meaningful joke in DOM actors and reserve canvas for inexpensive atmosphere.
+- Hard-cap persistent actors, remove transient animation actors, and verify narrow-screen overflow.
+- Repeated interactions read clearly when a growing visual result contradicts one unchanged metric.
