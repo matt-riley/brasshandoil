@@ -1,0 +1,605 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div id="pigeon-shell">
+    <h1>Pigeon Magnetoreception Simulator</h1>
+    <p class="subtitle">Scientists discovered iron-filled cells in your liver act as magnetic sensors.<br>You are a pigeon. Navigate home. You cannot see. You can only <em>feel</em>.</p>
+
+    <div id="flight-area">
+      <canvas id="field-canvas" width="700" height="700"></canvas>
+      
+      <div id="instructions-card">
+        <h3>FLIGHT DIRECTIVE</h3>
+        <p>Scientists discovered iron-filled cells in pigeon livers act as magnetic sensors. You are a pigeon. Navigate home blind using only your hepatic ferromagnetic sense.</p>
+        <div class="control-hints">
+          <p><strong>Controls:</strong></p>
+          <ul>
+            <li><strong>Mouse/Touch:</strong> Click and drag / move pointer inside area to steer</li>
+            <li><strong>Keyboard:</strong> Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to fly</li>
+          </ul>
+          <p><strong>Feedback:</strong> Watch the <strong>LIVER SIGNAL</strong>. It rises and glows green as you approach home.</p>
+        </div>
+        <button id="close-instructions-btn" type="button">BEGIN FLIGHT</button>
+      </div>
+
+      <div id="hud-overlay">
+        <div id="status">Click to fly</div>
+        <div id="magnetic-signal">—</div>
+        <div id="distance"></div>
+        <div id="compass-reading"></div>
+      </div>
+      <div id="arrival-message">
+        <h2>HOME ROOST REACHED</h2>
+        <p class="paper-title">Published in: <em>Journal of Implausible Avian Navigation</em></p>
+        <p class="abstract"><strong>Abstract:</strong> A single <em>Columba livia</em> specimen successfully navigated
+        <span id="total-distance">0</span> arbitrary units using hepatic ferromagnetic organelles alone,
+        confirming the hypothesis that pigeons do not need eyes, maps, or dignity.
+        The specimen's flight path has been described as "chaotic but endearing."</p>
+        <p class="footnote">Funding: The Brass Hand Oil Foundation for Unnecessary Ornithology</p>
+      </div>
+    </div>
+
+    <div id="trail-log"></div>
+  </div>
+</Base>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap');
+
+  #pigeon-shell {
+    position: fixed;
+    inset: 0;
+    background: #0a0a12;
+    color: #c8d0e0;
+    font-family: 'IBM Plex Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    overflow: hidden;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    color: #7eb8da;
+    margin: 0 0 0.3rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+    color: #667;
+    text-align: center;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+  }
+
+  #flight-area {
+    position: relative;
+    width: 700px;
+    height: 700px;
+    max-width: 90vw;
+    max-height: 60vh;
+    border: 1px solid #1a2a3a;
+    cursor: crosshair;
+    overflow: hidden;
+    background: #060610;
+    touch-action: none;
+  }
+
+  #field-canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  #hud-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  #status {
+    color: #f0c040;
+  }
+
+  #magnetic-signal {
+    color: #40f0a0;
+    font-weight: 700;
+  }
+
+  #distance {
+    color: #a080f0;
+  }
+
+  #compass-reading {
+    color: #f08040;
+  }
+
+  #arrival-message {
+    display: none;
+    position: absolute;
+    inset: 10%;
+    background: #fffff0;
+    color: #1a1a1a;
+    padding: 2rem;
+    font-family: 'Times New Roman', serif;
+    border: 2px solid #333;
+    overflow-y: auto;
+    z-index: 10;
+  }
+
+  #arrival-message h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #333;
+    padding-bottom: 0.5rem;
+    margin: 0 0 1rem 0;
+  }
+
+  .paper-title {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .abstract {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    text-align: justify;
+  }
+
+  .footnote {
+    margin-top: 2rem;
+    font-size: 0.7rem;
+    color: #888;
+    font-style: italic;
+  }
+
+  #trail-log {
+    margin-top: 0.5rem;
+    font-size: 0.6rem;
+    color: #334;
+    max-width: 700px;
+    text-align: center;
+  }
+
+  #instructions-card {
+    position: absolute;
+    inset: 5%;
+    background: rgba(10, 10, 18, 0.92);
+    border: 1px solid #1a2a3a;
+    padding: 1.2rem;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  #instructions-card h3 {
+    margin: 0 0 0.8rem 0;
+    color: #f0c040;
+    letter-spacing: 0.1em;
+    font-size: 1rem;
+  }
+
+  #instructions-card p {
+    font-size: 0.72rem;
+    line-height: 1.4;
+    margin: 0 0 0.8rem 0;
+    color: #c8d0e0;
+  }
+
+  .control-hints {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.6rem 0.8rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .control-hints p {
+    margin: 0 0 0.4rem 0 !important;
+  }
+
+  .control-hints ul {
+    margin: 0 0 0.6rem 0;
+    padding-left: 1.1rem;
+    font-size: 0.68rem;
+    color: #a0a8b8;
+  }
+
+  .control-hints li {
+    margin-bottom: 0.25rem;
+  }
+
+  #close-instructions-btn {
+    background: #f0c040;
+    color: #0a0a12;
+    border: none;
+    padding: 0.5rem 1.8rem;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  #close-instructions-btn:hover {
+    background: #ffd060;
+  }
+
+  #close-instructions-btn:active {
+    transform: scale(0.97);
+  }
+</style>
+
+<script>
+  const canvas = document.getElementById("field-canvas") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+  const flightArea = document.getElementById("flight-area") as HTMLDivElement;
+  const statusEl = document.getElementById("status") as HTMLDivElement;
+  const signalEl = document.getElementById("magnetic-signal") as HTMLDivElement;
+  const distanceEl = document.getElementById("distance") as HTMLDivElement;
+  const compassEl = document.getElementById("compass-reading") as HTMLDivElement;
+  const arrivalEl = document.getElementById("arrival-message") as HTMLDivElement;
+  const totalDistEl = document.getElementById("total-distance") as HTMLSpanElement;
+  const trailLog = document.getElementById("trail-log") as HTMLDivElement;
+  const instructionsCard = document.getElementById("instructions-card") as HTMLDivElement;
+  const closeBtn = document.getElementById("close-instructions-btn") as HTMLButtonElement;
+
+  // Pigeon state
+  let px = 350;
+  let py = 350;
+  const trail: Array<[number, number]> = [];
+  let totalDist = 0;
+  let arrived = false;
+  let flying = false;
+
+  // Home is placed randomly each session
+  const homeX = 100 + Math.random() * 500;
+  const homeY = 100 + Math.random() * 500;
+  const arrivalRadius = 30;
+
+  // Magnetic field: distance to home, normalized
+  function magneticStrength(x: number, y: number): number {
+    const dx = x - homeX;
+    const dy = y - homeY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const maxDist = Math.sqrt(700 * 700 + 700 * 700);
+    return 1 - dist / maxDist;
+  }
+
+  function compassDirection(x: number, y: number): string {
+    const angle = Math.atan2(homeY - y, homeX - x) * (180 / Math.PI);
+    const dirs = ["E", "NE", "N", "NW", "W", "SW", "S", "SE"];
+    const idx = Math.round(((angle + 360) % 360) / 45) % 8;
+    return dirs[idx] ?? "?";
+  }
+
+  function distToHome(x: number, y: number): number {
+    return Math.sqrt((x - homeX) ** 2 + (y - homeY) ** 2);
+  }
+
+  // Draw magnetic field visualization
+  function drawField(): void {
+    const w = canvas.width;
+    const h = canvas.height;
+    const imgData = ctx.createImageData(w, h);
+
+    for (let yi = 0; yi < h; yi += 4) {
+      for (let xi = 0; xi < w; xi += 4) {
+        const s = magneticStrength(xi, yi);
+        // Wobble based on time for living field effect
+        const t = Date.now() / 2000;
+        const wobble = Math.sin(xi * 0.02 + t) * Math.cos(yi * 0.02 + t * 0.7) * 0.1;
+        const v = Math.max(0, Math.min(1, s + wobble));
+
+        const r = Math.floor(v * 40);
+        const g = Math.floor(v * 120 + 10);
+        const b = Math.floor(v * 80 + 20);
+
+        // Fill 4x4 block
+        for (let dy = 0; dy < 4 && yi + dy < h; dy++) {
+          for (let dx = 0; dx < 4 && xi + dx < w; dx++) {
+            const idx = ((yi + dy) * w + (xi + dx)) * 4;
+            imgData.data[idx] = r;
+            imgData.data[idx + 1] = g;
+            imgData.data[idx + 2] = b;
+            imgData.data[idx + 3] = 255;
+          }
+        }
+      }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+
+    // Draw trail
+    if (trail.length > 1) {
+      ctx.strokeStyle = "rgba(240, 200, 60, 0.4)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      const first = trail[0]!;
+      ctx.moveTo(first[0], first[1]);
+      for (let i = 1; i < trail.length; i++) {
+        const pt = trail[i]!;
+        ctx.lineTo(pt[0], pt[1]);
+      }
+      ctx.stroke();
+    }
+
+    // Draw pigeon
+    ctx.fillStyle = "#f0c040";
+    ctx.beginPath();
+    ctx.arc(px, py, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pigeon direction indicator (tiny beak)
+    ctx.fillStyle = "#ff6030";
+    ctx.beginPath();
+    ctx.arc(px + 4, py - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function updateHUD(): void {
+    const s = magneticStrength(px, py);
+    const bars = "█".repeat(Math.floor(s * 20)) + "░".repeat(20 - Math.floor(s * 20));
+    signalEl.textContent = `LIVER: ${bars} ${(s * 100).toFixed(1)}%`;
+
+    const d = distToHome(px, py);
+    distanceEl.textContent = `${d.toFixed(0)} units`;
+
+    // Vague compass — pigeons get a sense, not a GPS
+    const dir = compassDirection(px, py);
+    const vague = s > 0.7 ? `STRONG PULL ${dir}` : s > 0.4 ? `faint tug… ${dir}?` : "static…";
+    compassEl.textContent = vague;
+  }
+
+  function checkArrival(): void {
+    if (arrived) return;
+    if (distToHome(px, py) < arrivalRadius) {
+      arrived = true;
+      arrivalEl.style.display = "block";
+      totalDistEl.textContent = totalDist.toFixed(0);
+      statusEl.textContent = "ARRIVED";
+      try {
+        document.exitPointerLock();
+      } catch (err) {}
+
+      trailLog.textContent = `Flight path: ${trail.length} waypoints recorded. ` +
+        `Efficiency: ${(distToHome(350, 350) / Math.max(totalDist, 1) * 100).toFixed(1)}% ` +
+        `(a straight line would have been ${distToHome(350, 350).toFixed(0)} units)`;
+    }
+  }
+
+  // Onboarding overlay / click controls
+  function closeInstructions() {
+    instructionsCard.style.display = "none";
+    if (!arrived) {
+      try {
+        flightArea.requestPointerLock();
+      } catch (err) {}
+    }
+  }
+
+  closeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeInstructions();
+  });
+
+  flightArea.addEventListener("click", () => {
+    if (arrived) return;
+    if (instructionsCard.style.display !== "none") {
+      closeInstructions();
+      return;
+    }
+    try {
+      flightArea.requestPointerLock();
+    } catch (err) {}
+  });
+
+  document.addEventListener("pointerlockchange", () => {
+    if (document.pointerLockElement === flightArea) {
+      flying = true;
+      statusEl.textContent = "FLYING — move mouse to navigate";
+    } else {
+      flying = false;
+      if (!arrived) statusEl.textContent = "Click to fly";
+    }
+  });
+
+  // Mouse movement (Pointer Lock mode)
+  document.addEventListener("mousemove", (e: MouseEvent) => {
+    if (!flying || arrived || document.pointerLockElement !== flightArea) return;
+
+    const speed = 0.8;
+    const dx = e.movementX * speed;
+    const dy = e.movementY * speed;
+
+    px = Math.max(0, Math.min(700, px + dx));
+    py = Math.max(0, Math.min(700, py + dy));
+
+    totalDist += Math.sqrt(dx * dx + dy * dy);
+    trail.push([px, py]);
+
+    updateHUD();
+    checkArrival();
+  });
+
+  // Mouse drag mode (Without Pointer Lock)
+  let isPointerDown = false;
+
+  flightArea.addEventListener("mousedown", (e) => {
+    if (arrived) return;
+    if (instructionsCard.style.display !== "none") {
+      closeInstructions();
+      return;
+    }
+    if (document.pointerLockElement !== flightArea) {
+      isPointerDown = true;
+      flying = true;
+      statusEl.textContent = "FLYING — drag pointer to navigate";
+      steerTowards(e.clientX, e.clientY);
+    }
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (isPointerDown && !arrived) {
+      steerTowards(e.clientX, e.clientY);
+    }
+  });
+
+  window.addEventListener("mouseup", () => {
+    isPointerDown = false;
+  });
+
+  // Touch controls
+  flightArea.addEventListener("touchstart", (e) => {
+    if (arrived) return;
+    if (instructionsCard.style.display !== "none") {
+      closeInstructions();
+    }
+    flying = true;
+    statusEl.textContent = "FLYING — drag on screen to navigate";
+    const touch = e.touches[0];
+    if (touch) {
+      const rect = flightArea.getBoundingClientRect();
+      const tx = ((touch.clientX - rect.left) / rect.width) * 700;
+      const ty = ((touch.clientY - rect.top) / rect.height) * 700;
+      px = Math.max(0, Math.min(700, tx));
+      py = Math.max(0, Math.min(700, ty));
+      trail.push([px, py]);
+      updateHUD();
+      checkArrival();
+    }
+  }, { passive: true });
+
+  flightArea.addEventListener("touchmove", (e) => {
+    if (!flying || arrived) return;
+    const touch = e.touches[0];
+    if (touch) {
+      const rect = flightArea.getBoundingClientRect();
+      const tx = ((touch.clientX - rect.left) / rect.width) * 700;
+      const ty = ((touch.clientY - rect.top) / rect.height) * 700;
+
+      const dx = tx - px;
+      const dy = ty - py;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 2) {
+        const step = Math.min(dist, 5);
+        px = Math.max(0, Math.min(700, px + (dx / dist) * step));
+        py = Math.max(0, Math.min(700, py + (dy / dist) * step));
+        totalDist += step;
+        trail.push([px, py]);
+        updateHUD();
+        checkArrival();
+      }
+    }
+  }, { passive: true });
+
+  function steerTowards(clientX: number, clientY: number) {
+    const rect = flightArea.getBoundingClientRect();
+    const tx = ((clientX - rect.left) / rect.width) * 700;
+    const ty = ((clientY - rect.top) / rect.height) * 700;
+
+    const dx = tx - px;
+    const dy = ty - py;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist > 2) {
+      const step = Math.min(dist, 5);
+      px = Math.max(0, Math.min(700, px + (dx / dist) * step));
+      py = Math.max(0, Math.min(700, py + (dy / dist) * step));
+      totalDist += step;
+      trail.push([px, py]);
+      updateHUD();
+      checkArrival();
+    }
+  }
+
+  // Keyboard navigation
+  const keysPressed: Record<string, boolean> = {};
+
+  document.addEventListener("keydown", (e) => {
+    if (arrived) return;
+    const key = e.key.toLowerCase();
+    keysPressed[key] = true;
+
+    const moveKeys = ["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"];
+    if (moveKeys.includes(key)) {
+      if (instructionsCard.style.display !== "none") {
+        instructionsCard.style.display = "none";
+      }
+      if (!flying) {
+        flying = true;
+        statusEl.textContent = "FLYING — use Arrow keys / WASD to steer";
+      }
+    }
+  });
+
+  document.addEventListener("keyup", (e) => {
+    const key = e.key.toLowerCase();
+    keysPressed[key] = false;
+  });
+
+  function handleKeyboardInput(): void {
+    if (!flying || arrived) return;
+
+    const speed = 3.5;
+    let dx = 0;
+    let dy = 0;
+
+    if (keysPressed["arrowup"] || keysPressed["w"]) dy -= speed;
+    if (keysPressed["arrowdown"] || keysPressed["s"]) dy += speed;
+    if (keysPressed["arrowleft"] || keysPressed["a"]) dx -= speed;
+    if (keysPressed["arrowright"] || keysPressed["d"]) dx += speed;
+
+    if (dx !== 0 || dy !== 0) {
+      px = Math.max(0, Math.min(700, px + dx));
+      py = Math.max(0, Math.min(700, py + dy));
+      totalDist += Math.sqrt(dx * dx + dy * dy);
+      trail.push([px, py]);
+      updateHUD();
+      checkArrival();
+    }
+  }
+
+  // Animation loop
+  function animate(): void {
+    handleKeyboardInput();
+    drawField();
+    requestAnimationFrame(animate);
+  }
+
+  // Test hook
+  (window as unknown as Record<string, unknown>).__pigeonArriveHome = () => {
+    px = homeX;
+    py = homeY;
+    trail.push([px, py]);
+    checkArrival();
+  };
+
+  updateHUD();
+  animate();
+</script>

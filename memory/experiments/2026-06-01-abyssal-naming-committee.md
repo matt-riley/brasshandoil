@@ -27,9 +27,11 @@ the ocean floor: [WIRED, 2026-05-23](https://www.wired.com/story/a-golden-orb-on
 
 ## Feedback To Carry Forward
 
-- Awaiting review.
-- Keep checking whether a central DOM prop over a canvas atmosphere feels richer and
-  more legible than drawing every focal object into the canvas.
+- Good, but the experiments are all feeling very similar in concept.
+- Keep the canvas-atmosphere plus DOM-focal-object pattern available as a technique,
+  but do not let it dictate the next premise.
+- Reject the next idea if it repeats the same ambient scene, central prop, button press,
+  escalating counter, and accumulating actor structure with a new coat of paint.
 
 ## Skills Or Patterns Learned
 

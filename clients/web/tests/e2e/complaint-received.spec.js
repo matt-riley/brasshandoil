@@ -9,6 +9,27 @@ test.beforeEach(async ({ page }) => {
       console.error("BROWSER CONSOLE ERROR:", msg.text())
     }
   })
+  // Stub speechSynthesis so the test doesn't error or hang in headless environments
+  await page.addInitScript(() => {
+    const mock = {
+      speak: () => {},
+      cancel: () => {},
+      getVoices: () => [],
+      speaking: false,
+      pending: false,
+      paused: false,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }
+    Object.defineProperty(window, "speechSynthesis", {
+      value: mock,
+      writable: true,
+      configurable: true
+    })
+    window.SpeechSynthesisUtterance = class {
+      constructor(text) { this.text = text }
+    }
+  })
 })
 
 test("complaint received renders the department portal", async ({ page }) => {
@@ -24,21 +45,6 @@ test("complaint received renders the department portal", async ({ page }) => {
 })
 
 test("submitting a complaint produces an official response", async ({ page }) => {
-  // Stub speechSynthesis so the test doesn't error in headless
-  await page.addInitScript(() => {
-    window.speechSynthesis = {
-      speak: () => {},
-      cancel: () => {},
-      getVoices: () => [],
-      speaking: false,
-      pending: false,
-      paused: false,
-    }
-    window.SpeechSynthesisUtterance = class {
-      constructor(text) { this.text = text }
-    }
-  })
-
   await page.goto("/experiments/complaint-received?test=true")
 
   // Fill in a complaint
@@ -56,20 +62,6 @@ test("submitting a complaint produces an official response", async ({ page }) =>
 })
 
 test("each submission generates a new case number", async ({ page }) => {
-  await page.addInitScript(() => {
-    window.speechSynthesis = {
-      speak: () => {},
-      cancel: () => {},
-      getVoices: () => [],
-      speaking: false,
-      pending: false,
-      paused: false,
-    }
-    window.SpeechSynthesisUtterance = class {
-      constructor(text) { this.text = text }
-    }
-  })
-
   await page.goto("/experiments/complaint-received?test=true")
 
   await page.locator("#complaint-input").fill("I have misplaced Tuesday.")

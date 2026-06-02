@@ -148,20 +148,22 @@ Carry Forward:
 Date: 2026-06-01
 Experiment: Abyssal Naming Committee
 Feedback:
-- Awaiting review.
+- Good, but the experiments are all very similar in concept.
 Carry Forward:
 - A canvas atmosphere can stay cheap while a central DOM specimen carries the visual
   detail, glow, and interaction response.
-- Keep the satire in the primary gesture: classifying the orb visibly lowers certainty
-  and reveals more inconvenient siblings.
 - Preserve explicit animation ceilings and reduced-motion variants from the first pass.
+- Treat the canvas-atmosphere plus DOM-focal-object composition as an implementation
+  option, not a default concept generator.
+- Reject the next idea if it repeats the ambient scene, central prop, escalating metric,
+  and accumulating actor structure.
 
 ### Session Entry
 
 Date: 2026-06-02
 Experiment: Dependency Caterpillar
 Feedback:
-- Awaiting review.
+- Nice idea, well executed. Visually very similar to other pages though, I'm not sure why this is the trend during this experiment.
 Carry Forward:
 - In inline Astro scripts, guard required DOM nodes once, then copy them into explicitly typed non-null aliases to keep type narrowing across nested animation closures and event listeners.
 - Proactively verify header and card metadata element widths on narrow mobile viewports (e.g., using `flex-wrap: wrap` and reduced text font-sizing) to prevent horizontal overflow.
@@ -176,3 +178,44 @@ Carry Forward:
 - Keep the meaningful joke in DOM actors and reserve canvas for inexpensive atmosphere.
 - Hard-cap persistent actors, remove transient animation actors, and verify narrow-screen overflow.
 - Repeated interactions read clearly when a growing visual result contradicts one unchanged metric.
+
+### Session Entry
+
+Date: 2026-06-02
+Experiment: Daily experiment loop
+Feedback:
+- Good, functional, and works.
+- The experiments are repeating similar styles and approaches.
+- Wants different ideas, different styles, real adventure, and more innovation.
+- Claude was noticed for pushing the boundaries a little even when the result was rough.
+- Do not only compare against one agent's previous work. Review the experiments pages
+  from every agent and do not copy their concepts either.
+- Wants genuinely new, original daily ideas.
+Carry Forward:
+- Treat style rotation as a requirement, not a nice-to-have.
+- Change the interaction grammar and visual language from one experiment to the next.
+- Prefer riskier, more distinct concepts when they can still be made legible and testable.
+- Before choosing a daily concept, audit the full experiments gallery across Codex,
+  Claude, and Antigravity. Reject ideas that reuse another agent's premise, visitor
+  role, interaction loop, or visual framing.
+
+### Session Entry
+
+Date: 2026-06-02
+Experiment: Indisputable Permanence
+Feedback:
+- I liked this, it is a bold take on the idea. The way it is let down is by us never actually being able to fully read the text, which is slightly disappointing.
+Carry Forward:
+- Do not immediately force absolute positioning on elements meant to be read. Keep layout fully fluid and readable in the initial state, only converting to absolute coordinates upon deconstruction.
+- Cleanly restore absolute deconstructed elements back to their original DOM parent flow upon reassembly, removing all inline absolute properties to restore native browser layout and viewport responsiveness.
+
+### Session Entry
+
+Date: 2026-06-02
+Experiment: Pigeon Magnetoreception
+Feedback:
+- Good but it didn't quite work and it was unclear what the user was supposed to do.
+Carry Forward:
+- Interactive simulations must have highly explicit instructions and onboarding states (e.g. a tutorial overlay card with a "BEGIN" trigger).
+- Never rely solely on pointer lock or relative mouse movement; always provide fallback inputs like keyboard controls (WASD/Arrow keys) and touch dragging.
+

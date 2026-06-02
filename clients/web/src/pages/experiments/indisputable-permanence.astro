@@ -1,0 +1,923 @@
+---
+import Base from "@layouts/Base.astro"
+
+const essayTitle = "The Indisputable Permanence of the Printed Word"
+const essayParagraphs = [
+  "In an era of restless digital dispersion, screens serve as liquid surfaces where letters drift and pixels evaporate. A text file does not exist; it is merely a consensus between a server, a browser, and a battery. It remains vulnerable to the jitter of the network, the whims of the developer, and the sudden migration of database tables. In contrast, the physical word represents an absolute coordinate in space and time.",
+  "Consider the physical letterform. When pressed into heavy paper stock with oil-based ink, a word forms a dimensional relief that cannot be updated, recalled, or subjected to cookie consent prompts. It does not re-render upon window resizing. It does not shift layout when an image loads. To print a sentence is to make a covenant with permanence, anchoring intellectual labor to history.",
+  "Yet, digital platforms coerce us into viewing all communication as fluid. They tell us that layouts must be responsive, that margins should be flexible, and that content must flow dynamically across viewports. This is a sickness. It breeds a deep, structural anxiety—a fear that what we read today will have shifted slightly to the left tomorrow. We must reject the fluid layout."
+]
+
+// Helper to wrap each word of a string in a span
+const wrapWords = (text: string) => {
+  return text.split(" ").map(word => {
+    return `<span class="phys-word">${word}</span>`
+  }).join(" ")
+}
+---
+
+<Base title="Indisputable Permanence | Brass Hand Oil">
+  <main class="ip-shell">
+    <div class="ip-container">
+      <!-- Left side: The Swiss Poster -->
+      <section class="poster-frame" aria-label="Swiss Typographic Poster">
+        <div id="poster-canvas" class="poster-canvas">
+          <!-- Background Swiss Geometric accents -->
+          <div class="poster-circle" aria-hidden="true"></div>
+          <div class="poster-gridline line-horizontal top-line" aria-hidden="true"></div>
+          <div class="poster-gridline line-vertical left-line" aria-hidden="true"></div>
+          
+          <!-- Poster Content -->
+          <div class="poster-header text-container">
+            <p class="poster-meta-tag phys-word">MANIFESTO NO. 84</p>
+            <h1 class="poster-title" aria-label={essayTitle}>
+              <span style="color: transparent; user-select: none; pointer-events: none; display: block;" aria-hidden="true">{essayTitle}</span>
+              {essayTitle.split(" ").map(word => <span class="phys-word font-serif">{word}</span>)}
+            </h1>
+          </div>
+          
+          <div class="poster-body">
+            {essayParagraphs.map(paragraph => (
+              <p class="poster-paragraph text-container" set:html={wrapWords(paragraph)} />
+            ))}
+          </div>
+
+          <div class="poster-footer text-container">
+            <span class="phys-word">COMMITTEE ON IMMUTABILITY &middot; 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right side: Modernist Controls and Readouts -->
+      <section class="control-sidebar" aria-label="Control Panel">
+        <div class="control-card">
+          <span class="card-eyebrow">CONTROL MECHANISM</span>
+          <h2>Poster Physics</h2>
+          
+          <div class="button-grid">
+            <button id="deconstruct-btn" class="control-btn" type="button">
+              Deconstruct Layout
+            </button>
+            <button id="gravity-btn" class="control-btn" type="button">
+              Gravity: Off
+            </button>
+            <button id="wind-btn" class="control-btn" type="button">
+              Wind Tunnel: Off
+            </button>
+            <button id="agitate-btn" class="control-btn" type="button">
+              Agitate
+            </button>
+            <button id="restore-btn" class="control-btn active" type="button">
+              Restore Order
+            </button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <span class="card-eyebrow">TYPOGRAPHIC METRICS</span>
+          <h2>Structural Readout</h2>
+          
+          <div class="status-panel">
+            <div class="status-row">
+              <span class="status-label">LAYOUT INTEGRITY</span>
+              <span id="structural-state-val" class="status-value state-stable">IMMUTABLE</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">ENTROPY LEVEL</span>
+              <span id="entropy-val" class="status-value">0.0%</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">ACTIVE ELEMENTS</span>
+              <span id="active-elements-val" class="status-value">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-footnote">
+          Shift-click words to repel them forcefully. Drag and toss individual words to observe kinetic collisions.
+        </div>
+      </section>
+    </div>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    background-color: #f7f5f0 !important;
+    color: #1a1a1a !important;
+  }
+
+  .ip-shell {
+    min-block-size: calc(100vh - 6rem);
+    padding: var(--spacing-8) var(--spacing-4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .ip-container {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--spacing-8);
+    width: 100%;
+    max-width: 1200px;
+    align-items: start;
+  }
+
+  /* Poster Frame styling */
+  .poster-frame {
+    background: #fdfcfb;
+    border: 2px solid #1a1a1a;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+    padding: var(--spacing-8);
+    min-block-size: 780px;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .poster-canvas {
+    width: 100%;
+    height: 100%;
+    min-block-size: 700px;
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  /* Swiss Poster Aesthetics */
+  .poster-circle {
+    position: absolute;
+    width: clamp(16rem, 35vw, 24rem);
+    height: clamp(16rem, 35vw, 24rem);
+    border-radius: 50%;
+    background: #d93838;
+    top: 15%;
+    left: 8%;
+    z-index: 1;
+    opacity: 0.85;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  .poster-gridline {
+    position: absolute;
+    background: #1a1a1a;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+
+  .line-horizontal {
+    height: 2px;
+    width: 100%;
+    left: 0;
+  }
+
+  .line-vertical {
+    width: 2px;
+    height: 100%;
+    top: 0;
+  }
+
+  .top-line {
+    top: 8rem;
+  }
+
+  .left-line {
+    left: 15rem;
+  }
+
+  .poster-header {
+    margin-bottom: var(--spacing-8);
+    z-index: 3;
+    position: relative;
+  }
+
+  .poster-meta-tag {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    margin-bottom: var(--spacing-2);
+  }
+
+  .poster-title {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 0.95;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .poster-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-6);
+    z-index: 3;
+    position: relative;
+  }
+
+  .poster-paragraph {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    text-align: justify;
+    margin: 0;
+    color: #2b2b2b;
+  }
+
+  .poster-paragraph.text-container {
+    position: relative;
+  }
+
+  .poster-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding-top: var(--spacing-4);
+  }
+
+  /* Physical Words */
+  .phys-word {
+    display: inline-block;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0s;
+    transform-origin: center center;
+    white-space: pre-wrap;
+    /* Extra padding prevents clipping and makes dragging easier */
+    padding: 1px 3px;
+    z-index: 4;
+  }
+
+  .phys-word.font-serif {
+    font-family: Georgia, "Times New Roman", serif;
+  }
+
+  .phys-word:active {
+    cursor: grabbing;
+  }
+
+  /* Deconstructed style modifiers */
+  .phys-word.deconstructed-body {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    background: rgba(253, 252, 251, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+    z-index: 10;
+  }
+
+  .phys-word.restoring {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    z-index: 5 !important;
+  }
+
+  /* Control sidebar layout */
+  .control-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+  }
+
+  .control-card {
+    background: #fdfcfb;
+    border: 2px solid #1a1a1a;
+    padding: var(--spacing-6);
+  }
+
+  .card-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #d93838;
+    letter-spacing: 0.12em;
+    display: block;
+    margin-bottom: var(--spacing-1);
+  }
+
+  .control-card h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0 0 var(--spacing-4) 0;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+
+  .button-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .control-btn {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.75rem var(--spacing-4);
+    border: 2px solid #1a1a1a;
+    background: transparent;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .control-btn:hover {
+    background: #1a1a1a;
+    color: #fdfcfb;
+  }
+
+  .control-btn.active {
+    background: #1a1a1a;
+    color: #fdfcfb;
+  }
+
+  .control-btn.physics-active {
+    background: #d93838;
+    color: #fff;
+    border-color: #d93838;
+  }
+
+  /* Status Panel readout styles */
+  .status-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+    padding-bottom: var(--spacing-1);
+  }
+
+  .status-label {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #666;
+    letter-spacing: 0.05em;
+  }
+
+  .status-value {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  .status-value.state-stable {
+    color: #15803d;
+  }
+
+  .status-value.state-unstable {
+    color: #b45309;
+  }
+
+  .status-value.state-collapsed {
+    color: #b91c1c;
+  }
+
+  .sidebar-footnote {
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    color: #666;
+    line-height: 1.4;
+    text-align: center;
+    padding: 0 var(--spacing-2);
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 900px) {
+    .ip-container {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-6);
+    }
+    
+    .poster-frame {
+      min-block-size: auto;
+      padding: var(--spacing-4);
+    }
+
+    .poster-canvas {
+      min-block-size: 680px;
+    }
+
+    .poster-gridline {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  interface WordBody {
+    element: HTMLElement;
+    originalParent: HTMLElement;
+    originalNextSibling: Node | null;
+    x: number;
+    y: number;
+    px: number;
+    py: number;
+    w: number;
+    h: number;
+    origX: number;
+    origY: number;
+    mass: number;
+    isDragged: boolean;
+  }
+
+  // State flags
+  let isDeconstructed = false;
+  let useGravity = false;
+  let useWind = false;
+  let isRestoring = false;
+
+  const words: WordBody[] = [];
+  const textContainers: HTMLElement[] = [];
+
+  // DOM Elements
+  const posterCanvas = document.getElementById("poster-canvas");
+  const deconstructBtn = document.getElementById("deconstruct-btn");
+  const gravityBtn = document.getElementById("gravity-btn");
+  const windBtn = document.getElementById("wind-btn");
+  const agitateBtn = document.getElementById("agitate-btn");
+  const restoreBtn = document.getElementById("restore-btn");
+
+  const stateVal = document.getElementById("structural-state-val");
+  const entropyVal = document.getElementById("entropy-val");
+  const activeCountVal = document.getElementById("active-elements-val");
+
+  // Drag State
+  let draggedBody: WordBody | null = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let mouseX = 0;
+  let mouseY = 0;
+
+  if (posterCanvas) {
+    // Event Listeners
+    deconstructBtn?.addEventListener("click", startDeconstruction);
+    gravityBtn?.addEventListener("click", toggleGravity);
+    windBtn?.addEventListener("click", toggleWind);
+    agitateBtn?.addEventListener("click", agitateLayout);
+    restoreBtn?.addEventListener("click", restoreLayout);
+
+    // Mouse positions relative to posterCanvas
+    posterCanvas.addEventListener("mousemove", (e) => {
+      if (!isDeconstructed || isRestoring) return;
+      const rect = posterCanvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+      repelWords(mouseX, mouseY, e.shiftKey ? 220 : 70, e.shiftKey ? 8 : 1.2);
+    });
+
+    posterCanvas.addEventListener("mouseleave", () => {
+      mouseX = -9999;
+      mouseY = -9999;
+    });
+
+    // Touch positions
+    posterCanvas.addEventListener("touchmove", (e) => {
+      if (!isDeconstructed || isRestoring) return;
+      if (e.touches.length > 0) {
+        const rect = posterCanvas.getBoundingClientRect();
+        mouseX = e.touches[0].clientX - rect.left;
+        mouseY = e.touches[0].clientY - rect.top;
+        repelWords(mouseX, mouseY, 70, 1.2);
+      }
+    });
+
+    // Drag-and-toss handlers
+    posterCanvas.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    posterCanvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd);
+
+    // Initial loop frame
+    requestAnimationFrame(physicsLoop);
+  }
+
+  function startDeconstruction() {
+    if (isDeconstructed || isRestoring || !posterCanvas) return;
+    isDeconstructed = true;
+    isRestoring = false;
+
+    // Cache parents heights to prevent collapsing
+    const containers = Array.from(document.querySelectorAll(".text-container")) as HTMLElement[];
+    containers.forEach(container => {
+      if (!container.style.height) {
+        container.style.height = `${container.getBoundingClientRect().height}px`;
+        textContainers.push(container);
+      }
+    });
+
+    const canvasRect = posterCanvas.getBoundingClientRect();
+    const physWordElements = Array.from(document.querySelectorAll(".phys-word")) as HTMLElement[];
+
+    // Calculate dynamic layout coordinates and DOM connections
+    physWordElements.forEach(word => {
+      const rect = word.getBoundingClientRect();
+      const origX = rect.left - canvasRect.left;
+      const origY = rect.top - canvasRect.top;
+
+      const body: WordBody = {
+        element: word,
+        originalParent: word.parentElement as HTMLElement,
+        originalNextSibling: word.nextSibling,
+        x: origX,
+        y: origY,
+        px: origX + (Math.random() - 0.5) * 2, // slight velocity kick
+        py: origY + (Math.random() - 0.5) * 2,
+        w: rect.width,
+        h: rect.height,
+        origX,
+        origY,
+        mass: Math.max(0.6, rect.width / 50),
+        isDragged: false
+      };
+
+      words.push(body);
+    });
+
+    // Convert elements to absolute absolute positioning on canvas
+    words.forEach(body => {
+      body.element.style.position = "absolute";
+      body.element.style.left = "0";
+      body.element.style.top = "0";
+      
+      const randomRot = (Math.random() - 0.5) * 16;
+      body.element.style.transform = `translate(${body.x}px, ${body.y}px) rotate(${randomRot}deg)`;
+      body.element.style.margin = "0";
+      body.element.classList.add("deconstructed-body");
+      
+      posterCanvas.appendChild(body.element);
+    });
+
+    // Update active button indicators
+    deconstructBtn?.classList.add("active");
+    restoreBtn?.classList.remove("active");
+
+    if (stateVal) {
+      stateVal.textContent = "COLLAPSED";
+      stateVal.className = "status-value state-collapsed";
+    }
+
+    if (activeCountVal) {
+      activeCountVal.textContent = String(words.length);
+    }
+  }
+
+  function physicsLoop(now: number) {
+    if (isDeconstructed && !isRestoring) {
+      updatePhysics();
+    }
+    requestAnimationFrame(physicsLoop);
+  }
+
+  function updatePhysics() {
+    if (!posterCanvas) return;
+
+    const canvasRect = posterCanvas.getBoundingClientRect();
+    const cWidth = canvasRect.width;
+    const cHeight = canvasRect.height;
+
+    // Forces configuration
+    const gravityVal = useGravity ? 0.35 : 0;
+    const windVal = useWind ? 0.22 : 0;
+    const damp = 0.985; // Air resistance
+
+    words.forEach(body => {
+      if (body.isDragged) return;
+
+      const vx = (body.x - body.px) * damp;
+      const vy = (body.y - body.py) * damp;
+
+      body.px = body.x;
+      body.py = body.y;
+
+      // Apply forces
+      body.x += vx + windVal;
+      body.y += vy + gravityVal;
+
+      // Boundary Collisions
+      const maxX = cWidth - body.w;
+      const maxY = cHeight - body.h;
+      const bounce = 0.35;
+
+      if (body.x < 0) {
+        const velX = body.x - body.px;
+        body.x = 0;
+        body.px = body.x + velX * bounce;
+      } else if (body.x > maxX) {
+        const velX = body.x - body.px;
+        body.x = maxX;
+        body.px = body.x + velX * bounce;
+      }
+
+      if (body.y < 0) {
+        const velY = body.y - body.py;
+        body.y = 0;
+        body.py = body.y + velY * bounce;
+      } else if (body.y > maxY) {
+        const velY = body.y - body.py;
+        body.y = maxY;
+        body.py = body.y + velY * bounce;
+      }
+
+      // Render transform
+      body.element.style.transform = `translate(${body.x}px, ${body.y}px)`;
+    });
+
+    updateMetrics();
+  }
+
+  function repelWords(targetX: number, targetY: number, radius: number, strength: number) {
+    if (!isDeconstructed || isRestoring) return;
+
+    words.forEach(body => {
+      if (body.isDragged) return;
+
+      // Center coordinates of the word element
+      const cx = body.x + body.w / 2;
+      const cy = body.y + body.h / 2;
+
+      const dx = cx - targetX;
+      const dy = cy - targetY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < radius && dist > 1) {
+        const force = ((radius - dist) / radius) * strength * body.mass;
+        body.x += (dx / dist) * force;
+        body.y += (dy / dist) * force;
+      }
+    });
+  }
+
+  function handleMouseDown(e: MouseEvent) {
+    if (!isDeconstructed || isRestoring) return;
+    
+    const target = e.target as HTMLElement;
+    if (!target.classList.contains("phys-word")) return;
+
+    const body = words.find(b => b.element === target);
+    if (!body) return;
+
+    e.preventDefault();
+    draggedBody = body;
+    body.isDragged = true;
+    body.element.style.cursor = "grabbing";
+
+    const rect = posterCanvas!.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    dragOffsetX = clickX - body.x;
+    dragOffsetY = clickY - body.y;
+  }
+
+  function handleMouseMove(e: MouseEvent) {
+    if (!draggedBody || !posterCanvas) return;
+
+    const rect = posterCanvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    // Set new position
+    draggedBody.px = draggedBody.x;
+    draggedBody.py = draggedBody.y;
+    draggedBody.x = clickX - dragOffsetX;
+    draggedBody.y = clickY - dragOffsetY;
+
+    // Snap within boundary
+    const maxX = rect.width - draggedBody.w;
+    const maxY = rect.height - draggedBody.h;
+    draggedBody.x = Math.max(0, Math.min(maxX, draggedBody.x));
+    draggedBody.y = Math.max(0, Math.min(maxY, draggedBody.y));
+
+    draggedBody.element.style.transform = `translate(${draggedBody.x}px, ${draggedBody.y}px)`;
+  }
+
+  function handleMouseUp() {
+    if (!draggedBody) return;
+    draggedBody.isDragged = false;
+    draggedBody.element.style.cursor = "grab";
+    draggedBody = null;
+  }
+
+  // Touch Support Dragging
+  function handleTouchStart(e: TouchEvent) {
+    if (!isDeconstructed || isRestoring || e.touches.length === 0) return;
+
+    const target = e.target as HTMLElement;
+    if (!target.classList.contains("phys-word")) return;
+
+    const body = words.find(b => b.element === target);
+    if (!body) return;
+
+    e.preventDefault(); // Prevent scroll while playing with physics
+    draggedBody = body;
+    body.isDragged = true;
+
+    const rect = posterCanvas!.getBoundingClientRect();
+    const clickX = e.touches[0].clientX - rect.left;
+    const clickY = e.touches[0].clientY - rect.top;
+
+    dragOffsetX = clickX - body.x;
+    dragOffsetY = clickY - body.y;
+  }
+
+  function handleTouchMove(e: TouchEvent) {
+    if (!draggedBody || !posterCanvas || e.touches.length === 0) return;
+    
+    e.preventDefault();
+    const rect = posterCanvas.getBoundingClientRect();
+    const clickX = e.touches[0].clientX - rect.left;
+    const clickY = e.touches[0].clientY - rect.top;
+
+    draggedBody.px = draggedBody.x;
+    draggedBody.py = draggedBody.y;
+    draggedBody.x = clickX - dragOffsetX;
+    draggedBody.y = clickY - dragOffsetY;
+
+    const maxX = rect.width - draggedBody.w;
+    const maxY = rect.height - draggedBody.h;
+    draggedBody.x = Math.max(0, Math.min(maxX, draggedBody.x));
+    draggedBody.y = Math.max(0, Math.min(maxY, draggedBody.y));
+
+    draggedBody.element.style.transform = `translate(${draggedBody.x}px, ${draggedBody.y}px)`;
+  }
+
+  function handleTouchEnd() {
+    if (!draggedBody) return;
+    draggedBody.isDragged = false;
+    draggedBody = null;
+  }
+
+  function toggleGravity() {
+    if (!isDeconstructed) {
+      startDeconstruction();
+    }
+    useGravity = !useGravity;
+    if (gravityBtn) {
+      gravityBtn.textContent = `Gravity: ${useGravity ? "On" : "Off"}`;
+      if (useGravity) {
+        gravityBtn.classList.add("physics-active");
+      } else {
+        gravityBtn.classList.remove("physics-active");
+      }
+    }
+  }
+
+  // Wind Tunnel toggle
+  function toggleWind() {
+    if (!isDeconstructed) {
+      startDeconstruction();
+    }
+    useWind = !useWind;
+    if (windBtn) {
+      windBtn.textContent = `Wind Tunnel: ${useWind ? "On" : "Off"}`;
+      if (useWind) {
+        windBtn.classList.add("physics-active");
+      } else {
+        windBtn.classList.remove("physics-active");
+      }
+    }
+  }
+
+  function agitateLayout() {
+    if (!isDeconstructed) {
+      startDeconstruction();
+    }
+
+    words.forEach(body => {
+      // Infuse chaotic kinetic impulses
+      const forceX = (Math.random() - 0.5) * 25;
+      const forceY = (Math.random() - 0.5) * 25 - 5;
+      body.px = body.x - forceX;
+      body.py = body.y - forceY;
+      
+      const randomRot = (Math.random() - 0.5) * 35;
+      body.element.style.setProperty("transform", `translate(${body.x}px, ${body.y}px) rotate(${randomRot}deg)`);
+    });
+  }
+
+  function restoreLayout() {
+    if (!isDeconstructed || isRestoring) return;
+    isRestoring = true;
+    isDeconstructed = false;
+    useGravity = false;
+    useWind = false;
+
+    // Reset buttons
+    if (gravityBtn) {
+      gravityBtn.textContent = "Gravity: Off";
+      gravityBtn.classList.remove("physics-active");
+    }
+    if (windBtn) {
+      windBtn.textContent = "Wind Tunnel: Off";
+      windBtn.classList.remove("physics-active");
+    }
+    deconstructBtn?.classList.remove("active");
+    restoreBtn?.classList.add("active");
+
+    if (stateVal) {
+      stateVal.textContent = "REASSEMBLING";
+      stateVal.className = "status-value state-unstable";
+    }
+
+    // Set CSS restoring animations
+    words.forEach(body => {
+      body.element.style.cursor = "wait";
+      body.element.classList.add("restoring");
+      body.element.style.transform = `translate(${body.origX}px, ${body.origY}px) rotate(0deg)`;
+      
+      body.x = body.origX;
+      body.y = body.origY;
+      body.px = body.origX;
+      body.py = body.origY;
+    });
+
+    setTimeout(() => {
+      words.forEach(body => {
+        // Clear override absolute styles
+        body.element.style.position = "";
+        body.element.style.left = "";
+        body.element.style.top = "";
+        body.element.style.transform = "";
+        body.element.style.margin = "";
+        body.element.style.cursor = "grab";
+        body.element.classList.remove("restoring");
+        body.element.classList.remove("deconstructed-body");
+
+        // Re-insert into original place in DOM
+        if (body.originalNextSibling) {
+          body.originalParent.insertBefore(body.element, body.originalNextSibling);
+        } else {
+          body.originalParent.appendChild(body.element);
+        }
+      });
+
+      // Clear fixed heights from text containers so they are fluid/responsive again
+      textContainers.forEach(container => {
+        container.style.height = "";
+      });
+      textContainers.length = 0; // empty cache references
+
+      // Empty words array
+      words.length = 0;
+
+      isRestoring = false;
+
+      if (stateVal) {
+        stateVal.textContent = "IMMUTABLE";
+        stateVal.className = "status-value state-stable";
+      }
+
+      if (entropyVal) {
+        entropyVal.textContent = "0.0%";
+      }
+
+      if (activeCountVal) {
+        activeCountVal.textContent = "0";
+      }
+    }, 600); // Animation duration match
+  }
+
+  function updateMetrics() {
+    if (!entropyVal) return;
+
+    let totalDeviation = 0;
+    words.forEach(body => {
+      const dx = body.x - body.origX;
+      const dy = body.y - body.origY;
+      totalDeviation += Math.hypot(dx, dy);
+    });
+
+    const avgDeviation = totalDeviation / words.length;
+    const entropyPercent = Math.min(100, (avgDeviation / 200) * 100).toFixed(1);
+    entropyVal.textContent = `${entropyPercent}%`;
+  }
+</script>
