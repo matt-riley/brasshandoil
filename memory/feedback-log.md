@@ -219,3 +219,37 @@ Carry Forward:
 - Interactive simulations must have highly explicit instructions and onboarding states (e.g. a tutorial overlay card with a "BEGIN" trigger).
 - Never rely solely on pointer lock or relative mouse movement; always provide fallback inputs like keyboard controls (WASD/Arrow keys) and touch dragging.
 
+### Session Entry
+
+Date: 2026-06-03
+Experiment: Tidal Type Foundry
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Rotated into a type-composition instrument to avoid repeating the recent simulator,
+  bureau, and accumulating-actor structures.
+- Every primary action should alter semantic feedback, not only canvas pixels.
+- Browser sanity checks should scope experiment-local headings because shared chrome
+  can own the first page heading.
+
+### Session Entry
+
+Date: 2026-06-03
+Experiment: Trionda Calibration Cradle
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Guard AudioContext activation correctly in Astro/TypeScript by pulling it into window-exposed checks or casting global win variables to prevent dev compilation warnings.
+- Keep strict TDD alignment with UI selectors from the outset.
+
+### Session Entry
+
+Date: 2026-06-03
+Experiment: Mobile Optimization Audit
+Feedback:
+- Run through all of the pages in the site and make sure they all perform and display well on mobile devices.
+Carry Forward:
+- Avoid using hardcoded `width: 100vw` for full-width components when nested inside layouts with default side padding (like `.container` which adds `padding-inline`), as this results in horizontal overflow (e.g. 391px on a 375px mobile viewport). Use `width: 100%` and relative/dynamic heights (`calc(100dvh - headerHeight)`) instead.
+- Follow a strict TDD loop for viewport audits: expand viewport-based E2E test suites first to cover all missing pages, run test suites to identify layout regressions, fix CSS/HTML constraints, and verify the changes against the automated tests.
+
+

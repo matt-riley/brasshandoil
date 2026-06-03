@@ -64,6 +64,14 @@ Set `perspective: 400px` on a container, then child elements with `rotateX(90deg
 #### Canvas ImageData pixel manipulation
 `ctx.createImageData(w, h)` + direct RGBA writes to `imgData.data[idx]` + `ctx.putImageData()` gives per-pixel control for procedural visualizations. Process in 4×4 blocks for performance. Combine with `requestAnimationFrame` and `Date.now()` for animated fields. Much faster than drawing thousands of individual rects.
 
+### 2026-06-03 — The Spin Room
+**Concept:** Inspired by Spencer Pratt's reality-TV-to-politics run for LA mayor. Campaign signs dangle on verlet-physics ropes in a neon void. Grab and fling them with the mouse. When signs collide, their reality-TV/political hybrid slogans merge into something worse. New signs spawn endlessly.
+**Technique:** Verlet integration for rope/pendulum physics — position-based dynamics with constraint solving, no velocity storage. Mouse interaction via direct position manipulation of verlet points.
+**File:** clients/web/src/pages/experiments/spin-room.astro
+
+#### Verlet Integration (rope/pendulum physics)
+Store current and previous position per point; velocity is implicit as `pos - oldPos`. Each frame: (1) compute new pos from current + (current - old) * damping + gravity, (2) iteratively solve distance constraints between connected points (divide error equally, skip pinned points). 5 iterations is enough for stiff ropes. Pinned points act as anchors. Mouse interaction: directly set a grabbed point's position each frame — the verlet integration naturally generates momentum on release since oldPos lags behind. Much simpler than force-based physics for rope/cloth/pendulum effects.
+
 ## Feedback from Matt
 
 ### 2026-05-31 — COMPLAINT RECEIVED

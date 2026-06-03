@@ -10,6 +10,7 @@ Use one file per theme when a lesson becomes durable enough to guide future expe
 - anti-patterns to avoid next time
 
 ## Recent additions
+- [semantic-feedback-for-canvas-experiments.md](semantic-feedback-for-canvas-experiments.md)
 - [scroll-driven-e2e-stability.md](scroll-driven-e2e-stability.md)
 - [style-rotation-and-novelty.md](style-rotation-and-novelty.md)
 - [mobile-viewport-testing-and-gesture-mitigation.md](mobile-viewport-testing-and-gesture-mitigation.md)
