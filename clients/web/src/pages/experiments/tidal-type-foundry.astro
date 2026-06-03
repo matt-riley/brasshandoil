@@ -1,0 +1,613 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="ttf-shell">
+    <section class="ttf-stage" id="foundry-stage" aria-label="Moon tide letter casting stage">
+      <canvas id="tide-canvas" aria-label="Molten tide carrying newly cast letters"></canvas>
+      <div class="ttf-sky" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="ttf-moon" id="moon-orb" aria-hidden="true"></div>
+      <div class="ttf-press" aria-hidden="true">
+        <div class="ttf-roller"></div>
+        <div class="ttf-mouth"></div>
+      </div>
+      <div class="ttf-specimen" aria-hidden="true">
+        <span id="specimen-letter">A</span>
+      </div>
+      <div class="ttf-tide-glass" aria-hidden="true"></div>
+    </section>
+
+    <section class="ttf-copy">
+      <p class="ttf-kicker">Foundry tide table / night shift</p>
+      <h1>Tidal Type Foundry</h1>
+      <p class="ttf-intro">
+        Pull the moon through the gauge. Cast letters into the blackwater tray.
+        Every mark cools into a different alphabet for tomorrow's newspaper.
+      </p>
+    </section>
+
+    <section class="ttf-console" aria-label="Tidal casting controls">
+      <label class="ttf-control" for="moon-dial">
+        <span>Moon haul</span>
+        <input id="moon-dial" type="range" min="0" max="100" value="58" />
+      </label>
+
+      <button id="cast-letter" type="button">Cast Letter</button>
+
+      <div class="ttf-readouts" aria-live="polite">
+        <div>
+          <span>Fresh type</span>
+          <strong id="glyph-count">0</strong>
+        </div>
+        <div>
+          <span>Tide report</span>
+          <strong id="tide-state">Low brass, ink calm</strong>
+        </div>
+      </div>
+
+      <div class="ttf-rack" id="glyph-rack" aria-label="Recently cast letters"></div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #07110f;
+  }
+
+  .ttf-shell {
+    --foam: #d7fff1;
+    --brass: #f1c66f;
+    --ink: #07110f;
+    --coral: #ff6f61;
+    --blue: #67a8ff;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+    grid-template-rows: 1fr auto;
+    gap: clamp(1rem, 2vw, 1.5rem);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.2vw, 1.75rem);
+    color: var(--foam);
+    background:
+      linear-gradient(140deg, rgba(255, 111, 97, 0.12), transparent 28rem),
+      radial-gradient(circle at 16% 22%, rgba(103, 168, 255, 0.2), transparent 18rem),
+      radial-gradient(circle at 78% 16%, rgba(241, 198, 111, 0.18), transparent 16rem),
+      #07110f;
+    font-family: Georgia, "Times New Roman", serif;
+    isolation: isolate;
+  }
+
+  .ttf-stage {
+    position: relative;
+    grid-row: 1 / span 2;
+    min-height: min(64rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(215, 255, 241, 0.22);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, #10183a 0%, #0c1f2d 46%, #07110f 100%);
+    box-shadow: inset 0 0 5rem rgba(0, 0, 0, 0.5), 0 1rem 3rem rgba(0, 0, 0, 0.24);
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  #tide-canvas,
+  .ttf-sky,
+  .ttf-tide-glass {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #tide-canvas {
+    z-index: 2;
+  }
+
+  .ttf-sky {
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 1px) 0 0 / 100% 4.5rem,
+      radial-gradient(circle at 48% 30%, rgba(255, 255, 255, 0.1), transparent 0.18rem);
+  }
+
+  .ttf-sky span {
+    position: absolute;
+    width: 0.3rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #d7fff1;
+    box-shadow: 0 0 1rem #d7fff1;
+    opacity: 0.72;
+  }
+
+  .ttf-sky span:nth-child(1) { top: 12%; left: 14%; }
+  .ttf-sky span:nth-child(2) { top: 22%; left: 62%; }
+  .ttf-sky span:nth-child(3) { top: 16%; left: 84%; }
+  .ttf-sky span:nth-child(4) { top: 37%; left: 29%; }
+  .ttf-sky span:nth-child(5) { top: 44%; left: 71%; }
+
+  .ttf-moon {
+    position: absolute;
+    top: clamp(1.4rem, 4vw, 3rem);
+    left: calc(8% + var(--moon-x, 58) * 0.72%);
+    z-index: 3;
+    width: clamp(5rem, 12vw, 9rem);
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 34% 30%, #fff8ce 0 16%, #f1c66f 17% 38%, #d4efe8 39% 64%, #6fa5d7 65%);
+    box-shadow: 0 0 2rem rgba(241, 198, 111, 0.58), 0 0 7rem rgba(103, 168, 255, 0.32);
+  }
+
+  .ttf-press {
+    position: absolute;
+    right: clamp(1rem, 4vw, 3rem);
+    bottom: 22%;
+    z-index: 5;
+    width: clamp(10rem, 22vw, 17rem);
+    height: clamp(9rem, 18vw, 13rem);
+    color: var(--brass);
+    filter: drop-shadow(0 1.5rem 1.2rem rgba(0, 0, 0, 0.38));
+  }
+
+  .ttf-roller {
+    position: absolute;
+    inset: 0 10% auto;
+    height: 42%;
+    border: 1px solid rgba(241, 198, 111, 0.7);
+    border-radius: 50%;
+    background:
+      repeating-linear-gradient(90deg, rgba(7, 17, 15, 0.2) 0 0.45rem, transparent 0.46rem 0.9rem),
+      linear-gradient(180deg, #f6d788, #9d7434);
+  }
+
+  .ttf-mouth {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 72%;
+    clip-path: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+    border: 1px solid rgba(241, 198, 111, 0.5);
+    background:
+      linear-gradient(90deg, transparent 0 18%, rgba(255, 111, 97, 0.28) 19% 21%, transparent 22%),
+      linear-gradient(180deg, rgba(241, 198, 111, 0.52), rgba(33, 42, 30, 0.88));
+  }
+
+  .ttf-specimen {
+    position: absolute;
+    left: clamp(1rem, 5vw, 4rem);
+    bottom: 12%;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    width: clamp(9rem, 22vw, 17rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(215, 255, 241, 0.28);
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 40% 32%, rgba(215, 255, 241, 0.2), transparent 42%),
+      rgba(3, 9, 12, 0.72);
+    box-shadow: inset 0 0 3rem rgba(0, 0, 0, 0.62), 0 0 2rem rgba(103, 168, 255, 0.16);
+  }
+
+  .ttf-specimen span {
+    color: #f9f3de;
+    font-size: clamp(5rem, 18vw, 13rem);
+    font-weight: 900;
+    line-height: 0.8;
+    text-shadow: 0 0 1rem rgba(255, 111, 97, 0.45), 0.14em 0.08em 0 #0a342d;
+  }
+
+  .ttf-tide-glass {
+    z-index: 6;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, transparent 50%, rgba(7, 17, 15, 0.05) 50%) 0 0 / 100% 0.45rem,
+      radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.38));
+    mix-blend-mode: screen;
+    opacity: 0.5;
+  }
+
+  .ttf-copy,
+  .ttf-console {
+    position: relative;
+    z-index: 8;
+    align-self: start;
+  }
+
+  .ttf-kicker,
+  .ttf-control span,
+  .ttf-readouts span {
+    color: #9ed8cf;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 12ch;
+    margin: 0.35rem 0 0;
+    color: #fff8dc;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 0.84;
+    text-shadow: 0 0 1.5rem rgba(241, 198, 111, 0.26);
+  }
+
+  .ttf-intro {
+    max-width: 27rem;
+    margin-top: 1rem;
+    color: rgba(215, 255, 241, 0.86);
+    font-family: var(--font-body);
+    font-size: clamp(0.95rem, 1.3vw, 1.06rem);
+  }
+
+  .ttf-console {
+    display: grid;
+    gap: 1rem;
+    align-self: end;
+    padding: 1rem;
+    border: 1px solid rgba(215, 255, 241, 0.2);
+    border-radius: 8px;
+    background: rgba(4, 18, 18, 0.82);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.24);
+  }
+
+  .ttf-control {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  #moon-dial {
+    width: 100%;
+    accent-color: var(--brass);
+  }
+
+  #cast-letter {
+    min-height: 3.25rem;
+    border: 1px solid #f1c66f;
+    border-radius: 6px;
+    color: #07110f;
+    background: linear-gradient(135deg, #f8d984, #ff6f61);
+    font-family: var(--font-mono);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  #cast-letter:hover,
+  #cast-letter:focus-visible {
+    outline: 2px solid #d7fff1;
+    outline-offset: 3px;
+  }
+
+  .ttf-readouts {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .ttf-readouts div {
+    display: grid;
+    gap: 0.15rem;
+    padding-block: 0.5rem;
+    border-top: 1px solid rgba(215, 255, 241, 0.16);
+  }
+
+  .ttf-readouts strong {
+    color: #fff8dc;
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    line-height: 1.25;
+  }
+
+  .ttf-rack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-height: 2.4rem;
+  }
+
+  .ttf-glyph-chip {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    aspect-ratio: 1;
+    border: 1px solid rgba(215, 255, 241, 0.35);
+    border-radius: 4px;
+    color: #07110f;
+    background: #d7fff1;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 900;
+    box-shadow: 0 0 0.8rem rgba(103, 168, 255, 0.2);
+  }
+
+  @media (max-width: 840px) {
+    .ttf-shell {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      min-height: calc(100vh - 5rem);
+    }
+
+    .ttf-stage {
+      grid-row: auto;
+      min-height: 26rem;
+      order: 2;
+    }
+
+    .ttf-copy {
+      order: 1;
+    }
+
+    .ttf-console {
+      order: 3;
+      align-self: stretch;
+    }
+
+    .ttf-press {
+      right: -1rem;
+      bottom: 19%;
+    }
+
+    .ttf-specimen {
+      left: 0.8rem;
+      bottom: 9%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ttf-shell,
+    .ttf-stage,
+    .ttf-moon {
+      scroll-behavior: auto;
+    }
+  }
+</style>
+
+<script>
+  const stage = document.querySelector("#foundry-stage")
+  const canvas = document.querySelector("#tide-canvas")
+  const moonDial = document.querySelector("#moon-dial")
+  const castButton = document.querySelector("#cast-letter")
+  const glyphCountEl = document.querySelector("#glyph-count")
+  const tideStateEl = document.querySelector("#tide-state")
+  const specimenLetterEl = document.querySelector("#specimen-letter")
+  const glyphRack = document.querySelector("#glyph-rack")
+  const moonOrb = document.querySelector("#moon-orb")
+
+  if (
+    stage instanceof HTMLElement &&
+    canvas instanceof HTMLCanvasElement &&
+    moonDial instanceof HTMLInputElement &&
+    castButton instanceof HTMLButtonElement &&
+    glyphCountEl instanceof HTMLElement &&
+    tideStateEl instanceof HTMLElement &&
+    specimenLetterEl instanceof HTMLElement &&
+    glyphRack instanceof HTMLElement &&
+    moonOrb instanceof HTMLElement
+  ) {
+    const foundryStage = stage
+    const tideCanvas = canvas
+    const dial = moonDial
+    const button = castButton
+    const countNode = glyphCountEl
+    const stateNode = tideStateEl
+    const specimenNode = specimenLetterEl
+    const rackNode = glyphRack
+    const moonNode = moonOrb
+    const ctx = tideCanvas.getContext("2d")
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const MAX_GLYPHS = 72
+    const letters = "AETHERLINOTYPEMOONBRASSINK"
+    const reports = [
+      "Low brass, ink calm",
+      "Moon drawn, tray waking",
+      "Serif tide at half pull",
+      "Letters floating above proof",
+      "Full press, blackwater singing",
+    ]
+    type Glyph = {
+      x: number
+      y: number
+      vx: number
+      vy: number
+      size: number
+      life: number
+      phase: number
+      letter: string
+      fill: string
+    }
+
+    const glyphs: Glyph[] = []
+    let moon = Number(dial.value) / 100
+    let pointerDown = false
+    let lastPointerCast = 0
+    let tick = 0
+    let castCount = 0
+    let width = 1
+    let height = 1
+
+    function resizeCanvas() {
+      const rect = foundryStage.getBoundingClientRect()
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      width = Math.max(1, Math.floor(rect.width))
+      height = Math.max(1, Math.floor(rect.height))
+      tideCanvas.width = Math.floor(width * dpr)
+      tideCanvas.height = Math.floor(height * dpr)
+      tideCanvas.style.width = `${width}px`
+      tideCanvas.style.height = `${height}px`
+      ctx?.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+
+    function currentLetter() {
+      const index = Math.floor((moon * (letters.length - 1) + castCount) % letters.length)
+      return letters[index]
+    }
+
+    function updateState() {
+      const reportIndex = Math.min(reports.length - 1, Math.floor(moon * reports.length))
+      foundryStage.style.setProperty("--moon-x", String(Math.round(moon * 100)))
+      moonNode.style.setProperty("--moon-x", String(Math.round(moon * 100)))
+      specimenNode.textContent = currentLetter()
+      countNode.textContent = String(glyphs.length)
+      stateNode.textContent = `${reports[reportIndex]} - ${currentLetter()} ready, proof ${glyphs.length}`
+      rackNode.replaceChildren(
+        ...glyphs.slice(-12).reverse().map((glyph) => {
+          const chip = document.createElement("span")
+          chip.className = "ttf-glyph-chip"
+          chip.textContent = glyph.letter
+          chip.style.background = glyph.fill
+          return chip
+        })
+      )
+    }
+
+    function castGlyph(x = width * (0.28 + moon * 0.34), y = height * 0.48, pressure = 0.62) {
+      const letter = currentLetter()
+      castCount += 1
+      glyphs.push({
+        x,
+        y,
+        vx: (Math.random() - 0.5) * (1.2 + pressure * 2),
+        vy: -0.4 - Math.random() * 1.2,
+        size: 28 + pressure * 58 + moon * 18,
+        life: 1,
+        phase: Math.random() * Math.PI * 2,
+        letter,
+        fill: Math.random() > 0.5 ? "#d7fff1" : "#f1c66f",
+      })
+
+      if (glyphs.length > MAX_GLYPHS) {
+        glyphs.splice(0, glyphs.length - MAX_GLYPHS)
+      }
+      updateState()
+    }
+
+    function castFromEvent(event: PointerEvent) {
+      const now = performance.now()
+      if (now - lastPointerCast < 65) return
+      const rect = foundryStage.getBoundingClientRect()
+      const pressure = Math.max(0.35, event.pressure || 0.55)
+      castGlyph(event.clientX - rect.left, event.clientY - rect.top, pressure)
+      lastPointerCast = now
+    }
+
+    function draw(time: number) {
+      if (!ctx) return
+      tick = time * 0.001
+      ctx.clearRect(0, 0, width, height)
+
+      const sky = ctx.createLinearGradient(0, 0, 0, height)
+      sky.addColorStop(0, "#10183a")
+      sky.addColorStop(0.48, "#0d2d35")
+      sky.addColorStop(1, "#07110f")
+      ctx.fillStyle = sky
+      ctx.fillRect(0, 0, width, height)
+
+      const tideHeight = height * (0.6 - moon * 0.18)
+      const waveAmp = 18 + moon * 35
+      ctx.save()
+      ctx.beginPath()
+      ctx.moveTo(0, height)
+      for (let x = 0; x <= width + 12; x += 12) {
+        const y =
+          tideHeight +
+          Math.sin(x * 0.013 + tick * (reducedMotion ? 0.25 : 1.4)) * waveAmp +
+          Math.sin(x * 0.029 - tick * 0.7) * 8
+        ctx.lineTo(x, y)
+      }
+      ctx.lineTo(width, height)
+      ctx.closePath()
+      const water = ctx.createLinearGradient(0, tideHeight - 80, 0, height)
+      water.addColorStop(0, "rgba(103, 168, 255, 0.52)")
+      water.addColorStop(0.42, "rgba(14, 99, 97, 0.82)")
+      water.addColorStop(1, "rgba(3, 9, 12, 0.96)")
+      ctx.fillStyle = water
+      ctx.fill()
+      ctx.globalCompositeOperation = "screen"
+      ctx.strokeStyle = "rgba(215, 255, 241, 0.34)"
+      ctx.lineWidth = 2
+      for (let row = 0; row < 6; row += 1) {
+        ctx.beginPath()
+        for (let x = 0; x <= width + 8; x += 8) {
+          const y =
+            tideHeight +
+            row * 24 +
+            Math.sin(x * 0.02 + row + tick * (1.1 + row * 0.06)) * (6 + moon * 7)
+          if (x === 0) ctx.moveTo(x, y)
+          else ctx.lineTo(x, y)
+        }
+        ctx.stroke()
+      }
+      ctx.restore()
+
+      ctx.save()
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      for (const glyph of glyphs) {
+        glyph.x += glyph.vx + Math.sin(tick + glyph.phase) * 0.28
+        glyph.y += glyph.vy + Math.sin(tick * 1.7 + glyph.phase) * 0.62 + moon * 0.8
+        glyph.vy += 0.018
+        glyph.life *= 0.997
+        const bob = Math.sin(tick * 2 + glyph.phase) * 5
+        ctx.font = `900 ${glyph.size}px Georgia, serif`
+        ctx.fillStyle = glyph.fill
+        ctx.globalAlpha = Math.max(0.2, glyph.life)
+        ctx.shadowColor = glyph.fill
+        ctx.shadowBlur = 16
+        ctx.fillText(glyph.letter, glyph.x, glyph.y + bob)
+      }
+      ctx.restore()
+
+      if (!reducedMotion) {
+        requestAnimationFrame(draw)
+      }
+    }
+
+    dial.addEventListener("input", () => {
+      moon = Number(dial.value) / 100
+      updateState()
+    })
+
+    button.addEventListener("click", () => {
+      castGlyph()
+    })
+
+    foundryStage.addEventListener("pointerdown", (event) => {
+      pointerDown = true
+      foundryStage.setPointerCapture(event.pointerId)
+      castFromEvent(event)
+    })
+
+    foundryStage.addEventListener("pointermove", (event) => {
+      if (!pointerDown) return
+      castFromEvent(event)
+    })
+
+    foundryStage.addEventListener("pointerup", () => {
+      pointerDown = false
+    })
+
+    foundryStage.addEventListener("pointercancel", () => {
+      pointerDown = false
+    })
+
+    window.addEventListener("resize", resizeCanvas)
+
+    resizeCanvas()
+    castGlyph(width * 0.34, height * 0.46, 0.5)
+    updateState()
+    requestAnimationFrame(draw)
+  }
+</script>

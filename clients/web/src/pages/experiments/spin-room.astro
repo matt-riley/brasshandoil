@@ -1,0 +1,495 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div id="spin-room-shell">
+    <div id="header">
+      <h1>The Spin Room</h1>
+      <p id="instructions">Grab a sign and fling it. When signs collide, they merge into something worse.</p>
+      <p id="ticker">MERGES: <span id="sign-count">0</span> | SIGNS: <span id="total-signs">0</span></p>
+    </div>
+    <canvas id="sim-canvas"></canvas>
+  </div>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    #spin-room-shell {
+      width: 100%;
+      height: calc(100dvh - 6rem);
+      background: #1a0a2e;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-family: "Courier New", monospace;
+      cursor: grab;
+    }
+
+    @media (max-width: 600px) {
+      #spin-room-shell {
+        height: calc(100dvh - 5rem);
+      }
+    }
+
+    #header {
+      padding: 12px 20px 8px;
+      text-align: center;
+      z-index: 10;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #ff6b35;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+    }
+
+    #instructions {
+      color: #aaa;
+      font-size: 0.75rem;
+      margin-top: 4px;
+    }
+
+    #ticker {
+      color: #ff6b35;
+      font-size: 0.7rem;
+      margin-top: 4px;
+      letter-spacing: 0.15em;
+    }
+
+    #sim-canvas {
+      flex: 1;
+      width: 100%;
+      display: block;
+    }
+
+    #spin-room-shell:active {
+      cursor: grabbing;
+    }
+  </style>
+
+  <script>
+    // ── Slogan pools ──
+    const TV_PREFIXES: string[] = [
+      "I'm not here to make friends,",
+      "At the end of the day,",
+      "This is MY journey,",
+      "I didn't come here to lose,",
+      "The tribe has spoken:",
+      "You're fired, and",
+      "It's time to face the music:",
+      "I'm giving 110% to",
+      "The rose goes to whoever",
+      "Let's be real here:",
+      "I'm keeping it real about",
+      "No drama, just",
+      "This is a game-changer for",
+      "I have a connection with",
+    ]
+
+    const POLITICAL_SUFFIXES: string[] = [
+      "lower taxes for vibes.",
+      "infrastructure is a feeling.",
+      "the economy of the heart.",
+      "zoning reform NOW.",
+      "a chicken in every hot tub.",
+      "mandatory confessional booths.",
+      "privatizing the weather.",
+      "emotional GDP growth.",
+      "free parking for the soul.",
+      "a wall around bad energy.",
+      "deregulating brunch.",
+      "stimulus checks for clout.",
+      "universal basic drama.",
+      "the deficit of authenticity.",
+    ]
+
+    function randomSlogan(): string {
+      const pre = TV_PREFIXES[Math.floor(Math.random() * TV_PREFIXES.length)]
+      const suf = POLITICAL_SUFFIXES[Math.floor(Math.random() * POLITICAL_SUFFIXES.length)]
+      return `${pre} ${suf}`
+    }
+
+    function mergeText(a: string, b: string): string {
+      const wordsA = a.split(" ")
+      const wordsB = b.split(" ")
+      const mid = Math.floor(wordsA.length / 2)
+      const midB = Math.floor(wordsB.length / 2)
+      return [...wordsA.slice(0, mid), ...wordsB.slice(midB)].join(" ")
+    }
+
+    // ── Verlet point ──
+    interface VPoint {
+      x: number; y: number
+      ox: number; oy: number
+      pinned: boolean
+    }
+
+    function makePoint(x: number, y: number, pinned = false): VPoint {
+      return { x, y, ox: x, oy: y, pinned }
+    }
+
+    // ── Constraint (stick) ──
+    interface Stick {
+      a: VPoint; b: VPoint; len: number
+    }
+
+    function makeStick(a: VPoint, b: VPoint): Stick {
+      const dx = b.x - a.x
+      const dy = b.y - a.y
+      return { a, b, len: Math.sqrt(dx * dx + dy * dy) }
+    }
+
+    // ── Sign (rope + placard) ──
+    interface Sign {
+      points: VPoint[]
+      sticks: Stick[]
+      text: string
+      color: string
+      tipX: number
+      tipY: number
+      width: number
+      dead: boolean
+    }
+
+    const SIGN_COLORS = ["#ff6b35", "#ffd166", "#06d6a0", "#118ab2", "#ef476f", "#fca311", "#7209b7", "#3a86ff"]
+
+    function makeSign(anchorX: number, ropeLen: number, segments: number, canvasW: number): Sign {
+      const pts: VPoint[] = []
+      const segLen = ropeLen / segments
+      for (let i = 0; i <= segments; i++) {
+        const pinned = i === 0
+        pts.push(makePoint(anchorX, i * segLen, pinned))
+      }
+      const sticks: Stick[] = []
+      for (let i = 0; i < segments; i++) {
+        sticks.push(makeStick(pts[i], pts[i + 1]))
+      }
+      const tip = pts[pts.length - 1]
+      const color = SIGN_COLORS[Math.floor(Math.random() * SIGN_COLORS.length)]
+      const width = 100 + Math.random() * 80
+      return { points: pts, sticks, text: randomSlogan(), color, tipX: tip.x, tipY: tip.y, width, dead: false }
+    }
+
+    // ── Physics ──
+    const GRAVITY = 0.25
+    const DAMPING = 0.99
+    const ITERATIONS = 5
+
+    function updatePoints(points: VPoint[]): void {
+      for (const p of points) {
+        if (p.pinned) continue
+        const vx = (p.x - p.ox) * DAMPING
+        const vy = (p.y - p.oy) * DAMPING
+        p.ox = p.x
+        p.oy = p.y
+        p.x += vx
+        p.y += vy + GRAVITY
+      }
+    }
+
+    function solveSticks(sticks: Stick[]): void {
+      for (let iter = 0; iter < ITERATIONS; iter++) {
+        for (const s of sticks) {
+          const dx = s.b.x - s.a.x
+          const dy = s.b.y - s.a.y
+          const dist = Math.sqrt(dx * dx + dy * dy) || 0.001
+          const diff = (s.len - dist) / dist * 0.5
+          const ox = dx * diff
+          const oy = dy * diff
+          if (!s.a.pinned) { s.a.x -= ox; s.a.y -= oy }
+          if (!s.b.pinned) { s.b.x += ox; s.b.y += oy }
+        }
+      }
+    }
+
+    // ── Setup ──
+    const canvas = document.getElementById("sim-canvas") as HTMLCanvasElement
+    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
+    const signCountEl = document.getElementById("sign-count") as HTMLElement
+    const totalSignsEl = document.getElementById("total-signs") as HTMLElement
+
+    function resize(): void {
+      const shell = document.getElementById("spin-room-shell") as HTMLElement
+      const header = document.getElementById("header") as HTMLElement
+      canvas.width = shell.clientWidth
+      canvas.height = shell.clientHeight - header.offsetHeight
+    }
+    resize()
+    window.addEventListener("resize", resize)
+
+    const signs: Sign[] = []
+    const NUM_SIGNS = 8
+
+    function initSigns(): void {
+      signs.length = 0
+      const spacing = canvas.width / (NUM_SIGNS + 1)
+      for (let i = 0; i < NUM_SIGNS; i++) {
+        const x = spacing * (i + 1)
+        const ropeLen = 60 + Math.random() * 100
+        signs.push(makeSign(x, ropeLen, 6, canvas.width))
+      }
+    }
+    initSigns()
+
+    // ── Interaction ──
+    let grabbed: VPoint | null = null
+    let mouseX = 0
+    let mouseY = 0
+
+    function canvasXY(e: MouseEvent): { cx: number; cy: number } {
+      const rect = canvas.getBoundingClientRect()
+      return { cx: e.clientX - rect.left, cy: e.clientY - rect.top }
+    }
+
+    canvas.addEventListener("mousedown", (e: MouseEvent) => {
+      const { cx, cy } = canvasXY(e)
+      let best: VPoint | null = null
+      let bestDist = 40 // grab radius
+      for (const s of signs) {
+        if (s.dead) continue
+        for (const p of s.points) {
+          if (p.pinned) continue
+          const d = Math.sqrt((p.x - cx) ** 2 + (p.y - cy) ** 2)
+          if (d < bestDist) { bestDist = d; best = p }
+        }
+      }
+      grabbed = best
+      mouseX = cx
+      mouseY = cy
+    })
+
+    canvas.addEventListener("mousemove", (e: MouseEvent) => {
+      const { cx, cy } = canvasXY(e)
+      mouseX = cx
+      mouseY = cy
+    })
+
+    canvas.addEventListener("mouseup", () => { grabbed = null })
+    canvas.addEventListener("mouseleave", () => { grabbed = null })
+
+    // Touch support
+    canvas.addEventListener("touchstart", (e: TouchEvent) => {
+      e.preventDefault()
+      const t = e.touches[0]
+      const rect = canvas.getBoundingClientRect()
+      const cx = t.clientX - rect.left
+      const cy = t.clientY - rect.top
+      let best: VPoint | null = null
+      let bestDist = 50
+      for (const s of signs) {
+        if (s.dead) continue
+        for (const p of s.points) {
+          if (p.pinned) continue
+          const d = Math.sqrt((p.x - cx) ** 2 + (p.y - cy) ** 2)
+          if (d < bestDist) { bestDist = d; best = p }
+        }
+      }
+      grabbed = best
+      mouseX = cx
+      mouseY = cy
+    }, { passive: false })
+
+    canvas.addEventListener("touchmove", (e: TouchEvent) => {
+      e.preventDefault()
+      const t = e.touches[0]
+      const rect = canvas.getBoundingClientRect()
+      mouseX = t.clientX - rect.left
+      mouseY = t.clientY - rect.top
+    }, { passive: false })
+
+    canvas.addEventListener("touchend", () => { grabbed = null })
+
+    // ── Collision / merge ──
+    let mergeCount = 0
+
+    function checkCollisions(): void {
+      for (let i = 0; i < signs.length; i++) {
+        const a = signs[i]
+        if (a.dead) continue
+        for (let j = i + 1; j < signs.length; j++) {
+          const b = signs[j]
+          if (b.dead) continue
+          const tipA = a.points[a.points.length - 1]
+          const tipB = b.points[b.points.length - 1]
+          const dx = tipA.x - tipB.x
+          const dy = tipA.y - tipB.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          const threshold = (a.width + b.width) * 0.3
+          if (dist < threshold) {
+            // Merge: keep a, kill b
+            a.text = mergeText(a.text, b.text)
+            a.width = Math.min(a.width + 20, 280)
+            a.color = SIGN_COLORS[Math.floor(Math.random() * SIGN_COLORS.length)]
+            b.dead = true
+            mergeCount++
+
+            // Spawn a replacement after a delay
+            setTimeout(() => {
+              const x = Math.random() * canvas.width * 0.8 + canvas.width * 0.1
+              const ropeLen = 60 + Math.random() * 100
+              signs.push(makeSign(x, ropeLen, 6, canvas.width))
+            }, 1500)
+          }
+        }
+      }
+    }
+
+    // ── Drawing ──
+    function drawRope(sign: Sign): void {
+      ctx.beginPath()
+      ctx.moveTo(sign.points[0].x, sign.points[0].y)
+      for (let i = 1; i < sign.points.length; i++) {
+        ctx.lineTo(sign.points[i].x, sign.points[i].y)
+      }
+      ctx.strokeStyle = "#666"
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // Anchor dot
+      ctx.beginPath()
+      ctx.arc(sign.points[0].x, sign.points[0].y, 4, 0, Math.PI * 2)
+      ctx.fillStyle = "#888"
+      ctx.fill()
+    }
+
+    function drawSign(sign: Sign): void {
+      const tip = sign.points[sign.points.length - 1]
+      const prev = sign.points[sign.points.length - 2]
+      const angle = Math.atan2(tip.x - prev.x, -(tip.y - prev.y))
+
+      ctx.save()
+      ctx.translate(tip.x, tip.y)
+      ctx.rotate(angle)
+
+      // Sign background
+      const w = sign.width
+      const h = 50
+      ctx.fillStyle = sign.color
+      ctx.shadowColor = sign.color
+      ctx.shadowBlur = 15
+      ctx.fillRect(-w / 2, -5, w, h)
+      ctx.shadowBlur = 0
+
+      // Border
+      ctx.strokeStyle = "#fff"
+      ctx.lineWidth = 2
+      ctx.strokeRect(-w / 2, -5, w, h)
+
+      // Text
+      ctx.fillStyle = "#000"
+      ctx.font = "bold 9px Courier New"
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+
+      // Word wrap
+      const words = sign.text.split(" ")
+      const lines: string[] = []
+      let line = ""
+      for (const word of words) {
+        const test = line ? `${line} ${word}` : word
+        if (ctx.measureText(test).width > w - 12) {
+          if (line) lines.push(line)
+          line = word
+        } else {
+          line = test
+        }
+      }
+      if (line) lines.push(line)
+
+      const lineH = 11
+      const startY = h / 2 - 5 + (-(lines.length - 1) * lineH) / 2
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], 0, startY + i * lineH)
+      }
+
+      ctx.restore()
+    }
+
+    // ── Main loop ──
+    function tick(): void {
+      // Apply grab force
+      if (grabbed) {
+        grabbed.x += (mouseX - grabbed.x) * 0.4
+        grabbed.y += (mouseY - grabbed.y) * 0.4
+      }
+
+      for (const s of signs) {
+        if (s.dead) continue
+        updatePoints(s.points)
+        solveSticks(s.sticks)
+
+        // Keep anchor pinned at top
+        const anchor = s.points[0]
+        if (anchor.y < 0) anchor.y = 0
+
+        // Bounds: keep tips on screen
+        const tip = s.points[s.points.length - 1]
+        if (tip.x < 0) tip.x = 0
+        if (tip.x > canvas.width) tip.x = canvas.width
+        if (tip.y > canvas.height) { tip.y = canvas.height; tip.oy = canvas.height }
+
+        s.tipX = tip.x
+        s.tipY = tip.y
+      }
+
+      checkCollisions()
+
+      // Draw
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Subtle grid
+      ctx.strokeStyle = "rgba(255,107,53,0.05)"
+      ctx.lineWidth = 1
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke()
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke()
+      }
+
+      const activeSigns = signs.filter(s => !s.dead)
+      for (const s of activeSigns) {
+        drawRope(s)
+        drawSign(s)
+      }
+
+      signCountEl.textContent = String(mergeCount)
+      totalSignsEl.textContent = String(activeSigns.length)
+
+      requestAnimationFrame(tick)
+    }
+
+    tick()
+
+    // ── Test hooks ──
+    ;(window as any).__simReady = true
+    ;(window as any).__signs = signs
+    ;(window as any).__mergeCount = mergeCount
+
+    // Update mergeCount ref for tests
+    const origCheck = checkCollisions
+    // Use a getter so tests always see the latest value
+    Object.defineProperty(window, "__mergeCount", {
+      get: () => mergeCount,
+      configurable: true,
+    })
+
+    ;(window as any).__forceMerge = () => {
+      const active = signs.filter(s => !s.dead)
+      if (active.length >= 2) {
+        const tipA = active[0].points[active[0].points.length - 1]
+        const tipB = active[1].points[active[1].points.length - 1]
+        tipB.x = tipA.x
+        tipB.y = tipA.y
+        tipB.ox = tipA.x
+        tipB.oy = tipA.y
+        // Run collision check
+        checkCollisions()
+      }
+    }
+  </script>
+</Base>

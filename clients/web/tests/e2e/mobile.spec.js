@@ -24,6 +24,11 @@ const pages = [
   "/experiments/scroll-symphony",
   "/experiments/sentient-monolith",
   "/experiments/theremin",
+  "/experiments/indisputable-permanence",
+  "/experiments/pigeon-magnetoreception",
+  "/experiments/spin-room",
+  "/experiments/tidal-type-foundry",
+  "/experiments/trionda-calibration",
 ]
 
 test.use({
