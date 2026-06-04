@@ -1,0 +1,977 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="ll-shell">
+    {/* Onboarding Overlay */}
+    <div id="onboarding-overlay" class="ll-overlay" role="dialog" aria-labelledby="overlay-title" aria-describedby="overlay-desc">
+      <div class="ll-overlay-content glass">
+        <span class="ll-kicker">Ecosystem Remediation Desk</span>
+        <h2 id="overlay-title">Lichen Ledger System</h2>
+        <p id="overlay-desc" class="ll-overlay-desc">
+          A report from the Intergovernmental Platform on Biodiversity. 
+          Unreclaimed corporate assets risk total extinction. Drag your cursor across the entries to inoculate them with mycelial spores and rewild the portfolio.
+        </p>
+        <button id="init-button" type="button">Initialize Spore Sweep</button>
+      </div>
+    </div>
+
+    {/* Main App Container */}
+    <div class="ll-container">
+      <header class="ll-header">
+        <p class="ll-kicker">Risk Factor: Microbial Insolvency</p>
+        <h1>Lichen Ledger</h1>
+        <p class="ll-description">
+          Drag/swipe your pointer across the spreadsheet rows to deposit spores, or use arrow keys and Space/Enter to compost the ledger.
+        </p>
+      </header>
+
+      {/* Grid wrapper for responsive layout */}
+      <div class="ll-workspace">
+        <div class="ll-ledger-wrapper">
+          <canvas id="lichen-canvas" aria-hidden="true"></canvas>
+
+          <div id="ledger-table" class="ll-table" role="table" aria-label="Microbial Insolvency Ledger">
+            <div class="ll-table-header" role="row">
+              <div role="columnheader">Asset Name</div>
+              <div role="columnheader">Ticker</div>
+              <div role="columnheader">Yield</div>
+              <div role="columnheader">Symbiosis</div>
+              <div role="columnheader">Status</div>
+              <div role="columnheader">Action</div>
+            </div>
+
+            {/* Rows */}
+            <div class="asset-row" role="row" data-row-index="0" data-ticker="CARB">
+              <div class="cell asset-name" role="cell" data-label="Asset Name">Global Carbon Futures</div>
+              <div class="cell asset-ticker" role="cell" data-label="Ticker">$CARB</div>
+              <div class="cell asset-yield" role="cell" data-label="Yield">4.82%</div>
+              <div class="cell asset-symbiosis" role="cell" data-label="Symbiosis">0.0%</div>
+              <div class="cell asset-status" role="cell" data-label="Status">PERFORMING</div>
+              <div class="cell asset-action" role="cell">
+                <button type="button" class="spore-row-btn" aria-label="Inoculate Global Carbon Futures">Inoculate</button>
+              </div>
+            </div>
+
+            <div class="asset-row" role="row" data-row-index="1" data-ticker="LITH">
+              <div class="cell asset-name" role="cell" data-label="Asset Name">Lithic Extraction Ltd</div>
+              <div class="cell asset-ticker" role="cell" data-label="Ticker">$LITH</div>
+              <div class="cell asset-yield" role="cell" data-label="Yield">12.45%</div>
+              <div class="cell asset-symbiosis" role="cell" data-label="Symbiosis">0.0%</div>
+              <div class="cell asset-status" role="cell" data-label="Status">PERFORMING</div>
+              <div class="cell asset-action" role="cell">
+                <button type="button" class="spore-row-btn" aria-label="Inoculate Lithic Extraction Ltd">Inoculate</button>
+              </div>
+            </div>
+
+            <div class="asset-row" role="row" data-row-index="2" data-ticker="TREE">
+              <div class="cell asset-name" role="cell" data-label="Asset Name">Canopy Forestry Group</div>
+              <div class="cell asset-ticker" role="cell" data-label="Ticker">$TREE</div>
+              <div class="cell asset-yield" role="cell" data-label="Yield">3.15%</div>
+              <div class="cell asset-symbiosis" role="cell" data-label="Symbiosis">0.0%</div>
+              <div class="cell asset-status" role="cell" data-label="Status">PERFORMING</div>
+              <div class="cell asset-action" role="cell">
+                <button type="button" class="spore-row-btn" aria-label="Inoculate Canopy Forestry Group">Inoculate</button>
+              </div>
+            </div>
+
+            <div class="asset-row" role="row" data-row-index="3" data-ticker="CORN">
+              <div class="cell asset-name" role="cell" data-label="Asset Name">Monoculture Agri-Corp</div>
+              <div class="cell asset-ticker" role="cell" data-label="Ticker">$CORN</div>
+              <div class="cell asset-yield" role="cell" data-label="Yield">6.70%</div>
+              <div class="cell asset-symbiosis" role="cell" data-label="Symbiosis">0.0%</div>
+              <div class="cell asset-status" role="cell" data-label="Status">PERFORMING</div>
+              <div class="cell asset-action" role="cell">
+                <button type="button" class="spore-row-btn" aria-label="Inoculate Monoculture Agri-Corp">Inoculate</button>
+              </div>
+            </div>
+
+            <div class="asset-row" role="row" data-row-index="4" data-ticker="WELL">
+              <div class="cell asset-name" role="cell" data-label="Asset Name">Deepwater Drilling Trust</div>
+              <div class="cell asset-ticker" role="cell" data-label="Ticker">$WELL</div>
+              <div class="cell asset-yield" role="cell" data-label="Yield">8.94%</div>
+              <div class="cell asset-symbiosis" role="cell" data-label="Symbiosis">0.0%</div>
+              <div class="cell asset-status" role="cell" data-label="Status">PERFORMING</div>
+              <div class="cell asset-action" role="cell">
+                <button type="button" class="spore-row-btn" aria-label="Inoculate Deepwater Drilling Trust">Inoculate</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Dynamic Telemetry HUD */}
+        <section class="ll-hud glass" aria-live="polite">
+          <div class="ll-hud-metric">
+            <span class="ll-hud-label">Ledger Symbiosis</span>
+            <strong id="symbiosis-pct" class="ll-hud-value text-glow-green">0.0%</strong>
+          </div>
+          <div class="ll-hud-divider" aria-hidden="true"></div>
+          <div class="ll-hud-metric">
+            <span class="ll-hud-label">Microbial Spore Count</span>
+            <strong id="spore-count" class="ll-hud-value text-glow-gold">0</strong>
+          </div>
+          <div class="ll-hud-divider" aria-hidden="true"></div>
+          <div class="ll-hud-actions">
+            <button id="spore-bomb-btn" type="button" class="ll-bomb-button">Discharge Spore Bomb</button>
+            <p class="ll-hud-note">Inoculate 100% of portfolio entities instantly.</p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background-color: #030804;
+    overflow-x: hidden;
+  }
+
+  .ll-shell {
+    position: relative;
+    min-height: calc(100vh - 4rem);
+    background:
+      radial-gradient(circle at 15% 15%, rgba(173, 255, 47, 0.05), transparent 25rem),
+      radial-gradient(circle at 85% 85%, rgba(212, 255, 128, 0.05), transparent 25rem),
+      #030904;
+    color: #e5f2e8;
+    font-family: 'Inter', system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .ll-kicker {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8ce79a;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .ll-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+  }
+
+  .ll-header {
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    margin: 0 0 0.8rem 0;
+    letter-spacing: -0.04em;
+    color: #f0f7f2;
+    text-shadow: 0 0 2rem rgba(173, 255, 47, 0.15);
+  }
+
+  .ll-description {
+    max-width: 38rem;
+    font-size: clamp(0.85rem, 1.8vw, 1rem);
+    line-height: 1.6;
+    color: rgba(229, 242, 232, 0.75);
+    margin: 0;
+  }
+
+  /* Workspace grid layout */
+  .ll-workspace {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (min-width: 900px) {
+    .ll-workspace {
+      grid-template-columns: 1fr 280px;
+    }
+  }
+
+  /* Table layout and relative canvas positioning */
+  .ll-ledger-wrapper {
+    position: relative;
+    border: 1px solid rgba(140, 231, 154, 0.15);
+    border-radius: 12px;
+    background: rgba(4, 15, 6, 0.6);
+    overflow: hidden;
+    touch-action: none; /* Prevents scroll when dragging on mobile */
+  }
+
+  #lichen-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .ll-table {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ll-table-header {
+    display: none; /* Hidden on mobile card view */
+    background: rgba(140, 231, 154, 0.08);
+    border-bottom: 1px solid rgba(140, 231, 154, 0.2);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8ce79a;
+  }
+
+  .asset-row {
+    display: flex;
+    flex-direction: column;
+    padding: 1.2rem;
+    border-bottom: 1px solid rgba(140, 231, 154, 0.1);
+    background: transparent;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .asset-row:focus-within {
+    background: rgba(140, 231, 154, 0.04);
+  }
+
+  .cell {
+    padding: 0.4rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    border-bottom: 1px dashed rgba(140, 231, 154, 0.05);
+  }
+
+  .cell:last-child {
+    border-bottom: none;
+  }
+
+  .cell::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(140, 231, 154, 0.6);
+  }
+
+  /* Hide pseudo-labels for action cell */
+  .asset-action::before {
+    display: none;
+  }
+  .asset-action {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.8rem;
+  }
+
+  .asset-name {
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .asset-ticker {
+    font-family: monospace;
+    color: rgba(229, 242, 232, 0.8);
+  }
+
+  .asset-yield {
+    font-family: monospace;
+    font-weight: 500;
+  }
+
+  .asset-symbiosis {
+    font-family: monospace;
+  }
+
+  .asset-status {
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    color: #e59f42; /* Warning orange for standard corporate */
+  }
+
+  /* Button styles */
+  .spore-row-btn {
+    background: rgba(140, 231, 154, 0.12);
+    border: 1px solid rgba(140, 231, 154, 0.3);
+    color: #8ce79a;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .spore-row-btn:hover,
+  .spore-row-btn:focus-visible {
+    background: #8ce79a;
+    color: #030804;
+    outline: none;
+    box-shadow: 0 0 10px rgba(140, 231, 154, 0.4);
+  }
+
+  /* Compost/Symbiotic row modifications */
+  .asset-row.composted {
+    border-color: rgba(173, 255, 47, 0.25);
+    background: rgba(173, 255, 47, 0.02);
+  }
+
+  .asset-row.composted .asset-name {
+    color: #adff2f;
+    text-shadow: 0 0 10px rgba(173, 255, 47, 0.3);
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .asset-row.composted .asset-status {
+    color: #adff2f;
+    text-shadow: 0 0 8px rgba(173, 255, 47, 0.3);
+  }
+
+  .asset-row.composted .asset-yield {
+    color: #ffd700;
+  }
+
+  .asset-row.composted .spore-row-btn {
+    background: rgba(173, 255, 47, 0.2);
+    border-color: #adff2f;
+    color: #adff2f;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Desktop Table styling */
+  @media (min-width: 600px) {
+    .ll-table-header {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr 1fr 1fr 1.2fr 1.2fr;
+      padding: 1rem 1.5rem;
+    }
+
+    .asset-row {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr 1fr 1fr 1.2fr 1.2fr;
+      padding: 1.2rem 1.5rem;
+      align-items: center;
+      flex-direction: row;
+    }
+
+    .cell {
+      padding: 0;
+      border-bottom: none;
+      display: block;
+    }
+
+    .cell::before {
+      display: none;
+    }
+
+    .asset-action {
+      padding-top: 0;
+    }
+  }
+
+  /* HUD Telemetry styling */
+  .ll-hud {
+    padding: 1.5rem;
+    border: 1px solid rgba(140, 231, 154, 0.15);
+    border-radius: 12px;
+    background: rgba(4, 15, 6, 0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    box-sizing: border-box;
+  }
+
+  .ll-hud-metric {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ll-hud-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(229, 242, 232, 0.6);
+    margin-bottom: 0.4rem;
+  }
+
+  .ll-hud-value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .text-glow-green {
+    color: #adff2f;
+    text-shadow: 0 0 15px rgba(173, 255, 47, 0.4);
+  }
+
+  .text-glow-gold {
+    color: #ffd700;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+  }
+
+  .ll-hud-divider {
+    height: 1px;
+    background: rgba(140, 231, 154, 0.15);
+  }
+
+  .ll-hud-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .ll-bomb-button {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #adff2f;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(173, 255, 47, 0.2), rgba(255, 215, 0, 0.1));
+    color: #adff2f;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .ll-bomb-button:hover,
+  .ll-bomb-button:focus-visible {
+    background: #adff2f;
+    color: #030804;
+    box-shadow: 0 0 20px rgba(173, 255, 47, 0.5);
+    outline: none;
+  }
+
+  .ll-hud-note {
+    font-size: 0.6rem;
+    color: rgba(229, 242, 232, 0.5);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* Onboarding Overlay styling */
+  .ll-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: grid;
+    place-content: center;
+    background: rgba(3, 8, 4, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 1.5rem;
+  }
+
+  .ll-overlay-content {
+    max-width: 28rem;
+    padding: 2.2rem;
+    border: 1px solid rgba(140, 231, 154, 0.25);
+    border-radius: 16px;
+    background: rgba(4, 15, 6, 0.85);
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .ll-overlay-content h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0.4rem 0 1rem 0;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 15px rgba(140, 231, 154, 0.2);
+  }
+
+  .ll-overlay-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: rgba(229, 242, 232, 0.8);
+    margin-bottom: 1.8rem;
+  }
+
+  #init-button {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    border: 1px solid #adff2f;
+    border-radius: 8px;
+    background: #adff2f;
+    color: #030804;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  #init-button:hover,
+  #init-button:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(173, 255, 47, 0.4);
+    outline: none;
+  }
+
+  /* Glassmorphism helpers */
+  .glass {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Animation states */
+  @media (prefers-reduced-motion: reduce) {
+    .ll-bomb-button,
+    #init-button,
+    .asset-row {
+      transition: none !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  // Narrow types for local script usage
+  interface SporeParticle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    radius: number;
+    maxRadius: number;
+    color: string;
+    life: number;
+    maxLife: number;
+  }
+
+  // Botanical Names dictionary for mutation mapping
+  const plantNames: Record<string, string> = {
+    "Global Carbon Futures": "Letharia Vulpina (Wolf Lichen) Symbiosis",
+    "Lithic Extraction Ltd": "Xanthoria Parietina (Sunburst Lichen) Inc.",
+    "Canopy Forestry Group": "Cladonia Rangiferina (Reindeer Moss) Guild",
+    "Monoculture Agri-Corp": "Lobaria Pulmonaria (Lung Lichen) Poly-Crop",
+    "Deepwater Drilling Trust": "Physcia Adscendens (Fairy Lichen) Vent"
+  };
+
+  const botanicalTickers: Record<string, string> = {
+    "CARB": "MOSS",
+    "LITH": "LICH",
+    "TREE": "SPORE",
+    "CORN": "SOIL",
+    "WELL": "DEEP"
+  };
+
+  const botanicalGlyphs = ["⸙", "☘", "✿", "𖧷", "☄", "☼", "☯", "⚜"];
+
+  // Query DOM elements with narrow types
+  const overlay = document.getElementById("onboarding-overlay") as HTMLDivElement | null;
+  const initBtn = document.getElementById("init-button") as HTMLButtonElement | null;
+  const canvas = document.getElementById("lichen-canvas") as HTMLCanvasElement | null;
+  const table = document.getElementById("ledger-table") as HTMLDivElement | null;
+  const rows = document.querySelectorAll(".asset-row") as NodeListOf<HTMLDivElement>;
+  const sporeBombBtn = document.getElementById("spore-bomb-btn") as HTMLButtonElement | null;
+  const symbiosisPct = document.getElementById("symbiosis-pct") as HTMLElement | null;
+  const sporeCountVal = document.getElementById("spore-count") as HTMLElement | null;
+
+  // Runtime State
+  let audioCtx: AudioContext | null = null;
+  let isPainting = false;
+  let totalSpores = 0;
+  const rowInoculated = [false, false, false, false, false];
+  const rowSporeRates = [0, 0, 0, 0, 0];
+  let particles: SporeParticle[] = [];
+  let currentFocusedRowIndex = -1;
+
+  // Sound Engine
+  function playSquelchSound(freqStart = 300, duration = 0.08) {
+    if (!audioCtx || audioCtx.state === "suspended") return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+
+      osc.type = Math.random() > 0.5 ? "sine" : "triangle";
+      osc.frequency.setValueAtTime(freqStart, audioCtx.currentTime);
+      // Rapid pitch sweep downwards
+      osc.frequency.exponentialRampToValueAtTime(Math.max(40, freqStart * 0.2), audioCtx.currentTime + duration);
+
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(freqStart, audioCtx.currentTime);
+      filter.Q.setValueAtTime(3, audioCtx.currentTime);
+
+      gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+      osc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+      // Fail silently if audio context is blocked
+    }
+  }
+
+  function playCompostCascade() {
+    if (!audioCtx) return;
+    // Play a sequence of bubbling/cascade noises
+    let delay = 0;
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => {
+        playSquelchSound(400 - i * 40, 0.12);
+      }, delay);
+      delay += 50 + Math.random() * 50;
+    }
+  }
+
+  // Scramble text animation to convert corporate names to botanical ones
+  function mutateRowText(row: HTMLDivElement, index: number) {
+    const nameEl = row.querySelector(".asset-name") as HTMLDivElement | null;
+    const tickerEl = row.querySelector(".asset-ticker") as HTMLDivElement | null;
+    const yieldEl = row.querySelector(".asset-yield") as HTMLDivElement | null;
+    const statusEl = row.querySelector(".asset-status") as HTMLDivElement | null;
+    const symbEl = row.querySelector(".asset-symbiosis") as HTMLDivElement | null;
+
+    if (!nameEl || !tickerEl || !yieldEl || !statusEl || !symbEl) return;
+
+    const originalName = nameEl.textContent || "";
+    const targetName = plantNames[originalName] || originalName;
+    const originalTicker = tickerEl.textContent?.replace("$", "") || "";
+    const targetTicker = `$${botanicalTickers[originalTicker] || originalTicker}`;
+
+    // Status goes to Symbiotic
+    statusEl.textContent = "SYMBIOTIC";
+
+    // Dynamic symbiosis
+    symbEl.textContent = "100.0%";
+
+    // Morph name text
+    let frame = 0;
+    const totalFrames = 25;
+    const interval = setInterval(() => {
+      frame++;
+      if (frame >= totalFrames) {
+        clearInterval(interval);
+        nameEl.textContent = targetName;
+        tickerEl.textContent = targetTicker;
+      } else {
+        // Scramble letters
+        nameEl.textContent = targetName
+          .split("")
+          .map((char, i) => {
+            if (i < (frame / totalFrames) * targetName.length) return char;
+            return botanicalGlyphs[Math.floor(Math.random() * botanicalGlyphs.length)];
+          })
+          .join("");
+      }
+    }, 30);
+
+    // Turn yield into a dynamic spore rate generator
+    rowSporeRates[index] = Math.floor(Math.random() * 15) + 5; // 5-20 spores per second
+    let localSpores = Math.floor(Math.random() * 100) + 50;
+
+    const updateYieldLoop = () => {
+      if (!row.classList.contains("composted")) return;
+      localSpores += rowSporeRates[index];
+      yieldEl.textContent = `${localSpores} SPORES`;
+      
+      // Update global spore count
+      totalSpores += rowSporeRates[index];
+      if (sporeCountVal) {
+        sporeCountVal.textContent = String(totalSpores);
+      }
+      setTimeout(updateYieldLoop, 1000);
+    };
+
+    updateYieldLoop();
+  }
+
+  // Inoculate specific row
+  function inoculateRow(row: HTMLDivElement) {
+    const index = parseInt(row.getAttribute("data-row-index") || "0", 10);
+    if (rowInoculated[index]) return;
+
+    rowInoculated[index] = true;
+    row.classList.add("composted");
+    
+    // Visual indicators & triggers
+    mutateRowText(row, index);
+    playSquelchSound(250 + index * 50, 0.15);
+
+    // Update global symbiosis rate
+    updateGlobalMetrics();
+  }
+
+  function updateGlobalMetrics() {
+    const activeRows = rowInoculated.filter(Boolean).length;
+    const percentage = (activeRows / rowInoculated.length) * 100;
+    if (symbiosisPct) {
+      symbiosisPct.textContent = `${percentage.toFixed(1)}%`;
+    }
+  }
+
+  // Inoculate all rows (Spore Bomb)
+  function triggerSporeBomb() {
+    playCompostCascade();
+    rows.forEach((row) => {
+      inoculateRow(row);
+    });
+
+    // Generate burst of particles from the bomb button or center
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      for (let i = 0; i < 150; i++) {
+        createLichenThread(centerX, centerY);
+      }
+    }
+  }
+
+  // Canvas Lichen growth particle generator
+  function createLichenThread(x: number, y: number) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.5 + Math.random() * 1.5;
+    const maxLife = 50 + Math.floor(Math.random() * 60);
+    
+    // Palette: Yellow-greens, gold, cyan-green
+    const lichenColors = ["rgba(173, 255, 47, 0.15)", "rgba(255, 215, 0, 0.12)", "rgba(140, 231, 154, 0.18)", "rgba(0, 255, 204, 0.1)"];
+    const color = lichenColors[Math.floor(Math.random() * lichenColors.length)];
+
+    particles.push({
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      radius: 2 + Math.random() * 3,
+      maxRadius: 8 + Math.random() * 12,
+      color,
+      life: 0,
+      maxLife
+    });
+  }
+
+  // Canvas animation loop
+  function animateLichen() {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // We do not clear completely, allowing lichen threads to overlay and build textures
+    // To keep performance high, we slowly fade old layers or cap draw counts
+    if (Math.random() < 0.05) {
+      ctx.fillStyle = "rgba(3, 8, 4, 0.01)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    const ratio = window.devicePixelRatio || 1;
+
+    particles.forEach((p, index) => {
+      // Render particle
+      ctx.beginPath();
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+      grad.addColorStop(0, p.color);
+      grad.addColorStop(1, "rgba(3, 8, 4, 0)");
+      ctx.fillStyle = grad;
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (!reducedMotion) {
+        // Move particle with slight Brownian jitter
+        p.x += p.vx + (Math.random() - 0.5) * 0.5;
+        p.y += p.vy + (Math.random() - 0.5) * 0.5;
+        
+        // Filament growth: widen particle slightly
+        p.radius += (p.maxRadius - p.radius) * 0.02;
+        p.life++;
+      } else {
+        p.life = p.maxLife; // Instantly expire threads in reduced motion
+      }
+
+      // Check if particle hits any row elements in DOM
+      // Throttled check for performance
+      if (p.life % 6 === 0) {
+        // Translate canvas coordinate to client coordinate
+        const canvasRect = canvas.getBoundingClientRect();
+        const clientX = canvasRect.left + p.x / ratio;
+        const clientY = canvasRect.top + p.y / ratio;
+
+        const hitEl = document.elementFromPoint(clientX, clientY);
+        if (hitEl) {
+          const row = hitEl.closest(".asset-row") as HTMLDivElement | null;
+          if (row) {
+            inoculateRow(row);
+          }
+        }
+      }
+
+      // Remove dead particles
+      if (p.life >= p.maxLife) {
+        particles.splice(index, 1);
+      }
+    });
+
+    requestAnimationFrame(animateLichen);
+  }
+
+  // Keyboard navigation helpers
+  function focusRow(index: number) {
+    if (index < 0 || index >= rows.length) return;
+    currentFocusedRowIndex = index;
+    const targetRow = rows[index];
+    const btn = targetRow.querySelector(".spore-row-btn") as HTMLButtonElement | null;
+    if (btn) {
+      btn.focus();
+    }
+  }
+
+  // Listeners & Initialization
+  if (initBtn && overlay) {
+    initBtn.addEventListener("click", () => {
+      // Unlock Web Audio Context
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      audioCtx = new AudioCtxClass();
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+
+      overlay.style.display = "none";
+      playSquelchSound(180, 0.2);
+
+      // Trigger standard resize for canvas
+      triggerResize();
+    });
+  }
+
+  function triggerResize() {
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.scale(dpr, dpr);
+      // Fill canvas background to initialize drawing context
+      ctx.fillStyle = "#040f06";
+      ctx.fillRect(0, 0, rect.width, rect.height);
+    }
+  }
+
+  window.addEventListener("resize", triggerResize);
+
+  // Setup Spore Bomb Button
+  if (sporeBombBtn) {
+    sporeBombBtn.addEventListener("click", () => {
+      // In case user bypasses overlay or clicks directly
+      if (!audioCtx) {
+        const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioCtx = new AudioCtxClass();
+      }
+      triggerSporeBomb();
+    });
+  }
+
+  // Setup Table Pointer Interaction (Painting)
+  if (table) {
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isPainting || !canvas) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Draw active spore filaments
+      for (let i = 0; i < 3; i++) {
+        createLichenThread(x, y);
+      }
+
+      // Squelch click/pop generator on mouse move
+      if (Math.random() < 0.18) {
+        playSquelchSound(150 + Math.random() * 250, 0.05);
+      }
+    };
+
+    table.addEventListener("pointerdown", (e) => {
+      isPainting = true;
+      table.setPointerCapture(e.pointerId);
+      handlePointerMove(e);
+    });
+
+    table.addEventListener("pointermove", handlePointerMove);
+
+    const stopPainting = (e: PointerEvent) => {
+      isPainting = false;
+      try {
+        table.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+    };
+
+    table.addEventListener("pointerup", stopPainting);
+    table.addEventListener("pointercancel", stopPainting);
+  }
+
+  // Row Inoculation Button triggers
+  rows.forEach((row) => {
+    const btn = row.querySelector(".spore-row-btn") as HTMLButtonElement | null;
+    if (btn) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation(); // Avoid double triggering pointer painting
+        if (!audioCtx) {
+          const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+          audioCtx = new AudioCtxClass();
+        }
+        inoculateRow(row);
+      });
+    }
+  });
+
+  // Keyboard navigation controls
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      let nextIndex = currentFocusedRowIndex + 1;
+      if (nextIndex >= rows.length) nextIndex = 0;
+      focusRow(nextIndex);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      let prevIndex = currentFocusedRowIndex - 1;
+      if (prevIndex < 0) prevIndex = rows.length - 1;
+      focusRow(prevIndex);
+    }
+  });
+
+  // Kickoff canvas loop
+  animateLichen();
+</script>
