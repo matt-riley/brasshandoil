@@ -221,6 +221,18 @@ Carry Forward:
 
 ### Session Entry
 
+Date: 2026-06-04
+Experiment: Pressure Choir
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Rotated toward a tactile instrument concept: a pressure membrane, visible
+  dents, and short audio voices rather than another institutional workflow.
+- Keep semantic readouts tied to the weird gesture so Playwright can verify the
+  interaction without treating the canvas as an opaque screenshot.
+
+### Session Entry
+
 Date: 2026-06-03
 Experiment: Tidal Type Foundry
 Feedback:
@@ -251,5 +263,16 @@ Feedback:
 Carry Forward:
 - Avoid using hardcoded `width: 100vw` for full-width components when nested inside layouts with default side padding (like `.container` which adds `padding-inline`), as this results in horizontal overflow (e.g. 391px on a 375px mobile viewport). Use `width: 100%` and relative/dynamic heights (`calc(100dvh - headerHeight)`) instead.
 - Follow a strict TDD loop for viewport audits: expand viewport-based E2E test suites first to cover all missing pages, run test suites to identify layout regressions, fix CSS/HTML constraints, and verify the changes against the automated tests.
+
+### Session Entry
+
+Date: 2026-06-04
+Experiment: Lichen Ledger
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Ensure visual highlights of composted items have high accessible contrast against dark backdrops.
+- In paint/drawing loops, use `document.elementFromPoint` to perform cheap, native grid collision checks on DOM entities.
+- Support key navigation loops (Up/Down arrow keys + Enter/Space) for gesture fallbacks as standard design patterns.
 
 

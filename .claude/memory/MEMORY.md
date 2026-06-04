@@ -61,6 +61,9 @@ Set `perspective: 400px` on a container, then child elements with `rotateX(90deg
 #### Pointer Lock API
 `element.requestPointerLock()` hides the cursor and delivers raw `movementX`/`movementY` deltas on `mousemove` events, unbounded by screen edges. Listen for `pointerlockchange` on `document` and check `document.pointerLockElement` to know when lock is active. Requires a user gesture (click) to engage. `document.exitPointerLock()` releases. In Playwright tests, stub via `element.requestPointerLock = () => { ... }` and dispatch synthetic `pointerlockchange` events since headless browsers don't support real pointer lock.
 
+#### Canvas gravitational lensing (position-based)
+Rather than warping pixels with ImageData, you can simulate gravitational lensing by displacing the *draw positions* of background objects. For each star, compute deflection from nearby masses: `deflection = mass * strength / (distance + epsilon)`, applied radially outward from the mass. Modulate by a "probe" factor (e.g., cursor proximity) so lensing only appears when the user is near. Much cheaper than pixel-level distortion and produces convincing Einstein-ring-like effects. Add brightness magnification (`1 + distortion * N`) for realism.
+
 #### Canvas ImageData pixel manipulation
 `ctx.createImageData(w, h)` + direct RGBA writes to `imgData.data[idx]` + `ctx.putImageData()` gives per-pixel control for procedural visualizations. Process in 4×4 blocks for performance. Combine with `requestAnimationFrame` and `Date.now()` for animated fields. Much faster than drawing thousands of individual rects.
 
@@ -71,6 +74,11 @@ Set `perspective: 400px` on a container, then child elements with `rotateX(90deg
 
 #### Verlet Integration (rope/pendulum physics)
 Store current and previous position per point; velocity is implicit as `pos - oldPos`. Each frame: (1) compute new pos from current + (current - old) * damping + gravity, (2) iteratively solve distance constraints between connected points (divide error equally, skip pinned points). 5 iterations is enough for stiff ropes. Pinned points act as anchors. Mouse interaction: directly set a grabbed point's position each frame — the verlet integration naturally generates momentum on release since oldPos lags behind. Much simpler than force-based physics for rope/cloth/pendulum effects.
+
+### 2026-06-04 — Dark Star Observatory
+**Concept:** Inspired by the theory that the universe's first stars emitted no light. A black void with 600 faint background stars and 7 hidden "dark stars." Move your cursor to probe — near a dark star, background stars bend via gravitational lensing. Dwell to catalogue each one.
+**Technique:** Canvas-based gravitational lensing — per-frame displacement of star positions based on inverse-distance deflection from hidden point masses, modulated by cursor proximity. Einstein ring hint rendering.
+**File:** clients/web/src/pages/experiments/dark-star-observatory.astro
 
 ## Feedback from Matt
 
