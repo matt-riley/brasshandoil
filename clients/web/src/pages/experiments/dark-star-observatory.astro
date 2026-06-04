@@ -1,0 +1,329 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div id="observatory">
+    <div id="hud">
+      <h1>Dark Star Observatory</h1>
+      <p id="instructions">Move your cursor to probe the void. Dark stars warp space around them — watch the background stars bend.</p>
+      <p id="survey">SURVEY: <span id="found-count">0</span> / <span id="total-count">0</span> dark stars catalogued</p>
+      <p id="status-line"></p>
+    </div>
+    <canvas id="field"></canvas>
+  </div>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    #observatory {
+      width: 100%;
+      height: calc(100dvh - 6rem);
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-family: "Courier New", monospace;
+      color: #8892a8;
+      cursor: crosshair;
+    }
+
+    #hud {
+      padding: 1rem 1.5rem;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    h1 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: #4a5568;
+      margin-bottom: 0.3rem;
+    }
+
+    #instructions {
+      font-size: 0.75rem;
+      color: #5a6478;
+      margin-bottom: 0.3rem;
+    }
+
+    #survey {
+      font-size: 0.8rem;
+      color: #6b7b9a;
+    }
+
+    #found-count {
+      color: #a0c4ff;
+    }
+
+    #status-line {
+      font-size: 0.7rem;
+      color: #3a4558;
+      margin-top: 0.2rem;
+      min-height: 1em;
+      font-style: italic;
+    }
+
+    canvas#field {
+      flex: 1;
+      display: block;
+      width: 100%;
+    }
+
+    @keyframes reveal-ring {
+      0% { opacity: 0; transform: scale(0.3); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(1.5); }
+    }
+  </style>
+
+  <script>
+    interface DarkStar {
+      x: number;
+      y: number;
+      mass: number;
+      found: boolean;
+      proximity: number;
+    }
+
+    interface BgStar {
+      x: number;
+      y: number;
+      brightness: number;
+      size: number;
+    }
+
+    const canvas = document.getElementById("field") as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d")!;
+    const foundEl = document.getElementById("found-count")!;
+    const totalEl = document.getElementById("total-count")!;
+    const statusEl = document.getElementById("status-line")!;
+
+    let W = 0;
+    let H = 0;
+    const DARK_STAR_COUNT = 7;
+    const BG_STAR_COUNT = 600;
+    const FIND_RADIUS = 0.03; // normalized, how close you must hover
+    const FIND_TIME = 800; // ms you must dwell near a dark star
+    const LENS_RADIUS = 0.15; // normalized, radius of lensing effect
+
+    const darkStars: DarkStar[] = [];
+    const bgStars: BgStar[] = [];
+    let mouseX = -1;
+    let mouseY = -1;
+    let foundCount = 0;
+
+    // Expose for tests
+    (window as unknown as { __darkStars: DarkStar[] }).__darkStars = darkStars;
+
+    function init(): void {
+      // Generate dark stars — avoid edges
+      darkStars.length = 0;
+      for (let i = 0; i < DARK_STAR_COUNT; i++) {
+        darkStars.push({
+          x: 0.15 + Math.random() * 0.7,
+          y: 0.1 + Math.random() * 0.8,
+          mass: 0.5 + Math.random() * 0.5,
+          found: false,
+          proximity: 0,
+        });
+      }
+
+      // Generate background stars
+      bgStars.length = 0;
+      for (let i = 0; i < BG_STAR_COUNT; i++) {
+        bgStars.push({
+          x: Math.random(),
+          y: Math.random(),
+          brightness: 0.15 + Math.random() * 0.6,
+          size: 0.5 + Math.random() * 1.5,
+        });
+      }
+
+      totalEl.textContent = String(DARK_STAR_COUNT);
+      foundCount = 0;
+      foundEl.textContent = "0";
+    }
+
+    function resize(): void {
+      const rect = canvas.getBoundingClientRect();
+      W = rect.width * devicePixelRatio;
+      H = rect.height * devicePixelRatio;
+      canvas.width = W;
+      canvas.height = H;
+    }
+
+    // Gravitational lensing: given a background star position and the cursor-relative
+    // dark star positions, compute the apparent (lensed) position
+    function lensPosition(
+      sx: number,
+      sy: number,
+      cursorNX: number,
+      cursorNY: number
+    ): { lx: number; ly: number; distortion: number } {
+      let lx = sx;
+      let ly = sy;
+      let totalDistortion = 0;
+
+      for (const ds of darkStars) {
+        // Distance from this bg star to the dark star
+        const dx = sx - ds.x;
+        const dy = sy - ds.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Only lens if cursor is near this dark star (simulating "probing")
+        const cdx = cursorNX - ds.x;
+        const cdy = cursorNY - ds.y;
+        const cursorDist = Math.sqrt(cdx * cdx + cdy * cdy);
+        const probeStrength = Math.max(0, 1 - cursorDist / LENS_RADIUS);
+
+        if (probeStrength > 0 && dist > 0.005) {
+          // Einstein ring-like deflection: bend stars away from the dark star
+          // proportional to mass and inversely proportional to distance
+          const deflection = ds.mass * 0.012 * probeStrength / (dist + 0.02);
+          lx += (dx / dist) * deflection;
+          ly += (dy / dist) * deflection;
+          totalDistortion += deflection;
+        }
+      }
+
+      return { lx, ly, distortion: totalDistortion };
+    }
+
+    function draw(): void {
+      ctx.fillStyle = "#000005";
+      ctx.fillRect(0, 0, W, H);
+
+      const cursorNX = mouseX / W;
+      const cursorNY = mouseY / H;
+
+      // Draw background stars with lensing
+      for (const star of bgStars) {
+        const { lx, ly, distortion } = lensPosition(star.x, star.y, cursorNX, cursorNY);
+
+        // Stars near strong distortion get brighter and bluer (lensing magnification)
+        const magnification = 1 + distortion * 8;
+        const b = Math.min(1, star.brightness * magnification);
+        const blueShift = Math.min(distortion * 20, 0.5);
+
+        const r = Math.floor((180 + 50 * (1 - blueShift)) * b);
+        const g = Math.floor((190 + 40 * (1 - blueShift)) * b);
+        const bl = Math.floor((220 + 35 * blueShift) * b);
+
+        ctx.fillStyle = `rgb(${r},${g},${bl})`;
+        ctx.beginPath();
+        const sz = star.size * (1 + distortion * 3) * devicePixelRatio;
+        ctx.arc(lx * W, ly * H, sz, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Draw found dark stars as faint rings
+      for (const ds of darkStars) {
+        if (ds.found) {
+          ctx.strokeStyle = "rgba(160, 196, 255, 0.15)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(ds.x * W, ds.y * H, 20 * devicePixelRatio, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Tiny label
+          ctx.fillStyle = "rgba(160, 196, 255, 0.3)";
+          ctx.font = `${9 * devicePixelRatio}px Courier New`;
+          ctx.fillText("●", ds.x * W - 3 * devicePixelRatio, ds.y * H + 3 * devicePixelRatio);
+        }
+
+        // Draw Einstein ring when cursor is very close
+        const cdx = cursorNX - ds.x;
+        const cdy = cursorNY - ds.y;
+        const cdist = Math.sqrt(cdx * cdx + cdy * cdy);
+        if (cdist < FIND_RADIUS * 2 && !ds.found) {
+          const ringAlpha = Math.max(0, 1 - cdist / (FIND_RADIUS * 2)) * 0.4;
+          ctx.strokeStyle = `rgba(180, 210, 255, ${ringAlpha})`;
+          ctx.lineWidth = 1.5 * devicePixelRatio;
+          ctx.beginPath();
+          ctx.arc(ds.x * W, ds.y * H, (15 + cdist * 200) * devicePixelRatio, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    // Track proximity for dwell-to-find mechanic
+    function updateProximity(dt: number): void {
+      if (mouseX < 0) return;
+      const cursorNX = mouseX / W;
+      const cursorNY = mouseY / H;
+
+      for (const ds of darkStars) {
+        if (ds.found) continue;
+        const dx = cursorNX - ds.x;
+        const dy = cursorNY - ds.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < FIND_RADIUS) {
+          ds.proximity += dt;
+          if (ds.proximity >= FIND_TIME) {
+            ds.found = true;
+            foundCount++;
+            foundEl.textContent = String(foundCount);
+            if (foundCount === DARK_STAR_COUNT) {
+              statusEl.textContent = "Survey complete. The invisible universe is mapped.";
+            } else {
+              statusEl.textContent = `Dark star catalogued. Mass: ${ds.mass.toFixed(3)} solar masses (theoretical).`;
+            }
+          }
+        } else {
+          ds.proximity = Math.max(0, ds.proximity - dt * 0.5);
+        }
+      }
+    }
+
+    let lastTime = performance.now();
+    function tick(): void {
+      const now = performance.now();
+      updateProximity(now - lastTime);
+      lastTime = now;
+      requestAnimationFrame(tick);
+    }
+
+    canvas.addEventListener("mousemove", (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = (e.clientX - rect.left) * devicePixelRatio;
+      mouseY = (e.clientY - rect.top) * devicePixelRatio;
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      mouseX = -1;
+      mouseY = -1;
+    });
+
+    // Touch support
+    const handleTouch = (e: TouchEvent) => {
+      e.preventDefault();
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        mouseX = (touch.clientX - rect.left) * devicePixelRatio;
+        mouseY = (touch.clientY - rect.top) * devicePixelRatio;
+      }
+    };
+
+    canvas.addEventListener("touchstart", handleTouch, { passive: false });
+    canvas.addEventListener("touchmove", handleTouch, { passive: false });
+
+    const clearTouch = () => {
+      mouseX = -1;
+      mouseY = -1;
+    };
+    canvas.addEventListener("touchend", clearTouch);
+    canvas.addEventListener("touchcancel", clearTouch);
+
+    window.addEventListener("resize", resize);
+    init();
+    resize();
+    requestAnimationFrame(draw);
+    requestAnimationFrame(tick);
+  </script>
+</Base>
