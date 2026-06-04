@@ -1,0 +1,574 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="pc-shell">
+    <section
+      class="pc-stage"
+      id="pressure-stage"
+      data-pressed="false"
+      aria-label="Pressure Choir membrane"
+    >
+      <canvas id="pressure-canvas" aria-label="A ringing pressure membrane"></canvas>
+      <div class="pc-membrane" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="pc-needle" aria-hidden="true"></div>
+    </section>
+
+    <section class="pc-console" aria-label="Pressure Choir controls">
+      <p class="pc-kicker">Barometer recital / sealed room</p>
+      <h1>Pressure Choir</h1>
+      <p class="pc-intro">
+        Press the listening skin. Drag slowly for low vowels, strike hard for
+        glassy overtones, then condense the room until the ceiling starts to sing.
+      </p>
+
+      <div class="pc-readouts" aria-live="polite">
+        <div>
+          <span>Pressure</span>
+          <strong><b id="pressure-reading">0.00</b> atm</strong>
+        </div>
+        <div>
+          <span>Dents</span>
+          <strong id="dent-count">0</strong>
+        </div>
+        <div>
+          <span>Choir</span>
+          <strong id="choir-state">waiting</strong>
+        </div>
+      </div>
+
+      <div class="pc-actions">
+        <button id="condense-button" type="button">Condense Room</button>
+        <button id="release-button" type="button">Release Valve</button>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #100d12;
+  }
+
+  .pc-shell {
+    --paper: #fff4d8;
+    --ink: #100d12;
+    --cyan: #77f5e5;
+    --rose: #ff5d7a;
+    --amber: #f6c453;
+    --violet: #8a7dff;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 25rem);
+    gap: clamp(1rem, 2vw, 1.5rem);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.2vw, 1.7rem);
+    color: var(--paper);
+    background:
+      linear-gradient(135deg, rgba(119, 245, 229, 0.14), transparent 28rem),
+      radial-gradient(circle at 82% 16%, rgba(255, 93, 122, 0.24), transparent 17rem),
+      radial-gradient(circle at 20% 86%, rgba(246, 196, 83, 0.18), transparent 20rem),
+      #100d12;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .pc-stage {
+    position: relative;
+    min-height: min(64rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(255, 244, 216, 0.2);
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 50% 46%, rgba(255, 244, 216, 0.16), transparent 19rem),
+      conic-gradient(from 140deg at 50% 52%, #211724, #243b43, #161126, #4a2235, #211724);
+    box-shadow:
+      inset 0 0 7rem rgba(16, 13, 18, 0.72),
+      0 1rem 2.5rem rgba(0, 0, 0, 0.32);
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  #pressure-canvas,
+  .pc-membrane {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #pressure-canvas {
+    z-index: 2;
+  }
+
+  .pc-membrane {
+    z-index: 1;
+    background:
+      linear-gradient(90deg, rgba(255, 244, 216, 0.11) 1px, transparent 1px) 0 0 / 3.5rem 3.5rem,
+      linear-gradient(0deg, rgba(255, 244, 216, 0.1) 1px, transparent 1px) 0 0 / 3.5rem 3.5rem;
+    mask-image: radial-gradient(ellipse at center, #000 0 68%, transparent 72%);
+  }
+
+  .pc-membrane span {
+    position: absolute;
+    width: clamp(8rem, 18vw, 15rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(255, 244, 216, 0.26);
+    border-radius: 50%;
+    box-shadow: inset 0 0 2rem rgba(255, 244, 216, 0.08);
+    animation: pc-breathe 7s ease-in-out infinite;
+  }
+
+  .pc-membrane span:nth-child(1) { top: 12%; left: 14%; }
+  .pc-membrane span:nth-child(2) { top: 22%; right: 16%; animation-delay: -1.8s; }
+  .pc-membrane span:nth-child(3) { right: 24%; bottom: 12%; animation-delay: -3.2s; }
+  .pc-membrane span:nth-child(4) { bottom: 18%; left: 18%; animation-delay: -4.6s; }
+
+  .pc-stage[data-pressed="true"] .pc-membrane {
+    filter: saturate(1.45) contrast(1.12);
+  }
+
+  .pc-needle {
+    position: absolute;
+    right: clamp(1rem, 3vw, 2rem);
+    bottom: clamp(1rem, 3vw, 2rem);
+    z-index: 4;
+    width: clamp(8rem, 19vw, 14rem);
+    height: clamp(8rem, 19vw, 14rem);
+    border: 1px solid rgba(255, 244, 216, 0.28);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at center, var(--paper) 0 0.24rem, transparent 0.26rem),
+      conic-gradient(from 220deg, rgba(119, 245, 229, 0.35), rgba(246, 196, 83, 0.48), rgba(255, 93, 122, 0.46), transparent 62%);
+    box-shadow: inset 0 0 2rem rgba(0, 0, 0, 0.45);
+    opacity: 0.82;
+  }
+
+  .pc-needle::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 42%;
+    height: 0.16rem;
+    content: "";
+    background: var(--paper);
+    border-radius: 999px;
+    transform: translateY(-50%) rotate(calc(-145deg + var(--needle, 0) * 210deg));
+    transform-origin: left center;
+    box-shadow: 0 0 1rem rgba(255, 244, 216, 0.6);
+  }
+
+  .pc-console {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 1rem;
+  }
+
+  .pc-kicker,
+  .pc-readouts span {
+    margin: 0;
+    color: #77f5e5;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 9ch;
+    margin: 0;
+    color: var(--paper);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(3rem, 8vw, 6.7rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.85;
+    text-shadow:
+      0.04em 0.04em 0 rgba(255, 93, 122, 0.8),
+      -0.035em 0.055em 0 rgba(119, 245, 229, 0.56);
+  }
+
+  .pc-intro {
+    max-width: 32rem;
+    margin: 0;
+    color: rgba(255, 244, 216, 0.82);
+    font-size: clamp(0.98rem, 1.4vw, 1.08rem);
+    line-height: 1.6;
+  }
+
+  .pc-readouts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .pc-readouts div {
+    min-width: 0;
+    border: 1px solid rgba(255, 244, 216, 0.2);
+    border-radius: 8px;
+    padding: 0.8rem;
+    background: rgba(16, 13, 18, 0.56);
+  }
+
+  .pc-readouts strong {
+    display: block;
+    margin-top: 0.45rem;
+    color: var(--paper);
+    font-size: clamp(1.1rem, 2.4vw, 1.65rem);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .pc-readouts b {
+    font: inherit;
+  }
+
+  .pc-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  button {
+    min-height: 3.2rem;
+    border: 1px solid rgba(255, 244, 216, 0.36);
+    border-radius: 8px;
+    color: #100d12;
+    background: var(--amber);
+    font: 800 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 150ms ease, filter 150ms ease;
+  }
+
+  button:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+
+  #release-button {
+    color: var(--paper);
+    background: #2a2135;
+  }
+
+  @keyframes pc-breathe {
+    0%, 100% { transform: scale(0.94); opacity: 0.38; }
+    50% { transform: scale(1.06); opacity: 0.78; }
+  }
+
+  @media (max-width: 820px) {
+    .pc-shell {
+      grid-template-columns: 1fr;
+      overflow: visible;
+    }
+
+    .pc-stage {
+      min-height: min(56vh, 31rem);
+      order: 2;
+    }
+
+    .pc-console {
+      order: 1;
+      align-self: start;
+      padding-block: 0;
+    }
+
+    h1 {
+      max-width: none;
+      font-size: clamp(2.7rem, 15vw, 4.6rem);
+    }
+
+    .pc-readouts {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pc-membrane span {
+      animation: none;
+    }
+
+    button {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const stage = document.getElementById("pressure-stage")
+  const canvas = document.getElementById("pressure-canvas")
+  const pressureReading = document.getElementById("pressure-reading")
+  const dentCount = document.getElementById("dent-count")
+  const choirState = document.getElementById("choir-state")
+  const condenseButton = document.getElementById("condense-button")
+  const releaseButton = document.getElementById("release-button")
+
+  if (
+    stage instanceof HTMLElement &&
+    canvas instanceof HTMLCanvasElement &&
+    pressureReading instanceof HTMLElement &&
+    dentCount instanceof HTMLElement &&
+    choirState instanceof HTMLElement &&
+    condenseButton instanceof HTMLButtonElement &&
+    releaseButton instanceof HTMLButtonElement
+  ) {
+    type Dent = {
+      x: number
+      y: number
+      amount: number
+      age: number
+      radius: number
+      spin: number
+      hue: string
+    }
+
+    type AudioWindow = Window &
+      typeof globalThis & {
+        webkitAudioContext?: typeof AudioContext
+      }
+
+    const stageEl = stage
+    const canvasEl = canvas
+    const pressureEl = pressureReading
+    const dentEl = dentCount
+    const choirEl = choirState
+    const condenseEl = condenseButton
+    const releaseEl = releaseButton
+    const ctx = canvasEl.getContext("2d")
+
+    if (ctx) {
+      const dents: Dent[] = []
+      let audioCtx: AudioContext | null = null
+      let width = 1
+      let height = 1
+      let activePointer: number | null = null
+      let pressure = 0
+      let targetPressure = 0
+      let dentTotal = 0
+      let heldCondensation = false
+      let lastDentAt = 0
+
+      const syncReadouts = () => {
+        pressureEl.textContent = pressure.toFixed(2)
+        dentEl.textContent = String(dentTotal)
+        stageEl.style.setProperty("--needle", String(Math.min(1, pressure)))
+      }
+
+      const resize = () => {
+        const rect = stageEl.getBoundingClientRect()
+        const dpr = Math.min(window.devicePixelRatio || 1, 2)
+        width = Math.max(1, Math.floor(rect.width))
+        height = Math.max(1, Math.floor(rect.height))
+        canvasEl.width = Math.floor(width * dpr)
+        canvasEl.height = Math.floor(height * dpr)
+        canvasEl.style.width = `${width}px`
+        canvasEl.style.height = `${height}px`
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      }
+
+      const ensureAudio = (): AudioContext | null => {
+        const audioWindow = window as AudioWindow
+        const AudioCtor = audioWindow.AudioContext || audioWindow.webkitAudioContext
+        if (!AudioCtor) return null
+        if (!audioCtx) audioCtx = new AudioCtor()
+        if (audioCtx.state === "suspended") audioCtx.resume()
+        return audioCtx
+      }
+
+      const sing = (amount: number, xRatio: number) => {
+        const ac = ensureAudio()
+        if (!ac) return
+
+        const now = ac.currentTime
+        const osc = ac.createOscillator()
+        const mod = ac.createOscillator()
+        const modGain = ac.createGain()
+        const gain = ac.createGain()
+        const filter = ac.createBiquadFilter()
+        const base = 120 + xRatio * 360 + amount * 180
+
+        osc.type = amount > 0.62 ? "sawtooth" : "sine"
+        osc.frequency.setValueAtTime(base, now)
+        osc.frequency.exponentialRampToValueAtTime(base * (1.18 + amount * 0.34), now + 0.34)
+        mod.type = "triangle"
+        mod.frequency.setValueAtTime(3 + amount * 9, now)
+        modGain.gain.setValueAtTime(8 + amount * 48, now)
+        filter.type = "bandpass"
+        filter.frequency.setValueAtTime(340 + amount * 1600, now)
+        filter.Q.setValueAtTime(3 + amount * 8, now)
+        gain.gain.setValueAtTime(0.0001, now)
+        gain.gain.exponentialRampToValueAtTime(0.045 + amount * 0.08, now + 0.025)
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42)
+
+        mod.connect(modGain)
+        modGain.connect(osc.frequency)
+        osc.connect(filter)
+        filter.connect(gain)
+        gain.connect(ac.destination)
+        mod.start(now)
+        osc.start(now)
+        mod.stop(now + 0.45)
+        osc.stop(now + 0.45)
+      }
+
+      const addDent = (x: number, y: number, amount: number) => {
+        dentTotal += 1
+        dents.push({
+          x,
+          y,
+          amount,
+          age: 0,
+          radius: 24 + amount * 84,
+          spin: Math.random() * Math.PI * 2,
+          hue: amount > 0.65 ? "#ff5d7a" : amount > 0.38 ? "#f6c453" : "#77f5e5",
+        })
+        if (dents.length > 80) dents.shift()
+        choirEl.textContent = amount > 0.68 ? "bright overtone" : amount > 0.36 ? "low vowel" : "soft hum"
+        dentEl.textContent = String(dentTotal)
+        sing(amount, x / Math.max(1, width))
+      }
+
+      const pointFromEvent = (event: PointerEvent) => {
+        const rect = canvasEl.getBoundingClientRect()
+        return {
+          x: event.clientX - rect.left,
+          y: event.clientY - rect.top,
+          amount: Math.max(0.16, event.pressure || (event.buttons ? 0.48 : 0.2)),
+        }
+      }
+
+      const press = (event: PointerEvent) => {
+        activePointer = event.pointerId
+        stageEl.setPointerCapture(event.pointerId)
+        stageEl.dataset.pressed = "true"
+        const point = pointFromEvent(event)
+        targetPressure = Math.min(1, point.amount + 0.08)
+        addDent(point.x, point.y, targetPressure)
+        lastDentAt = performance.now()
+      }
+
+      const drag = (event: PointerEvent) => {
+        if (activePointer !== event.pointerId) return
+        const point = pointFromEvent(event)
+        const now = performance.now()
+        targetPressure = Math.min(1, point.amount + 0.08)
+        if (now - lastDentAt > 42) {
+          addDent(point.x, point.y, targetPressure)
+          lastDentAt = now
+        }
+      }
+
+      const release = (event: PointerEvent) => {
+        if (activePointer !== event.pointerId) return
+        activePointer = null
+        stageEl.dataset.pressed = "false"
+        if (!heldCondensation) targetPressure = 0
+        choirEl.textContent = heldCondensation ? "held condensation" : "released"
+      }
+
+      const condense = () => {
+        heldCondensation = true
+        targetPressure = 0.86
+        for (let i = 0; i < 9; i += 1) {
+          addDent(
+            width * (0.18 + Math.random() * 0.64),
+            height * (0.18 + Math.random() * 0.64),
+            0.48 + Math.random() * 0.44
+          )
+        }
+        choirEl.textContent = "held condensation"
+      }
+
+      const releaseValve = () => {
+        heldCondensation = false
+        targetPressure = 0
+        choirEl.textContent = "released"
+      }
+
+      const draw = (time: number) => {
+        pressure += (targetPressure - pressure) * 0.08
+        if (!heldCondensation && activePointer === null) targetPressure *= 0.965
+        syncReadouts()
+
+        ctx.clearRect(0, 0, width, height)
+
+        const wash = ctx.createLinearGradient(0, 0, width, height)
+        wash.addColorStop(0, "rgba(119, 245, 229, 0.2)")
+        wash.addColorStop(0.45, "rgba(255, 244, 216, 0.08)")
+        wash.addColorStop(1, "rgba(255, 93, 122, 0.2)")
+        ctx.fillStyle = wash
+        ctx.fillRect(0, 0, width, height)
+
+        ctx.save()
+        ctx.globalCompositeOperation = "screen"
+        for (let i = 0; i < 9; i += 1) {
+          const y = height * (0.12 + i * 0.095)
+          const wobble = Math.sin(time * 0.0012 + i * 0.8) * (10 + pressure * 26)
+          ctx.beginPath()
+          for (let x = -20; x <= width + 20; x += 18) {
+            const wave = Math.sin(x * 0.015 + time * 0.002 + i) * (8 + pressure * 30)
+            const px = x
+            const py = y + wave + wobble
+            if (x === -20) ctx.moveTo(px, py)
+            else ctx.lineTo(px, py)
+          }
+          ctx.strokeStyle = i % 3 === 0 ? "rgba(119, 245, 229, 0.32)" : "rgba(246, 196, 83, 0.2)"
+          ctx.lineWidth = 1 + pressure * 2
+          ctx.stroke()
+        }
+        ctx.restore()
+
+        for (const dent of dents) {
+          dent.age += 1
+          const fade = Math.max(0, 1 - dent.age / 190)
+          const pulse = Math.sin(time * 0.005 + dent.spin) * 0.5 + 0.5
+          const radius = dent.radius + dent.age * (0.7 + dent.amount * 0.9)
+
+          ctx.save()
+          ctx.globalCompositeOperation = "lighter"
+          const glow = ctx.createRadialGradient(dent.x, dent.y, 0, dent.x, dent.y, radius)
+          glow.addColorStop(0, `rgba(255, 244, 216, ${0.28 * fade})`)
+          glow.addColorStop(0.32, dent.hue === "#ff5d7a" ? `rgba(255, 93, 122, ${0.22 * fade})` : `rgba(119, 245, 229, ${0.22 * fade})`)
+          glow.addColorStop(1, "rgba(255, 244, 216, 0)")
+          ctx.fillStyle = glow
+          ctx.beginPath()
+          ctx.arc(dent.x, dent.y, radius, 0, Math.PI * 2)
+          ctx.fill()
+
+          ctx.strokeStyle = dent.hue
+          ctx.globalAlpha = (0.45 + pulse * 0.28) * fade
+          ctx.lineWidth = 1.2 + dent.amount * 2.4
+          ctx.beginPath()
+          ctx.ellipse(dent.x, dent.y, radius * 0.72, radius * (0.34 + dent.amount * 0.16), dent.spin, 0, Math.PI * 2)
+          ctx.stroke()
+          ctx.restore()
+        }
+
+        for (let i = dents.length - 1; i >= 0; i -= 1) {
+          if (dents[i].age > 230) dents.splice(i, 1)
+        }
+
+        requestAnimationFrame(draw)
+      }
+
+      resize()
+      syncReadouts()
+      draw(performance.now())
+
+      window.addEventListener("resize", resize)
+      stageEl.addEventListener("pointerdown", press)
+      stageEl.addEventListener("pointermove", drag)
+      stageEl.addEventListener("pointerup", release)
+      stageEl.addEventListener("pointercancel", release)
+      condenseEl.addEventListener("click", condense)
+      releaseEl.addEventListener("click", releaseValve)
+    }
+  }
+</script>

@@ -30,6 +30,7 @@ const pages = [
   "/experiments/tidal-type-foundry",
   "/experiments/trionda-calibration",
   "/experiments/dark-star-observatory",
+  "/experiments/pressure-choir",
 ]
 
 test.use({
