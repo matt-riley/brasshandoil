@@ -14,3 +14,7 @@ This is a playground for whimsy, creativity and pushing the boundaries of the we
 ### 3. Immediate Touch/Pointer Alignment
 - Upgraded canvas-based experiments to register `touchstart`, `touchend`, and `touchcancel` alongside `touchmove`. This guarantees the experience remains interactive on the very first touch and cleanly cleans up states when touch is lifted, matching mouse behavior.
 
+### 4. Normalized Relative Coordinate Tracking for Canvas Layout Resilience
+- Replaced viewport-based absolute and devicePixelRatio-dependent coordinate translation logic with normalized `[0, 1]` relative canvas positions in event handlers (`mousemove` and `touchstart`). This guarantees that client coordinate evaluation is completely immune to page layout shifts, CSS scaling transformations, and timing/settle race conditions in E2E automation.
+
+

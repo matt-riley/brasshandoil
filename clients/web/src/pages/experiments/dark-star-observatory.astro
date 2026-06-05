@@ -110,8 +110,8 @@ import Base from "@layouts/Base.astro"
 
     const darkStars: DarkStar[] = [];
     const bgStars: BgStar[] = [];
-    let mouseX = -1;
-    let mouseY = -1;
+    let mouseNX = -1;
+    let mouseNY = -1;
     let foundCount = 0;
 
     // Expose for tests
@@ -195,8 +195,8 @@ import Base from "@layouts/Base.astro"
       ctx.fillStyle = "#000005";
       ctx.fillRect(0, 0, W, H);
 
-      const cursorNX = mouseX / W;
-      const cursorNY = mouseY / H;
+      const cursorNX = mouseNX;
+      const cursorNY = mouseNY;
 
       // Draw background stars with lensing
       for (const star of bgStars) {
@@ -252,9 +252,9 @@ import Base from "@layouts/Base.astro"
 
     // Track proximity for dwell-to-find mechanic
     function updateProximity(dt: number): void {
-      if (mouseX < 0) return;
-      const cursorNX = mouseX / W;
-      const cursorNY = mouseY / H;
+      if (mouseNX < 0) return;
+      const cursorNX = mouseNX;
+      const cursorNY = mouseNY;
 
       for (const ds of darkStars) {
         if (ds.found) continue;
@@ -290,13 +290,15 @@ import Base from "@layouts/Base.astro"
 
     canvas.addEventListener("mousemove", (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouseX = (e.clientX - rect.left) * devicePixelRatio;
-      mouseY = (e.clientY - rect.top) * devicePixelRatio;
+      if (rect.width > 0 && rect.height > 0) {
+        mouseNX = (e.clientX - rect.left) / rect.width;
+        mouseNY = (e.clientY - rect.top) / rect.height;
+      }
     });
 
     canvas.addEventListener("mouseleave", () => {
-      mouseX = -1;
-      mouseY = -1;
+      mouseNX = -1;
+      mouseNY = -1;
     });
 
     // Touch support
@@ -305,8 +307,10 @@ import Base from "@layouts/Base.astro"
       if (e.touches.length > 0) {
         const touch = e.touches[0];
         const rect = canvas.getBoundingClientRect();
-        mouseX = (touch.clientX - rect.left) * devicePixelRatio;
-        mouseY = (touch.clientY - rect.top) * devicePixelRatio;
+        if (rect.width > 0 && rect.height > 0) {
+          mouseNX = (touch.clientX - rect.left) / rect.width;
+          mouseNY = (touch.clientY - rect.top) / rect.height;
+        }
       }
     };
 
@@ -314,13 +318,17 @@ import Base from "@layouts/Base.astro"
     canvas.addEventListener("touchmove", handleTouch, { passive: false });
 
     const clearTouch = () => {
-      mouseX = -1;
-      mouseY = -1;
+      mouseNX = -1;
+      mouseNY = -1;
     };
     canvas.addEventListener("touchend", clearTouch);
     canvas.addEventListener("touchcancel", clearTouch);
 
-    window.addEventListener("resize", resize);
+    const resizeObserver = new ResizeObserver(() => {
+      resize();
+    });
+    resizeObserver.observe(canvas);
+
     init();
     resize();
     requestAnimationFrame(draw);
