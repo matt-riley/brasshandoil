@@ -24,3 +24,4 @@
 - Keep the browser suite small enough that it still gets run during one-hour sessions.
 - Avoid testing animation internals unless the animation itself is the feature under review.
 - If a test must target an icon-only control, give the control an accessible name first and assert through that.
+- **Custom CSS Toggles**: Custom toggles often hide the underlying native `<input>` element. In E2E tests, target the visible companion `<label>` element for clicks and visibility assertions rather than the hidden input to avoid false failures.

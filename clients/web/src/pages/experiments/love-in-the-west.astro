@@ -1,0 +1,384 @@
+---
+import Base from "@layouts/Base.astro"
+
+const loveLetters = [
+  { from: "Venus", text: "I have been chasing you since May. You never look back." },
+  { from: "Jupiter", text: "I am 318 times your mass and still I tremble." },
+  { from: "Venus", text: "They call us the evening stars. I prefer: accomplices." },
+  { from: "Jupiter", text: "Mercury keeps third-wheeling. I said nothing. I am patient." },
+  { from: "Venus", text: "In 1.6 degrees I will know the colour of your storms." },
+  { from: "Jupiter", text: "Your clouds smell of sulphuric acid. I find this intoxicating." },
+  { from: "Venus", text: "Every 13 months we do this. You'd think I'd learn." },
+  { from: "Jupiter", text: "The astronomers are watching. Let them." },
+  { from: "Venus", text: "After Tuesday you'll sink into the sun's glare. I'll wait for autumn." },
+  { from: "Jupiter", text: "Your surface temperature is 475°C. I have never felt warmer." },
+  { from: "Venus", text: "We will be one fingerwidth apart. That is all we ever get." },
+  { from: "Jupiter", text: "My red spot has been spinning for 350 years. It was always about you." },
+]
+---
+
+<Base>
+  <div id="sky">
+    <div id="hud">
+      <h1>Love in the West</h1>
+      <p id="instructions">Move your cursor to aim the telescope. The planets are writing to each other — but you can only read their letters through the lens.</p>
+      <p id="date-display">June 5, 2026 — conjunction in 4 days</p>
+      <p id="distance-display">Angular separation: <span id="sep">—</span></p>
+    </div>
+
+    <div id="venus" class="planet">
+      <div class="planet-glow"></div>
+      <span class="planet-label">Venus</span>
+    </div>
+
+    <div id="jupiter" class="planet">
+      <div class="planet-glow"></div>
+      <span class="planet-label">Jupiter</span>
+    </div>
+
+    <div id="telescope-lens"></div>
+
+    <div id="conjunction-flash"></div>
+
+    {loveLetters.map((letter, i) => (
+      <div class="love-letter" data-index={i} data-from={letter.from}>
+        <span class="letter-from">{letter.from}:</span> {letter.text}
+      </div>
+    ))}
+  </div>
+</Base>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  #sky {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      #1a0a2e 0%,
+      #16213e 30%,
+      #0f3460 50%,
+      #533483 70%,
+      #e94560 85%,
+      #ff9a3c 95%,
+      #ffe4a0 100%
+    );
+    overflow: hidden;
+    cursor: none;
+  }
+
+  #hud {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 100;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: "Courier New", monospace;
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  #hud h1 {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.3rem;
+    font-weight: normal;
+    letter-spacing: 0.1em;
+  }
+
+  #hud p { margin: 0.15rem 0; }
+
+  .planet {
+    position: absolute;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .planet-glow {
+    border-radius: 50%;
+    position: relative;
+  }
+
+  #venus .planet-glow {
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle, #fffbe6 0%, #ffe066 40%, transparent 70%);
+    box-shadow:
+      0 0 20px 8px rgba(255, 240, 150, 0.6),
+      0 0 60px 20px rgba(255, 230, 100, 0.3);
+  }
+
+  #jupiter .planet-glow {
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, #ffe8cc 0%, #e8a050 40%, transparent 70%);
+    box-shadow:
+      0 0 25px 10px rgba(232, 160, 80, 0.5),
+      0 0 70px 25px rgba(200, 140, 60, 0.25);
+  }
+
+  .planet-label {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+    font-family: "Courier New", monospace;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+  }
+
+  #telescope-lens {
+    position: fixed;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 50;
+    transform: translate(-50%, -50%);
+    border: 1.5px solid rgba(180, 200, 255, 0.25);
+    backdrop-filter: contrast(2.5) saturate(1.8) brightness(1.4);
+    -webkit-backdrop-filter: contrast(2.5) saturate(1.8) brightness(1.4);
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  #telescope-lens.active {
+    opacity: 1;
+  }
+
+  .love-letter {
+    position: absolute;
+    z-index: 5;
+    font-family: "Georgia", serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: rgba(255, 240, 220, 0.9);
+    max-width: 280px;
+    line-height: 1.4;
+    opacity: 0.03;
+    transition: none;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(255, 200, 100, 0.5);
+  }
+
+  .letter-from {
+    font-weight: bold;
+    font-style: normal;
+    color: rgba(255, 220, 180, 1);
+  }
+
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    pointer-events: none;
+  }
+
+  #conjunction-flash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at var(--fx, 50%) var(--fy, 50%), white 0%, transparent 60%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 200;
+    transition: opacity 0.5s;
+  }
+
+  #conjunction-flash.active {
+    opacity: 1;
+    animation: flash-pulse 2s ease-out forwards;
+  }
+
+  @keyframes flash-pulse {
+    0% { opacity: 0.9; }
+    30% { opacity: 0.5; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: var(--base-opacity); }
+    50% { opacity: calc(var(--base-opacity) * 0.3); }
+  }
+</style>
+
+<script>
+  declare global {
+    interface Window {
+      __simReady: boolean
+      __planetDistance: () => number
+      __fastForward: (ms: number) => void
+      __forceConjunction: () => void
+      __conjunctionOccurred: boolean
+    }
+  }
+
+  const sky = document.getElementById("sky") as HTMLDivElement
+  const venusEl = document.getElementById("venus") as HTMLDivElement
+  const jupiterEl = document.getElementById("jupiter") as HTMLDivElement
+  const lens = document.getElementById("telescope-lens") as HTMLDivElement
+  const sepDisplay = document.getElementById("sep") as HTMLSpanElement
+  const flash = document.getElementById("conjunction-flash") as HTMLDivElement
+  const letters = document.querySelectorAll<HTMLDivElement>(".love-letter")
+
+  // Create stars
+  const starCount = 80
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement("div")
+    star.className = "star"
+    const size = Math.random() * 2.5 + 0.5
+    star.style.width = `${size}px`
+    star.style.height = `${size}px`
+    star.style.left = `${Math.random() * 100}%`
+    star.style.top = `${Math.random() * 70}%`
+    const baseOp = Math.random() * 0.6 + 0.2
+    star.style.setProperty("--base-opacity", String(baseOp))
+    star.style.opacity = String(baseOp)
+    star.style.animation = `twinkle ${2 + Math.random() * 4}s ease-in-out ${Math.random() * 3}s infinite`
+    sky.appendChild(star)
+  }
+
+  // Simulation state
+  const W = () => window.innerWidth
+  const H = () => window.innerHeight
+
+  let simTime = 0 // ms of simulation elapsed
+  const CONJUNCTION_TIME = 20000 // 20 seconds to conjunction
+  let conjunctionOccurred = false
+  window.__conjunctionOccurred = false
+
+  // Venus starts lower-right, Jupiter starts lower-left (western sky)
+  function venusPos(t: number): { x: number; y: number } {
+    const progress = Math.min(t / CONJUNCTION_TIME, 1)
+    const eased = progress * progress * (3 - 2 * progress) // smoothstep
+    const startX = W() * 0.7
+    const startY = H() * 0.55
+    const endX = W() * 0.5
+    const endY = H() * 0.45
+    return { x: startX + (endX - startX) * eased, y: startY + (endY - startY) * eased }
+  }
+
+  function jupiterPos(t: number): { x: number; y: number } {
+    const progress = Math.min(t / CONJUNCTION_TIME, 1)
+    const eased = progress * progress * (3 - 2 * progress)
+    const startX = W() * 0.35
+    const startY = H() * 0.4
+    const endX = W() * 0.5
+    const endY = H() * 0.45
+    return { x: startX + (endX - startX) * eased, y: startY + (endY - startY) * eased }
+  }
+
+  function dist(a: { x: number; y: number }, b: { x: number; y: number }): number {
+    return Math.hypot(a.x - b.x, a.y - b.y)
+  }
+
+  // Place love letters scattered between the planets' paths
+  letters.forEach((el, i) => {
+    const t = (i + 0.5) / letters.length
+    const vp = venusPos(t * CONJUNCTION_TIME * 0.9)
+    const jp = jupiterPos(t * CONJUNCTION_TIME * 0.9)
+    const mx = (vp.x + jp.x) / 2 + (Math.random() - 0.5) * 200
+    const my = (vp.y + jp.y) / 2 + (Math.random() - 0.5) * 150
+    el.style.left = `${mx}px`
+    el.style.top = `${my}px`
+  })
+
+  // Mouse / telescope
+  let mouseX = -200
+  let mouseY = -200
+  let mouseInside = false
+
+  sky.addEventListener("mousemove", (e: MouseEvent) => {
+    mouseX = e.clientX
+    mouseY = e.clientY
+    mouseInside = true
+    lens.classList.add("active")
+    lens.style.transform = `translate(${mouseX - 80}px, ${mouseY - 80}px)`
+    lens.style.left = "0"
+    lens.style.top = "0"
+  })
+
+  sky.addEventListener("mouseleave", () => {
+    mouseInside = false
+    lens.classList.remove("active")
+  })
+
+  function triggerConjunction(vp: { x: number; y: number }): void {
+    if (conjunctionOccurred) return
+    conjunctionOccurred = true
+    window.__conjunctionOccurred = true
+    flash.style.setProperty("--fx", `${vp.x}px`)
+    flash.style.setProperty("--fy", `${vp.y}px`)
+    flash.classList.add("active")
+
+    // Show all letters
+    letters.forEach((el) => {
+      el.style.opacity = "0.9"
+      el.style.transition = "opacity 2s"
+    })
+  }
+
+  // Animation loop
+  let lastFrame = performance.now()
+
+  function frame(now: number): void {
+    const dt = now - lastFrame
+    lastFrame = now
+    if (!conjunctionOccurred) {
+      simTime += dt
+    }
+
+    const vp = venusPos(simTime)
+    const jp = jupiterPos(simTime)
+
+    venusEl.style.left = `${vp.x - 8}px`
+    venusEl.style.top = `${vp.y - 8}px`
+    jupiterEl.style.left = `${jp.x - 12}px`
+    jupiterEl.style.top = `${jp.y - 12}px`
+
+    // Angular separation display (fake degrees)
+    const d = dist(vp, jp)
+    const angSep = (d / W()) * 30 // rough scale to degrees
+    sepDisplay.textContent = conjunctionOccurred ? "0.0°" : `${angSep.toFixed(1)}°`
+
+    // Reveal letters near telescope
+    if (mouseInside && !conjunctionOccurred) {
+      letters.forEach((el) => {
+        const rect = el.getBoundingClientRect()
+        const cx = rect.left + rect.width / 2
+        const cy = rect.top + rect.height / 2
+        const distToMouse = Math.hypot(cx - mouseX, cy - mouseY)
+        const reveal = Math.max(0, 1 - distToMouse / 100)
+        el.style.opacity = String(Math.max(0.03, reveal * 0.95))
+      })
+    }
+
+    // Check conjunction
+    if (!conjunctionOccurred && d < 30) {
+      triggerConjunction(vp)
+    }
+
+    requestAnimationFrame(frame)
+  }
+
+  requestAnimationFrame(frame)
+
+  // Test hooks
+  window.__simReady = true
+  window.__planetDistance = () => {
+    const vp = venusPos(simTime)
+    const jp = jupiterPos(simTime)
+    return dist(vp, jp)
+  }
+  window.__fastForward = (ms: number) => {
+    simTime += ms
+  }
+  window.__forceConjunction = () => {
+    simTime = CONJUNCTION_TIME + 1000
+    const vp = venusPos(simTime)
+    triggerConjunction(vp)
+  }
+</script>

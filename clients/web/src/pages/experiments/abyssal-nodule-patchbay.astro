@@ -1,0 +1,1297 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div class="ap-shell" role="region" aria-label="Abyssal Voltaic Calibration Desk">
+    <div class="ap-scanlines" aria-hidden="true"></div>
+    <div class="ap-grid-overlay" aria-hidden="true"></div>
+
+    <!-- ONBOARDING OVERLAY -->
+    <div id="onboarding-overlay" class="ap-overlay">
+      <div class="ap-overlay-box glass">
+        <h2 class="ap-overlay-title">// DEEP-SEA SEAFOOR TRANSMISSION //</h2>
+        <p class="ap-overlay-text">
+          Telemetry indicates vast polymetallic nodule fields at a depth of 5,000 meters. These nodules act as natural, slow-charging electrochemical batteries, powering a delicate bioluminescent benthic ecosystem.
+        </p>
+        <p class="ap-overlay-text">
+          Your mission is to establish patching connections to siphon voltage up to the surface grid. Warning: drawing current will diminish local benthic light levels.
+        </p>
+        <button id="init-patchbay" type="button" class="btn btn-primary btn-large">Descend to Seafloor</button>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="ap-header">
+      <div class="ap-meta-row">
+        <span class="ap-ticker">// DEPTH: 5,012M // PRESSURE: 50.8 MPA // NODE LINK: ACTIVE</span>
+        <span class="ap-time-sync" id="time-sync">CHAMBER STABLE</span>
+      </div>
+      <div class="terminal-header" id="terminal-header-state">
+        <h1 class="ap-title">Abyssal Nodule Patchbay</h1>
+        <p class="ap-subtitle">Benthic galvanic prospecting console. Balance voltaic harvest against ecosystem stability.</p>
+      </div>
+    </header>
+
+    <!-- CORE DESK GRID -->
+    <div class="ap-grid">
+      
+      <!-- PATCH PANEL (LEFT) -->
+      <section class="ap-panel ap-patch-panel">
+        <h2 class="ap-panel-title">// ABYSSAL CHAMBER NODES (SOCKET GRID)</h2>
+        
+        <div class="patchbay-container" id="patchbay-container">
+          <!-- Benthic Bioluminescent Backdrop (SVG) -->
+          <svg class="benthic-svg" viewBox="0 0 500 500" aria-hidden="true">
+            <!-- Glass Sponge creature -->
+            <g class="benthic-creature" style="--glow-color: #00ff66;">
+              <path d="M 60 200 C 60 120, 100 120, 100 200 C 100 280, 60 280, 60 200 Z" stroke="rgba(0, 255, 102, 0.15)" stroke-width="1.5" fill="none" />
+              <path d="M 60 200 Q 80 200 100 200" stroke="rgba(0, 255, 102, 0.1)" stroke-width="1" fill="none" />
+              <path d="M 80 140 Q 80 200 80 260" stroke="rgba(0, 255, 102, 0.1)" stroke-width="1" fill="none" />
+              <circle cx="80" cy="160" r="2" fill="#00ff66" class="biolum-dot" />
+              <circle cx="70" cy="210" r="1.5" fill="#00ff66" class="biolum-dot" style="animation-delay: 0.5s;" />
+              <circle cx="90" cy="240" r="2" fill="#00ff66" class="biolum-dot" style="animation-delay: 1.2s;" />
+            </g>
+
+            <!-- Jellyfish creature -->
+            <g class="benthic-creature" style="--glow-color: #00ff66;">
+              <path d="M 400 180 C 400 130, 460 130, 460 180 C 430 190, 430 190, 400 180 Z" stroke="rgba(0, 255, 102, 0.2)" stroke-width="2" fill="none" />
+              <path d="M 410 185 Q 415 230 410 260" stroke="rgba(0, 255, 102, 0.15)" stroke-width="1" fill="none" />
+              <path d="M 430 188 Q 435 240 432 270" stroke="rgba(0, 255, 102, 0.15)" stroke-width="1" fill="none" />
+              <path d="M 450 185 Q 445 225 450 255" stroke="rgba(0, 255, 102, 0.15)" stroke-width="1" fill="none" />
+              <circle cx="430" cy="150" r="2.5" fill="#00ff66" class="biolum-dot" style="animation-delay: 0.8s;" />
+            </g>
+
+            <!-- Deep Sea Isopod / Worm creature -->
+            <g class="benthic-creature" style="--glow-color: #00ff66;">
+              <path d="M 220 280 Q 250 290 280 280 Q 250 270 220 280 Z" stroke="rgba(0, 255, 102, 0.15)" stroke-width="1.5" fill="none" />
+              <path d="M 230 280 L 230 295 M 240 280 L 240 298 M 250 280 L 250 298 M 260 280 L 260 298 M 270 280 L 270 295" stroke="rgba(0, 255, 102, 0.15)" stroke-width="1" fill="none" />
+              <circle cx="222" cy="278" r="1.5" fill="#00ff66" class="biolum-dot" style="animation-delay: 1.5s;" />
+            </g>
+
+            <!-- Nodules Backdrop Graphics -->
+            <!-- Alpha -->
+            <circle cx="120" cy="120" r="32" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(0, 240, 255, 0.15)" stroke-width="2" class="nodule-graphic" />
+            <circle cx="120" cy="120" r="16" fill="none" stroke="rgba(0, 240, 255, 0.05)" stroke-dasharray="3 3" />
+            <!-- Beta -->
+            <circle cx="250" cy="80" r="32" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(0, 240, 255, 0.15)" stroke-width="2" class="nodule-graphic" />
+            <circle cx="250" cy="80" r="16" fill="none" stroke="rgba(0, 240, 255, 0.05)" stroke-dasharray="3 3" />
+            <!-- Gamma -->
+            <circle cx="380" cy="120" r="32" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(0, 240, 255, 0.15)" stroke-width="2" class="nodule-graphic" />
+            <circle cx="380" cy="120" r="16" fill="none" stroke="rgba(0, 240, 255, 0.05)" stroke-dasharray="3 3" />
+            <!-- Delta -->
+            <circle cx="120" cy="320" r="32" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(0, 240, 255, 0.15)" stroke-width="2" class="nodule-graphic" />
+            <circle cx="120" cy="320" r="16" fill="none" stroke="rgba(0, 240, 255, 0.05)" stroke-dasharray="3 3" />
+            <!-- Epsilon -->
+            <circle cx="250" cy="360" r="32" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(0, 240, 255, 0.15)" stroke-width="2" class="nodule-graphic" />
+            <circle cx="250" cy="360" r="16" fill="none" stroke="rgba(0, 240, 255, 0.05)" stroke-dasharray="3 3" />
+            <!-- Zeta -->
+            <circle cx="380" cy="320" r="32" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(0, 240, 255, 0.15)" stroke-width="2" class="nodule-graphic" />
+            <circle cx="380" cy="320" r="16" fill="none" stroke="rgba(0, 240, 255, 0.05)" stroke-dasharray="3 3" />
+
+            <!-- Dynamic Cables Group -->
+            <g id="cables-group"></g>
+
+            <!-- Temporary Drag Cable -->
+            <path id="drag-cable" d="" stroke="rgba(255, 255, 255, 0.5)" stroke-width="3" stroke-dasharray="4 4" fill="none" />
+          </svg>
+
+          <!-- Interactive Sockets Layer (positioned over SVG coordinates) -->
+          <!-- Alpha -->
+          <div class="nodule" style="left: 24%; top: 24%;">
+            <span class="nodule-label">NODE α</span>
+            <button id="socket-alpha" class="patch-socket" data-socket-id="alpha" aria-label="Patch Socket Alpha" type="button"></button>
+          </div>
+          <!-- Beta -->
+          <div class="nodule" style="left: 50%; top: 16%;">
+            <span class="nodule-label">NODE β</span>
+            <button id="socket-beta" class="patch-socket" data-socket-id="beta" aria-label="Patch Socket Beta" type="button"></button>
+          </div>
+          <!-- Gamma -->
+          <div class="nodule" style="left: 76%; top: 24%;">
+            <span class="nodule-label">NODE γ</span>
+            <button id="socket-gamma" class="patch-socket" data-socket-id="gamma" aria-label="Patch Socket Gamma" type="button"></button>
+          </div>
+          <!-- Delta -->
+          <div class="nodule" style="left: 24%; top: 64%;">
+            <span class="nodule-label">NODE δ</span>
+            <button id="socket-delta" class="patch-socket" data-socket-id="delta" aria-label="Patch Socket Delta" type="button"></button>
+          </div>
+          <!-- Epsilon -->
+          <div class="nodule" style="left: 50%; top: 72%;">
+            <span class="nodule-label">NODE ε</span>
+            <button id="socket-epsilon" class="patch-socket" data-socket-id="epsilon" aria-label="Patch Socket Epsilon" type="button"></button>
+          </div>
+          <!-- Zeta -->
+          <div class="nodule" style="left: 76%; top: 64%;">
+            <span class="nodule-label">NODE ζ</span>
+            <button id="socket-zeta" class="patch-socket" data-socket-id="zeta" aria-label="Patch Socket Zeta" type="button"></button>
+          </div>
+        </div>
+
+        <p class="panel-fineprint">* Drag from one socket to another to patch a connection, or click/tap a source socket and then a destination socket. Press Tab to cycle through sockets, and Enter to select.</p>
+      </section>
+
+      <!-- METRICS & CONTROL DESK (RIGHT) -->
+      <div class="ap-console-column">
+        
+        <!-- MONITOR METERS -->
+        <section class="ap-panel ap-monitor-panel">
+          <h2 class="ap-panel-title">// GALVANIC FIELD TELEMETRY MONITOR</h2>
+          
+          <div class="ap-meters-grid">
+            <div class="meter-box">
+              <span class="meter-label">Benthic Luminescence</span>
+              <div class="meter-value-row">
+                <strong id="luminescence-pct" class="meter-value text-green">100%</strong>
+                <span class="meter-trend" id="luminescence-trend">STABLE</span>
+              </div>
+              <div class="meter-bar-container">
+                <div id="luminescence-bar" class="meter-bar bg-green" style="width: 100%;"></div>
+              </div>
+            </div>
+
+            <div class="meter-box">
+              <span class="meter-label">Surface Battery Voltage</span>
+              <div class="meter-value-row">
+                <strong id="surface-voltage" class="meter-value text-teal">0 V</strong>
+                <span class="meter-trend" id="voltage-trend">STANDBY</span>
+              </div>
+              <div class="meter-bar-container">
+                <div id="voltage-bar" class="meter-bar bg-teal" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="meter-box">
+              <span class="meter-label">Patch Connections</span>
+              <div class="meter-value-row">
+                <strong id="connections-count" class="meter-value text-amber">0 / 6</strong>
+                <span class="meter-trend" id="current-flow">0.0 µA</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONTROL PANEL -->
+        <section class="ap-panel ap-control-panel">
+          <h2 class="ap-panel-title">// ELECTROLOGY TERMINAL OVERRIDES</h2>
+          
+          <div class="control-actions">
+            <!-- Symbiosis Mode Toggle -->
+            <div class="control-row glass">
+              <div class="control-info">
+                <span class="control-label">Benthic Symbiosis Mode</span>
+                <p class="control-description">Reverse voltage flow back into abyssal nodes to recharge natural ecosystems.</p>
+              </div>
+              <div class="toggle-container">
+                <input type="checkbox" id="symbiosis-mode-toggle" class="toggle-input" />
+                <label for="symbiosis-mode-toggle" class="toggle-label" aria-label="Toggle Symbiosis Mode"></label>
+              </div>
+            </div>
+
+            <!-- Short Circuit button -->
+            <button id="short-circuit-btn" type="button" class="btn btn-warning">Trigger Overload / Clear Cables</button>
+          </div>
+        </section>
+
+        <!-- REAL-TIME LOG FEED -->
+        <section class="ap-panel ap-log-panel">
+          <h2 class="ap-panel-title">// SEAFLOOR CALIBRATION LOG FEED</h2>
+          <div class="log-container">
+            <div id="terminal-log" class="terminal-log" aria-live="polite">
+              <div class="log-entry">[00:00:01] DEPTH TRANSDUCER COMPLETED. COUPLING DISCHARGED.</div>
+              <div class="log-entry">[00:00:02] PROSPECTING RACK LOCKED. STABLE TERMINAL ONLINE.</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="ap-footer">
+      <span>// BENTHIC RESEARCH TERMINAL STATION 04</span>
+      <span>Tap sockets to connect cables. Adjust symbiosis settings to preserve deep ecosystems.</span>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #02040a;
+    overflow-x: hidden;
+  }
+
+  .ap-shell {
+    --teal: #00f0ff;
+    --green: #00ff66;
+    --amber: #ffb700;
+    --dark-bg: #02040a;
+    --panel-bg: rgba(6, 10, 20, 0.7);
+    --border-color: rgba(0, 240, 255, 0.12);
+    
+    position: relative;
+    min-height: 100dvh;
+    padding: 1rem;
+    box-sizing: border-box;
+    color: #f1f5f9;
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--dark-bg);
+    background-image: 
+      radial-gradient(circle at 5% 5%, rgba(0, 240, 255, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 95% 95%, rgba(0, 255, 102, 0.02) 0%, transparent 50%);
+    user-select: none;
+    touch-action: none;
+  }
+
+  /* Scanline / CRT visual effect */
+  .ap-scanlines {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    background: linear-gradient(
+      rgba(0, 0, 0, 0) 50%, 
+      rgba(0, 0, 0, 0.2) 50%
+    );
+    background-size: 100% 4px;
+    opacity: 0.75;
+  }
+
+  .ap-grid-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(0, 240, 255, 0.005) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 240, 255, 0.005) 1px, transparent 1px);
+  }
+
+  /* Onboarding Overlay */
+  .ap-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(1, 3, 8, 0.95);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .ap-overlay-box {
+    max-width: 500px;
+    background: rgba(6, 12, 26, 0.85);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 240, 255, 0.1);
+  }
+
+  .ap-overlay-title {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--teal);
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .ap-overlay-text {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Header */
+  .ap-header {
+    position: relative;
+    z-index: 10;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+  }
+
+  .ap-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.35rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+
+  .ap-ticker {
+    color: var(--teal);
+  }
+
+  .ap-time-sync {
+    color: rgba(241, 245, 249, 0.45);
+  }
+
+  .ap-title {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #ffffff 40%, var(--teal) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ap-subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+
+  /* Header Symbiosis State change styling */
+  .terminal-header {
+    transition: filter 0.3s;
+  }
+  .terminal-header.symbiosis-active .ap-title {
+    background: linear-gradient(135deg, #ffffff 40%, var(--green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Desk Layout Grid */
+  .ap-grid {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 1.1fr 1.0fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Panel Base */
+  .ap-panel {
+    position: relative;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .ap-panel-title {
+    margin: 0 0 1rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    color: var(--teal);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.06);
+    padding-bottom: 0.4rem;
+    text-transform: uppercase;
+  }
+
+  /* Patchbay Container */
+  .patchbay-container {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: radial-gradient(circle at center, rgba(6, 12, 26, 0.95) 0%, rgba(1, 3, 8, 0.98) 100%);
+    border: 1px dashed rgba(0, 240, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .benthic-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .benthic-creature {
+    filter: drop-shadow(0 0 6px var(--glow-color));
+    transition: opacity 0.5s, filter 0.5s;
+  }
+
+  .biolum-dot {
+    animation: biolum-pulse 2s infinite alternate ease-in-out;
+  }
+
+  @keyframes biolum-pulse {
+    0% { opacity: 0.2; r: 1px; }
+    100% { opacity: 1; r: 3px; }
+  }
+
+  .nodule-graphic {
+    transition: stroke 0.3s, fill 0.3s;
+  }
+
+  /* Interactive Nodules & Sockets Overlay */
+  .nodule {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nodule-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    color: rgba(241, 245, 249, 0.4);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    pointer-events: none;
+  }
+
+  .patch-socket {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #1e293b;
+    border: 3px solid #64748b;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  .patch-socket:hover, .patch-socket:focus {
+    border-color: var(--teal);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 0 8px var(--teal);
+    background: #0f172a;
+  }
+
+  .patch-socket.selected {
+    border-color: var(--amber);
+    background: #1e1b12;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 0 12px var(--amber);
+    animation: select-pulse 1s infinite alternate ease-in-out;
+  }
+
+  @keyframes select-pulse {
+    from { box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 0 4px var(--amber); }
+    to { box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 0 12px var(--amber); }
+  }
+
+  .patch-socket.connected {
+    background: #0d1e17;
+    border-color: var(--green);
+  }
+
+  /* Console Column / Right Column */
+  .ap-console-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Meters Dashboard */
+  .ap-meters-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .meter-box {
+    background: rgba(6, 12, 26, 0.55);
+    border: 1px solid rgba(0, 240, 255, 0.04);
+    padding: 0.65rem 0.85rem;
+    border-radius: 4px;
+  }
+
+  .meter-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+  }
+
+  .meter-value-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.4rem;
+  }
+
+  .meter-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  .meter-trend {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: #64748b;
+    letter-spacing: 0.05em;
+  }
+
+  .meter-bar-container {
+    width: 100%;
+    height: 4px;
+    background: #0f172a;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .meter-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease, background-color 0.4s ease;
+  }
+
+  .bg-green { background-color: var(--green); }
+  .bg-teal { background-color: var(--teal); }
+
+  .text-green {
+    color: var(--green);
+    text-shadow: 0 0 6px rgba(0, 255, 102, 0.35);
+  }
+
+  .text-teal {
+    color: var(--teal);
+    text-shadow: 0 0 6px rgba(0, 240, 255, 0.35);
+  }
+
+  .text-amber {
+    color: var(--amber);
+    text-shadow: 0 0 6px rgba(255, 183, 0, 0.35);
+  }
+
+  /* Control Panel Switches */
+  .control-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0.85rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.03);
+    background: rgba(6, 12, 26, 0.4);
+  }
+
+  .control-info {
+    max-width: 80%;
+  }
+
+  .control-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .control-description {
+    margin: 0.15rem 0 0;
+    font-size: 0.65rem;
+    color: #64748b;
+    line-height: 1.35;
+  }
+
+  /* Custom high-tech Toggle Switch */
+  .toggle-container {
+    position: relative;
+    width: 44px;
+    height: 22px;
+  }
+
+  .toggle-input {
+    display: none;
+  }
+
+  .toggle-label {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #1e293b;
+    border-radius: 11px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .toggle-label::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #64748b;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s, background-color 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  .toggle-input:checked + .toggle-label {
+    background: rgba(0, 255, 102, 0.2);
+    border-color: var(--green);
+  }
+
+  .toggle-input:checked + .toggle-label::after {
+    transform: translateX(22px);
+    background-color: var(--green);
+    box-shadow: 0 0 8px var(--green);
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.75rem 1.25rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s, border-color 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background: var(--teal);
+    color: #02040a;
+  }
+
+  .btn-primary:hover {
+    background: #33f5ff;
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+  }
+
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+
+  .btn-warning {
+    background: rgba(255, 183, 0, 0.1);
+    color: var(--amber);
+    border: 1px solid rgba(255, 183, 0, 0.25);
+  }
+
+  .btn-warning:hover {
+    background: rgba(255, 183, 0, 0.2);
+    border-color: var(--amber);
+    box-shadow: 0 0 10px rgba(255, 183, 0, 0.2);
+  }
+
+  .btn-warning:active {
+    transform: translateY(1px);
+  }
+
+  .btn-large {
+    font-size: 0.85rem;
+    padding: 0.9rem 1.75rem;
+  }
+
+  .glass {
+    backdrop-filter: blur(10px);
+  }
+
+  /* Scrolling Log Panel */
+  .log-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .terminal-log {
+    height: 84px;
+    background: rgba(1, 3, 8, 0.65);
+    border: 1px solid rgba(0, 240, 255, 0.04);
+    border-radius: 4px;
+    padding: 0.45rem 0.65rem;
+    overflow-y: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    line-height: 1.4;
+    color: #cbd5e1;
+    scroll-behavior: smooth;
+  }
+
+  .log-entry {
+    border-bottom: 1px solid rgba(255,255,255,0.01);
+    padding: 0.15rem 0;
+    animation: ap-print 0.15s ease-out;
+  }
+
+  @keyframes ap-print {
+    from { opacity: 0; transform: translateY(1px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Fineprint and layout-affecting wrappers */
+  .panel-fineprint {
+    margin: 0;
+    font-size: 0.62rem;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  .ap-footer {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.6rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: #475569;
+    letter-spacing: 0.05em;
+  }
+
+  /* Responsive Mobile Layout */
+  @media (max-width: 768px) {
+    .ap-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .ap-footer {
+      flex-direction: column;
+      gap: 0.4rem;
+      text-align: center;
+    }
+  }
+</style>
+
+<script is:inline>
+  // Dynamic calibration script running completely in client context
+  document.addEventListener('astro:page-load', () => {
+    const initBtn = document.getElementById('init-patchbay');
+    const overlay = document.getElementById('onboarding-overlay');
+    const terminalHeader = document.getElementById('terminal-header-state');
+    
+    // Core Meters
+    const luminescencePct = document.getElementById('luminescence-pct');
+    const luminescenceBar = document.getElementById('luminescence-bar');
+    const luminescenceTrend = document.getElementById('luminescence-trend');
+    const surfaceVoltage = document.getElementById('surface-voltage');
+    const voltageBar = document.getElementById('voltage-bar');
+    const voltageTrend = document.getElementById('voltage-trend');
+    const connectionsCount = document.getElementById('connections-count');
+    const currentFlowReadout = document.getElementById('current-flow');
+    
+    // Controls
+    const symbiosisToggle = document.getElementById('symbiosis-mode-toggle');
+    const shortCircuitBtn = document.getElementById('short-circuit-btn');
+    const container = document.getElementById('patchbay-container');
+    const cablesGroup = document.getElementById('cables-group');
+    const dragCable = document.getElementById('drag-cable');
+    const logContainer = document.getElementById('terminal-log');
+    
+    // Sockets positions
+    const socketElements = document.querySelectorAll('.patch-socket');
+    const sockets = {
+      alpha: { x: 120, y: 120, el: document.getElementById('socket-alpha') },
+      beta: { x: 250, y: 80, el: document.getElementById('socket-beta') },
+      gamma: { x: 380, y: 120, el: document.getElementById('socket-gamma') },
+      delta: { x: 120, y: 320, el: document.getElementById('socket-delta') },
+      epsilon: { x: 250, y: 360, el: document.getElementById('socket-epsilon') },
+      zeta: { x: 380, y: 320, el: document.getElementById('socket-zeta') }
+    };
+    
+    // State Variables
+    let audioCtx = null;
+    let humGainNode = null;
+    let isSymbiosisMode = false;
+    let activeConnections = []; // Array of [{ from, to, id }]
+    let selectedSocketId = null;
+    let dragStartSocketId = null;
+    let isDragging = false;
+    
+    // Add log entry helper
+    function addLogEntry(text) {
+      if (!logContainer) return;
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerText = `[${timeStr}] ${text}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // ACOUSTIC SYNTHESIS SETUP
+    function initAudio() {
+      if (audioCtx) return;
+      
+      const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!OriginalAudioContext) return;
+      
+      audioCtx = new OriginalAudioContext();
+      
+      // Detuned dual oscillators for beating electrological hum
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      humGainNode = audioCtx.createGain();
+      
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(55, audioCtx.currentTime); // A1 note
+      
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(56.5, audioCtx.currentTime); // detuned
+      
+      humGainNode.gain.setValueAtTime(0, audioCtx.currentTime); // silent initially
+      
+      osc1.connect(humGainNode);
+      osc2.connect(humGainNode);
+      humGainNode.connect(audioCtx.destination);
+      
+      osc1.start();
+      osc2.start();
+      
+      // Sonar scheduler
+      scheduleNextSonarPing();
+      
+      addLogEntry("AUDIO MODULE CONNECTED. SYNTH UNIT ACTIVE.");
+    }
+    
+    function setHumIntensity(connectionsNum) {
+      if (!humGainNode || !audioCtx) return;
+      
+      let targetGain = 0;
+      if (connectionsNum > 0) {
+        // Limit max hum to 0.15 to avoid overloading
+        targetGain = Math.min(0.02 + connectionsNum * 0.02, 0.15);
+      }
+      
+      // Smooth transition
+      humGainNode.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.15);
+    }
+    
+    function triggerOverloadAudio() {
+      if (!audioCtx) return;
+      
+      // Flash of loud static noise
+      const bufferSize = audioCtx.sampleRate * 0.12; // 120ms
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      
+      const noiseNode = audioCtx.createBufferSource();
+      noiseNode.buffer = buffer;
+      
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+      
+      noiseNode.connect(noiseGain);
+      noiseGain.connect(audioCtx.destination);
+      noiseNode.start();
+    }
+    
+    function triggerPopAudio() {
+      if (!audioCtx) return;
+      
+      // Bubble pop generator (rapid pitch sweep up)
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isSymbiosisMode ? 400 : 220, now);
+      osc.frequency.exponentialRampToValueAtTime(isSymbiosisMode ? 950 : 800, now + 0.06);
+      
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(now + 0.07);
+    }
+    
+    function triggerSonarPing() {
+      if (!audioCtx) return;
+      
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const filter = audioCtx.createBiquadFilter();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'sine';
+      // Sonar freq depends on mode and current state
+      const baseFreq = isSymbiosisMode ? 880 : 520;
+      osc.frequency.setValueAtTime(baseFreq, now);
+      
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(baseFreq, now);
+      filter.Q.setValueAtTime(12, now);
+      
+      // Decay slowly
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(now + 2.0);
+    }
+    
+    function scheduleNextSonarPing() {
+      if (!audioCtx) return;
+      
+      // Sonar ping every 4-8 seconds
+      const delay = 4000 + Math.random() * 4000;
+      setTimeout(() => {
+        triggerSonarPing();
+        scheduleNextSonarPing();
+      }, delay);
+    }
+
+    // STATE AND GRAPHICS UPDATING
+    function updateMetrics() {
+      const activeCount = activeConnections.length;
+      connectionsCount.innerText = `${activeCount} / 6`;
+      
+      // Benthic creatures dimming based on connections
+      const creatures = document.querySelectorAll('.benthic-creature');
+      const noduleGraphics = document.querySelectorAll('.nodule-graphic');
+      
+      if (isSymbiosisMode) {
+        // Symbiosis mode: Benthic Luminescence rises, Surface battery drains
+        const lPct = Math.min(100, 100 + activeCount * 5);
+        luminescencePct.innerText = `${lPct}%`;
+        luminescenceBar.style.width = `${lPct}%`;
+        luminescenceTrend.innerText = activeCount > 0 ? "REGENERATING" : "STABLE";
+        
+        surfaceVoltage.innerText = `0 V`;
+        voltageBar.style.width = `0%`;
+        voltageTrend.innerText = "STANDBY";
+        
+        currentFlowReadout.innerText = `${(activeCount * 18.5).toFixed(1)} µA`;
+        
+        // Make creatures bright
+        creatures.forEach(c => {
+          c.style.opacity = '1.0';
+          c.style.filter = 'drop-shadow(0 0 12px #00ff66)';
+        });
+        
+        // Green highlight on nodules
+        noduleGraphics.forEach(n => {
+          n.setAttribute('stroke', 'rgba(0, 255, 102, 0.4)');
+        });
+      } else {
+        // Extraction mode: Benthic Luminescence drops, Surface battery increases
+        const lPct = Math.max(0, 100 - activeCount * 15);
+        luminescencePct.innerText = `${lPct}%`;
+        luminescenceBar.style.width = `${lPct}%`;
+        luminescenceTrend.innerText = activeCount > 0 ? "DEPLETING" : "STABLE";
+        
+        const volt = activeCount * 12;
+        surfaceVoltage.innerText = `${volt} V`;
+        voltageBar.style.width = `${(volt / 72) * 100}%`;
+        voltageTrend.innerText = activeCount > 0 ? "CHARGING" : "STANDBY";
+        
+        currentFlowReadout.innerText = `-${(activeCount * 45.2).toFixed(1)} µA`;
+        
+        // Dim creatures
+        const opacity = lPct / 100;
+        creatures.forEach(c => {
+          c.style.opacity = `${Math.max(0.1, opacity)}`;
+          c.style.filter = `drop-shadow(0 0 ${opacity * 8}px #00ff66)`;
+        });
+        
+        // Blue nodules
+        noduleGraphics.forEach(n => {
+          n.setAttribute('stroke', 'rgba(0, 240, 255, 0.2)');
+        });
+      }
+      
+      setHumIntensity(activeCount);
+    }
+    
+    // Draw sagging cable between two sockets
+    function drawCablePath(fromKey, toKey) {
+      const fromPos = getRelativeCoords(sockets[fromKey].el);
+      const toPos = getRelativeCoords(sockets[toKey].el);
+      
+      // Calculate midpoints & sag
+      const midX = (fromPos.x + toPos.x) / 2;
+      const midY = (fromPos.y + toPos.y) / 2;
+      const dx = toPos.x - fromPos.x;
+      const dy = toPos.y - fromPos.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const sag = Math.min(220, dist * 0.45); // sag proportional to distance
+      
+      // Bezier control point
+      const controlX = midX;
+      const controlY = midY + sag;
+      
+      return `M ${fromPos.x} ${fromPos.y} Q ${controlX} ${controlY} ${toPos.x} ${toPos.y}`;
+    }
+    
+    // Re-draw all active cables
+    function renderCables() {
+      if (!cablesGroup) return;
+      cablesGroup.innerHTML = '';
+      
+      activeConnections.forEach(conn => {
+        const d = drawCablePath(conn.from, conn.to);
+        
+        // Outer glow path
+        const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        glowPath.setAttribute('d', d);
+        glowPath.setAttribute('stroke', isSymbiosisMode ? 'rgba(0, 255, 102, 0.2)' : 'rgba(0, 240, 255, 0.2)');
+        glowPath.setAttribute('stroke-width', '8');
+        glowPath.setAttribute('fill', 'none');
+        
+        // Inner cable path
+        const innerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        innerPath.setAttribute('d', d);
+        innerPath.setAttribute('stroke', isSymbiosisMode ? 'var(--green)' : 'var(--teal)');
+        innerPath.setAttribute('stroke-width', '3');
+        innerPath.setAttribute('fill', 'none');
+        
+        // Moving electron flow dots
+        const flowAnimation = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        flowAnimation.setAttribute('r', '3');
+        flowAnimation.setAttribute('fill', isSymbiosisMode ? '#ffffff' : 'var(--teal)');
+        
+        const motionPath = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+        motionPath.setAttribute('path', d);
+        motionPath.setAttribute('dur', '2s');
+        motionPath.setAttribute('repeatCount', 'indefinite');
+        
+        flowAnimation.appendChild(motionPath);
+        
+        cablesGroup.appendChild(glowPath);
+        cablesGroup.appendChild(innerPath);
+        cablesGroup.appendChild(flowAnimation);
+      });
+    }
+
+    // Helper to get socket coordinates relative to the SVG viewbox (500x500)
+    function getRelativeCoords(el) {
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      
+      const relativeLeft = elRect.left - containerRect.left + elRect.width / 2;
+      const relativeTop = elRect.top - containerRect.top + elRect.height / 2;
+      
+      // Map to 500x500 viewBox
+      const x = (relativeLeft / containerRect.width) * 500;
+      const y = (relativeTop / containerRect.height) * 500;
+      
+      return { x, y };
+    }
+    
+    // CONNECTION LOGIC
+    function tryConnect(fromId, toId) {
+      if (fromId === toId) return false;
+      
+      // Check if connection already exists
+      const exists = activeConnections.some(c => 
+        (c.from === fromId && c.to === toId) || (c.from === toId && c.to === fromId)
+      );
+      
+      if (exists) {
+        addLogEntry(`LINK STABILIZED BETWEEN ${fromId.toUpperCase()} & ${toId.toUpperCase()}`);
+        return false;
+      }
+      
+      // Add connection
+      activeConnections.push({ from: fromId, to: toId, id: `c-${fromId}-${toId}` });
+      
+      // Mark sockets as connected
+      sockets[fromId].el.classList.add('connected');
+      sockets[toId].el.classList.add('connected');
+      
+      triggerPopAudio();
+      renderCables();
+      updateMetrics();
+      
+      addLogEntry(`ESTABLISHED PATCH: ${fromId.toUpperCase()} ⟷ ${toId.toUpperCase()}`);
+      return true;
+    }
+    
+    function clearSelections() {
+      selectedSocketId = null;
+      socketElements.forEach(s => s.classList.remove('selected'));
+    }
+    
+    // DRAG AND GESTURE IMPLEMENTATION
+    function handlePointerDown(e) {
+      const socket = e.target.closest('.patch-socket');
+      if (!socket) return;
+      
+      initAudio();
+      
+      const socketId = socket.dataset.socketId;
+      dragStartSocketId = socketId;
+      isDragging = true;
+      
+      // Select the clicked socket
+      clearSelections();
+      selectedSocketId = socketId;
+      socket.classList.add('selected');
+      
+      // Set up drag wire coordinates
+      const startCoords = getRelativeCoords(socket);
+      dragCable.setAttribute('d', `M ${startCoords.x} ${startCoords.y} L ${startCoords.x} ${startCoords.y}`);
+      dragCable.style.display = 'block';
+      
+      container.setPointerCapture(e.pointerId);
+    }
+    
+    function handlePointerMove(e) {
+      if (!isDragging || !dragStartSocketId) return;
+      
+      const startCoords = getRelativeCoords(sockets[dragStartSocketId].el);
+      
+      // Find current relative coordinates inside container
+      const containerRect = container.getBoundingClientRect();
+      const x = ((e.clientX - containerRect.left) / containerRect.width) * 500;
+      const y = ((e.clientY - containerRect.top) / containerRect.height) * 500;
+      
+      // Calculate sagging drag cable
+      const midX = (startCoords.x + x) / 2;
+      const midY = (startCoords.y + y) / 2;
+      const sag = Math.min(100, Math.sqrt((x - startCoords.x) ** 2 + (y - startCoords.y) ** 2) * 0.35);
+      
+      dragCable.setAttribute('d', `M ${startCoords.x} ${startCoords.y} Q ${midX} ${midY + sag} ${x} ${y}`);
+    }
+    
+    function handlePointerUp(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      dragCable.style.display = 'none';
+      
+      // Check if pointing at another socket
+      // Using elementFromPoint to find socket element under current pointer
+      const targetElement = document.elementFromPoint(e.clientX, e.clientY);
+      const targetSocket = targetElement ? targetElement.closest('.patch-socket') : null;
+      
+      if (targetSocket && dragStartSocketId) {
+        const targetId = targetSocket.dataset.socketId;
+        tryConnect(dragStartSocketId, targetId);
+      }
+      
+      clearSelections();
+      container.releasePointerCapture(e.pointerId);
+    }
+
+    // CLICK FALLBACKS
+    function handleSocketClick(e) {
+      initAudio();
+      
+      const socketId = e.target.dataset.socketId;
+      if (!selectedSocketId) {
+        // Select first node
+        selectedSocketId = socketId;
+        e.target.classList.add('selected');
+      } else {
+        // Attempt to connect first node to second node
+        tryConnect(selectedSocketId, socketId);
+        clearSelections();
+      }
+    }
+    
+    // INTERACTION ATTACHMENTS
+    initBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+      initAudio();
+      triggerSonarPing();
+      addLogEntry("DEEP DESCENT ACTIVATED. TELEMETRY INITIALIZED.");
+    });
+    
+    // Add touch action none to prevent mobile drag scroll
+    container.style.touchAction = 'none';
+    
+    container.addEventListener('pointerdown', handlePointerDown);
+    container.addEventListener('pointermove', handlePointerMove);
+    container.addEventListener('pointerup', handlePointerUp);
+    
+    socketElements.forEach(btn => {
+      btn.addEventListener('click', handleSocketClick);
+    });
+    
+    // Toggle Symbiosis Mode
+    symbiosisToggle.addEventListener('change', (e) => {
+      initAudio();
+      isSymbiosisMode = e.target.checked;
+      
+      if (isSymbiosisMode) {
+        terminalHeader.classList.add('symbiosis-active');
+        addLogEntry("SYSTEM CONFIGURATION: BENTHIC SYMBIOSIS ACTIVE.");
+      } else {
+        terminalHeader.classList.remove('symbiosis-active');
+        addLogEntry("SYSTEM CONFIGURATION: EXTRACTIVE POWER HARVEST ACTIVE.");
+      }
+      
+      triggerSonarPing();
+      updateMetrics();
+      renderCables();
+    });
+    
+    // Clear/Short Circuit
+    shortCircuitBtn.addEventListener('click', () => {
+      initAudio();
+      triggerOverloadAudio();
+      
+      // Screen shake/flash effect on terminal header
+      terminalHeader.classList.add('overload-flash');
+      setTimeout(() => terminalHeader.classList.remove('overload-flash'), 400);
+      
+      activeConnections = [];
+      clearSelections();
+      
+      socketElements.forEach(s => {
+        s.classList.remove('connected');
+      });
+      
+      renderCables();
+      updateMetrics();
+      addLogEntry("OVERLOAD TRIGGERED. POWER TRANSDUCERS FLUSHED.");
+    });
+    
+    // Resize handler to redraw cables accurately if responsive layout shifts
+    window.addEventListener('resize', () => {
+      if (activeConnections.length > 0) {
+        renderCables();
+      }
+    });
+  });
+</script>
+
+<style is:global>
+  /* Header flash on overload */
+  .overload-flash {
+    animation: flash-red 0.35s ease-out;
+  }
+  
+  @keyframes flash-red {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(255, 0, 0, 0.4); filter: brightness(2); }
+  }
+</style>

@@ -31,6 +31,10 @@ const pages = [
   "/experiments/trionda-calibration",
   "/experiments/dark-star-observatory",
   "/experiments/pressure-choir",
+  "/experiments/abyssal-nodule-patchbay",
+  "/experiments/lichen-ledger",
+  "/experiments/love-in-the-west",
+  "/experiments/receipt-rain-choir",
 ]
 
 test.use({

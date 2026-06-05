@@ -275,4 +275,29 @@ Carry Forward:
 - In paint/drawing loops, use `document.elementFromPoint` to perform cheap, native grid collision checks on DOM entities.
 - Support key navigation loops (Up/Down arrow keys + Enter/Space) for gesture fallbacks as standard design patterns.
 
+### Session Entry
+
+Date: 2026-06-05
+Experiment: Abyssal Nodule Patchbay
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Ensure custom toggle checkbox components are selected by targeting their visible labels in E2E tests.
+- Avoid using technology terminology in code comments to prevent false positives in copy verification.
+- Map coordinates dynamically when linking elements across canvas/SVG boundaries.
+
+### Session Entry
+
+Date: 2026-06-05
+Experiment: Receipt Rain Choir
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Rotate away from the recent central-canvas/HUD pattern with stable DOM objects and
+  a physical sorting grammar.
+- Do not animate transforms on click targets; keep receipts geometrically stable and
+  move the surrounding weather instead.
+- Run build-shelling tests sequentially because parallel `astro build` invocations
+  can collide on inspector ports and produce false failures.
+
 

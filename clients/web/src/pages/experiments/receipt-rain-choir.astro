@@ -1,0 +1,592 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="rr-shell">
+    <section class="rr-hero" aria-labelledby="receipt-title">
+      <div>
+        <p class="rr-kicker">Thermal Weather Station</p>
+        <h1 id="receipt-title">Receipt Rain Choir</h1>
+        <p class="rr-lede">
+          Sort the falling receipts before their ink fades into weather. Choose a strip, then file it into Archive, Shred, or Audit to change the chorus of totals.
+        </p>
+      </div>
+      <div class="rr-totals" aria-live="polite">
+        <div>
+          <span>Sorted</span>
+          <strong id="sorted-total">$0.00</strong>
+        </div>
+        <div>
+          <span>Unsorted</span>
+          <strong id="unsorted-total">$0.00</strong>
+        </div>
+        <div>
+          <span>Choir</span>
+          <strong id="choir-mode">Rain waiting</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="rr-desk" aria-label="Receipt sorting desk">
+      <div id="receipt-field" class="rr-field" aria-label="Falling thermal receipts">
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="18.40" data-bin="unassigned" style="--x: 7%; --y: 5%; --tilt: -6deg; --delay: -1s;">
+          <span>Midnight umbrella polish</span>
+          <strong>$18.40</strong>
+          <em>ink unstable</em>
+        </button>
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="42.17" data-bin="unassigned" style="--x: 38%; --y: 12%; --tilt: 4deg; --delay: -4s;">
+          <span>Emergency fog subscription</span>
+          <strong>$42.17</strong>
+          <em>please hum</em>
+        </button>
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="7.05" data-bin="unassigned" style="--x: 68%; --y: 3%; --tilt: -2deg; --delay: -2s;">
+          <span>Borrowed lighthouse crumbs</span>
+          <strong>$7.05</strong>
+          <em>staple absent</em>
+        </button>
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="91.22" data-bin="unassigned" style="--x: 18%; --y: 34%; --tilt: 7deg; --delay: -6s;">
+          <span>Six apologies, chilled</span>
+          <strong>$91.22</strong>
+          <em>heat sensitive</em>
+        </button>
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="26.80" data-bin="unassigned" style="--x: 52%; --y: 43%; --tilt: -8deg; --delay: -3s;">
+          <span>Reusable thunder deposit</span>
+          <strong>$26.80</strong>
+          <em>tax unclear</em>
+        </button>
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="13.33" data-bin="unassigned" style="--x: 78%; --y: 29%; --tilt: 5deg; --delay: -5s;">
+          <span>Civic moth toll</span>
+          <strong>$13.33</strong>
+          <em>sing twice</em>
+        </button>
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="64.09" data-bin="unassigned" style="--x: 3%; --y: 67%; --tilt: 3deg; --delay: -7s;">
+          <span>Counterfeit dawn rental</span>
+          <strong>$64.09</strong>
+          <em>return before rain</em>
+        </button>
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="31.76" data-bin="unassigned" style="--x: 43%; --y: 72%; --tilt: -5deg; --delay: -8s;">
+          <span>Accordion compliance fee</span>
+          <strong>$31.76</strong>
+          <em>fold gently</em>
+        </button>
+        <button class="receipt-strip" type="button" aria-pressed="false" data-value="55.50" data-bin="unassigned" style="--x: 71%; --y: 65%; --tilt: 8deg; --delay: -9s;">
+          <span>Raincoat for a candle</span>
+          <strong>$55.50</strong>
+          <em>flame pending</em>
+        </button>
+      </div>
+
+      <nav class="rr-bins" aria-label="Sorting bins">
+        <button id="bin-archive" class="bin-button archive" type="button" data-bin="archive">
+          <span>1</span>
+          Archive
+        </button>
+        <button id="bin-shred" class="bin-button shred" type="button" data-bin="shred">
+          <span>2</span>
+          Shred
+        </button>
+        <button id="bin-audit" class="bin-button audit" type="button" data-bin="audit">
+          <span>3</span>
+          Audit
+        </button>
+      </nav>
+    </section>
+
+    <section class="rr-footer" aria-label="Receipt weather controls">
+      <p id="rr-instructions">Pick any strip, then choose a bin. Keyboard: focus a receipt, press Enter, then 1, 2, or 3.</p>
+      <button id="summon-button" type="button">Summon receipt weather</button>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    overflow-x: hidden;
+    background: #12100c;
+  }
+
+  .rr-shell {
+    min-height: calc(100vh - 4rem);
+    color: #2a2117;
+    background:
+      linear-gradient(90deg, rgba(14, 72, 85, 0.18), transparent 28%, rgba(164, 43, 43, 0.14) 72%, transparent),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 20px),
+      #e7d5ae;
+    font-family: Inter, system-ui, sans-serif;
+    padding: clamp(1rem, 4vw, 3rem);
+    box-sizing: border-box;
+  }
+
+  .rr-hero {
+    width: min(1120px, 100%);
+    margin: 0 auto 1.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+    gap: clamp(1rem, 4vw, 2rem);
+    align-items: end;
+  }
+
+  .rr-kicker {
+    margin: 0 0 0.5rem;
+    color: #9b2c2c;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 11ch;
+    color: #16110d;
+    font-family: Outfit, Inter, system-ui, sans-serif;
+    font-size: clamp(3rem, 9vw, 7.5rem);
+    line-height: 0.84;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .rr-lede {
+    max-width: 42rem;
+    margin: 1rem 0 0;
+    color: #4b3727;
+    font-size: clamp(1rem, 2vw, 1.18rem);
+    line-height: 1.55;
+  }
+
+  .rr-totals {
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.9rem;
+    border: 2px solid #241b13;
+    background: #f8efcf;
+    box-shadow: 0.45rem 0.45rem 0 #241b13;
+  }
+
+  .rr-totals div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px dashed rgba(36, 27, 19, 0.32);
+    padding-bottom: 0.45rem;
+  }
+
+  .rr-totals div:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .rr-totals span {
+    color: #69513d;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .rr-totals strong {
+    color: #111;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .rr-desk {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 10rem;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .rr-field {
+    position: relative;
+    min-height: clamp(30rem, 62vh, 42rem);
+    overflow: hidden;
+    border: 2px solid #241b13;
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.42), transparent 30%),
+      linear-gradient(#f5e8bd, #d5b981);
+    box-shadow: inset 0 0 0 0.45rem rgba(36, 27, 19, 0.07);
+    touch-action: none;
+  }
+
+  .rr-field::before,
+  .rr-field::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .rr-field::before {
+    background: repeating-linear-gradient(90deg, transparent 0 38px, rgba(36, 27, 19, 0.06) 38px 39px);
+    mix-blend-mode: multiply;
+  }
+
+  .rr-field::after {
+    background: radial-gradient(circle at var(--storm-x, 50%) var(--storm-y, 50%), rgba(9, 83, 95, 0.28), transparent 11rem);
+    opacity: 0.8;
+  }
+
+  .receipt-strip {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: clamp(7.5rem, 18vw, 11rem);
+    min-height: 8.5rem;
+    border: 1px solid rgba(36, 27, 19, 0.45);
+    border-radius: 0;
+    color: #211910;
+    background:
+      linear-gradient(90deg, transparent 0 8px, rgba(155, 44, 44, 0.18) 8px 9px, transparent 9px),
+      repeating-linear-gradient(0deg, #fff7d9 0 9px, #f3e5bb 9px 10px);
+    box-shadow: 0.18rem 0.28rem 0 rgba(36, 27, 19, 0.28);
+    transform: rotate(var(--tilt));
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      opacity 180ms ease,
+      filter 180ms ease;
+    animation: receiptFlicker 4s steps(2, end) infinite;
+    animation-delay: var(--delay);
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    padding: 0.8rem 0.65rem 0.7rem;
+    z-index: 2;
+  }
+
+  .receipt-strip span,
+  .receipt-strip strong,
+  .receipt-strip em {
+    display: block;
+  }
+
+  .receipt-strip span {
+    min-height: 2.8rem;
+    font-size: 0.8rem;
+    font-weight: 900;
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+
+  .receipt-strip strong {
+    margin-top: 0.75rem;
+    font-size: 1.35rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .receipt-strip em {
+    margin-top: 0.65rem;
+    color: #795f4a;
+    font-size: 0.68rem;
+    font-style: normal;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .receipt-strip[aria-pressed="true"] {
+    border-color: #0f5966;
+    box-shadow: 0 0 0 4px rgba(15, 89, 102, 0.28), 0.22rem 0.32rem 0 #0f5966;
+    z-index: 6;
+  }
+
+  .receipt-strip.sorted {
+    animation-play-state: paused;
+    filter: saturate(1.22) contrast(1.08);
+  }
+
+  .receipt-strip[data-bin="archive"] {
+    background-color: #c5ebdf;
+    transform: rotate(-1deg) scale(0.92);
+  }
+
+  .receipt-strip[data-bin="shred"] {
+    opacity: 0.58;
+    clip-path: polygon(0 0, 18% 0, 18% 100%, 25% 100%, 25% 0, 43% 0, 43% 100%, 50% 100%, 50% 0, 69% 0, 69% 100%, 76% 100%, 76% 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .receipt-strip[data-bin="audit"] {
+    background-color: #ffe1a6;
+    box-shadow: 0 0 0 4px rgba(155, 44, 44, 0.22), 0.18rem 0.28rem 0 rgba(36, 27, 19, 0.28);
+  }
+
+  .rr-bins {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .bin-button,
+  #summon-button {
+    border: 2px solid #241b13;
+    color: #160f0a;
+    background: #f8efcf;
+    box-shadow: 0.28rem 0.28rem 0 #241b13;
+    font: inherit;
+    font-weight: 950;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .bin-button {
+    min-height: 8rem;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0.4rem;
+  }
+
+  .bin-button span {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+  }
+
+  .bin-button.archive {
+    background: #c5ebdf;
+  }
+
+  .bin-button.shred {
+    background: #f0b6b0;
+  }
+
+  .bin-button.audit {
+    background: #ffd571;
+  }
+
+  .bin-button:hover,
+  .bin-button:focus-visible,
+  #summon-button:hover,
+  #summon-button:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: 0.4rem 0.4rem 0 #241b13;
+  }
+
+  .rr-footer {
+    width: min(1120px, 100%);
+    margin: 1rem auto 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .rr-footer p {
+    margin: 0;
+    color: #4b3727;
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  #summon-button {
+    min-height: 3.2rem;
+    padding: 0 1rem;
+    background: #0f5966;
+    color: #fff7d9;
+    white-space: nowrap;
+  }
+
+  @keyframes receiptFlicker {
+    0%,
+    100% {
+      filter: contrast(1);
+    }
+    50% {
+      filter: contrast(1.08) sepia(0.12);
+    }
+  }
+
+  @media (max-width: 760px) {
+    .rr-shell {
+      padding: 1rem;
+    }
+
+    .rr-hero,
+    .rr-desk {
+      grid-template-columns: 1fr;
+    }
+
+    h1 {
+      max-width: 8ch;
+      font-size: clamp(2.7rem, 16vw, 4.5rem);
+    }
+
+    .rr-field {
+      min-height: 36rem;
+    }
+
+    .receipt-strip {
+      width: 8.2rem;
+    }
+
+    .rr-bins {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .bin-button {
+      min-height: 5.5rem;
+      font-size: 0.84rem;
+    }
+
+    .rr-footer {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    #summon-button {
+      white-space: normal;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .receipt-strip {
+      animation: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  const field = document.querySelector("#receipt-field")
+  const receipts = Array.from(document.querySelectorAll(".receipt-strip"))
+  const bins = Array.from(document.querySelectorAll(".bin-button"))
+  const sortedTotal = document.querySelector("#sorted-total")
+  const unsortedTotal = document.querySelector("#unsorted-total")
+  const choirMode = document.querySelector("#choir-mode")
+  const summonButton = document.querySelector("#summon-button")
+
+  if (
+    field instanceof HTMLElement &&
+    sortedTotal instanceof HTMLElement &&
+    unsortedTotal instanceof HTMLElement &&
+    choirMode instanceof HTMLElement &&
+    summonButton instanceof HTMLButtonElement
+  ) {
+    let selectedReceipt = null
+    let stormTick = 0
+
+    const formatMoney = (value) =>
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(value)
+
+    const getValue = (receipt) => Number(receipt.dataset.value || "0")
+
+    const updateTotals = () => {
+      const sorted = receipts
+        .filter((receipt) => receipt instanceof HTMLElement && receipt.classList.contains("sorted"))
+        .reduce((sum, receipt) => sum + getValue(receipt), 0)
+      const unsorted = receipts
+        .filter((receipt) => receipt instanceof HTMLElement && !receipt.classList.contains("sorted"))
+        .reduce((sum, receipt) => sum + getValue(receipt), 0)
+
+      sortedTotal.textContent = formatMoney(sorted)
+      unsortedTotal.textContent = formatMoney(unsorted)
+    }
+
+    const setSelected = (receipt) => {
+      if (!(receipt instanceof HTMLElement)) return
+      receipts.forEach((item) => item instanceof HTMLElement && item.setAttribute("aria-pressed", "false"))
+      receipt.setAttribute("aria-pressed", "true")
+      selectedReceipt = receipt
+      choirMode.textContent = "Listening for a bin"
+    }
+
+    const placeSortedReceipt = (receipt, bin) => {
+      const index = receipts.indexOf(receipt)
+      const binOffsets = {
+        archive: [8, 80],
+        shred: [43, 80],
+        audit: [72, 80],
+      }
+      const [baseX, baseY] = binOffsets[bin] || [50, 80]
+      receipt.style.setProperty("--x", `${baseX + (index % 2) * 4}%`)
+      receipt.style.setProperty("--y", `${baseY - Math.floor(index / 3) * 6}%`)
+      receipt.style.setProperty("--tilt", `${(index % 5) - 2}deg`)
+    }
+
+    function sortReceipt(receipt, bin) {
+      if (!(receipt instanceof HTMLElement)) return
+      receipt.classList.add("sorted")
+      receipt.dataset.bin = bin
+      receipt.setAttribute("aria-pressed", "false")
+      placeSortedReceipt(receipt, bin)
+      selectedReceipt = null
+
+      const modes = {
+        archive: "Archival alto",
+        shred: "Confetti tenor",
+        audit: "Audit soprano",
+      }
+      choirMode.textContent = modes[bin] || "Rain waiting"
+      updateTotals()
+    }
+
+    const sortFirstAvailable = (bin) => {
+      const receipt =
+        selectedReceipt ||
+        receipts.find(
+          (item) => item instanceof HTMLElement && !item.classList.contains("sorted")
+        )
+      if (receipt instanceof HTMLElement) sortReceipt(receipt, bin)
+    }
+
+    receipts.forEach((receipt) => {
+      if (!(receipt instanceof HTMLElement)) return
+      receipt.addEventListener("click", () => setSelected(receipt))
+      receipt.addEventListener("pointerdown", () => setSelected(receipt))
+      receipt.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          setSelected(receipt)
+        }
+      })
+    })
+
+    bins.forEach((binButton) => {
+      if (!(binButton instanceof HTMLElement)) return
+      binButton.addEventListener("click", () => sortFirstAvailable(binButton.dataset.bin || "archive"))
+    })
+
+    document.addEventListener("keydown", (event) => {
+      const keyMap = {
+        "1": "archive",
+        "2": "shred",
+        "3": "audit",
+      }
+      const bin = keyMap[event.key]
+      if (bin) sortFirstAvailable(bin)
+    })
+
+    summonButton.addEventListener("click", () => {
+      receipts.forEach((receipt, index) => {
+        if (!(receipt instanceof HTMLElement)) return
+        receipt.classList.remove("sorted")
+        receipt.dataset.bin = "unassigned"
+        receipt.setAttribute("aria-pressed", "false")
+        receipt.style.setProperty("--x", `${6 + ((index * 17) % 76)}%`)
+        receipt.style.setProperty("--y", `${4 + ((index * 23) % 68)}%`)
+        receipt.style.setProperty("--tilt", `${(index % 2 === 0 ? -1 : 1) * (3 + (index % 6))}deg`)
+      })
+      selectedReceipt = null
+      choirMode.textContent = "Rain returning"
+      updateTotals()
+    })
+
+    const animateStorm = () => {
+      stormTick += 0.012
+      field.style.setProperty("--storm-x", `${50 + Math.sin(stormTick) * 36}%`)
+      field.style.setProperty("--storm-y", `${52 + Math.cos(stormTick * 0.7) * 28}%`)
+      requestAnimationFrame(animateStorm)
+    }
+
+    updateTotals()
+    requestAnimationFrame(animateStorm)
+  }
+</script>

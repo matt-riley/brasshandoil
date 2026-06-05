@@ -64,6 +64,9 @@ Set `perspective: 400px` on a container, then child elements with `rotateX(90deg
 #### Canvas gravitational lensing (position-based)
 Rather than warping pixels with ImageData, you can simulate gravitational lensing by displacing the *draw positions* of background objects. For each star, compute deflection from nearby masses: `deflection = mass * strength / (distance + epsilon)`, applied radially outward from the mass. Modulate by a "probe" factor (e.g., cursor proximity) so lensing only appears when the user is near. Much cheaper than pixel-level distortion and produces convincing Einstein-ring-like effects. Add brightness magnification (`1 + distortion * N`) for realism.
 
+#### CSS backdrop-filter as interactive lens
+A positioned `<div>` with `backdrop-filter: contrast(N) saturate(N) brightness(N)` and `border-radius: 50%` creates a magnifying/enhancing lens that follows the cursor. Elements behind it that are nearly invisible (opacity ~0.03) become readable through the lens without JavaScript opacity manipulation — the filter chain amplifies whatever light is there. Combine with `mix-blend-mode: screen` on the lens for additive light effects. Update position via `mousemove` + `style.transform`. The key insight: backdrop-filter operates on rendered pixels behind the element, so you can "reveal" low-opacity content without changing its actual opacity. Gotcha: `backdrop-filter` doesn't work if any ancestor has `overflow: hidden` with certain compositing — test stacking context carefully.
+
 #### Canvas ImageData pixel manipulation
 `ctx.createImageData(w, h)` + direct RGBA writes to `imgData.data[idx]` + `ctx.putImageData()` gives per-pixel control for procedural visualizations. Process in 4×4 blocks for performance. Combine with `requestAnimationFrame` and `Date.now()` for animated fields. Much faster than drawing thousands of individual rects.
 
@@ -79,6 +82,11 @@ Store current and previous position per point; velocity is implicit as `pos - ol
 **Concept:** Inspired by the theory that the universe's first stars emitted no light. A black void with 600 faint background stars and 7 hidden "dark stars." Move your cursor to probe — near a dark star, background stars bend via gravitational lensing. Dwell to catalogue each one.
 **Technique:** Canvas-based gravitational lensing — per-frame displacement of star positions based on inverse-distance deflection from hidden point masses, modulated by cursor proximity. Einstein ring hint rendering.
 **File:** clients/web/src/pages/experiments/dark-star-observatory.astro
+
+### 2026-06-05 — Love in the West
+**Concept:** Inspired by the Venus-Jupiter conjunction happening June 9, 2026. A twilight sky with two glowing planets drifting toward each other over 20 seconds. Your cursor is a telescope lens — move it over the sky to reveal hidden love letters the planets are writing to each other. When they finally meet, a white flash and all letters become visible.
+**Technique:** CSS `backdrop-filter` as interactive game mechanic — a div with `backdrop-filter: contrast(2.5) saturate(1.8) brightness(1.4)` and `mix-blend-mode: screen` follows the cursor via `clip-path`/positioning, creating a "telescope lens" that amplifies near-invisible elements into readability. Also: `mix-blend-mode: screen` for additive light blending on planet conjunction.
+**File:** clients/web/src/pages/experiments/love-in-the-west.astro
 
 ## Feedback from Matt
 
