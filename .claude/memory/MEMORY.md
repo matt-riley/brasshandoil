@@ -67,6 +67,9 @@ Rather than warping pixels with ImageData, you can simulate gravitational lensin
 #### CSS backdrop-filter as interactive lens
 A positioned `<div>` with `backdrop-filter: contrast(N) saturate(N) brightness(N)` and `border-radius: 50%` creates a magnifying/enhancing lens that follows the cursor. Elements behind it that are nearly invisible (opacity ~0.03) become readable through the lens without JavaScript opacity manipulation — the filter chain amplifies whatever light is there. Combine with `mix-blend-mode: screen` on the lens for additive light effects. Update position via `mousemove` + `style.transform`. The key insight: backdrop-filter operates on rendered pixels behind the element, so you can "reveal" low-opacity content without changing its actual opacity. Gotcha: `backdrop-filter` doesn't work if any ancestor has `overflow: hidden` with certain compositing — test stacking context carefully.
 
+#### SVG feTurbulence + feDisplacementMap (organic distortion)
+`<feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="42">` generates Perlin-style noise; `<feDisplacementMap in="SourceGraphic" in2="noise" scale="N">` warps the source pixels by that noise. Animate `seed` (increment each frame) and modulate `baseFrequency` with `Math.sin()` for a writhing, organic feel. `scale` controls intensity (0 = none, 30+ = heavy distortion). Apply to any element via `filter: url(#id)`. Use separate filters for different intensities on different parts of the page. Gotcha: filter region defaults can clip distorted pixels — use `x="-20%" y="-20%" width="140%" height="140%"` to avoid.
+
 #### Canvas ImageData pixel manipulation
 `ctx.createImageData(w, h)` + direct RGBA writes to `imgData.data[idx]` + `ctx.putImageData()` gives per-pixel control for procedural visualizations. Process in 4×4 blocks for performance. Combine with `requestAnimationFrame` and `Date.now()` for animated fields. Much faster than drawing thousands of individual rects.
 
@@ -87,6 +90,11 @@ Store current and previous position per point; velocity is implicit as `pos - ol
 **Concept:** Inspired by the Venus-Jupiter conjunction happening June 9, 2026. A twilight sky with two glowing planets drifting toward each other over 20 seconds. Your cursor is a telescope lens — move it over the sky to reveal hidden love letters the planets are writing to each other. When they finally meet, a white flash and all letters become visible.
 **Technique:** CSS `backdrop-filter` as interactive game mechanic — a div with `backdrop-filter: contrast(2.5) saturate(1.8) brightness(1.4)` and `mix-blend-mode: screen` follows the cursor via `clip-path`/positioning, creating a "telescope lens" that amplifies near-invisible elements into readability. Also: `mix-blend-mode: screen` for additive light blending on planet conjunction.
 **File:** clients/web/src/pages/experiments/love-in-the-west.astro
+
+### 2026-06-06 — Specimen 4471
+**Concept:** Inspired by the flesh-eating New World screwworm fly confirmed in a Texas calf — the first US detection in decades. A pristine USDA veterinary inspection report. Your cursor is a UV lamp; hover over the tissue sample to reveal larvae writhing beneath. The longer you inspect, the more the infestation spreads into the document itself — text distorts, notes rewrite, the status escalates from CLEAR to QUARANTINE FAILURE.
+**Technique:** SVG `<feTurbulence>` + `<feDisplacementMap>` — generating organic, animated distortion by mutating the turbulence `seed` and `baseFrequency` each frame via `requestAnimationFrame`. Applied both to the specimen area and to text elements as infestation spreads.
+**File:** clients/web/src/pages/experiments/specimen-4471.astro
 
 ## Feedback from Matt
 

@@ -35,6 +35,9 @@ const pages = [
   "/experiments/lichen-ledger",
   "/experiments/love-in-the-west",
   "/experiments/receipt-rain-choir",
+  "/experiments/quebec-biosphere",
+  "/experiments/specimen-4471",
+  "/experiments/static-orchard-switchboard",
 ]
 
 test.use({

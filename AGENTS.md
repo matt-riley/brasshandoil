@@ -17,4 +17,8 @@ This is a playground for whimsy, creativity and pushing the boundaries of the we
 ### 4. Normalized Relative Coordinate Tracking for Canvas Layout Resilience
 - Replaced viewport-based absolute and devicePixelRatio-dependent coordinate translation logic with normalized `[0, 1]` relative canvas positions in event handlers (`mousemove` and `touchstart`). This guarantees that client coordinate evaluation is completely immune to page layout shifts, CSS scaling transformations, and timing/settle race conditions in E2E automation.
 
+### 5. Keyboard Navigation Cursor and Arrow-Key Bindings for SVG/Canvas Interactive Layers
+- Implemented a virtual cursor overlay (represented as an SVG crosshair) combined with `keydown` event listeners for arrow-key movements and digit/space keys. This guarantees fully keyboard-accessible interactive manipulation of absolute layout coordinates, ensuring robustness in E2E headless environments and compliance with interactive accessibility patterns.
 
+### 6. Robust E2E Hover Simulation via Bounded Locators
+- Replaced coordinate-based manual cursor movement (`page.mouse.move(x, y)`) with strict, element-scoped hover targets (`locator.hover()`) in responsive and mobile E2E tests. This ensures that pointer-activation triggers (like specimen UV lamps or hover-based density updates) remain position-independent and layout-immune across all viewport sizes.

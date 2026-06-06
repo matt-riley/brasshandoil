@@ -300,4 +300,26 @@ Carry Forward:
 - Run build-shelling tests sequentially because parallel `astro build` invocations
   can collide on inspector ports and produce false failures.
 
+### Session Entry
+
+Date: 2026-06-06
+Experiment: Quebec Biosphere
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Structure coordinate-mapped dual pane layouts (e.g. blueprint vs. organic canvas) to capture interactions across grid spaces.
+- Keep interactive canvas/SVG nodes aligned with normalized relative coords in event handlers to resist layout shifts.
+- Establish a virtual keyboard cursor and arrow-key bindings for complex canvas/SVG pointer controls.
+
+### Session Entry
+
+Date: 2026-06-06
+Experiment: Static Orchard Switchboard
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Require explicit interaction arming for proximity-driven instruments so boot and reset states stay quiet.
+- When keyboard activation performs a terminal action, return before generic movement refresh can overwrite the semantic status.
+- Keep mobile overflow checks in every new experiment spec; SVG-heavy layouts can still overflow through console controls.
+
 
