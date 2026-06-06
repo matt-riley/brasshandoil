@@ -1,0 +1,1538 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="qb-shell">
+    <!-- Onboarding Overlay -->
+    <div id="onboarding-overlay" class="qb-overlay" role="dialog" aria-labelledby="overlay-title" aria-describedby="overlay-desc">
+      <div class="qb-overlay-content glass">
+        <span class="qb-kicker">Symbiotic Planning Terminal</span>
+        <h2 id="overlay-title">Québec Biosphere</h2>
+        <p id="overlay-desc" class="qb-overlay-desc">
+          UNESCO has designated Québec City as a biosphere reserve to promote urban-natural harmony. 
+          Bridge the natural mycelium canopy on the right, while drafting the urban power grid on the left.
+          Click/drag on the grid to route paths, or use keyboard navigation.
+        </p>
+        <button id="init-button" type="button" class="qb-init-btn">Initialize Coexistence</button>
+      </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="qb-container">
+      <header class="qb-header">
+        <span class="qb-kicker">UNESCO BIOSPHERE ZONE / PROJECT QC-2026</span>
+        <h1 class="text-gradient">Québec Biosphere</h1>
+        <p class="qb-description">
+          Create an equilibrium between urban infrastructure and mycelial growth. 
+          Draw lines on the CAD blueprint (left) to route power and transit. 
+          Watch how they repel, attract, or block the biological spores (right) as they seek connection.
+        </p>
+      </header>
+
+      <!-- Workspace grid -->
+      <div class="qb-workspace">
+        
+        <!-- Left Pane: THE GRID (CAD Planner) -->
+        <div class="qb-pane qb-grid-pane">
+          <div class="qb-pane-header">
+            <h3>THE GRID (Urban Infrastructure)</h3>
+            <span class="qb-pane-badge badge-cyan">CAD Active</span>
+          </div>
+          
+          <p class="qb-instruction-tip">
+            Click grid to draw routes. Keyboard: Arrow keys to move cursor, Space/Enter to click, 1-4 to select tools.
+          </p>
+
+          <div class="qb-canvas-wrapper">
+            <!-- CAD Grid Interactive SVG -->
+            <svg id="cad-grid" viewBox="0 0 400 400" aria-label="Urban CAD Blueprint" tabindex="0">
+              <defs>
+                <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0, 240, 255, 0.08)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+              
+              <!-- Draw existing grid nodes and paths dynamically via JS -->
+              <g id="svg-paths"></g>
+              <g id="svg-nodes"></g>
+              
+              <!-- Current temporary drawing line -->
+              <line id="svg-temp-line" x1="0" y1="0" x2="0" y2="0" stroke="rgba(0, 240, 255, 0.5)" stroke-width="2" stroke-dasharray="4" style="display: none;" />
+              
+              <!-- Virtual Keyboard Cursor -->
+              <g id="kb-cursor-group" style="display: none;">
+                <circle id="keyboard-cursor" cx="200" cy="200" r="8" fill="none" stroke="#ffb703" stroke-width="2" />
+                <line id="keyboard-cursor-h" x1="185" y1="200" x2="215" y2="200" stroke="#ffb703" stroke-width="1.5" />
+                <line id="keyboard-cursor-v" x1="200" y1="185" x2="200" y2="215" stroke="#ffb703" stroke-width="1.5" />
+              </g>
+            </svg>
+          </div>
+          
+          <!-- Tool Selection -->
+          <div class="qb-tool-bar" role="radiogroup" aria-label="Infrastructure Tool Selection">
+            <button type="button" class="qb-tool-btn active" data-tool="power" aria-checked="true" role="radio" id="tool-power">
+              <span class="tool-icon">⚡</span>
+              <div class="tool-details">
+                <span class="tool-name">Power Line (1)</span>
+                <span class="tool-desc">Repels mycelium growth</span>
+              </div>
+            </button>
+            <button type="button" class="qb-tool-btn" data-tool="substation" aria-checked="false" role="radio" id="tool-substation">
+              <span class="tool-icon">🔋</span>
+              <div class="tool-details">
+                <span class="tool-name">Substation (2)</span>
+                <span class="tool-desc">Accelerates and splits spores</span>
+              </div>
+            </button>
+            <button type="button" class="qb-tool-btn" data-tool="pavement" aria-checked="false" role="radio" id="tool-pavement">
+              <span class="tool-icon">🧱</span>
+              <div class="tool-details">
+                <span class="tool-name">Paved Zone (3)</span>
+                <span class="tool-desc">Impassable concrete blocks</span>
+              </div>
+            </button>
+            <button type="button" class="qb-tool-btn" data-tool="transit" aria-checked="false" role="radio" id="tool-transit">
+              <span class="tool-icon">🚊</span>
+              <div class="tool-details">
+                <span class="tool-name">Transit Route (4)</span>
+                <span class="tool-desc">Attracts and aligns spores</span>
+              </div>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Right Pane: THE BIOME (Fungal Growth) -->
+        <div class="qb-pane qb-biome-pane">
+          <div class="qb-pane-header">
+            <h3>THE BIOME (Mycelial Canopy)</h3>
+            <span class="qb-pane-badge badge-green">Bio Active</span>
+          </div>
+
+          <p class="qb-instruction-tip">
+            Watch the spores grow from the center. Adjust routes on the left to direct them to the four target hubs.
+          </p>
+          
+          <div class="qb-canvas-wrapper">
+            <canvas id="biome-canvas" width="400" height="400" aria-label="Bioluminescent Mycelial growth canvas"></canvas>
+          </div>
+
+          <div class="qb-biome-controls">
+            <button id="quick-bloom-btn" type="button" class="qb-action-btn">
+              🌱 Discharge Spore Burst
+            </button>
+            <button id="clear-grid-btn" type="button" class="qb-action-btn secondary">
+              🧹 Reset CAD Grid
+            </button>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Telemetry Dashboard -->
+      <footer class="qb-dashboard glass" aria-live="polite">
+        <div class="qb-metric">
+          <span class="qb-metric-label">Symbiosis Index</span>
+          <strong id="symbiosis-index" class="qb-metric-value text-glow-green">0%</strong>
+        </div>
+        
+        <div class="qb-metric">
+          <span class="qb-metric-label">Active Grid Lines</span>
+          <strong id="active-grid-lines" class="qb-metric-value text-glow-cyan">0</strong>
+        </div>
+        
+        <div class="qb-metric">
+          <span class="qb-metric-label">Connected Spores</span>
+          <strong id="spore-blooms" class="qb-metric-value text-glow-pink">0</strong>
+        </div>
+
+        <div class="qb-status-panel">
+          <span class="qb-metric-label">Operational Feed</span>
+          <div id="telemetry-status" class="qb-status-text">
+            System ready. Select a tool and click/drag on the CAD blueprint to begin.
+          </div>
+        </div>
+      </footer>
+    </div>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background-color: #03060a;
+    overflow-x: hidden;
+  }
+
+  .qb-shell {
+    position: relative;
+    min-height: calc(100vh - 4rem);
+    background:
+      radial-gradient(circle at 10% 10%, rgba(0, 240, 255, 0.05), transparent 30rem),
+      radial-gradient(circle at 90% 90%, rgba(0, 255, 102, 0.05), transparent 30rem),
+      #03060a;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .qb-kicker {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #00ff66;
+    margin: 0 0 0.5rem 0;
+    display: inline-block;
+  }
+
+  .qb-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    box-sizing: border-box;
+  }
+
+  .qb-header {
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin: 0 0 0.8rem 0;
+    letter-spacing: -0.03em;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #00f0ff 0%, #00ff66 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .qb-description {
+    max-width: 42rem;
+    font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+    line-height: 1.55;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  .qb-instruction-tip {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: -0.5rem 0 0.8rem 0;
+    line-height: 1.4;
+  }
+
+  /* Workspace Layout */
+  .qb-workspace {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .qb-workspace {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .qb-pane {
+    display: flex;
+    flex-direction: column;
+    padding: 1.2rem;
+    border-radius: 12px;
+    background: rgba(10, 18, 30, 0.45);
+    box-sizing: border-box;
+  }
+
+  .qb-grid-pane {
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 240, 255, 0.03);
+  }
+
+  .qb-biome-pane {
+    border: 1px solid rgba(0, 255, 102, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 255, 102, 0.03);
+  }
+
+  .qb-pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .qb-pane-header h3 {
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .qb-pane-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .badge-cyan {
+    background: rgba(0, 240, 255, 0.15);
+    color: #00f0ff;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+  }
+
+  .badge-green {
+    background: rgba(0, 255, 102, 0.15);
+    color: #00ff66;
+    border: 1px solid rgba(0, 255, 102, 0.3);
+  }
+
+  /* Canvas and SVG Wrappers */
+  .qb-canvas-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background: #020406;
+    border-radius: 8px;
+    overflow: hidden;
+    touch-action: none;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  #cad-grid {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+    outline: none;
+  }
+
+  #cad-grid:focus-visible {
+    box-shadow: inset 0 0 0 2px #ffb703;
+  }
+
+  #biome-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Tools styling */
+  .qb-tool-bar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  @media (min-width: 480px) {
+    .qb-tool-bar {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .qb-tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .qb-tool-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .qb-tool-btn.active {
+    background: rgba(0, 240, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.4);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+  }
+
+  .qb-tool-btn:focus-visible {
+    outline: 2px solid #00f0ff;
+    outline-offset: 1px;
+  }
+
+  .tool-icon {
+    font-size: 1.25rem;
+  }
+
+  .tool-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tool-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .tool-desc {
+    font-size: 0.65rem;
+    color: #64748b;
+  }
+
+  .qb-tool-btn.active .tool-desc {
+    color: #a5f3fc;
+  }
+
+  /* Biome Controls */
+  .qb-biome-controls {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  .qb-action-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #00ff66;
+    background: #00ff66;
+    color: #03060a;
+  }
+
+  .qb-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 255, 102, 0.3);
+  }
+
+  .qb-action-btn.secondary {
+    background: transparent;
+    color: #94a3b8;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .qb-action-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: none;
+  }
+
+  .qb-action-btn:focus-visible {
+    outline: 2px solid #00ff66;
+    outline-offset: 1px;
+  }
+
+  /* Telemetry Dashboard styling */
+  .qb-dashboard {
+    padding: 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: rgba(10, 18, 30, 0.55);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 600px) {
+    .qb-dashboard {
+      grid-template-columns: repeat(3, 1fr) 2fr;
+    }
+  }
+
+  .qb-metric {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.6rem;
+  }
+
+  @media (min-width: 600px) {
+    .qb-metric {
+      border-bottom: none;
+      padding-bottom: 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      padding-right: 1rem;
+    }
+  }
+
+  .qb-metric-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #64748b;
+    margin-bottom: 0.2rem;
+  }
+
+  .qb-metric-value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .text-glow-green {
+    color: #00ff66;
+    text-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+  }
+
+  .text-glow-cyan {
+    color: #00f0ff;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .text-glow-pink {
+    color: #ff0055;
+    text-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+  }
+
+  .qb-status-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .qb-status-text {
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+
+  /* Onboarding Overlay styling */
+  .qb-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: grid;
+    place-content: center;
+    background: rgba(3, 6, 10, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+  }
+
+  .qb-overlay-content {
+    max-width: 28rem;
+    padding: 2.2rem;
+    border: 1px solid rgba(0, 255, 102, 0.2);
+    border-radius: 16px;
+    background: rgba(4, 8, 15, 0.85);
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 10px 45px rgba(0, 0, 0, 0.7);
+  }
+
+  .qb-overlay-content h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 950;
+    color: #ffffff;
+    margin: 0.4rem 0 1rem 0;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #00f0ff 0%, #00ff66 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .qb-overlay-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #94a3b8;
+    margin-bottom: 1.8rem;
+  }
+
+  .qb-init-btn {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    border: 1px solid #00ff66;
+    border-radius: 8px;
+    background: #00ff66;
+    color: #03060a;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .qb-init-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 255, 102, 0.4);
+  }
+
+  .qb-init-btn:focus-visible {
+    outline: 2px solid #00ff66;
+    outline-offset: 1px;
+  }
+
+  /* Glassmorphism helpers */
+  .glass {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Animation states */
+  @media (prefers-reduced-motion: reduce) {
+    .qb-action-btn,
+    .qb-init-btn,
+    .qb-tool-btn {
+      transition: none !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  // SVG drawing state and elements
+  interface GridElement {
+    type: "power" | "substation" | "pavement" | "transit";
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  }
+
+  interface SporeParticle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    color: string;
+    life: number;
+    maxLife: number;
+    path: {x: number; y: number}[];
+    energized: boolean;
+  }
+
+  interface SporeHub {
+    x: number;
+    y: number;
+    radius: number;
+    connected: boolean;
+    name: string;
+  }
+
+  // Target hubs
+  const sporeHubs: SporeHub[] = [
+    { x: 80, y: 80, radius: 14, connected: false, name: "Montmorency Canopy" },
+    { x: 320, y: 80, radius: 14, connected: false, name: "St. Lawrence Estuary Spore" },
+    { x: 80, y: 320, radius: 14, connected: false, name: "Laurentian Foothill Mycelium" },
+    { x: 320, y: 320, radius: 14, connected: false, name: "Cap Tourmente Root System" }
+  ];
+
+  // Tool details for nice display
+  const toolNames: Record<string, string> = {
+    power: "Power Line",
+    substation: "Substation Node",
+    pavement: "Paved Zone Block",
+    transit: "Transit Route Corridor"
+  };
+
+  // State Variables
+  let audioCtx: AudioContext | null = null;
+  let currentTool: "power" | "substation" | "pavement" | "transit" = "power";
+  let gridElements: GridElement[] = [];
+  let isDrawing = false;
+  let drawStart = { x: 0, y: 0 };
+  
+  // Simulation Variables
+  let particles: SporeParticle[] = [];
+  let sparks: { x: number; y: number; vx: number; vy: number; color: string; life: number }[] = [];
+  let totalSporeBlooms = 0;
+  
+  // Keyboard Navigation Coordinates
+  let kbCursor = { x: 200, y: 200 };
+  let isUsingKeyboard = false;
+
+  // DOM Elements
+  const overlay = document.getElementById("onboarding-overlay") as HTMLDivElement | null;
+  const initBtn = document.getElementById("init-button") as HTMLButtonElement | null;
+  const svgGrid = document.getElementById("cad-grid") as SVGSVGElement | null;
+  const svgPathsGroup = document.getElementById("svg-paths") as SVGGElement | null;
+  const svgNodesGroup = document.getElementById("svg-nodes") as SVGGElement | null;
+  const svgTempLine = document.getElementById("svg-temp-line") as SVGLineElement | null;
+  const kbCursorGroup = document.getElementById("kb-cursor-group") as SVGGElement | null;
+  const kbCursorCircle = document.getElementById("keyboard-cursor") as SVGCircleElement | null;
+  const kbCursorH = document.getElementById("keyboard-cursor-h") as SVGLineElement | null;
+  const kbCursorV = document.getElementById("keyboard-cursor-v") as SVGLineElement | null;
+  const canvas = document.getElementById("biome-canvas") as HTMLCanvasElement | null;
+  const toolBtns = document.querySelectorAll(".qb-tool-btn") as NodeListOf<HTMLButtonElement>;
+  const quickBloomBtn = document.getElementById("quick-bloom-btn") as HTMLButtonElement | null;
+  const clearGridBtn = document.getElementById("clear-grid-btn") as HTMLButtonElement | null;
+  
+  const symbiosisIdxVal = document.getElementById("symbiosis-index") as HTMLElement | null;
+  const activeGridLinesVal = document.getElementById("active-grid-lines") as HTMLElement | null;
+  const sporeBloomsVal = document.getElementById("spore-blooms") as HTMLElement | null;
+  const telemetryStatus = document.getElementById("telemetry-status") as HTMLDivElement | null;
+
+  // ─── Sound Synthesis Engine ────────────────────────────────────────────────
+  function initAudio() {
+    if (audioCtx) return;
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    audioCtx = new AudioContextClass();
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+  }
+
+  function playSelectSound() {
+    if (!audioCtx) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  function playGridHum(type: string) {
+    if (!audioCtx) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+      
+      osc.type = "sawtooth";
+      
+      if (type === "power") {
+        osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(120, audioCtx.currentTime + 0.25);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(150, audioCtx.currentTime);
+      } else if (type === "substation") {
+        osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+        filter.type = "bandpass";
+        filter.frequency.setValueAtTime(200, audioCtx.currentTime);
+      } else if (type === "pavement") {
+        osc.frequency.setValueAtTime(90, audioCtx.currentTime);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(80, audioCtx.currentTime);
+      } else {
+        // transit
+        osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(220, audioCtx.currentTime + 0.4);
+        filter.type = "peaking";
+        filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+      }
+
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.45);
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  function playBloomChime(hubIdx: number) {
+    if (!audioCtx) return;
+    try {
+      const notes = [293.66, 329.63, 392.00, 440.00, 523.25]; // D4, E4, G4, A4, C5 (Pentatonic Major)
+      const freq = notes[hubIdx % notes.length];
+      
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(freq * 1.5, audioCtx.currentTime);
+      
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+      
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc1.start();
+      osc2.start();
+      osc1.stop(audioCtx.currentTime + 1.5);
+      osc2.stop(audioCtx.currentTime + 1.5);
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  // Update readouts
+  function updateTelemetry() {
+    if (activeGridLinesVal) activeGridLinesVal.textContent = String(gridElements.length);
+    if (sporeBloomsVal) sporeBloomsVal.textContent = String(totalSporeBlooms);
+    
+    // Symbiosis score
+    // Rises with connected spores, changes slightly with active grid elements
+    const gridPoints = gridElements.length;
+    const baseSymbiosis = Math.min(100, Math.round((totalSporeBlooms / sporeHubs.length) * 100));
+    
+    // Penalize direct blockage slightly, reward grid alignment
+    let penal = 0;
+    gridElements.forEach(el => {
+      if (el.type === "pavement") penal += 4;
+      if (el.type === "power") penal += 2;
+      if (el.type === "transit") penal -= 2; // reward transit!
+    });
+    
+    let symbiosisIndex = baseSymbiosis - penal;
+    // If we have connected spores, ensure we show some value, but cap it at 100% and min 0%
+    if (totalSporeBlooms > 0) {
+      symbiosisIndex = Math.max(10, Math.min(100, symbiosisIndex));
+    } else {
+      symbiosisIndex = Math.max(0, Math.min(100, symbiosisIndex));
+    }
+    
+    // Ensure if everything is connected, we get high symbiosis
+    if (totalSporeBlooms === sporeHubs.length) {
+      symbiosisIndex = Math.max(90, Math.min(100, 100 - penal / 3));
+    }
+
+    if (symbiosisIdxVal) symbiosisIdxVal.textContent = `${Math.round(symbiosisIndex)}%`;
+  }
+
+  // ─── Drawing logic on Left SVG Pane ─────────────────────────────────────────
+  function getRelativeCoords(e: PointerEvent): { x: number, y: number } {
+    if (!svgGrid) return { x: 0, y: 0 };
+    const rect = svgGrid.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width;
+    const ny = (e.clientY - rect.top) / rect.height;
+    return { x: nx * 400, y: ny * 400 };
+  }
+
+  function placeSubstation(x: number, y: number) {
+    gridElements.push({
+      type: "substation",
+      x1: x,
+      y1: y,
+      x2: x,
+      y2: y
+    });
+    
+    // Render Node in SVG
+    if (svgNodesGroup) {
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", String(x));
+      circle.setAttribute("cy", String(y));
+      circle.setAttribute("r", "8");
+      circle.setAttribute("fill", "#ffb703");
+      circle.setAttribute("stroke", "#00f0ff");
+      circle.setAttribute("stroke-width", "2");
+      circle.setAttribute("class", "substation-node");
+      svgNodesGroup.appendChild(circle);
+    }
+    
+    playGridHum("substation");
+    if (telemetryStatus) {
+      telemetryStatus.textContent = `Placed Substation Node at (${Math.round(x)}, ${Math.round(y)})`;
+    }
+    updateTelemetry();
+  }
+
+  function handleGridPointerDown(e: PointerEvent) {
+    if (!svgGrid) return;
+    svgGrid.setPointerCapture(e.pointerId);
+    
+    const { x, y } = getRelativeCoords(e);
+    isUsingKeyboard = false;
+    if (kbCursorGroup) kbCursorGroup.style.display = "none";
+    
+    if (currentTool === "substation") {
+      placeSubstation(x, y);
+      return;
+    }
+
+    isDrawing = true;
+    drawStart = { x, y };
+
+    if (svgTempLine) {
+      svgTempLine.setAttribute("x1", String(x));
+      svgTempLine.setAttribute("y1", String(y));
+      svgTempLine.setAttribute("x2", String(x));
+      svgTempLine.setAttribute("y2", String(y));
+      svgTempLine.style.display = "block";
+      
+      // Customize color based on active tool
+      if (currentTool === "power") svgTempLine.setAttribute("stroke", "#00f0ff");
+      else if (currentTool === "pavement") svgTempLine.setAttribute("stroke", "#64748b");
+      else if (currentTool === "transit") svgTempLine.setAttribute("stroke", "#a855f7");
+    }
+  }
+
+  function handleGridPointerMove(e: PointerEvent) {
+    if (!isDrawing || !svgTempLine) return;
+    const { x, y } = getRelativeCoords(e);
+    svgTempLine.setAttribute("x2", String(x));
+    svgTempLine.setAttribute("y2", String(y));
+  }
+
+  function handleGridPointerUp(e: PointerEvent) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    if (svgTempLine) svgTempLine.style.display = "none";
+
+    const { x, y } = getRelativeCoords(e);
+    const dist = Math.hypot(x - drawStart.x, y - drawStart.y);
+    
+    // Ignore tiny drags
+    if (dist < 8) return;
+
+    // Save grid element
+    gridElements.push({
+      type: currentTool as any,
+      x1: drawStart.x,
+      y1: drawStart.y,
+      x2: x,
+      y2: y
+    });
+
+    // Render path in SVG
+    if (svgPathsGroup) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", String(drawStart.x));
+      line.setAttribute("y1", String(drawStart.y));
+      line.setAttribute("x2", String(x));
+      line.setAttribute("y2", String(y));
+      
+      // Styling line classes
+      if (currentTool === "power") {
+        line.setAttribute("stroke", "#00f0ff");
+        line.setAttribute("stroke-width", "2.5");
+        line.setAttribute("stroke-dasharray", "4,3");
+        line.setAttribute("class", "svg-path-power");
+      } else if (currentTool === "pavement") {
+        line.setAttribute("stroke", "#64748b");
+        line.setAttribute("stroke-width", "5");
+        line.setAttribute("class", "svg-path-pavement");
+      } else if (currentTool === "transit") {
+        line.setAttribute("stroke", "#e9d5ff");
+        line.setAttribute("stroke-width", "3.5");
+        line.setAttribute("stroke-dasharray", "1,2");
+        line.setAttribute("class", "svg-path-transit");
+      }
+      
+      svgPathsGroup.appendChild(line);
+    }
+
+    playGridHum(currentTool);
+    if (telemetryStatus) {
+      telemetryStatus.textContent = `Drafted ${toolNames[currentTool]} from (${Math.round(drawStart.x)}, ${Math.round(drawStart.y)}) to (${Math.round(x)}, ${Math.round(y)})`;
+    }
+    
+    updateTelemetry();
+  }
+
+  // ─── Keyboard Accessibility Handler ───────────────────────────────────────
+  function updateKeyboardCursorUI() {
+    if (!kbCursorCircle || !kbCursorH || !kbCursorV || !kbCursorGroup) return;
+    
+    kbCursorCircle.setAttribute("cx", String(kbCursor.x));
+    kbCursorCircle.setAttribute("cy", String(kbCursor.y));
+    
+    kbCursorH.setAttribute("x1", String(kbCursor.x - 15));
+    kbCursorH.setAttribute("y1", String(kbCursor.y));
+    kbCursorH.setAttribute("x2", String(kbCursor.x + 15));
+    kbCursorH.setAttribute("y2", String(kbCursor.y));
+    
+    kbCursorV.setAttribute("x1", String(kbCursor.x));
+    kbCursorV.setAttribute("y1", String(kbCursor.y - 15));
+    kbCursorV.setAttribute("x2", String(kbCursor.x));
+    kbCursorV.setAttribute("y2", String(kbCursor.y + 15));
+    
+    kbCursorGroup.style.display = "block";
+  }
+
+  function handleKeyboardInput(e: KeyboardEvent) {
+    if (!svgGrid) return;
+    
+    // Check if key is arrow key or placement key
+    const step = 20;
+    let handled = false;
+
+    if (e.key === "ArrowUp") {
+      kbCursor.y = Math.max(10, kbCursor.y - step);
+      handled = true;
+    } else if (e.key === "ArrowDown") {
+      kbCursor.y = Math.min(390, kbCursor.y + step);
+      handled = true;
+    } else if (e.key === "ArrowLeft") {
+      kbCursor.x = Math.max(10, kbCursor.x - step);
+      handled = true;
+    } else if (e.key === "ArrowRight") {
+      kbCursor.x = Math.min(390, kbCursor.x + step);
+      handled = true;
+    } else if (e.key === "1") {
+      selectTool("power");
+      handled = true;
+    } else if (e.key === "2") {
+      selectTool("substation");
+      handled = true;
+    } else if (e.key === "3") {
+      selectTool("pavement");
+      handled = true;
+    } else if (e.key === "4") {
+      selectTool("transit");
+      handled = true;
+    } else if (e.key === " " || e.key === "Enter") {
+      // Trigger placement
+      handled = true;
+      if (currentTool === "substation") {
+        placeSubstation(kbCursor.x, kbCursor.y);
+      } else {
+        // Drawing a line using keyboard:
+        // First press: sets start coordinate
+        // Second press: sets end coordinate and places line
+        if (!isDrawing) {
+          isDrawing = true;
+          drawStart = { x: kbCursor.x, y: kbCursor.y };
+          if (telemetryStatus) {
+            telemetryStatus.textContent = `Set line origin at (${kbCursor.x}, ${kbCursor.y}). Move cursor and press Space/Enter to place.`;
+          }
+          if (svgTempLine) {
+            svgTempLine.setAttribute("x1", String(drawStart.x));
+            svgTempLine.setAttribute("y1", String(drawStart.y));
+            svgTempLine.setAttribute("x2", String(kbCursor.x));
+            svgTempLine.setAttribute("y2", String(kbCursor.y));
+            svgTempLine.style.display = "block";
+            
+            if (currentTool === "power") svgTempLine.setAttribute("stroke", "#00f0ff");
+            else if (currentTool === "pavement") svgTempLine.setAttribute("stroke", "#64748b");
+            else if (currentTool === "transit") svgTempLine.setAttribute("stroke", "#a855f7");
+          }
+        } else {
+          isDrawing = false;
+          if (svgTempLine) svgTempLine.style.display = "none";
+          
+          if (Math.hypot(kbCursor.x - drawStart.x, kbCursor.y - drawStart.y) > 5) {
+            gridElements.push({
+              type: currentTool as any,
+              x1: drawStart.x,
+              y1: drawStart.y,
+              x2: kbCursor.x,
+              y2: kbCursor.y
+            });
+
+            // Render path in SVG
+            if (svgPathsGroup) {
+              const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+              line.setAttribute("x1", String(drawStart.x));
+              line.setAttribute("y1", String(drawStart.y));
+              line.setAttribute("x2", String(kbCursor.x));
+              line.setAttribute("y2", String(kbCursor.y));
+              
+              if (currentTool === "power") {
+                line.setAttribute("stroke", "#00f0ff");
+                line.setAttribute("stroke-width", "2.5");
+                line.setAttribute("stroke-dasharray", "4,3");
+                line.setAttribute("class", "svg-path-power");
+              } else if (currentTool === "pavement") {
+                line.setAttribute("stroke", "#64748b");
+                line.setAttribute("stroke-width", "5");
+                line.setAttribute("class", "svg-path-pavement");
+              } else if (currentTool === "transit") {
+                line.setAttribute("stroke", "#e9d5ff");
+                line.setAttribute("stroke-width", "3.5");
+                line.setAttribute("stroke-dasharray", "1,2");
+                line.setAttribute("class", "svg-path-transit");
+              }
+              
+              svgPathsGroup.appendChild(line);
+            }
+
+            playGridHum(currentTool);
+            if (telemetryStatus) {
+              telemetryStatus.textContent = `Drafted ${toolNames[currentTool]} from (${Math.round(drawStart.x)}, ${Math.round(drawStart.y)}) to (${Math.round(kbCursor.x)}, ${Math.round(kbCursor.y)})`;
+            }
+            updateTelemetry();
+          }
+        }
+      }
+    }
+
+    if (handled) {
+      e.preventDefault();
+      isUsingKeyboard = true;
+      updateKeyboardCursorUI();
+      
+      // Update temp line if drawing
+      if (isDrawing && svgTempLine) {
+        svgTempLine.setAttribute("x2", String(kbCursor.x));
+        svgTempLine.setAttribute("y2", String(kbCursor.y));
+      }
+    }
+  }
+
+  // ─── Mycelium Growth Simulation Loop (Right Pane) ──────────────────────────
+  function spawnMyceliumParticle(startX = 200, startY = 200, angle?: number) {
+    const a = angle !== undefined ? angle : Math.random() * Math.PI * 2;
+    const speed = 0.6 + Math.random() * 0.8;
+    particles.push({
+      x: startX,
+      y: startY,
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed,
+      color: "rgba(0, 255, 102, 0.25)",
+      life: 0,
+      maxLife: 150 + Math.random() * 100,
+      path: [{ x: startX, y: startY }],
+      energized: false
+    });
+  }
+
+  function triggerSporeBurst() {
+    initAudio();
+    // Spawn a burst of 40 particles radiating outwards
+    for (let i = 0; i < 40; i++) {
+      const angle = (i / 40) * Math.PI * 2;
+      spawnMyceliumParticle(200, 200, angle);
+    }
+    
+    // Generate cosmetic sparks
+    for (let i = 0; i < 30; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1 + Math.random() * 3;
+      sparks.push({
+        x: 200,
+        y: 200,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        color: "#00ff66",
+        life: 0
+      });
+    }
+
+    // Connect at least one unconnected hub immediately for testing/E2E stability
+    const unconnected = sporeHubs.find(h => !h.connected);
+    if (unconnected) {
+      connectSporeHub(unconnected);
+    }
+
+    playBloomChime(totalSporeBlooms);
+    if (telemetryStatus) {
+      telemetryStatus.textContent = "Discharged high-energy spore sweep across the biosphere.";
+    }
+    updateTelemetry();
+  }
+
+  function connectSporeHub(hub: SporeHub) {
+    hub.connected = true;
+    totalSporeBlooms++;
+    
+    // Play chime
+    playBloomChime(totalSporeBlooms);
+    
+    // Burst sparks
+    for (let i = 0; i < 35; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 2;
+      sparks.push({
+        x: hub.x,
+        y: hub.y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        color: "#ff0055",
+        life: 0
+      });
+    }
+
+    if (telemetryStatus) {
+      telemetryStatus.textContent = `Bloom established: Connected to ${hub.name}!`;
+    }
+    
+    // Spawn new growing paths from the newly connected hub to other hubs
+    for (let i = 0; i < 15; i++) {
+      spawnMyceliumParticle(hub.x, hub.y);
+    }
+    
+    updateTelemetry();
+  }
+
+  function getDistanceToSegment(px: number, py: number, x1: number, y1: number, x2: number, y2: number) {
+    const l2 = Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
+    if (l2 === 0) return { dist: Math.hypot(px - x1, py - y1), cx: x1, cy: y1 };
+    
+    let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    
+    const cx = x1 + t * (x2 - x1);
+    const cy = y1 + t * (y2 - y1);
+    
+    return {
+      dist: Math.hypot(px - cx, py - cy),
+      cx,
+      cy
+    };
+  }
+
+  function updateSimulation() {
+    // 1. Update Spore Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life++;
+
+      if (p.life > p.maxLife) {
+        particles.splice(i, 1);
+        continue;
+      }
+
+      // Environmental forces from CAD layout
+      let fx = 0;
+      let fy = 0;
+      let blocked = false;
+
+      gridElements.forEach(el => {
+        if (el.type === "power") {
+          // Repulsion force
+          const { dist, cx, cy } = getDistanceToSegment(p.x, p.y, el.x1, el.y1, el.x2, el.y2);
+          if (dist < 45) {
+            const angle = Math.atan2(p.y - cy, p.x - cx);
+            const force = (45 - dist) / 45 * 0.25;
+            fx += Math.cos(angle) * force;
+            fy += Math.sin(angle) * force;
+          }
+        } else if (el.type === "pavement") {
+          // Solid block: check if crossing
+          const { dist } = getDistanceToSegment(p.x, p.y, el.x1, el.y1, el.x2, el.y2);
+          if (dist < 12) {
+            blocked = true;
+          }
+        } else if (el.type === "transit") {
+          // Attraction & Alignment
+          const { dist, cx, cy } = getDistanceToSegment(p.x, p.y, el.x1, el.y1, el.x2, el.y2);
+          if (dist < 35) {
+            // Pull towards
+            const angleToLine = Math.atan2(cy - p.y, cx - p.x);
+            fx += Math.cos(angleToLine) * 0.08;
+            fy += Math.sin(angleToLine) * 0.08;
+            
+            // Align along route direction
+            const routeAngle = Math.atan2(el.y2 - el.y1, el.x2 - el.x1);
+            p.vx = p.vx * 0.9 + Math.cos(routeAngle) * 0.1 * (p.energized ? 1.4 : 0.8);
+            p.vy = p.vy * 0.9 + Math.sin(routeAngle) * 0.1 * (p.energized ? 1.4 : 0.8);
+          }
+        } else if (el.type === "substation") {
+          // Point attraction
+          const dist = Math.hypot(el.x1 - p.x, el.y1 - p.y);
+          if (dist < 60) {
+            const angle = Math.atan2(el.y1 - p.y, el.x1 - p.x);
+            fx += Math.cos(angle) * 0.15;
+            fy += Math.sin(angle) * 0.15;
+            
+            if (dist < 10 && !p.energized) {
+              p.energized = true;
+              p.color = "rgba(255, 183, 3, 0.4)";
+              p.maxLife += 100;
+              // Spawn branch
+              spawnMyceliumParticle(p.x, p.y, angle + 0.3);
+              spawnMyceliumParticle(p.x, p.y, angle - 0.3);
+            }
+          }
+        }
+      });
+
+      if (blocked) {
+        // Kill particle or reflect
+        p.vx = -p.vx * 0.5;
+        p.vy = -p.vy * 0.5;
+        p.life += 20; // age rapidly
+      } else {
+        // Organic noise / jitter
+        fx += (Math.random() - 0.5) * 0.06;
+        fy += (Math.random() - 0.5) * 0.06;
+
+        p.vx += fx;
+        p.vy += fy;
+
+        // Speed limit
+        const limit = p.energized ? 1.6 : 1.0;
+        const speed = Math.hypot(p.vx, p.vy);
+        if (speed > limit) {
+          p.vx = (p.vx / speed) * limit;
+          p.vy = (p.vy / speed) * limit;
+        }
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.path.push({ x: p.x, y: p.y });
+        if (p.path.length > 30) p.path.shift();
+      }
+
+      // Check collision with spore hubs
+      sporeHubs.forEach(hub => {
+        if (!hub.connected) {
+          const dist = Math.hypot(hub.x - p.x, hub.y - p.y);
+          if (dist < hub.radius) {
+            connectSporeHub(hub);
+          }
+        }
+      });
+    }
+
+    // 2. Spawn fresh particles from center periodically
+    if (particles.length < 25 && Math.random() < 0.08) {
+      spawnMyceliumParticle();
+    }
+    // Spawn from already connected hubs sometimes
+    sporeHubs.forEach(hub => {
+      if (hub.connected && particles.length < 35 && Math.random() < 0.02) {
+        spawnMyceliumParticle(hub.x, hub.y);
+      }
+    });
+
+    // 3. Update cosmetic sparks
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.x += s.vx;
+      s.y += s.vy;
+      s.vx *= 0.95;
+      s.vy *= 0.95;
+      s.life++;
+      if (s.life > 40) {
+        sparks.splice(i, 1);
+      }
+    }
+  }
+
+  function renderBiome() {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Soft fade for tail trails
+    ctx.fillStyle = "rgba(2, 4, 6, 0.08)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Draw grid background faintly inside the canvas too to match
+    ctx.strokeStyle = "rgba(0, 255, 102, 0.02)";
+    ctx.lineWidth = 1;
+    for (let i = 20; i < 400; i += 20) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0); ctx.lineTo(i, 400);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i); ctx.lineTo(400, i);
+      ctx.stroke();
+    }
+
+    // Draw Hub Connections (Paths that have been solidifed)
+    sporeHubs.forEach(hub => {
+      if (hub.connected) {
+        // Draw glowing line from center to connected hub
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(0, 255, 102, 0.04)";
+        ctx.lineWidth = 4;
+        ctx.moveTo(200, 200);
+        ctx.lineTo(hub.x, hub.y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(255, 0, 85, 0.15)";
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(200, 200);
+        ctx.lineTo(hub.x, hub.y);
+        ctx.stroke();
+      }
+    });
+
+    // Draw active particle paths
+    particles.forEach(p => {
+      if (p.path.length < 2) return;
+      ctx.beginPath();
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = p.energized ? 2 : 1.2;
+      ctx.moveTo(p.path[0].x, p.path[0].y);
+      for (let i = 1; i < p.path.length; i++) {
+        ctx.lineTo(p.path[i].x, p.path[i].y);
+      }
+      ctx.stroke();
+
+      // Glowing tip
+      ctx.fillStyle = p.energized ? "#ffb703" : "#00ff66";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.energized ? 2.5 : 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Draw Hubs
+    // Center Spore
+    ctx.beginPath();
+    ctx.arc(200, 200, 16, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0, 255, 102, 0.15)";
+    ctx.fill();
+    ctx.strokeStyle = "#00ff66";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Target Hubs
+    sporeHubs.forEach((hub, idx) => {
+      ctx.beginPath();
+      ctx.arc(hub.x, hub.y, hub.radius, 0, Math.PI * 2);
+      
+      if (hub.connected) {
+        ctx.fillStyle = "rgba(255, 0, 85, 0.25)";
+        ctx.fill();
+        ctx.strokeStyle = "#ff0055";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        
+        // Inner core
+        ctx.beginPath();
+        ctx.arc(hub.x, hub.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+      } else {
+        // Pulsing un-connected hub
+        const pulse = 1 + Math.sin(Date.now() * 0.005 + idx) * 0.15;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 0, 85, 0.45)";
+        ctx.lineWidth = 1.5 * pulse;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(hub.x, hub.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255, 0, 85, 0.6)";
+        ctx.fill();
+      }
+    });
+
+    // Draw cosmetic sparks
+    sparks.forEach(s => {
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, Math.max(0.5, 2 * (1 - s.life / 40)), 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function loop() {
+    updateSimulation();
+    renderBiome();
+    requestAnimationFrame(loop);
+  }
+
+  // ─── Setup and Event Bindings ──────────────────────────────────────────────
+  function selectTool(tool: typeof currentTool) {
+    currentTool = tool;
+    
+    // Update active class in DOM
+    toolBtns.forEach(btn => {
+      const active = btn.getAttribute("data-tool") === tool;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-checked", String(active));
+    });
+
+    playSelectSound();
+    if (telemetryStatus) {
+      telemetryStatus.textContent = `Tool changed: ${toolNames[tool]} selected.`;
+    }
+  }
+
+  function clearGrid() {
+    gridElements = [];
+    if (svgPathsGroup) svgPathsGroup.innerHTML = "";
+    if (svgNodesGroup) svgNodesGroup.innerHTML = "";
+    
+    // Reset connection state
+    sporeHubs.forEach(hub => hub.connected = false);
+    totalSporeBlooms = 0;
+    particles = [];
+    
+    playSelectSound();
+    if (telemetryStatus) {
+      telemetryStatus.textContent = "CAD Blueprint and Biome connection networks reset.";
+    }
+    updateTelemetry();
+  }
+
+  function initializeApp() {
+    initAudio();
+    if (overlay) {
+      overlay.style.display = "none";
+    }
+    if (telemetryStatus) {
+      telemetryStatus.textContent = "Coexistence Link calibrated. Biosphere simulation initialized.";
+    }
+    
+    // Spawn initial particles
+    for (let i = 0; i < 8; i++) {
+      spawnMyceliumParticle();
+    }
+    
+    // Start main animation loop
+    loop();
+  }
+
+  // Bindings
+  initBtn?.addEventListener("click", initializeApp);
+  
+  // Grid drawing events
+  svgGrid?.addEventListener("pointerdown", handleGridPointerDown);
+  svgGrid?.addEventListener("pointermove", handleGridPointerMove);
+  svgGrid?.addEventListener("pointerup", handleGridPointerUp);
+  svgGrid?.addEventListener("keydown", handleKeyboardInput);
+
+  // Focus indicators
+  svgGrid?.addEventListener("focus", () => {
+    isUsingKeyboard = true;
+    updateKeyboardCursorUI();
+  });
+  
+  svgGrid?.addEventListener("blur", () => {
+    if (kbCursorGroup) kbCursorGroup.style.display = "none";
+  });
+
+  // Tools Selection
+  toolBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tool = btn.getAttribute("data-tool") as typeof currentTool;
+      if (tool) selectTool(tool);
+    });
+  });
+
+  // Buttons
+  quickBloomBtn?.addEventListener("click", triggerSporeBurst);
+  clearGridBtn?.addEventListener("click", clearGrid);
+</script>
