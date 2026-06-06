@@ -143,3 +143,4 @@ dist
 
 # Playwright artifacts (when run from repo root)
 test-results/
+.fallow/
