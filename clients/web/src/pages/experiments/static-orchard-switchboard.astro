@@ -1,0 +1,625 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="so-shell">
+    <section
+      class="so-stage"
+      id="orchard-stage"
+      data-tuned="false"
+      data-harvests="0"
+      aria-label="Static orchard tuning field"
+    >
+      <svg
+        id="static-orchard"
+        class="so-orchard"
+        viewBox="0 0 1000 720"
+        role="img"
+        aria-label="Seven signal trees wired to a switchboard"
+      >
+        <defs>
+          <filter id="static-wobble">
+            <feTurbulence id="static-noise" type="fractalNoise" baseFrequency="0.012 0.085" numOctaves="3" seed="7" />
+            <feDisplacementMap in="SourceGraphic" scale="9" />
+          </filter>
+          <linearGradient id="soil-glow" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#fcf5dc" />
+            <stop offset="0.48" stop-color="#48f5ce" />
+            <stop offset="1" stop-color="#f05f57" />
+          </linearGradient>
+        </defs>
+
+        <rect width="1000" height="720" fill="#101116" />
+        <path class="so-horizon" d="M30 562 C180 520 292 605 430 548 C590 482 710 624 970 535" />
+        <g class="so-wires">
+          <path d="M160 612 C270 480 325 430 410 350" />
+          <path d="M210 650 C360 570 482 435 540 306" />
+          <path d="M340 620 C410 530 520 462 630 374" />
+          <path d="M512 654 C578 535 690 454 775 328" />
+          <path d="M642 635 C730 560 786 462 884 402" />
+        </g>
+
+        <g class="signal-tree" data-tree="apple" transform="translate(138 252)">
+          <path class="so-trunk" d="M0 344 C18 252 -14 168 26 84" />
+          <path class="so-crown" d="M-84 76 C-48 -2 38 -30 98 20 C158 70 126 154 56 166 C-20 180 -118 146 -84 76Z" />
+          <circle class="so-fruit" cx="-38" cy="76" r="15" />
+          <circle class="so-fruit" cx="24" cy="38" r="13" />
+          <circle class="so-fruit" cx="70" cy="106" r="17" />
+        </g>
+        <g class="signal-tree" data-tree="pear" transform="translate(276 314)">
+          <path class="so-trunk" d="M0 296 C-12 230 22 158 2 78" />
+          <path class="so-crown" d="M-72 82 C-82 18 -8 -38 64 4 C130 43 122 122 68 154 C2 192 -62 148 -72 82Z" />
+          <circle class="so-fruit" cx="-24" cy="66" r="13" />
+          <circle class="so-fruit" cx="46" cy="58" r="16" />
+        </g>
+        <g class="signal-tree" data-tree="plum" transform="translate(414 202)">
+          <path class="so-trunk" d="M0 414 C34 310 -10 205 32 98" />
+          <path class="so-crown" d="M-96 110 C-88 12 16 -52 112 -6 C204 38 170 150 92 188 C6 228 -112 206 -96 110Z" />
+          <circle class="so-fruit" cx="-42" cy="104" r="16" />
+          <circle class="so-fruit" cx="36" cy="52" r="14" />
+          <circle class="so-fruit" cx="86" cy="126" r="15" />
+        </g>
+        <g class="signal-tree" data-tree="quince" transform="translate(550 292)">
+          <path class="so-trunk" d="M0 330 C-28 260 26 188 10 90" />
+          <path class="so-crown" d="M-86 88 C-52 -8 60 -24 116 46 C162 104 108 174 36 176 C-34 178 -118 154 -86 88Z" />
+          <circle class="so-fruit" cx="-38" cy="70" r="14" />
+          <circle class="so-fruit" cx="34" cy="92" r="15" />
+        </g>
+        <g class="signal-tree" data-tree="fig" transform="translate(682 228)">
+          <path class="so-trunk" d="M0 390 C22 288 -22 196 22 82" />
+          <path class="so-crown" d="M-90 94 C-72 10 20 -44 92 12 C160 64 142 154 78 184 C2 220 -118 180 -90 94Z" />
+          <circle class="so-fruit" cx="-34" cy="78" r="14" />
+          <circle class="so-fruit" cx="38" cy="50" r="17" />
+          <circle class="so-fruit" cx="80" cy="120" r="12" />
+        </g>
+        <g class="signal-tree" data-tree="medlar" transform="translate(806 340)">
+          <path class="so-trunk" d="M0 278 C-18 214 18 140 0 70" />
+          <path class="so-crown" d="M-70 74 C-58 10 22 -24 78 18 C132 58 114 126 56 146 C-8 168 -84 132 -70 74Z" />
+          <circle class="so-fruit" cx="-22" cy="66" r="13" />
+          <circle class="so-fruit" cx="42" cy="76" r="15" />
+        </g>
+        <g class="signal-tree" data-tree="citron" transform="translate(902 256)">
+          <path class="so-trunk" d="M0 352 C16 266 -12 176 20 88" />
+          <path class="so-crown" d="M-80 82 C-54 6 42 -26 96 28 C148 80 124 154 58 170 C-20 188 -106 152 -80 82Z" />
+          <circle class="so-fruit" cx="-24" cy="84" r="13" />
+          <circle class="so-fruit" cx="42" cy="52" r="14" />
+        </g>
+      </svg>
+
+      <button id="antenna-probe" class="so-probe" type="button" aria-label="Tune antenna probe">
+        <span></span>
+      </button>
+
+      <div class="so-jars" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </div>
+    </section>
+
+    <section class="so-console" aria-label="Static Orchard Switchboard controls">
+      <p class="so-kicker">Shortwave pomology / night shift</p>
+      <h1>Static Orchard Switchboard</h1>
+      <p class="so-intro">
+        Sweep the antenna through the rows until the signal fruit starts to fizz.
+        Bottle the brightest crackle in jam jars before the orchard forgets its station.
+      </p>
+
+      <div class="so-readouts" aria-live="polite">
+        <div>
+          <span>Signal</span>
+          <strong id="signal-reading">0.00</strong>
+        </div>
+        <div>
+          <span>Jars</span>
+          <strong id="jar-count">0</strong>
+        </div>
+        <div>
+          <span>Tree</span>
+          <strong id="active-tree">none</strong>
+        </div>
+        <div>
+          <span>State</span>
+          <strong id="orchard-state">untuned</strong>
+        </div>
+      </div>
+
+      <div class="so-actions">
+        <button id="tune-button" type="button">Find Tone</button>
+        <button id="bottle-button" type="button">Bottle Signal</button>
+        <button id="reset-button" type="button">Clear Jars</button>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #101116;
+  }
+
+  .so-shell {
+    --cream: #fcf5dc;
+    --ink: #101116;
+    --mint: #48f5ce;
+    --tomato: #f05f57;
+    --lilac: #aaa3ff;
+    --gold: #e3b23c;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+    gap: clamp(1rem, 2vw, 1.4rem);
+    min-height: calc(100vh - 6rem);
+    padding: clamp(0.9rem, 2vw, 1.5rem);
+    overflow: hidden;
+    color: var(--cream);
+    background:
+      linear-gradient(115deg, rgba(72, 245, 206, 0.14), transparent 38%),
+      linear-gradient(250deg, rgba(240, 95, 87, 0.2), transparent 38%),
+      #101116;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .so-stage {
+    position: relative;
+    min-height: min(64rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(252, 245, 220, 0.24);
+    border-radius: 8px;
+    background:
+      repeating-linear-gradient(90deg, rgba(252, 245, 220, 0.05) 0 1px, transparent 1px 3.5rem),
+      linear-gradient(180deg, #171823 0%, #10241f 70%, #281816 100%);
+    box-shadow:
+      inset 0 0 5rem rgba(0, 0, 0, 0.45),
+      0 1rem 3rem rgba(0, 0, 0, 0.28);
+    touch-action: none;
+  }
+
+  .so-orchard {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    filter: url("#static-wobble");
+  }
+
+  .so-horizon,
+  .so-wires path {
+    fill: none;
+    stroke: rgba(252, 245, 220, 0.26);
+    stroke-linecap: round;
+    stroke-width: 3;
+  }
+
+  .so-wires path {
+    stroke: rgba(72, 245, 206, 0.3);
+    stroke-dasharray: 9 14;
+    animation: so-wire 4s linear infinite;
+  }
+
+  .signal-tree {
+    color: var(--mint);
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+
+  .so-trunk {
+    fill: none;
+    stroke: #fcf5dc;
+    stroke-linecap: round;
+    stroke-width: 14;
+  }
+
+  .so-crown {
+    fill: rgba(72, 245, 206, 0.14);
+    stroke: currentColor;
+    stroke-width: 4;
+  }
+
+  .so-fruit {
+    fill: var(--tomato);
+    stroke: var(--cream);
+    stroke-width: 3;
+    transform-origin: center;
+    animation: so-fruit 2.8s ease-in-out infinite;
+  }
+
+  .signal-tree:nth-of-type(odd) .so-fruit {
+    fill: var(--gold);
+    animation-delay: -1.1s;
+  }
+
+  .so-stage[data-tuned="true"] .signal-tree {
+    opacity: 0.72;
+  }
+
+  .so-stage[data-active-tree="apple"] [data-tree="apple"],
+  .so-stage[data-active-tree="pear"] [data-tree="pear"],
+  .so-stage[data-active-tree="plum"] [data-tree="plum"],
+  .so-stage[data-active-tree="quince"] [data-tree="quince"],
+  .so-stage[data-active-tree="fig"] [data-tree="fig"],
+  .so-stage[data-active-tree="medlar"] [data-tree="medlar"],
+  .so-stage[data-active-tree="citron"] [data-tree="citron"] {
+    color: var(--cream);
+    opacity: 1;
+    transform: translateY(-8px);
+  }
+
+  .so-probe {
+    position: absolute;
+    left: calc(var(--probe-x, 50) * 1%);
+    top: calc(var(--probe-y, 50) * 1%);
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: clamp(3.3rem, 7vw, 4.6rem);
+    aspect-ratio: 1;
+    padding: 0;
+    border: 1px solid rgba(252, 245, 220, 0.72);
+    border-radius: 50%;
+    color: var(--cream);
+    background:
+      radial-gradient(circle, rgba(252, 245, 220, 0.96) 0 0.18rem, transparent 0.22rem),
+      conic-gradient(from 20deg, rgba(72, 245, 206, 0.64), rgba(240, 95, 87, 0.68), rgba(227, 178, 60, 0.72), rgba(72, 245, 206, 0.64));
+    box-shadow:
+      0 0 0 0.55rem rgba(72, 245, 206, 0.13),
+      0 0 2rem rgba(72, 245, 206, 0.45);
+    cursor: grab;
+    transform: translate(-50%, -50%);
+  }
+
+  .so-probe:focus-visible {
+    outline: 3px solid var(--cream);
+    outline-offset: 5px;
+  }
+
+  .so-probe span,
+  .so-probe::before,
+  .so-probe::after {
+    position: absolute;
+    content: "";
+    background: currentColor;
+  }
+
+  .so-probe span {
+    width: 70%;
+    height: 2px;
+  }
+
+  .so-probe::before {
+    width: 2px;
+    height: 70%;
+  }
+
+  .so-probe::after {
+    width: 118%;
+    height: 118%;
+    border: 1px dashed currentColor;
+    border-radius: 50%;
+    background: transparent;
+    animation: so-spin 8s linear infinite;
+  }
+
+  .so-jars {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.45rem;
+  }
+
+  .so-jars i {
+    display: block;
+    width: clamp(1.5rem, 4vw, 2.2rem);
+    height: clamp(2.3rem, 5vw, 3.4rem);
+    border: 1px solid rgba(252, 245, 220, 0.46);
+    border-radius: 0.35rem 0.35rem 0.7rem 0.7rem;
+    background:
+      linear-gradient(180deg, rgba(252, 245, 220, 0.18), transparent 30%),
+      linear-gradient(0deg, rgba(72, 245, 206, 0.52), transparent calc(var(--jar-fill, 0) * 1%));
+  }
+
+  .so-console {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 1rem;
+  }
+
+  .so-kicker,
+  .so-readouts span {
+    margin: 0;
+    color: var(--mint);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 11ch;
+    margin: 0;
+    color: var(--cream);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.8rem, 7vw, 6.4rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.88;
+    text-shadow:
+      0.04em 0.04em 0 rgba(72, 245, 206, 0.55),
+      -0.035em 0.055em 0 rgba(240, 95, 87, 0.8);
+  }
+
+  .so-intro {
+    max-width: 32rem;
+    margin: 0;
+    color: rgba(252, 245, 220, 0.82);
+    font-size: clamp(0.96rem, 1.4vw, 1.05rem);
+    line-height: 1.6;
+  }
+
+  .so-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .so-readouts div {
+    min-width: 0;
+    border: 1px solid rgba(252, 245, 220, 0.2);
+    border-radius: 8px;
+    padding: 0.72rem;
+    background: rgba(16, 17, 22, 0.64);
+  }
+
+  .so-readouts strong {
+    display: block;
+    min-height: 1.35em;
+    margin-top: 0.34rem;
+    color: var(--cream);
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  .so-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .so-actions button {
+    min-height: 3.15rem;
+    border: 1px solid rgba(252, 245, 220, 0.34);
+    border-radius: 8px;
+    color: var(--ink);
+    background: var(--gold);
+    font: 800 0.78rem/1.05 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  #bottle-button {
+    background: var(--mint);
+  }
+
+  #reset-button {
+    color: var(--cream);
+    background: #24232d;
+  }
+
+  @keyframes so-wire {
+    to { stroke-dashoffset: -46; }
+  }
+
+  @keyframes so-fruit {
+    50% { transform: translateY(-5px) scale(1.08); }
+  }
+
+  @keyframes so-spin {
+    to { transform: rotate(1turn); }
+  }
+
+  @media (max-width: 780px) {
+    .so-shell {
+      grid-template-columns: 1fr;
+      min-height: calc(100vh - 5rem);
+      overflow: visible;
+    }
+
+    .so-stage {
+      min-height: 58vh;
+    }
+
+    .so-console {
+      align-self: stretch;
+      padding-block: 0;
+    }
+
+    h1 {
+      max-width: 100%;
+      font-size: clamp(2.45rem, 13vw, 4rem);
+    }
+  }
+
+  @media (max-width: 430px) {
+    .so-actions,
+    .so-readouts {
+      grid-template-columns: 1fr;
+    }
+
+    .so-actions button {
+      min-height: 2.8rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .so-wires path,
+    .so-fruit,
+    .so-probe::after {
+      animation: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  const stage = document.getElementById("orchard-stage")
+  const probe = document.getElementById("antenna-probe")
+  const signalReading = document.getElementById("signal-reading")
+  const jarCount = document.getElementById("jar-count")
+  const orchardState = document.getElementById("orchard-state")
+  const activeTree = document.getElementById("active-tree")
+  const tuneButton = document.getElementById("tune-button")
+  const bottleButton = document.getElementById("bottle-button")
+  const resetButton = document.getElementById("reset-button")
+  const noise = document.getElementById("static-noise")
+  const jars = Array.from(document.querySelectorAll(".so-jars i"))
+
+  const trees = [
+    { name: "apple", x: 0.15, y: 0.42 },
+    { name: "pear", x: 0.28, y: 0.52 },
+    { name: "plum", x: 0.43, y: 0.34 },
+    { name: "quince", x: 0.56, y: 0.47 },
+    { name: "fig", x: 0.68, y: 0.38 },
+    { name: "medlar", x: 0.81, y: 0.58 },
+    { name: "citron", x: 0.9, y: 0.43 },
+  ]
+
+  const state = {
+    x: 0.5,
+    y: 0.5,
+    signal: 0,
+    harvests: 0,
+    dragging: false,
+    hasTuned: false,
+    pulse: 0,
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value))
+  }
+
+  function nearestTree() {
+    return trees
+      .map((tree) => ({
+        ...tree,
+        distance: Math.hypot(tree.x - state.x, tree.y - state.y),
+      }))
+      .sort((a, b) => a.distance - b.distance)[0]
+  }
+
+  function updateReadouts(status) {
+    const tree = nearestTree()
+    state.signal = state.hasTuned ? clamp(1 - tree.distance * 3.6, 0, 1) : 0
+
+    stage.style.setProperty("--probe-x", String(state.x * 100))
+    stage.style.setProperty("--probe-y", String(state.y * 100))
+    stage.dataset.tuned = state.signal > 0.05 ? "true" : "false"
+    stage.dataset.activeTree = state.signal > 0.05 ? tree.name : "none"
+    stage.dataset.harvests = String(state.harvests)
+
+    signalReading.textContent = state.signal.toFixed(2)
+    jarCount.textContent = String(state.harvests)
+    activeTree.textContent = state.signal > 0.05 ? tree.name : "none"
+    orchardState.textContent =
+      status || (state.signal > 0.75 ? "singing" : state.signal > 0.05 ? "tuned" : "untuned")
+
+    jars.forEach((jar, index) => {
+      jar.style.setProperty("--jar-fill", index < state.harvests ? "100" : "0")
+    })
+  }
+
+  function tuneToPosition(clientX, clientY) {
+    const rect = stage.getBoundingClientRect()
+    state.hasTuned = true
+    state.x = clamp((clientX - rect.left) / rect.width, 0.04, 0.96)
+    state.y = clamp((clientY - rect.top) / rect.height, 0.08, 0.92)
+    updateReadouts()
+  }
+
+  function harvestSignal() {
+    if (state.signal <= 0.02) {
+      updateReadouts("too quiet")
+      return
+    }
+
+    state.harvests = Math.min(99, state.harvests + 1)
+    state.pulse += 0.25
+    updateReadouts("bottled")
+  }
+
+  stage.addEventListener("pointerdown", (event) => {
+    state.dragging = true
+    probe.focus()
+    stage.setPointerCapture(event.pointerId)
+    tuneToPosition(event.clientX, event.clientY)
+  })
+
+  stage.addEventListener("pointermove", (event) => {
+    if (state.dragging) {
+      tuneToPosition(event.clientX, event.clientY)
+    }
+  })
+
+  stage.addEventListener("pointerup", (event) => {
+    state.dragging = false
+    stage.releasePointerCapture(event.pointerId)
+  })
+
+  stage.addEventListener("pointercancel", () => {
+    state.dragging = false
+  })
+
+  window.addEventListener("keydown", (event) => {
+    if (document.activeElement !== probe) return
+
+    const step = event.shiftKey ? 0.1 : 0.06
+    if (event.key === "ArrowLeft") state.x -= step
+    else if (event.key === "ArrowRight") state.x += step
+    else if (event.key === "ArrowUp") state.y -= step
+    else if (event.key === "ArrowDown") state.y += step
+    else if (event.key === " " || event.key === "Enter") {
+      event.preventDefault()
+      harvestSignal()
+      return
+    }
+    else return
+
+    event.preventDefault()
+    state.hasTuned = true
+    state.x = clamp(state.x, 0.04, 0.96)
+    state.y = clamp(state.y, 0.08, 0.92)
+    updateReadouts()
+  })
+
+  tuneButton.addEventListener("click", () => {
+    const target = trees[state.harvests % trees.length]
+    state.hasTuned = true
+    state.x = target.x
+    state.y = target.y
+    updateReadouts("found")
+  })
+
+  bottleButton.addEventListener("click", harvestSignal)
+
+  resetButton.addEventListener("click", () => {
+    state.x = 0.5
+    state.y = 0.5
+    state.signal = 0
+    state.harvests = 0
+    state.hasTuned = false
+    updateReadouts("untuned")
+  })
+
+  function animate() {
+    state.pulse *= 0.92
+    const frequency = 0.012 + state.signal * 0.026 + state.pulse * 0.01
+    noise.setAttribute("baseFrequency", `${frequency.toFixed(3)} ${(0.085 + state.signal * 0.08).toFixed(3)}`)
+    requestAnimationFrame(animate)
+  }
+
+  updateReadouts("untuned")
+  requestAnimationFrame(animate)
+</script>
