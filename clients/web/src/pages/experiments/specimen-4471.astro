@@ -1,0 +1,562 @@
+---
+import Base from "@layouts/Base.astro"
+
+const reportFields = [
+  { label: "Case Number", value: "NWS-TX-2026-4471" },
+  { label: "Species", value: "Cochliomyia hominivorax" },
+  { label: "Location", value: "Zavala County, TX" },
+  { label: "Date Collected", value: "2026-06-03" },
+  { label: "Sample Type", value: "Larval, umbilical tissue" },
+  { label: "Inspector", value: "YOU" },
+]
+---
+
+<Base>
+  <div id="report-container">
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true">
+      <defs>
+        <filter id="writhe-filter" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence
+            id="turb"
+            type="fractalNoise"
+            baseFrequency="0.015"
+            numOctaves="3"
+            seed="42"
+            result="noise"
+          />
+          <feDisplacementMap
+            id="displace"
+            in="SourceGraphic"
+            in2="noise"
+            scale="0"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+        <filter id="text-writhe" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence
+            id="text-turb"
+            type="fractalNoise"
+            baseFrequency="0.02"
+            numOctaves="2"
+            seed="77"
+            result="tnoise"
+          />
+          <feDisplacementMap
+            id="text-displace"
+            in="SourceGraphic"
+            in2="tnoise"
+            scale="0"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+      </defs>
+    </svg>
+
+    <header id="report-header" class="infectable">
+      <div class="usda-seal">&#x2723;</div>
+      <div class="header-text">
+        <p class="dept-name">UNITED STATES DEPARTMENT OF AGRICULTURE</p>
+        <p class="agency-name">ANIMAL AND PLANT HEALTH INSPECTION SERVICE</p>
+        <p class="division">VETERINARY SERVICES — FOREIGN PEST DETECTION UNIT</p>
+      </div>
+    </header>
+
+    <h1 id="report-title">SPECIMEN INSPECTION REPORT</h1>
+    <h2 id="specimen-label">Specimen #4471</h2>
+
+    <div id="status-bar">
+      <span class="status-label">CURRENT STATUS:</span>
+      <span id="specimen-status" class="status-value status-clear">CLEAR</span>
+    </div>
+
+    <div id="fields-grid" class="infectable">
+      {reportFields.map((f) => (
+        <div class="field-row">
+          <span class="field-label">{f.label}</span>
+          <span class="field-value">{f.value}</span>
+        </div>
+      ))}
+    </div>
+
+    <div id="specimen-section">
+      <p class="section-heading infectable">TISSUE SAMPLE — UV INSPECTION REQUIRED</p>
+      <p class="instruction-text">Move your inspection lamp over the sample area below.</p>
+      <div id="specimen-area">
+        <div id="specimen-surface"></div>
+        <div id="larvae-layer"></div>
+        <div id="uv-lamp"></div>
+        <div id="uv-glow"></div>
+      </div>
+    </div>
+
+    <div id="infestation-meter">
+      <span class="meter-label infectable">LARVAL DENSITY INDEX:</span>
+      <div class="meter-track">
+        <div id="meter-fill"></div>
+      </div>
+      <span id="meter-value">0.00</span>
+    </div>
+
+    <div id="notes-section" class="infectable">
+      <p class="section-heading">INSPECTOR NOTES</p>
+      <p id="inspector-notes">No abnormalities detected. Tissue presents within normal parameters. Recommend routine filing.</p>
+    </div>
+
+    <footer id="report-footer" class="infectable">
+      <p>APHIS FORM 7042-B — FOR OFFICIAL USE ONLY — UNCLASSIFIED</p>
+      <p>This document is the property of the United States Government and must be returned upon request.</p>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+  #report-container {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fafaf5;
+    color: #1a1a1a;
+    border: 2px solid #333;
+    position: relative;
+  }
+
+  #report-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 3px double #333;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .usda-seal {
+    font-size: 3rem;
+    color: #2d5016;
+    line-height: 1;
+  }
+
+  .header-text {
+    flex: 1;
+  }
+
+  .dept-name {
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    margin: 0;
+    color: #2d5016;
+  }
+
+  .agency-name {
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    margin: 0.2rem 0 0;
+    color: #444;
+  }
+
+  .division {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    margin: 0.2rem 0 0;
+    color: #666;
+  }
+
+  #report-title {
+    text-align: center;
+    font-size: 1.4rem;
+    letter-spacing: 0.2em;
+    margin: 0 0 0.3rem;
+    color: #1a1a1a;
+  }
+
+  #specimen-label {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0 0 1.5rem;
+    color: #555;
+  }
+
+  #status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    border: 1px solid #333;
+    margin-bottom: 1.5rem;
+    background: #f0f0e8;
+  }
+
+  .status-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: #555;
+  }
+
+  .status-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    transition: color 0.5s;
+  }
+
+  .status-clear { color: #2d7016; }
+  .status-suspect { color: #b8860b; }
+  .status-confirmed { color: #cc3300; }
+  .status-quarantine { color: #ff0000; animation: pulse-red 0.5s ease-in-out infinite alternate; }
+
+  @keyframes pulse-red {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+  }
+
+  #fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .field-row {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px dotted #ccc;
+  }
+
+  .field-label {
+    font-weight: 600;
+    color: #555;
+    white-space: nowrap;
+  }
+
+  .field-value {
+    color: #1a1a1a;
+  }
+
+  #specimen-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-heading {
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    margin: 0 0 0.5rem;
+    color: #333;
+    border-bottom: 1px solid #aaa;
+    padding-bottom: 0.3rem;
+  }
+
+  .instruction-text {
+    font-size: 0.7rem;
+    color: #777;
+    margin: 0 0 0.8rem;
+    font-style: italic;
+  }
+
+  #specimen-area {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #e8d5c0;
+    border: 1px solid #999;
+    cursor: none;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+
+  #specimen-surface {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 40%, #d4b896 0%, transparent 40%),
+      radial-gradient(circle at 70% 60%, #c9a882 0%, transparent 35%),
+      radial-gradient(circle at 50% 50%, #dcc4a8 0%, #e0cbb0 100%);
+  }
+
+  #larvae-layer {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background:
+      radial-gradient(ellipse 8px 3px at 25% 35%, #8b6914 0%, transparent 100%),
+      radial-gradient(ellipse 6px 2px at 32% 42%, #7a5c10 0%, transparent 100%),
+      radial-gradient(ellipse 9px 3px at 45% 55%, #8b6914 0%, transparent 100%),
+      radial-gradient(ellipse 5px 2px at 55% 38%, #6b4e0e 0%, transparent 100%),
+      radial-gradient(ellipse 7px 3px at 68% 62%, #8b6914 0%, transparent 100%),
+      radial-gradient(ellipse 6px 2px at 72% 45%, #7a5c10 0%, transparent 100%),
+      radial-gradient(ellipse 8px 3px at 38% 70%, #8b6914 0%, transparent 100%),
+      radial-gradient(ellipse 5px 2px at 60% 75%, #6b4e0e 0%, transparent 100%);
+    filter: url(#writhe-filter);
+    transition: opacity 0.3s;
+  }
+
+  #uv-lamp {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px solid rgba(100, 50, 255, 0.6);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow:
+      0 0 20px rgba(100, 50, 255, 0.3),
+      inset 0 0 30px rgba(100, 50, 255, 0.15);
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 3;
+  }
+
+  #uv-glow {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      circle,
+      rgba(147, 51, 255, 0.2) 0%,
+      rgba(100, 50, 255, 0.05) 50%,
+      transparent 70%
+    );
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 2;
+  }
+
+  #specimen-area:hover #uv-lamp,
+  #specimen-area:hover #uv-glow {
+    opacity: 1;
+  }
+
+  #infestation-meter {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.7rem;
+  }
+
+  .meter-label {
+    letter-spacing: 0.1em;
+    color: #555;
+    white-space: nowrap;
+  }
+
+  .meter-track {
+    flex: 1;
+    height: 12px;
+    background: #e0e0d8;
+    border: 1px solid #999;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #meter-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4a7c2e, #b8860b, #cc3300, #ff0000);
+    transition: width 0.3s;
+  }
+
+  #meter-value {
+    font-weight: 600;
+    min-width: 3ch;
+    color: #333;
+  }
+
+  #notes-section {
+    margin-bottom: 1.5rem;
+  }
+
+  #inspector-notes {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: #333;
+    padding: 0.5rem;
+    background: #f5f5ed;
+    border: 1px dashed #bbb;
+    min-height: 3rem;
+  }
+
+  #report-footer {
+    border-top: 3px double #333;
+    padding-top: 1rem;
+    text-align: center;
+    font-size: 0.6rem;
+    color: #888;
+    letter-spacing: 0.08em;
+  }
+
+  #report-footer p {
+    margin: 0.2rem 0;
+  }
+
+  .infectable {
+    transition: filter 0.8s ease-in-out;
+  }
+</style>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    if (!window.location.pathname.includes("specimen-4471")) return;
+
+    const specimenArea = document.getElementById("specimen-area") as HTMLDivElement;
+    const uvLamp = document.getElementById("uv-lamp") as HTMLDivElement;
+    const uvGlow = document.getElementById("uv-glow") as HTMLDivElement;
+    const larvaeLayer = document.getElementById("larvae-layer") as HTMLDivElement;
+    const turbulence = document.getElementById("turb") as unknown as SVGElement;
+    const displace = document.getElementById("displace") as unknown as SVGFEDisplacementMapElement;
+    const textTurb = document.getElementById("text-turb") as unknown as SVGElement;
+    const textDisplace = document.getElementById("text-displace") as unknown as SVGFEDisplacementMapElement;
+    const statusEl = document.getElementById("specimen-status") as HTMLSpanElement;
+    const meterFill = document.getElementById("meter-fill") as HTMLDivElement;
+    const meterValue = document.getElementById("meter-value") as HTMLSpanElement;
+    const inspectorNotes = document.getElementById("inspector-notes") as HTMLParagraphElement;
+
+    if (!specimenArea || !uvLamp || !uvGlow || !larvaeLayer || !turbulence || !displace || !statusEl || !meterFill || !meterValue || !inspectorNotes || !textTurb || !textDisplace) return;
+
+    let infestation = 0;
+    let isHovering = false;
+    let animFrame: number | null = null;
+    let turbSeed = 42;
+    let elapsed = 0;
+
+    const notesProgression: Array<{ threshold: number; text: string }> = [
+      { threshold: 0, text: "No abnormalities detected. Tissue presents within normal parameters. Recommend routine filing." },
+      { threshold: 0.1, text: "Faint subcutaneous motility observed under UV. Possible artifact. Continuing examination." },
+      { threshold: 0.25, text: "Confirmed motility. Multiple larvae visible in wound margin. Reclassifying from routine to priority." },
+      { threshold: 0.4, text: "Egg clusters identified in three quadrants. Estimated 200+ viable larvae. Requesting containment team." },
+      { threshold: 0.55, text: "Larvae have penetrated the inspection form. This is not a metaphor. The paper is moving." },
+      { threshold: 0.7, text: "Containment breach. Larvae present in filing system, keyboard, document margins. Inspector advised to step back." },
+      { threshold: 0.85, text: "THIS FORM IS NO LONGER STERILE. DO NOT FILE. DO NOT TRANSMIT. THE SPECIMEN IS THE REPORT." },
+    ];
+
+    function getStatus(level: number): { text: string; cls: string } {
+      if (level < 0.15) return { text: "CLEAR", cls: "status-clear" };
+      if (level < 0.45) return { text: "SUSPECT", cls: "status-suspect" };
+      if (level < 0.75) return { text: "CONFIRMED", cls: "status-confirmed" };
+      return { text: "QUARANTINE FAILURE", cls: "status-quarantine" };
+    }
+
+    function getNotes(level: number): string {
+      let note = notesProgression[0].text;
+      for (const entry of notesProgression) {
+        if (level >= entry.threshold) note = entry.text;
+      }
+      return note;
+    }
+
+    function updateState(): void {
+      // Status
+      const { text, cls } = getStatus(infestation);
+      statusEl.textContent = text;
+      statusEl.className = `status-value ${cls}`;
+
+      // Meter
+      meterFill.style.width = `${infestation * 100}%`;
+      meterValue.textContent = infestation.toFixed(2);
+
+      // Notes
+      inspectorNotes.textContent = getNotes(infestation);
+
+      // Larvae layer opacity
+      larvaeLayer.style.opacity = String(Math.min(infestation * 2.5, 1));
+
+      // SVG displacement scale on specimen
+      const specimenScale = Math.min(infestation * 40, 30);
+      displace.setAttribute("scale", String(specimenScale));
+
+      // Text distortion on infectable elements
+      const textScale = Math.max(0, (infestation - 0.3) * 25);
+      textDisplace.setAttribute("scale", String(textScale));
+
+      const infectables = document.querySelectorAll<HTMLElement>(".infectable");
+      if (infestation > 0.3) {
+        infectables.forEach((el) => {
+          el.style.filter = `url(#text-writhe)`;
+        });
+      } else {
+        infectables.forEach((el) => {
+          el.style.filter = "none";
+        });
+      }
+
+      // At extreme infestation, distort the whole report
+      const container = document.getElementById("report-container");
+      if (container && infestation > 0.8) {
+        container.style.filter = `url(#writhe-filter)`;
+        container.style.borderColor = "#cc0000";
+      }
+    }
+
+    function animate(): void {
+      elapsed += 16;
+
+      // Animate turbulence seed for writhing effect
+      turbSeed += 1;
+      turbulence.setAttribute("seed", String(turbSeed));
+
+      // Vary base frequency slightly for organic feel
+      const baseFreq = 0.015 + Math.sin(elapsed * 0.001) * 0.005;
+      turbulence.setAttribute("baseFrequency", String(baseFreq));
+
+      // Text turbulence animation
+      const textSeed = 77 + Math.floor(elapsed / 80);
+      textTurb.setAttribute("seed", String(textSeed));
+
+      // Grow infestation while hovering
+      if (isHovering && infestation < 1) {
+        infestation = Math.min(1, infestation + 0.002);
+        updateState();
+      }
+
+      animFrame = requestAnimationFrame(animate);
+    }
+
+    // Mouse tracking over specimen area
+    specimenArea.addEventListener("pointermove", (e: PointerEvent) => {
+      const rect = specimenArea.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      uvLamp.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+      uvGlow.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+
+      // Fix: set transform correctly for test expectations
+      uvLamp.style.transform = `translate(${x}px, ${y}px)`;
+      uvGlow.style.transform = `translate(${x}px, ${y}px)`;
+    });
+
+    specimenArea.addEventListener("pointerenter", () => {
+      isHovering = true;
+    });
+
+    specimenArea.addEventListener("pointerleave", () => {
+      isHovering = false;
+    });
+
+    // Test hooks
+    (window as any).__specimenReady = true;
+    (window as any).__infestationLevel = () => infestation;
+    (window as any).__setInfestation = (level: number) => {
+      infestation = Math.max(0, Math.min(1, level));
+      updateState();
+    };
+
+    // Start animation
+    animFrame = requestAnimationFrame(animate);
+    updateState();
+  });
+</script>
