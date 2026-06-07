@@ -306,6 +306,27 @@ const loveLetters = [
     lens.classList.remove("active")
   })
 
+  const handleTouch = (e: TouchEvent) => {
+    if (e.touches.length > 0) {
+      e.preventDefault()
+      const touch = e.touches[0]
+      mouseX = touch.clientX
+      mouseY = touch.clientY
+      mouseInside = true
+      lens.classList.add("active")
+      lens.style.transform = `translate(${mouseX - 80}px, ${mouseY - 80}px)`
+      lens.style.left = "0"
+      lens.style.top = "0"
+    }
+  }
+
+  sky.addEventListener("touchstart", handleTouch, { passive: false })
+  sky.addEventListener("touchmove", handleTouch, { passive: false })
+  sky.addEventListener("touchend", () => {
+    mouseInside = false
+    lens.classList.remove("active")
+  })
+
   function triggerConjunction(vp: { x: number; y: number }): void {
     if (conjunctionOccurred) return
     conjunctionOccurred = true
