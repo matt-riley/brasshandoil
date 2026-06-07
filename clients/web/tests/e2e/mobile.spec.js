@@ -38,6 +38,8 @@ const pages = [
   "/experiments/quebec-biosphere",
   "/experiments/specimen-4471",
   "/experiments/static-orchard-switchboard",
+  "/experiments/glasshouse-parliament",
+  "/experiments/legal-tender",
 ]
 
 test.use({

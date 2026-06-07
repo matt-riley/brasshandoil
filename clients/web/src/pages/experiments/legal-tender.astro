@@ -1,0 +1,515 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <div id="scene">
+    <div data-testid="bill" id="bill">
+      <div id="bill-inner">
+        <div id="header">
+          <span class="motto">THIS NOTE IS LEGAL TENDER FOR ALL DEBTS, PUBLIC AND PRIVATE AND IMAGINARY</span>
+        </div>
+
+        <canvas id="guilloche" width="700" height="400"></canvas>
+
+        <div id="bill-text">
+          <div id="left-col">
+            <div class="field">
+              <span class="label">SERIES</span>
+              <span class="value">2026∞</span>
+            </div>
+            <div class="field">
+              <span class="label">SERIAL</span>
+              <span class="value" data-testid="serial" id="serial"></span>
+            </div>
+          </div>
+
+          <div id="center-col">
+            <div data-testid="denomination" id="denomination">$250</div>
+            <div id="subtitle">TWO HUNDRED AND FIFTY DOLLARS</div>
+          </div>
+
+          <div id="right-col">
+            <div class="field">
+              <span class="label">INFLATION INDEX</span>
+              <span class="value" id="inflation-index">1.000</span>
+            </div>
+            <div class="field">
+              <span class="label">PRINT RUN</span>
+              <span class="value" id="print-run">1</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="footer">
+          <span class="fine-print">
+            UNITED STATES OF AMERICA • FEDERAL RESERVE NOTE •
+            IN GOD WE TRUST (TERMS AND CONDITIONS APPLY) •
+            NOT VALID IN DIMENSIONS WHERE π IS RATIONAL
+          </span>
+        </div>
+      </div>
+
+      <!-- Shred overlay -->
+      <div id="shred-overlay" class="hidden"></div>
+    </div>
+
+    <!-- Counterfeit warning -->
+    <div data-testid="counterfeit-warning" id="counterfeit-warning" class="hidden">
+      <div id="warning-content">
+        <div id="warning-stamp">⚠ COUNTERFEIT ATTEMPT LOGGED ⚠</div>
+        <p>Your right-click has been reported to the Bureau of Engraving and Strange.</p>
+        <p>A field agent has been dispatched to your approximate location.</p>
+        <p class="dismiss">(click to dismiss — this goes on your permanent record)</p>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  #scene {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a2e;
+    padding: 2rem;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #bill {
+    position: relative;
+    background: #f4f1e8;
+    border: 3px solid #2d5016;
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 700px;
+    max-width: 95vw;
+    box-shadow:
+      0 0 30px rgba(45, 80, 22, 0.3),
+      inset 0 0 60px rgba(45, 80, 22, 0.05);
+    transition: width 0.5s ease, height 0.5s ease;
+  }
+
+  #bill-inner {
+    position: relative;
+  }
+
+  #header {
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .motto {
+    font-family: "Times New Roman", serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: #2d5016;
+    text-transform: uppercase;
+  }
+
+  #guilloche {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    height: auto;
+    border: 1px solid rgba(45, 80, 22, 0.2);
+  }
+
+  #bill-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 0.75rem;
+    padding: 0 0.5rem;
+  }
+
+  #left-col, #right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .field .label {
+    display: block;
+    font-family: monospace;
+    font-size: 0.5rem;
+    color: #666;
+    letter-spacing: 0.1em;
+  }
+
+  .field .value {
+    font-family: "Courier New", monospace;
+    font-size: 0.75rem;
+    color: #2d5016;
+    font-weight: bold;
+  }
+
+  #center-col {
+    text-align: center;
+  }
+
+  #denomination {
+    font-family: "Times New Roman", serif;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2d5016;
+    text-shadow: 1px 1px 0 rgba(45, 80, 22, 0.2);
+  }
+
+  #subtitle {
+    font-family: "Times New Roman", serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: #4a7a2e;
+    text-transform: uppercase;
+  }
+
+  #footer {
+    text-align: center;
+    margin-top: 0.75rem;
+    border-top: 1px solid rgba(45, 80, 22, 0.2);
+    padding-top: 0.5rem;
+  }
+
+  .fine-print {
+    font-family: "Times New Roman", serif;
+    font-size: 0.45rem;
+    letter-spacing: 0.1em;
+    color: #888;
+  }
+
+  #shred-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  #shred-overlay.shredding {
+    animation: shred 1.5s ease-in forwards;
+  }
+
+  @keyframes shred {
+    0% { clip-path: inset(0); opacity: 1; }
+    50% { clip-path: polygon(0 0, 100% 0, 100% 30%, 80% 50%, 100% 70%, 100% 100%, 0 100%, 20% 70%, 0 50%, 20% 30%); opacity: 0.7; }
+    100% { clip-path: inset(50% 50% 50% 50%); opacity: 0; }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  #counterfeit-warning {
+    position: fixed;
+    inset: 0;
+    background: rgba(139, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: pointer;
+    animation: flash 0.3s ease-in-out 3;
+  }
+
+  @keyframes flash {
+    0%, 100% { background: rgba(139, 0, 0, 0.95); }
+    50% { background: rgba(200, 0, 0, 0.95); }
+  }
+
+  #warning-content {
+    text-align: center;
+    color: white;
+    max-width: 500px;
+    padding: 2rem;
+  }
+
+  #warning-stamp {
+    font-family: "Courier New", monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 3px solid white;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    transform: rotate(-2deg);
+    display: inline-block;
+  }
+
+  #warning-content p {
+    font-family: "Times New Roman", serif;
+    font-size: 1rem;
+    margin: 0.5rem 0;
+  }
+
+  .dismiss {
+    font-size: 0.75rem !important;
+    opacity: 0.6;
+    margin-top: 1rem !important;
+  }
+
+  .bill-shredding #bill-inner {
+    animation: tearApart 1.5s ease-in forwards;
+  }
+
+  @keyframes tearApart {
+    0% { transform: none; filter: none; }
+    30% { transform: skewX(2deg) scaleY(0.98); filter: blur(1px); }
+    60% { transform: skewX(-3deg) scaleY(0.9); filter: blur(3px); opacity: 0.6; }
+    100% { transform: scaleY(0) skewX(10deg); filter: blur(10px); opacity: 0; }
+  }
+</style>
+
+<script>
+  // === GUILLOCHE PARAMETRIC CURVES ===
+  interface GuillocheParams {
+    R: number      // outer radius
+    r: number      // inner radius
+    d: number      // drawing point distance
+    color: string
+    lineWidth: number
+    offsetX: number
+    offsetY: number
+    phase: number
+  }
+
+  const canvas = document.getElementById("guilloche") as HTMLCanvasElement
+  const ctx = canvas.getContext("2d")!
+
+  // State
+  let currentDenomination = 250
+  let printRun = 1
+  let inflationStart = Date.now()
+  let animationId: number
+  let drawProgress = 0
+  let isShredding = false
+
+  // Generate serial from timestamp
+  function generateSerial(): string {
+    const now = Date.now()
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+    let serial = ""
+    let n = now
+    for (let i = 0; i < 10; i++) {
+      if (i === 2 || i === 6) {
+        serial += chars[n % chars.length]
+        n = Math.floor(n / chars.length)
+      } else {
+        serial += (n % 10).toString()
+        n = Math.floor(n / 10)
+      }
+    }
+    return serial
+  }
+
+  // Set serial number
+  const serialEl = document.getElementById("serial") as HTMLElement
+  serialEl.textContent = generateSerial()
+
+  // Generate guilloche patterns for the current denomination
+  function generatePatterns(denom: number): GuillocheParams[] {
+    const seed = denom * 7
+    const greens = [
+      "rgba(45, 80, 22, 0.6)",
+      "rgba(34, 100, 34, 0.4)",
+      "rgba(60, 120, 40, 0.5)",
+      "rgba(20, 70, 50, 0.3)",
+      "rgba(80, 140, 60, 0.35)",
+    ]
+
+    const patterns: GuillocheParams[] = []
+    const numPatterns = 3 + Math.floor(denom / 200)
+
+    for (let i = 0; i < Math.min(numPatterns, 7); i++) {
+      const s = seed + i * 31
+      patterns.push({
+        R: 80 + (s % 60),
+        r: 20 + ((s * 3) % 40),
+        d: 30 + ((s * 7) % 50),
+        color: greens[i % greens.length],
+        lineWidth: 0.5 + (i % 3) * 0.3,
+        offsetX: canvas.width / 2 + ((s * 11) % 100) - 50,
+        offsetY: canvas.height / 2 + ((s * 13) % 60) - 30,
+        phase: (s % 628) / 100,
+      })
+    }
+    return patterns
+  }
+
+  // Draw a single guilloche hypotrochoid pattern progressively
+  function drawGuillochePattern(
+    params: GuillocheParams,
+    progress: number
+  ): void {
+    const { R, r, d, color, lineWidth, offsetX, offsetY, phase } = params
+    const totalSteps = 2000
+    const steps = Math.floor(totalSteps * progress)
+
+    ctx.beginPath()
+    ctx.strokeStyle = color
+    ctx.lineWidth = lineWidth
+
+    for (let i = 0; i <= steps; i++) {
+      const t = (i / totalSteps) * Math.PI * 2 * (R / gcd(R, r)) + phase
+      // Hypotrochoid equations
+      const x = (R - r) * Math.cos(t) + d * Math.cos(((R - r) / r) * t)
+      const y = (R - r) * Math.sin(t) + d * Math.sin(((R - r) / r) * t)
+
+      if (i === 0) {
+        ctx.moveTo(offsetX + x, offsetY + y)
+      } else {
+        ctx.lineTo(offsetX + x, offsetY + y)
+      }
+    }
+    ctx.stroke()
+  }
+
+  // GCD for pattern period calculation
+  function gcd(a: number, b: number): number {
+    a = Math.abs(Math.round(a))
+    b = Math.abs(Math.round(b))
+    while (b) {
+      const t = b
+      b = a % b
+      a = t
+    }
+    return a || 1
+  }
+
+  // Draw border guilloche (simpler rosette around the edge)
+  function drawBorderPattern(progress: number): void {
+    const margin = 15
+    const w = canvas.width - margin * 2
+    const h = canvas.height - margin * 2
+    const steps = Math.floor(400 * progress)
+
+    ctx.beginPath()
+    ctx.strokeStyle = "rgba(45, 80, 22, 0.25)"
+    ctx.lineWidth = 0.8
+
+    for (let i = 0; i <= steps; i++) {
+      const t = (i / 400) * Math.PI * 2
+      // Lissajous-like border
+      const x = margin + w / 2 + (w / 2 - 10) * Math.sin(3 * t) * Math.cos(t)
+      const y = margin + h / 2 + (h / 2 - 10) * Math.sin(3 * t) * Math.sin(t)
+
+      if (i === 0) ctx.moveTo(x, y)
+      else ctx.lineTo(x, y)
+    }
+    ctx.stroke()
+  }
+
+  // Main animation loop
+  let patterns = generatePatterns(currentDenomination)
+
+  function animate(): void {
+    if (isShredding) return
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // Progress from 0 to 1 over ~4 seconds
+    drawProgress = Math.min(1, drawProgress + 0.005)
+
+    // Draw border
+    drawBorderPattern(drawProgress)
+
+    // Draw each guilloche pattern
+    patterns.forEach((p, i) => {
+      const patternProgress = Math.max(
+        0,
+        Math.min(1, (drawProgress - i * 0.1) / 0.7)
+      )
+      if (patternProgress > 0) {
+        drawGuillochePattern(p, patternProgress)
+      }
+    })
+
+    // Inflation: bill grows over time
+    const elapsed = (Date.now() - inflationStart) / 1000
+    const scale = 1 + elapsed * 0.003 // grows 0.3% per second
+    const bill = document.getElementById("bill") as HTMLElement
+    bill.style.transform = `scale(${scale})`
+
+    // Update inflation index
+    const indexEl = document.getElementById("inflation-index") as HTMLElement
+    indexEl.textContent = scale.toFixed(3)
+
+    animationId = requestAnimationFrame(animate)
+  }
+
+  // Start animation
+  animate()
+
+  // === INTERACTIONS ===
+
+  // Keypress: shred and reprint at higher denomination
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (isShredding) return
+    if (e.key === "F5" || e.key === "F12" || e.ctrlKey || e.metaKey) return
+
+    shredAndReprint()
+  })
+
+  function shredAndReprint(): void {
+    isShredding = true
+    cancelAnimationFrame(animationId)
+
+    const billInner = document.getElementById("bill-inner") as HTMLElement
+    const bill = document.getElementById("bill") as HTMLElement
+    bill.classList.add("bill-shredding")
+
+    setTimeout(() => {
+      // Escalate denomination
+      currentDenomination = Math.floor(currentDenomination * (1.5 + Math.random()))
+      printRun++
+
+      // Update displays
+      const denomEl = document.getElementById("denomination") as HTMLElement
+      denomEl.textContent = `$${currentDenomination.toLocaleString()}`
+
+      const subtitleEl = document.getElementById("subtitle") as HTMLElement
+      subtitleEl.textContent = numberToWords(currentDenomination) + " DOLLARS"
+
+      const printRunEl = document.getElementById("print-run") as HTMLElement
+      printRunEl.textContent = printRun.toString()
+
+      serialEl.textContent = generateSerial()
+
+      // Reset and restart
+      bill.classList.remove("bill-shredding")
+      drawProgress = 0
+      patterns = generatePatterns(currentDenomination)
+      inflationStart = Date.now()
+      bill.style.transform = "scale(1)"
+
+      isShredding = false
+      animate()
+    }, 1800)
+  }
+
+  // Right-click: counterfeit warning
+  document.addEventListener("contextmenu", (e: MouseEvent) => {
+    e.preventDefault()
+    const warning = document.getElementById("counterfeit-warning") as HTMLElement
+    warning.classList.remove("hidden")
+  })
+
+  // Dismiss warning
+  const warningEl = document.getElementById("counterfeit-warning") as HTMLElement
+  warningEl.addEventListener("click", () => {
+    warningEl.classList.add("hidden")
+  })
+
+  // Number to words (abbreviated for large numbers)
+  function numberToWords(n: number): string {
+    if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + " BILLION"
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + " MILLION"
+    if (n >= 1_000) return (n / 1_000).toFixed(1) + " THOUSAND"
+    const words: Record<number, string> = {
+      250: "TWO HUNDRED AND FIFTY",
+      500: "FIVE HUNDRED",
+    }
+    return words[n] || n.toLocaleString()
+  }
+</script>
+</Base>

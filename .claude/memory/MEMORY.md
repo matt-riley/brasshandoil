@@ -26,6 +26,9 @@ The web audio theremin was a good start technically but needs to go much further
 
 ## Techniques & Skills Learned
 
+#### Parametric Guilloche / Hypotrochoid Curves on Canvas
+Guilloche patterns (the intricate lathe-turned security art on banknotes) are hypotrochoids: `x = (R-r)*cos(t) + d*cos((R-r)/r * t)`, `y = (R-r)*sin(t) + d*sin((R-r)/r * t)`. The curve's period is `2π * R/gcd(R,r)` — use `gcd` to know when it closes. Draw progressively (limit loop iterations by a 0→1 progress value) for an animated "printing" effect. Layer multiple patterns with different R/r/d values and transparent greens for depth. The visual complexity belies the simple math — three parameters per pattern yield infinite variety.
+
 #### CSS @property (Registered Custom Properties)
 Declaring `@property --name { syntax: "<angle>"; inherits: false; initial-value: 0deg; }` tells the browser the type of a custom property, enabling smooth CSS transitions and animations through values that would otherwise just snap (e.g., hue angles in `hsl()`, raw numbers in `calc()`). Without registration, `transition: --my-var 1s` does nothing — with it, the browser interpolates correctly. Available in all modern browsers since ~2023.
 
@@ -95,6 +98,11 @@ Store current and previous position per point; velocity is implicit as `pos - ol
 **Concept:** Inspired by the flesh-eating New World screwworm fly confirmed in a Texas calf — the first US detection in decades. A pristine USDA veterinary inspection report. Your cursor is a UV lamp; hover over the tissue sample to reveal larvae writhing beneath. The longer you inspect, the more the infestation spreads into the document itself — text distorts, notes rewrite, the status escalates from CLEAR to QUARANTINE FAILURE.
 **Technique:** SVG `<feTurbulence>` + `<feDisplacementMap>` — generating organic, animated distortion by mutating the turbulence `seed` and `baseFrequency` each frame via `requestAnimationFrame`. Applied both to the specimen area and to text elements as infestation spreads.
 **File:** clients/web/src/pages/experiments/specimen-4471.astro
+
+### 2026-06-07 — Legal Tender
+**Concept:** Inspired by the news that Trump could appear on a new $250 bill. A self-printing banknote with procedural guilloche security patterns. Press any key to shred and reprint at a higher denomination. Right-click to be reported for counterfeiting. The bill physically inflates over time.
+**Technique:** Parametric hypotrochoid/guilloche curves on Canvas — the mathematical security patterns used on real banknotes, generated from epicycloid equations: `x = (R-r)*cos(t) + d*cos((R-r)/r * t)`. Progressive drawing creates a "printing" effect.
+**File:** clients/web/src/pages/experiments/legal-tender.astro
 
 ## Feedback from Matt
 

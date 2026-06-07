@@ -322,4 +322,17 @@ Carry Forward:
 - When keyboard activation performs a terminal action, return before generic movement refresh can overwrite the semantic status.
 - Keep mobile overflow checks in every new experiment spec; SVG-heavy layouts can still overflow through console controls.
 
+### Session Entry
+
+Date: 2026-06-07
+Experiment: Glasshouse Parliament
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Rotated into a greenhouse-roof voting surface to avoid another central probe,
+  sorting desk, or canvas/HUD composition.
+- Pointer-following visual overlays can block stable controls; keep decorative
+  layers pointer-transparent unless they are the actual target.
+- Focused browser and build tests can pass different failure modes, so run both
+  before calling a daily experiment done.
 

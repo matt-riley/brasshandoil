@@ -1,0 +1,572 @@
+---
+import Base from "@layouts/Base.astro"
+
+const panes = [
+  "North vent",
+  "Root ledger",
+  "Dew clause",
+  "Canopy whip",
+  "Shade bench",
+  "Soil minister",
+  "Steam chair",
+  "Glass bell",
+]
+---
+
+<Base>
+  <main class="gh-shell">
+    <section
+      class="gh-stage"
+      id="glasshouse-stage"
+      data-awake="false"
+      data-motion="0"
+      data-heat="0"
+      data-dew="0"
+      aria-label="Glasshouse Parliament voting chamber"
+    >
+      <div class="gh-sunwash" aria-hidden="true"></div>
+      <div class="gh-condensation" aria-hidden="true">
+        <span style="--x: 8%; --y: 12%; --s: 1.1;"></span>
+        <span style="--x: 18%; --y: 68%; --s: 0.8;"></span>
+        <span style="--x: 31%; --y: 28%; --s: 1.35;"></span>
+        <span style="--x: 43%; --y: 77%; --s: 1;"></span>
+        <span style="--x: 58%; --y: 16%; --s: 0.72;"></span>
+        <span style="--x: 71%; --y: 54%; --s: 1.22;"></span>
+        <span style="--x: 84%; --y: 34%; --s: 0.92;"></span>
+        <span style="--x: 92%; --y: 73%; --s: 1.5;"></span>
+      </div>
+
+      <button id="sun-lens" class="gh-lens" type="button" aria-label="Focus the hot glass"></button>
+
+      <div class="gh-roof" aria-label="Greenhouse voting panes">
+        {panes.map((pane, index) => (
+          <button
+            class="gh-pane"
+            type="button"
+            data-pane={index}
+            aria-pressed="false"
+          >
+            <span>{pane}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="gh-console" aria-label="Glasshouse Parliament controls">
+      <p class="gh-kicker">Emergency sitting / noon under glass</p>
+      <h1>Glasshouse Parliament</h1>
+      <p class="gh-intro">
+        Focus the hot glass across the chamber, then make the panes vote on whether
+        the canopy is allowed to keep breathing.
+      </p>
+
+      <dl class="gh-readouts" aria-live="polite">
+        <div>
+          <dt>Motions</dt>
+          <dd id="motion-reading">0</dd>
+        </div>
+        <div>
+          <dt>Heat</dt>
+          <dd id="heat-reading">0</dd>
+        </div>
+        <div>
+          <dt>Dew</dt>
+          <dd id="dew-reading">0</dd>
+        </div>
+        <div>
+          <dt>Verdict</dt>
+          <dd id="verdict-reading">not seated</dd>
+        </div>
+      </dl>
+
+      <div class="gh-actions">
+        <button id="water-button" type="button">Call for mist</button>
+        <button id="adjourn-button" type="button">Adjourn</button>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #111612;
+  }
+
+  .gh-shell {
+    --ink: #111612;
+    --leaf: #256d4f;
+    --acid: #d4ff63;
+    --blue: #8ed7ff;
+    --rose: #ff6f91;
+    --paper: #fff4d7;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+    gap: clamp(1rem, 2vw, 1.4rem);
+    min-height: calc(100vh - 6rem);
+    padding: clamp(0.85rem, 2vw, 1.4rem);
+    overflow: hidden;
+    color: var(--paper);
+    background:
+      linear-gradient(135deg, rgba(142, 215, 255, 0.18), transparent 30%),
+      linear-gradient(315deg, rgba(255, 111, 145, 0.14), transparent 34%),
+      linear-gradient(180deg, #18251d, #111612 72%);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .gh-stage {
+    position: relative;
+    min-height: min(64rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(255, 244, 215, 0.24);
+    border-radius: 8px;
+    background:
+      linear-gradient(63deg, transparent 0 47%, rgba(255, 244, 215, 0.2) 48% 50%, transparent 51%),
+      linear-gradient(117deg, transparent 0 47%, rgba(142, 215, 255, 0.16) 48% 50%, transparent 51%),
+      linear-gradient(180deg, #224432 0%, #16281d 48%, #4d3627 100%);
+    box-shadow:
+      inset 0 0 4rem rgba(0, 0, 0, 0.38),
+      0 1rem 2.8rem rgba(0, 0, 0, 0.3);
+    touch-action: none;
+  }
+
+  .gh-stage::before,
+  .gh-stage::after {
+    content: "";
+    position: absolute;
+    inset: 6% 8%;
+    border: 1px solid rgba(255, 244, 215, 0.18);
+    clip-path: polygon(50% 0, 100% 31%, 100% 100%, 0 100%, 0 31%);
+    pointer-events: none;
+  }
+
+  .gh-stage::after {
+    inset: 14% 16%;
+    border-color: rgba(212, 255, 99, 0.22);
+  }
+
+  .gh-sunwash {
+    position: absolute;
+    width: 28rem;
+    aspect-ratio: 1;
+    left: calc(var(--lens-x, 50%) - 14rem);
+    top: calc(var(--lens-y, 30%) - 14rem);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, rgba(255, 244, 215, 0.74), rgba(212, 255, 99, 0.34) 28%, rgba(142, 215, 255, 0.04) 62%, transparent 72%);
+    mix-blend-mode: screen;
+    opacity: 0.5;
+    transform: scale(calc(0.92 + (var(--heat, 0) * 0.004)));
+    transition: opacity 180ms ease;
+    pointer-events: none;
+  }
+
+  .gh-stage[data-awake="true"] .gh-sunwash {
+    opacity: 0.9;
+  }
+
+  .gh-condensation {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: calc(0.24 + (var(--dew, 0) * 0.006));
+  }
+
+  .gh-condensation span {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: calc(1.7rem * var(--s));
+    height: calc(5rem * var(--s));
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 244, 215, 0.66), rgba(142, 215, 255, 0.06));
+    box-shadow: 0 0 1.6rem rgba(142, 215, 255, 0.22);
+    transform: translateY(calc(var(--drip, 0px) * var(--s)));
+  }
+
+  .gh-lens {
+    position: absolute;
+    z-index: 3;
+    left: calc(var(--lens-x, 50%) - 2.4rem);
+    top: calc(var(--lens-y, 30%) - 2.4rem);
+    width: 4.8rem;
+    aspect-ratio: 1;
+    border: 2px solid rgba(255, 244, 215, 0.82);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 36% 30%, #fff4d7, rgba(142, 215, 255, 0.45) 31%, rgba(17, 22, 18, 0.12) 67%),
+      rgba(142, 215, 255, 0.18);
+    box-shadow:
+      inset -0.5rem -0.7rem 1rem rgba(17, 22, 18, 0.34),
+      0 0 2.2rem rgba(212, 255, 99, 0.44);
+    cursor: grab;
+    pointer-events: none;
+  }
+
+  .gh-lens:focus-visible,
+  .gh-pane:focus-visible,
+  .gh-actions button:focus-visible {
+    outline: 3px solid var(--acid);
+    outline-offset: 4px;
+  }
+
+  .gh-roof {
+    position: absolute;
+    inset: 8% 7% 9%;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(8rem, 1fr));
+    gap: clamp(0.45rem, 1vw, 0.8rem);
+    padding-top: clamp(4rem, 9vw, 7rem);
+  }
+
+  .gh-pane {
+    position: relative;
+    min-width: 0;
+    border: 1px solid rgba(255, 244, 215, 0.5);
+    border-radius: 8px;
+    color: var(--paper);
+    background:
+      linear-gradient(145deg, rgba(255, 244, 215, 0.22), rgba(142, 215, 255, 0.07) 52%, rgba(37, 109, 79, 0.26)),
+      rgba(17, 22, 18, 0.26);
+    box-shadow: inset 0 0 1.2rem rgba(142, 215, 255, 0.1);
+    cursor: pointer;
+  }
+
+  .gh-pane::before {
+    content: "";
+    position: absolute;
+    inset: 0.45rem;
+    border: 1px solid rgba(255, 244, 215, 0.22);
+    border-radius: 5px;
+    background:
+      linear-gradient(90deg, transparent 49%, rgba(255, 244, 215, 0.15) 50%, transparent 51%),
+      linear-gradient(0deg, transparent 49%, rgba(255, 244, 215, 0.12) 50%, transparent 51%);
+    pointer-events: none;
+  }
+
+  .gh-pane span {
+    position: absolute;
+    inset: auto 0.75rem 0.75rem;
+    z-index: 1;
+    color: inherit;
+    font-size: clamp(0.82rem, 1.1vw, 1rem);
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.1;
+    text-align: left;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.36);
+  }
+
+  .gh-pane[aria-pressed="true"] {
+    color: #111612;
+    background:
+      linear-gradient(145deg, rgba(212, 255, 99, 0.92), rgba(142, 215, 255, 0.62) 58%, rgba(255, 111, 145, 0.55)),
+      var(--acid);
+    box-shadow:
+      inset 0 0 1.4rem rgba(255, 244, 215, 0.46),
+      0 0 1.6rem rgba(212, 255, 99, 0.34);
+  }
+
+  .gh-console {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    min-width: 0;
+    padding: clamp(1rem, 2vw, 1.4rem);
+    border-left: 1px solid rgba(255, 244, 215, 0.18);
+  }
+
+  .gh-kicker {
+    margin: 0;
+    color: var(--blue);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .gh-console h1 {
+    margin: 0;
+    max-width: 11ch;
+    color: var(--paper);
+    font-size: clamp(3rem, 7vw, 5.8rem);
+    line-height: 0.86;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .gh-intro {
+    margin: 0;
+    max-width: 34rem;
+    color: rgba(255, 244, 215, 0.78);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .gh-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin: 0;
+  }
+
+  .gh-readouts div {
+    min-width: 0;
+    padding: 0.8rem;
+    border: 1px solid rgba(255, 244, 215, 0.18);
+    border-radius: 8px;
+    background: rgba(255, 244, 215, 0.06);
+  }
+
+  .gh-readouts dt {
+    color: rgba(255, 244, 215, 0.62);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .gh-readouts dd {
+    margin: 0.2rem 0 0;
+    color: var(--acid);
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
+    font-weight: 900;
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  #verdict-reading {
+    color: var(--paper);
+    font-size: clamp(1rem, 1.5vw, 1.18rem);
+    line-height: 1.18;
+  }
+
+  .gh-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .gh-actions button {
+    min-height: 3rem;
+    border: 1px solid rgba(255, 244, 215, 0.34);
+    border-radius: 8px;
+    color: var(--paper);
+    background: rgba(255, 244, 215, 0.08);
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .gh-actions button:hover {
+    border-color: var(--acid);
+    background: rgba(212, 255, 99, 0.14);
+  }
+
+  @media (max-width: 820px) {
+    .gh-shell {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100dvh - 5rem);
+      padding: 0.75rem;
+      overflow: clip;
+    }
+
+    .gh-stage {
+      min-height: 58vh;
+    }
+
+    .gh-roof {
+      inset: 7% 5% 7%;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(4, minmax(5.2rem, 1fr));
+      padding-top: 3.6rem;
+    }
+
+    .gh-console {
+      padding: 0.2rem 0 0;
+      border-left: 0;
+    }
+
+    .gh-console h1 {
+      max-width: none;
+      font-size: 2.8rem;
+      line-height: 0.9;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gh-sunwash,
+    .gh-condensation span {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const stage = document.querySelector("#glasshouse-stage")
+  const lens = document.querySelector("#sun-lens")
+  const panes = Array.from(document.querySelectorAll(".gh-pane"))
+  const motionReading = document.querySelector("#motion-reading")
+  const heatReading = document.querySelector("#heat-reading")
+  const dewReading = document.querySelector("#dew-reading")
+  const verdictReading = document.querySelector("#verdict-reading")
+  const waterButton = document.querySelector("#water-button")
+  const adjournButton = document.querySelector("#adjourn-button")
+
+  if (
+    stage instanceof HTMLElement &&
+    lens instanceof HTMLElement &&
+    motionReading instanceof HTMLElement &&
+    heatReading instanceof HTMLElement &&
+    dewReading instanceof HTMLElement &&
+    verdictReading instanceof HTMLElement &&
+    waterButton instanceof HTMLButtonElement &&
+    adjournButton instanceof HTMLButtonElement
+  ) {
+    const chamber = stage
+    const lensButton = lens
+    const paneButtons = panes.filter(
+      (pane): pane is HTMLButtonElement => pane instanceof HTMLButtonElement
+    )
+    const state = {
+      activePane: 0,
+      awake: false,
+      dew: 0,
+      heat: 0,
+      lightMotions: 0,
+      votes: new Set(),
+    }
+
+    const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+
+    const setLight = (clientX: number, clientY: number) => {
+      const rect = chamber.getBoundingClientRect()
+      const x = clamp((clientX - rect.left) / rect.width, 0, 1)
+      const y = clamp((clientY - rect.top) / rect.height, 0, 1)
+      chamber.style.setProperty("--lens-x", `${(x * 100).toFixed(2)}%`)
+      chamber.style.setProperty("--lens-y", `${(y * 100).toFixed(2)}%`)
+      state.awake = true
+      state.lightMotions = Math.max(state.lightMotions + 1, state.votes.size)
+      state.heat = clamp(Math.round(12 + x * 38 + state.votes.size * 11), 0, 99)
+      updateReadings("opened")
+    }
+
+    const verdictFor = (hint = "") => {
+      if (state.dew > 0 && hint === "mist") return "mist requested"
+      if (state.votes.size >= 5) return "canopy overruled"
+      if (state.votes.size > 0 || hint === "opened") return "opened for debate"
+      return "not seated"
+    }
+
+    const updateReadings = (hint = "") => {
+      const motion = Math.max(state.lightMotions, state.votes.size)
+      chamber.dataset.awake = String(state.awake)
+      chamber.dataset.motion = String(state.votes.size)
+      chamber.dataset.heat = String(state.heat)
+      chamber.dataset.dew = String(state.dew)
+      chamber.style.setProperty("--heat", String(state.heat))
+      chamber.style.setProperty("--dew", String(state.dew))
+      motionReading.textContent = String(motion)
+      heatReading.textContent = String(state.heat)
+      dewReading.textContent = String(state.dew)
+      verdictReading.textContent = verdictFor(hint)
+    }
+
+    const castVote = (pane: HTMLButtonElement) => {
+      const index = Number(pane.dataset.pane || 0)
+      state.votes.add(index)
+      state.activePane = index
+      state.awake = true
+      state.heat = clamp(state.heat + 17, 0, 99)
+      pane.setAttribute("aria-pressed", "true")
+      updateReadings("opened")
+    }
+
+    const resetChamber = () => {
+      state.activePane = 0
+      state.awake = false
+      state.dew = 0
+      state.heat = 0
+      state.lightMotions = 0
+      state.votes.clear()
+      paneButtons.forEach((pane) => pane.setAttribute("aria-pressed", "false"))
+      chamber.style.setProperty("--lens-x", "50%")
+      chamber.style.setProperty("--lens-y", "30%")
+      updateReadings()
+    }
+
+    paneButtons.forEach((pane, index) => {
+      pane.addEventListener("click", () => castVote(pane))
+      pane.addEventListener("focus", () => {
+        state.activePane = index
+      })
+    })
+
+    chamber.addEventListener("pointermove", (event) => {
+      setLight(event.clientX, event.clientY)
+    })
+
+    lensButton.addEventListener("keydown", (event) => {
+      const rect = lensButton.getBoundingClientRect()
+      const step = 34
+      if (event.key === "ArrowLeft") {
+        event.preventDefault()
+        setLight(rect.left + rect.width / 2 - step, rect.top + rect.height / 2)
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault()
+        setLight(rect.left + rect.width / 2 + step, rect.top + rect.height / 2)
+      }
+      if (event.key === "ArrowUp") {
+        event.preventDefault()
+        setLight(rect.left + rect.width / 2, rect.top + rect.height / 2 - step)
+      }
+      if (event.key === "ArrowDown") {
+        event.preventDefault()
+        setLight(rect.left + rect.width / 2, rect.top + rect.height / 2 + step)
+      }
+    })
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" && document.activeElement?.classList.contains("gh-pane")) {
+        event.preventDefault()
+        state.activePane = (state.activePane + 1) % paneButtons.length
+        paneButtons[state.activePane]?.focus()
+      }
+      if (event.key === "ArrowLeft" && document.activeElement?.classList.contains("gh-pane")) {
+        event.preventDefault()
+        state.activePane = (state.activePane - 1 + paneButtons.length) % paneButtons.length
+        paneButtons[state.activePane]?.focus()
+      }
+      if ((event.key === "Enter" || event.key === " ") && document.activeElement?.classList.contains("gh-pane")) {
+        event.preventDefault()
+        const pane = paneButtons[state.activePane]
+        if (pane) castVote(pane)
+      }
+    })
+
+    waterButton.addEventListener("click", () => {
+      state.awake = true
+      state.dew = clamp(state.dew + 28, 0, 99)
+      state.heat = clamp(state.heat - 8, 0, 99)
+      updateReadings("mist")
+    })
+
+    adjournButton.addEventListener("click", resetChamber)
+
+    let frame = 0
+    const animate = () => {
+      frame = (frame + 1) % 360
+      chamber.style.setProperty("--drip", `${Math.sin(frame / 34) * (4 + state.dew / 14)}px`)
+      requestAnimationFrame(animate)
+    }
+
+    resetChamber()
+    requestAnimationFrame(animate)
+  }
+</script>
