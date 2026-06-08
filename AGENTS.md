@@ -22,3 +22,10 @@ This is a playground for whimsy, creativity and pushing the boundaries of the we
 
 ### 6. Robust E2E Hover Simulation via Bounded Locators
 - Replaced coordinate-based manual cursor movement (`page.mouse.move(x, y)`) with strict, element-scoped hover targets (`locator.hover()`) in responsive and mobile E2E tests. This ensures that pointer-activation triggers (like specimen UV lamps or hover-based density updates) remain position-independent and layout-immune across all viewport sizes.
+
+### 7. Simulating Browser Performance Constraints in Interactive UI
+- Safely injected input delay via decoupled event timeouts (`setTimeout`) without locking up main thread execution or breaking E2E locator actions.
+- Displaced interactive targets using CSS `translate(x, y)` to simulate layout shifts without causing recursive browser layout recalculations or losing pointer hover state bindings.
+- Safely modeled recursive "Stack Overflow" errors using capped threshold checks and mock stack traces to maintain test determinism and prevent test runner freezes.
+### 8. Continuous Mouse Repositioning Loop for Dwell-Time Interaction Stability
+- Implemented a continuous mouse movement loop in Playwright E2E tests that repeatedly calculates the canvas bounding box and repositions the cursor onto normalized target positions. This guarantees that mouse proximity events remain correctly tracked over a prolonged dwell-time (~2.5 seconds), preventing cursor drift due to concurrent layout shifts, resizing, or timing delays during parallel test suite execution.

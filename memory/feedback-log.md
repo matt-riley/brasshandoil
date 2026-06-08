@@ -336,3 +336,29 @@ Carry Forward:
 - Focused browser and build tests can pass different failure modes, so run both
   before calling a daily experiment done.
 
+### Session Entry
+
+Date: 2026-06-08
+Experiment: The Enhanced Browser Games
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from recent news: "The Enhanced Games" allowing performance-enhancing modifications.
+- Implemented "client-side browser doping" pun using Anabolic rAF, setTimeout Beta-Blockers, and Layout EPO to assist game actions at the expense of UI stability and rendering integrity.
+- Ensured a full screen overlay is shown initially to explicitly arm AudioContext and unlock synthesized audio waves.
+- Mitigated layout jitter side effects by using CSS transforms (`translate`) instead of layout-altering dimensions for target displacement.
+- Added full keyboard overrides (arrow keys, space/enter) for pointer-less testing and mobile accessibility.
+
+### Session Entry
+
+Date: 2026-06-08
+Experiment: Bureau of Borrowed Shadows
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Rotated into a projection-ledger desk with fixed DOM controls and visual-only
+  shadow transforms to avoid another canvas/HUD pattern.
+- Desktop visual smoke checks can catch composition defects that interaction and
+  overflow specs miss.
+- Compare target geometry relative to the stage after hover interactions because
+  visibility scrolling can move viewport-space bounding boxes.

@@ -76,6 +76,9 @@ A positioned `<div>` with `backdrop-filter: contrast(N) saturate(N) brightness(N
 #### Canvas ImageData pixel manipulation
 `ctx.createImageData(w, h)` + direct RGBA writes to `imgData.data[idx]` + `ctx.putImageData()` gives per-pixel control for procedural visualizations. Process in 4×4 blocks for performance. Combine with `requestAnimationFrame` and `Date.now()` for animated fields. Much faster than drawing thousands of individual rects.
 
+#### Canvas clip-path thermal scanner (reveal-through-darkness)
+`ctx.save() → ctx.beginPath() → ctx.arc(cursorX, cursorY, radius) → ctx.clip()` creates a circular reveal window. Inside the clip region, render a different visual layer (e.g., thermal colormap) while the rest of the canvas stays dark. `ctx.restore()` pops the clip. Layer multiple render passes: dark terrain first, clipped thermal overlay second, HUD/scanlines last. For heat signatures, `createRadialGradient` with thermal palette stops (purple → red → orange → white) gives convincing FLIR appearance. Animate the clip radius with `Math.sin()` for scanner wobble. Add CRT scanlines with semi-transparent horizontal lines every 3px. This pattern generalizes to any "reveal lens" mechanic — flashlight, x-ray, sonar, etc.
+
 ### 2026-06-03 — The Spin Room
 **Concept:** Inspired by Spencer Pratt's reality-TV-to-politics run for LA mayor. Campaign signs dangle on verlet-physics ropes in a neon void. Grab and fling them with the mouse. When signs collide, their reality-TV/political hybrid slogans merge into something worse. New signs spawn endlessly.
 **Technique:** Verlet integration for rope/pendulum physics — position-based dynamics with constraint solving, no velocity storage. Mouse interaction via direct position manipulation of verlet points.
@@ -103,6 +106,11 @@ Store current and previous position per point; velocity is implicit as `pos - ol
 **Concept:** Inspired by the news that Trump could appear on a new $250 bill. A self-printing banknote with procedural guilloche security patterns. Press any key to shred and reprint at a higher denomination. Right-click to be reported for counterfeiting. The bill physically inflates over time.
 **Technique:** Parametric hypotrochoid/guilloche curves on Canvas — the mathematical security patterns used on real banknotes, generated from epicycloid equations: `x = (R-r)*cos(t) + d*cos((R-r)/r * t)`. Progressive drawing creates a "printing" effect.
 **File:** clients/web/src/pages/experiments/legal-tender.astro
+
+### 2026-06-08 — Operation Mary — Thermal Search Unit
+**Concept:** Inspired by Mary the Tasmanian devil escaping a Queensland wildlife park via "abnormally large leap." A thermal imaging drone interface where your cursor is the scanner. Every heat signature is a decoy (possum, warm rock, confused tourist, off-duty sniffer dog). Equipment degrades across phases — the drone AI wants to film the gift shop, sniffer dogs file for overtime. Mary is finally found in the park office filing a formal resignation from captivity.
+**Technique:** Canvas `globalCompositeOperation` via clip-path compositing — using `ctx.save()/clip()/restore()` to create a thermal scanner reveal circle. Layered canvas rendering: terrain layer, thermal overlay inside clip region, heat signature blobs with `createRadialGradient`, and CRT scanline post-processing. Multi-phase narrative driven by scan-to-reveal mechanic.
+**File:** clients/web/src/pages/experiments/operation-mary.astro
 
 ## Feedback from Matt
 
