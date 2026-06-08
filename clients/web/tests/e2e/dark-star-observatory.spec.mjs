@@ -103,14 +103,16 @@ test.describe("Dark Star Observatory", () => {
     if (!starPos) return
 
     const canvas = page.locator("canvas#field")
-    const box = await canvas.boundingBox()
-    if (!box) return
-
-    // Move mouse directly onto the dark star and hover
-    const x = box.x + starPos.x * box.width
-    const y = box.y + starPos.y * box.height
-    await page.mouse.move(x, y)
-    await page.waitForTimeout(2500) // Hold near it to "find" it
+    // Move mouse directly onto the dark star and hover, continuously correcting for any layout shifts
+    for (let i = 0; i < 15; i++) {
+      const box = await canvas.boundingBox()
+      if (box) {
+        const x = box.x + starPos.x * box.width
+        const y = box.y + starPos.y * box.height
+        await page.mouse.move(x, y)
+      }
+      await page.waitForTimeout(200)
+    }
 
     const count = await page.locator("#found-count").textContent()
     expect(Number(count)).toBeGreaterThanOrEqual(1)

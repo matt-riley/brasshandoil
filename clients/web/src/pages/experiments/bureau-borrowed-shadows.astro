@@ -1,0 +1,684 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="bs-shell">
+    <section class="bs-console" aria-label="Borrowed Shadows ledger">
+      <p class="bs-kicker">Projection desk / after-hours registry</p>
+      <h1>Bureau of Borrowed Shadows</h1>
+      <p class="bs-intro">
+        Aim the lamp across the desk. Select an object to lend its shadow to the
+        ledger, then stamp the transaction before the room remembers who owned it.
+      </p>
+
+      <div class="bs-readouts" aria-live="polite">
+        <div>
+          <span>Loans</span>
+          <strong id="loan-count">0</strong>
+        </div>
+        <div>
+          <span>Ink</span>
+          <strong id="ink-reading">0</strong>
+        </div>
+        <div>
+          <span>Holder</span>
+          <strong id="current-holder">none</strong>
+        </div>
+        <div>
+          <span>Ledger</span>
+          <strong id="ledger-state">balanced</strong>
+        </div>
+      </div>
+
+      <div class="bs-actions">
+        <button id="stamp-button" type="button">Stamp Loan</button>
+        <button id="recall-button" type="button">Recall All</button>
+      </div>
+    </section>
+
+    <section
+      id="shadow-stage"
+      class="bs-stage"
+      data-awake="false"
+      data-loans="0"
+      aria-label="Projection desk with borrowed shadows"
+    >
+      <div id="lamp-field" class="bs-lamp-field" aria-hidden="true">
+        <div id="shadow-lamp"></div>
+        <div class="bs-light-cone"></div>
+      </div>
+
+      <div class="bs-ledger-sheet" aria-hidden="true">
+        <span>shadow loan ledger</span>
+        <i></i><i></i><i></i><i></i>
+      </div>
+
+      <button
+        class="bs-object"
+        type="button"
+        data-name="key"
+        data-index="0"
+        aria-pressed="false"
+      >
+        <span class="bs-label">key</span>
+      </button>
+      <button
+        class="bs-object"
+        type="button"
+        data-name="umbrella"
+        data-index="1"
+        aria-pressed="false"
+      >
+        <span class="bs-label">umbrella</span>
+      </button>
+      <button
+        class="bs-object"
+        type="button"
+        data-name="kettle"
+        data-index="2"
+        aria-pressed="false"
+      >
+        <span class="bs-label">kettle</span>
+      </button>
+      <button
+        class="bs-object"
+        type="button"
+        data-name="prism"
+        data-index="3"
+        aria-pressed="false"
+      >
+        <span class="bs-label">prism</span>
+      </button>
+      <button
+        class="bs-object"
+        type="button"
+        data-name="candle"
+        data-index="4"
+        aria-pressed="false"
+      >
+        <span class="bs-label">candle</span>
+      </button>
+      <button
+        class="bs-object"
+        type="button"
+        data-name="spool"
+        data-index="5"
+        aria-pressed="false"
+      >
+        <span class="bs-label">spool</span>
+      </button>
+
+      <div class="bs-shadow" data-shadow="key" aria-hidden="true"></div>
+      <div class="bs-shadow" data-shadow="umbrella" aria-hidden="true"></div>
+      <div class="bs-shadow" data-shadow="kettle" aria-hidden="true"></div>
+      <div class="bs-shadow" data-shadow="prism" aria-hidden="true"></div>
+      <div class="bs-shadow" data-shadow="candle" aria-hidden="true"></div>
+      <div class="bs-shadow" data-shadow="spool" aria-hidden="true"></div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #15110c;
+  }
+
+  .bs-shell {
+    --paper: #f8eccd;
+    --ink: #15110c;
+    --brass: #d5a642;
+    --green: #2dd4a4;
+    --red: #d75245;
+    --blue: #4777d9;
+    display: grid;
+    grid-template-columns: minmax(17rem, 24rem) minmax(0, 1fr);
+    gap: clamp(1rem, 2vw, 1.5rem);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.2vw, 1.8rem);
+    color: var(--paper);
+    background:
+      linear-gradient(120deg, rgba(45, 212, 164, 0.14), transparent 26rem),
+      radial-gradient(circle at 78% 18%, rgba(213, 166, 66, 0.22), transparent 17rem),
+      linear-gradient(180deg, #20170f 0%, #12120f 58%, #0d1014 100%);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .bs-console {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 1rem;
+  }
+
+  .bs-kicker,
+  .bs-readouts span {
+    margin: 0;
+    color: var(--green);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 8ch;
+    margin: 0;
+    color: var(--paper);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.65rem, 5.2vw, 4.85rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.88;
+    text-shadow:
+      0.04em 0.04em 0 rgba(71, 119, 217, 0.55),
+      -0.035em 0.055em 0 rgba(213, 166, 66, 0.68);
+  }
+
+  .bs-intro {
+    max-width: 32rem;
+    margin: 0;
+    color: rgba(248, 236, 205, 0.82);
+    font-size: clamp(0.98rem, 1.4vw, 1.08rem);
+    line-height: 1.6;
+  }
+
+  .bs-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .bs-readouts div {
+    min-width: 0;
+    border: 1px solid rgba(248, 236, 205, 0.22);
+    border-radius: 8px;
+    padding: 0.8rem;
+    background: rgba(13, 16, 20, 0.58);
+  }
+
+  .bs-readouts strong {
+    display: block;
+    margin-top: 0.45rem;
+    color: var(--paper);
+    font-size: clamp(1.08rem, 2.4vw, 1.55rem);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  .bs-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  .bs-actions button {
+    min-height: 3.2rem;
+    border: 1px solid rgba(248, 236, 205, 0.35);
+    border-radius: 8px;
+    color: var(--ink);
+    background: var(--brass);
+    font: 800 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 150ms ease, filter 150ms ease;
+  }
+
+  .bs-actions button:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+
+  #recall-button {
+    color: var(--paper);
+    background: #25374a;
+  }
+
+  .bs-stage {
+    position: relative;
+    min-height: min(64rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(248, 236, 205, 0.2);
+    border-radius: 8px;
+    background:
+      linear-gradient(90deg, rgba(248, 236, 205, 0.08) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      linear-gradient(0deg, rgba(248, 236, 205, 0.07) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      radial-gradient(circle at 44% 46%, rgba(248, 236, 205, 0.15), transparent 18rem),
+      #1c1612;
+    box-shadow:
+      inset 0 0 6rem rgba(0, 0, 0, 0.55),
+      0 1rem 2.5rem rgba(0, 0, 0, 0.3);
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .bs-lamp-field,
+  .bs-light-cone,
+  #shadow-lamp,
+  .bs-ledger-sheet,
+  .bs-shadow,
+  .bs-object {
+    position: absolute;
+  }
+
+  .bs-lamp-field {
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  #shadow-lamp {
+    --lamp-x: 50%;
+    --lamp-y: 42%;
+    left: var(--lamp-x);
+    top: var(--lamp-y);
+    width: clamp(2.2rem, 4.5vw, 3.4rem);
+    aspect-ratio: 1;
+    border: 0.18rem solid rgba(248, 236, 205, 0.88);
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff8d6 0 24%, var(--brass) 27% 48%, transparent 52%);
+    box-shadow:
+      0 0 1.4rem rgba(213, 166, 66, 0.86),
+      0 0 4rem rgba(213, 166, 66, 0.34);
+    transform: translate(-50%, -50%);
+  }
+
+  .bs-light-cone {
+    --lamp-x: 50%;
+    --lamp-y: 42%;
+    left: var(--lamp-x);
+    top: var(--lamp-y);
+    width: clamp(16rem, 42vw, 34rem);
+    height: clamp(12rem, 34vw, 27rem);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(248, 236, 205, 0.24), transparent 64%);
+    mix-blend-mode: screen;
+    opacity: 0.72;
+    transform: translate(-50%, -50%);
+  }
+
+  .bs-ledger-sheet {
+    left: 50%;
+    top: 52%;
+    z-index: 1;
+    width: min(42rem, 78%);
+    height: min(24rem, 46%);
+    border: 1px solid rgba(21, 17, 12, 0.35);
+    border-radius: 8px;
+    background:
+      linear-gradient(90deg, transparent 0 9%, rgba(215, 82, 69, 0.24) 9.4% 9.8%, transparent 10.3%),
+      repeating-linear-gradient(0deg, transparent 0 2.1rem, rgba(21, 17, 12, 0.18) 2.16rem 2.22rem),
+      #ead9ad;
+    box-shadow: 0 1.2rem 2.5rem rgba(0, 0, 0, 0.28);
+    transform: translate(-50%, -50%) rotate(-1.4deg);
+  }
+
+  .bs-ledger-sheet span {
+    position: absolute;
+    left: 13%;
+    top: 9%;
+    color: rgba(21, 17, 12, 0.64);
+    font: 800 clamp(0.72rem, 1.5vw, 0.9rem)/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .bs-ledger-sheet i {
+    position: absolute;
+    left: 14%;
+    width: 64%;
+    height: 0.42rem;
+    border-radius: 999px;
+    background: rgba(21, 17, 12, 0.16);
+  }
+
+  .bs-ledger-sheet i:nth-child(2) { top: 31%; }
+  .bs-ledger-sheet i:nth-child(3) { top: 45%; width: 52%; }
+  .bs-ledger-sheet i:nth-child(4) { top: 59%; width: 70%; }
+  .bs-ledger-sheet i:nth-child(5) { top: 73%; width: 46%; }
+
+  .bs-object {
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: clamp(4.2rem, 9vw, 6rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(248, 236, 205, 0.52);
+    border-radius: 8px;
+    color: var(--paper);
+    background: rgba(13, 16, 20, 0.72);
+    box-shadow:
+      inset 0 0 1.4rem rgba(248, 236, 205, 0.08),
+      0 0.8rem 1.5rem rgba(0, 0, 0, 0.28);
+    cursor: pointer;
+    transition: filter 160ms ease, box-shadow 160ms ease;
+  }
+
+  .bs-object::before,
+  .bs-object::after {
+    content: "";
+    position: absolute;
+    display: block;
+  }
+
+  .bs-object:hover,
+  .bs-object:focus-visible,
+  .bs-object[aria-pressed="true"] {
+    outline: none;
+    filter: brightness(1.12);
+    box-shadow:
+      inset 0 0 1.4rem rgba(248, 236, 205, 0.18),
+      0 0 0 0.18rem rgba(45, 212, 164, 0.7),
+      0 1rem 1.7rem rgba(0, 0, 0, 0.32);
+  }
+
+  .bs-object[aria-pressed="true"] {
+    background: rgba(71, 119, 217, 0.48);
+  }
+
+  .bs-label {
+    position: absolute;
+    left: 50%;
+    bottom: -1.55rem;
+    color: rgba(248, 236, 205, 0.8);
+    font: 700 0.65rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .bs-object[data-name="key"] { left: 13%; top: 18%; }
+  .bs-object[data-name="umbrella"] { left: 42%; top: 11%; }
+  .bs-object[data-name="kettle"] { right: 12%; top: 23%; }
+  .bs-object[data-name="prism"] { left: 18%; bottom: 18%; }
+  .bs-object[data-name="candle"] { left: 50%; bottom: 10%; }
+  .bs-object[data-name="spool"] { right: 17%; bottom: 20%; }
+
+  .bs-object[data-name="key"]::before {
+    width: 2.3rem;
+    height: 2.3rem;
+    border: 0.42rem solid var(--brass);
+    border-radius: 50%;
+  }
+
+  .bs-object[data-name="key"]::after {
+    width: 2.5rem;
+    height: 0.45rem;
+    background: var(--brass);
+    transform: translate(1.25rem, 0.6rem);
+    box-shadow: 1rem 0.55rem 0 -0.15rem var(--brass);
+  }
+
+  .bs-object[data-name="umbrella"]::before {
+    width: 3.8rem;
+    height: 2rem;
+    border-radius: 4rem 4rem 0 0;
+    background: conic-gradient(from 225deg, var(--red), var(--brass), var(--green), var(--red));
+  }
+
+  .bs-object[data-name="umbrella"]::after {
+    width: 0.34rem;
+    height: 3.4rem;
+    background: var(--paper);
+    transform: translateY(1rem);
+  }
+
+  .bs-object[data-name="kettle"]::before {
+    width: 3.3rem;
+    height: 2.5rem;
+    border: 0.32rem solid var(--brass);
+    border-radius: 48% 48% 44% 44%;
+    background: rgba(213, 166, 66, 0.24);
+  }
+
+  .bs-object[data-name="kettle"]::after {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.3rem solid var(--brass);
+    border-left: 0;
+    border-bottom: 0;
+    transform: translate(2.1rem, -0.25rem) rotate(18deg);
+  }
+
+  .bs-object[data-name="prism"]::before {
+    width: 0;
+    height: 0;
+    border-left: 1.8rem solid transparent;
+    border-right: 1.8rem solid transparent;
+    border-bottom: 3.6rem solid rgba(45, 212, 164, 0.78);
+    filter: drop-shadow(0 0 1rem rgba(45, 212, 164, 0.35));
+  }
+
+  .bs-object[data-name="candle"]::before {
+    width: 1.35rem;
+    height: 3.7rem;
+    border-radius: 0.35rem;
+    background: var(--paper);
+  }
+
+  .bs-object[data-name="candle"]::after {
+    width: 1.1rem;
+    height: 1.5rem;
+    border-radius: 70% 30% 70% 30%;
+    background: #ffcf5c;
+    transform: translateY(-2.35rem) rotate(45deg);
+    box-shadow: 0 0 1.4rem rgba(255, 207, 92, 0.8);
+  }
+
+  .bs-object[data-name="spool"]::before {
+    width: 3.9rem;
+    height: 2.9rem;
+    border: 0.4rem solid var(--blue);
+    border-radius: 50%;
+    background: repeating-linear-gradient(90deg, rgba(248, 236, 205, 0.18) 0 0.18rem, transparent 0.18rem 0.42rem);
+  }
+
+  .bs-object[data-name="spool"]::after {
+    width: 4.7rem;
+    height: 0.35rem;
+    background: var(--blue);
+  }
+
+  .bs-shadow {
+    --sx: 0rem;
+    --sy: 0rem;
+    --spread: 1;
+    z-index: 2;
+    width: clamp(4.4rem, 10vw, 6.6rem);
+    height: clamp(2rem, 4.6vw, 3rem);
+    border-radius: 50%;
+    background: rgba(4, 6, 8, 0.48);
+    filter: blur(0.42rem);
+    opacity: 0.54;
+    transform: translate(var(--sx), var(--sy)) scale(var(--spread)) rotate(var(--turn, 0deg));
+    transition: opacity 160ms ease;
+    pointer-events: none;
+  }
+
+  .bs-stage[data-loans="0"] .bs-shadow {
+    opacity: 0.28;
+  }
+
+  .bs-shadow[data-shadow="key"] { left: 15%; top: 34%; --turn: -8deg; }
+  .bs-shadow[data-shadow="umbrella"] { left: 44%; top: 27%; --turn: 4deg; }
+  .bs-shadow[data-shadow="kettle"] { right: 13%; top: 39%; --turn: 11deg; }
+  .bs-shadow[data-shadow="prism"] { left: 20%; bottom: 27%; --turn: -16deg; }
+  .bs-shadow[data-shadow="candle"] { left: 51%; bottom: 20%; --turn: 7deg; }
+  .bs-shadow[data-shadow="spool"] { right: 18%; bottom: 30%; --turn: -3deg; }
+
+  @media (max-width: 860px) {
+    .bs-shell {
+      grid-template-columns: 1fr;
+      overflow: visible;
+    }
+
+    .bs-console {
+      align-self: start;
+      padding-block: 0;
+    }
+
+    .bs-stage {
+      min-height: min(58vh, 32rem);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .bs-shell {
+      padding: 0.85rem;
+    }
+
+    .bs-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .bs-object {
+      width: clamp(3.25rem, 15vw, 4rem);
+    }
+
+    .bs-label {
+      font-size: 0.55rem;
+      bottom: -1.18rem;
+    }
+  }
+</style>
+
+<script is:inline>
+  const stage = document.querySelector("#shadow-stage")
+  const lamp = document.querySelector("#shadow-lamp")
+  const cone = document.querySelector(".bs-light-cone")
+  const objects = Array.from(document.querySelectorAll(".bs-object"))
+  const shadows = Array.from(document.querySelectorAll(".bs-shadow"))
+  const loanCount = document.querySelector("#loan-count")
+  const inkReading = document.querySelector("#ink-reading")
+  const currentHolder = document.querySelector("#current-holder")
+  const ledgerState = document.querySelector("#ledger-state")
+  const stampButton = document.querySelector("#stamp-button")
+  const recallButton = document.querySelector("#recall-button")
+
+  const normalizedLamp = { x: 0.5, y: 0.42 }
+  const renderedLamp = { x: normalizedLamp.x, y: normalizedLamp.y }
+  const loaned = new Set()
+  let stamped = false
+  let inkValue = 0
+
+  const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value))
+
+  function setLampFromClient(clientX, clientY) {
+    const rect = stage.getBoundingClientRect()
+    normalizedLamp.x = clamp((clientX - rect.left) / rect.width)
+    normalizedLamp.y = clamp((clientY - rect.top) / rect.height)
+    stage.dataset.awake = "true"
+    updateLedger()
+  }
+
+  function updateLedger(activeName = currentHolder.textContent) {
+    const loans = loaned.size
+    stage.dataset.loans = String(loans)
+    loanCount.textContent = String(loans)
+    currentHolder.textContent = loans === 0 ? "none" : activeName
+    inkValue = loans === 0 && !stamped && stage.dataset.awake !== "true"
+      ? 0
+      : Math.max(inkValue, Math.round((Math.abs(normalizedLamp.x - 0.5) + normalizedLamp.y) * 38 + loans * 7 + (stamped ? 31 : 0)))
+    inkReading.textContent = String(inkValue)
+    ledgerState.textContent = loans === 0
+      ? "balanced"
+      : stamped
+        ? "certified"
+        : "unbalanced"
+  }
+
+  function borrowShadow(index) {
+    const object = objects[index]
+    if (!object) return
+    loaned.add(index)
+    stamped = false
+    objects.forEach((item, itemIndex) => {
+      item.setAttribute("aria-pressed", String(loaned.has(itemIndex)))
+    })
+    updateLedger(object.dataset.name)
+  }
+
+  function recallAll() {
+    loaned.clear()
+    stamped = false
+    inkValue = 0
+    stage.dataset.awake = "false"
+    objects.forEach((item) => item.setAttribute("aria-pressed", "false"))
+    updateLedger("none")
+  }
+
+  stage.addEventListener("pointermove", (event) => {
+    setLampFromClient(event.clientX, event.clientY)
+  })
+
+  stage.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0]
+    if (touch) setLampFromClient(touch.clientX, touch.clientY)
+  }, { passive: true })
+
+  stage.addEventListener("touchmove", (event) => {
+    const touch = event.touches[0]
+    if (touch) setLampFromClient(touch.clientX, touch.clientY)
+  }, { passive: true })
+
+  objects.forEach((object, index) => {
+    object.addEventListener("click", () => borrowShadow(index))
+    object.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        borrowShadow(index)
+      }
+
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault()
+        objects[(index + 1) % objects.length].focus()
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault()
+        objects[(index - 1 + objects.length) % objects.length].focus()
+      }
+    })
+  })
+
+  stampButton.addEventListener("click", () => {
+    stamped = true
+    inkValue = Math.max(inkValue, 42)
+    updateLedger(currentHolder.textContent)
+  })
+
+  recallButton.addEventListener("click", recallAll)
+
+  function animateShadows() {
+    renderedLamp.x += (normalizedLamp.x - renderedLamp.x) * 0.16
+    renderedLamp.y += (normalizedLamp.y - renderedLamp.y) * 0.16
+    const lampX = `${(renderedLamp.x * 100).toFixed(2)}%`
+    const lampY = `${(renderedLamp.y * 100).toFixed(2)}%`
+    lamp.style.setProperty("--lamp-x", lampX)
+    lamp.style.setProperty("--lamp-y", lampY)
+    cone.style.setProperty("--lamp-x", lampX)
+    cone.style.setProperty("--lamp-y", lampY)
+
+    shadows.forEach((shadow, index) => {
+      const object = objects[index]
+      const objectX = Number.parseFloat(getComputedStyle(object).left || "0")
+      const directionX = (index % 3 - 1) * 0.3 + (0.5 - renderedLamp.x)
+      const directionY = 0.28 + (0.5 - renderedLamp.y)
+      const loanBoost = loaned.has(index) ? 1.45 : 0.86
+      shadow.style.setProperty("--sx", `${(directionX * 5.4).toFixed(2)}rem`)
+      shadow.style.setProperty("--sy", `${(directionY * 4.8).toFixed(2)}rem`)
+      shadow.style.setProperty("--spread", `${(loanBoost + Math.abs(objectX % 7) * 0.01).toFixed(2)}`)
+    })
+
+    requestAnimationFrame(animateShadows)
+  }
+
+  updateLedger("none")
+  requestAnimationFrame(animateShadows)
+</script>

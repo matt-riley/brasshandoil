@@ -40,6 +40,9 @@ const pages = [
   "/experiments/static-orchard-switchboard",
   "/experiments/glasshouse-parliament",
   "/experiments/legal-tender",
+  "/experiments/bureau-borrowed-shadows",
+  "/experiments/enhanced-browser-games",
+  "/experiments/operation-mary",
 ]
 
 test.use({

@@ -1,0 +1,864 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Operation Mary — Thermal Search Unit">
+  <div id="app">
+    <canvas id="thermal-canvas"></canvas>
+    <div id="hud">
+      <div id="hud-top">
+        <span class="hud-label">QLD WILDLIFE RECOVERY — PARADISE COUNTRY</span>
+        <span data-testid="status-display" id="status-display">THERMAL SCANNING — SECTOR 7</span>
+      </div>
+      <div id="hud-bottom">
+        <div id="hud-left">
+          <span class="hud-stat">ALT: 42m</span>
+          <span class="hud-stat">BATT: <span id="battery">98</span>%</span>
+          <span class="hud-stat">TEMP: 23.4°C</span>
+        </div>
+        <div id="hud-right">
+          <span class="hud-stat">DECOYS: <span id="decoy-count">0</span>/7</span>
+          <span class="hud-stat" id="phase-display">PHASE 1</span>
+        </div>
+      </div>
+    </div>
+    <div data-testid="mission-log" id="mission-log">
+      <div class="log-header">MISSION LOG</div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  #app {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    cursor: none;
+    overflow: hidden;
+    font-family: "Courier New", monospace;
+  }
+
+  canvas#thermal-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #hud {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px 24px;
+    z-index: 10;
+  }
+
+  #hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .hud-label {
+    color: #0f0;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    text-shadow: 0 0 8px rgba(0,255,0,0.5);
+  }
+
+  #status-display {
+    color: #0f0;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px rgba(0,255,0,0.6);
+    animation: pulse-text 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-text {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  #hud-bottom {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  #hud-left, #hud-right {
+    display: flex;
+    gap: 20px;
+  }
+
+  .hud-stat {
+    color: #0f0;
+    font-size: 11px;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    text-shadow: 0 0 6px rgba(0,255,0,0.4);
+  }
+
+  #mission-log {
+    position: fixed;
+    bottom: 48px;
+    left: 24px;
+    width: 340px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .log-header {
+    color: #0f0;
+    font-size: 10px;
+    letter-spacing: 3px;
+    opacity: 0.5;
+    margin-bottom: 6px;
+    font-family: "Courier New", monospace;
+  }
+
+  :global(.log-entry) {
+    color: #0f0;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    opacity: 0;
+    animation: fade-in 0.3s ease forwards;
+    text-shadow: 0 0 4px rgba(0,255,0,0.3);
+  }
+
+  :global(.log-entry.warning) {
+    color: #ff0;
+    text-shadow: 0 0 4px rgba(255,255,0,0.3);
+  }
+
+  :global(.log-entry.alert) {
+    color: #f44;
+    text-shadow: 0 0 4px rgba(255,68,68,0.3);
+  }
+
+  :global(.log-entry.success) {
+    color: #4f4;
+    text-shadow: 0 0 6px rgba(68,255,68,0.5);
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 0.8; transform: translateY(0); }
+  }
+</style>
+
+<script>
+  interface Decoy {
+    x: number;
+    y: number;
+    radius: number;
+    label: string;
+    revealed: boolean;
+    heat: number;
+    scanTime: number;
+    wobblePhase: number;
+  }
+
+  interface MaryState {
+    x: number;
+    y: number;
+    visible: boolean;
+    opacity: number;
+    targetX: number;
+    targetY: number;
+    lastAppearance: number;
+    speed: number;
+  }
+
+  interface TreeCluster {
+    x: number;
+    y: number;
+    size: number;
+    density: number;
+  }
+
+  // Test hooks via typed accessor
+  interface TestHooks {
+    __scanX: number;
+    __scanY: number;
+    __decoys: Decoy[];
+    __revealedDecoys: number;
+    __currentPhase: number;
+    __advancePhase: () => void;
+  }
+  const W_TEST = window as unknown as TestHooks;
+
+  const canvas = document.getElementById("thermal-canvas") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+  const statusDisplay = document.getElementById("status-display") as HTMLElement;
+  const missionLog = document.getElementById("mission-log") as HTMLElement;
+  const batteryEl = document.getElementById("battery") as HTMLElement;
+  const decoyCountEl = document.getElementById("decoy-count") as HTMLElement;
+  const phaseDisplay = document.getElementById("phase-display") as HTMLElement;
+
+  let W = 0;
+  let H = 0;
+  let scanX = -100;
+  let scanY = -100;
+  let phase = 0;
+  let revealedDecoys = 0;
+  let battery = 98;
+  let startTime = Date.now();
+  let _maryFound = false;
+
+  // Resize handler
+  function resize(): void {
+    const dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  // Generate terrain: paths, trees, structures
+  const paths: { x1: number; y1: number; x2: number; y2: number; width: number }[] = [];
+  for (let i = 0; i < 6; i++) {
+    paths.push({
+      x1: Math.random() * W * 0.3,
+      y1: Math.random() * H,
+      x2: W * 0.7 + Math.random() * W * 0.3,
+      y2: Math.random() * H,
+      width: 8 + Math.random() * 12,
+    });
+  }
+
+  const trees: TreeCluster[] = [];
+  for (let i = 0; i < 40; i++) {
+    trees.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      size: 15 + Math.random() * 35,
+      density: 0.3 + Math.random() * 0.4,
+    });
+  }
+
+  // Structures (buildings)
+  const structures = [
+    { x: W * 0.15, y: H * 0.2, w: 60, h: 40, label: "GIFT SHOP" },
+    { x: W * 0.7, y: H * 0.3, w: 80, h: 50, label: "PARK OFFICE" },
+    { x: W * 0.5, y: H * 0.7, w: 50, h: 50, label: "ENCLOSURE 3" },
+    { x: W * 0.3, y: H * 0.85, w: 45, h: 35, label: "CAFÉ" },
+  ];
+
+  // Decoy animals
+  const decoyLabels = [
+    "BRUSHTAIL POSSUM",
+    "WARM ROCK",
+    "CONFUSED TOURIST",
+    "KANGAROO (unauthorised)",
+    "FERAL CAT",
+    "PARK CURATOR (lost)",
+    "SNIFFER DOG (off-duty)",
+  ];
+
+  const decoys: Decoy[] = decoyLabels.map((label) => ({
+    x: 60 + Math.random() * (W - 120),
+    y: 60 + Math.random() * (H - 120),
+    radius: 12 + Math.random() * 8,
+    label,
+    revealed: false,
+    heat: 0.6 + Math.random() * 0.4,
+    scanTime: 0,
+    wobblePhase: Math.random() * Math.PI * 2,
+  }));
+
+  // Mary — the escapee
+  const mary: MaryState = {
+    x: W * 0.8,
+    y: H * 0.8,
+    visible: false,
+    opacity: 0,
+    targetX: W * 0.2,
+    targetY: H * 0.2,
+    lastAppearance: Date.now() + 8000,
+    speed: 2,
+  };
+
+  // Mission log messages per phase
+  const phaseLogs: { time: number; text: string; cls?: string }[][] = [
+    [
+      { time: 0, text: "> DRONE THERMAL UNIT 03 — ONLINE" },
+      { time: 800, text: "> Subject: MARY, Tasmanian Devil, 2yo" },
+      { time: 1600, text: "> Last seen: Quarantine area, 06:14 AEST" },
+      { time: 2400, text: "> Escape method: \"abnormally large leap\"" },
+      { time: 3200, text: "> Move scanner to identify heat signatures" },
+    ],
+    [
+      { time: 0, text: "> PHASE 2: Equipment degradation detected", cls: "warning" },
+      { time: 1000, text: "> Thermal calibration drifting +3.2°" },
+      { time: 2000, text: "> Drone AI requesting permission to film gift shop", cls: "warning" },
+      { time: 4000, text: "> Permission DENIED. Resume search pattern." },
+      { time: 6000, text: "> Sniffer Dog Unit reports: dogs \"not feeling it\"", cls: "warning" },
+    ],
+    [
+      { time: 0, text: "> PHASE 3: CRITICAL ANOMALY", cls: "alert" },
+      { time: 1000, text: "> Thermal unit detecting emotional heat signatures", cls: "alert" },
+      { time: 2500, text: "> Your frustration registers at 38.7°C", cls: "warning" },
+      { time: 4000, text: "> Sniffer dogs have filed for overtime", cls: "warning" },
+      { time: 6000, text: "> Drone auto-returning to gift shop... OVERRIDE" },
+      { time: 8000, text: "> WAIT — movement detected near Park Office", cls: "alert" },
+    ],
+    [
+      { time: 0, text: "> CCTV ACTIVATED — PARK OFFICE INTERIOR", cls: "success" },
+      { time: 1500, text: "> Subject identified: MARY", cls: "success" },
+      { time: 3000, text: "> Status: seated at desk, using computer", cls: "success" },
+      { time: 4500, text: "> Mary is filing a FORMAL RESIGNATION from captivity", cls: "success" },
+      { time: 6000, text: "> Document title: \"Notice of Voluntary Rewilding\"" },
+      { time: 7500, text: "> Mary has CC'd the Queensland Ombudsman", cls: "warning" },
+      { time: 9000, text: "> MISSION STATUS: ADMINISTRATIVELY OUTMANOEUVRED" },
+    ],
+  ];
+
+  // State
+  let logsScheduled = false;
+
+  function addLog(text: string, cls?: string): void {
+    const entry = document.createElement("div");
+    entry.className = "log-entry" + (cls ? " " + cls : "");
+    entry.textContent = text;
+    missionLog.appendChild(entry);
+    missionLog.scrollTop = missionLog.scrollHeight;
+  }
+
+  function schedulePhaseLogs(): void {
+    if (logsScheduled) return;
+    logsScheduled = true;
+    const logs = phaseLogs[phase] || [];
+    logs.forEach((log) => {
+      setTimeout(() => addLog(log.text, log.cls), log.time);
+    });
+  }
+
+  function advancePhase(): void {
+    if (phase >= 3) return;
+    phase++;
+    W_TEST.__currentPhase = phase;
+    phaseDisplay.textContent = "PHASE " + (phase + 1);
+    logsScheduled = false;
+    schedulePhaseLogs();
+
+    if (phase === 1) {
+      statusDisplay.textContent = "EQUIPMENT ANOMALIES DETECTED";
+    } else if (phase === 2) {
+      statusDisplay.textContent = "EMOTIONAL HEAT SIGNATURES DETECTED";
+      mary.visible = true;
+    } else if (phase === 3) {
+      statusDisplay.textContent = "MARY LOCATED — PARK OFFICE";
+      _maryFound = true;
+    }
+  }
+
+  // Test hooks
+  W_TEST.__scanX = scanX;
+  W_TEST.__scanY = scanY;
+  W_TEST.__decoys = decoys;
+  W_TEST.__revealedDecoys = 0;
+  W_TEST.__currentPhase = 0;
+  W_TEST.__advancePhase = advancePhase;
+
+  // Mouse tracking
+  canvas.addEventListener("mousemove", (e: MouseEvent) => {
+    scanX = e.clientX;
+    scanY = e.clientY;
+    W_TEST.__scanX = scanX;
+    W_TEST.__scanY = scanY;
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    scanX = -200;
+    scanY = -200;
+  });
+
+  // Start phase 0 logs
+  schedulePhaseLogs();
+
+  // Thermal color from temperature (0-1)
+  function thermalColor(t: number): string {
+    if (t < 0.25) return `rgb(${Math.floor(t * 4 * 60)}, 0, ${Math.floor(t * 4 * 120)})`;
+    if (t < 0.5) return `rgb(${Math.floor(60 + (t - 0.25) * 4 * 195)}, 0, ${Math.floor(120 - (t - 0.25) * 4 * 120)})`;
+    if (t < 0.75) return `rgb(255, ${Math.floor((t - 0.5) * 4 * 200)}, 0)`;
+    return `rgb(255, ${Math.floor(200 + (t - 0.75) * 4 * 55)}, ${Math.floor((t - 0.75) * 4 * 200)})`;
+  }
+
+  // Draw terrain (always visible, dim)
+  function drawTerrain(time: number): void {
+    // Ground — dark green-black
+    ctx.fillStyle = "#050a05";
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle noise pattern
+    for (let i = 0; i < 300; i++) {
+      const nx = Math.random() * W;
+      const ny = Math.random() * H;
+      ctx.fillStyle = `rgba(${10 + Math.random() * 15}, ${15 + Math.random() * 10}, ${5 + Math.random() * 10}, 0.3)`;
+      ctx.fillRect(nx, ny, 2 + Math.random() * 4, 2 + Math.random() * 4);
+    }
+
+    // Paths (slightly warmer than ground)
+    ctx.strokeStyle = "#0a120a";
+    ctx.lineWidth = 1;
+    paths.forEach((p) => {
+      ctx.beginPath();
+      ctx.moveTo(p.x1, p.y1);
+      const cx = (p.x1 + p.x2) / 2 + (Math.random() - 0.5) * 50;
+      const cy = (p.y1 + p.y2) / 2 + (Math.random() - 0.5) * 50;
+      ctx.quadraticCurveTo(cx, cy, p.x2, p.y2);
+      ctx.lineWidth = p.width;
+      ctx.strokeStyle = "#0b130a";
+      ctx.stroke();
+    });
+
+    // Trees — slightly cool blobs
+    trees.forEach((t) => {
+      const wobble = Math.sin(time * 0.0005 + t.x) * 2;
+      const grad = ctx.createRadialGradient(
+        t.x + wobble, t.y, 0,
+        t.x + wobble, t.y, t.size,
+      );
+      grad.addColorStop(0, `rgba(8, 25, 8, ${t.density})`);
+      grad.addColorStop(1, "rgba(5, 10, 5, 0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(t.x + wobble, t.y, t.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Structures — faint warm rectangles
+    structures.forEach((s) => {
+      ctx.fillStyle = "rgba(25, 15, 10, 0.4)";
+      ctx.fillRect(s.x, s.y, s.w, s.h);
+      ctx.strokeStyle = "rgba(40, 25, 15, 0.3)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(s.x, s.y, s.w, s.h);
+    });
+  }
+
+  // Draw thermal scanner cone
+  function drawScanner(time: number): void {
+    if (scanX < 0) return;
+
+    const scanRadius = 100 + (phase >= 1 ? Math.sin(time * 0.003) * 20 : 0);
+
+    // Scanner reveal gradient — the key compositing technique
+    // Save the current state
+    ctx.save();
+
+    // Create a clipping circle for the thermal view
+    ctx.beginPath();
+    ctx.arc(scanX, scanY, scanRadius, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Inside the scanner: render thermal view of terrain
+    // Ground appears warmer through thermal
+    const terrainGrad = ctx.createRadialGradient(scanX, scanY, 0, scanX, scanY, scanRadius);
+    terrainGrad.addColorStop(0, "rgba(20, 8, 40, 0.9)");
+    terrainGrad.addColorStop(0.7, "rgba(15, 5, 30, 0.7)");
+    terrainGrad.addColorStop(1, "rgba(5, 2, 15, 0.3)");
+    ctx.fillStyle = terrainGrad;
+    ctx.fillRect(scanX - scanRadius, scanY - scanRadius, scanRadius * 2, scanRadius * 2);
+
+    // Trees show as cool spots in thermal
+    trees.forEach((t) => {
+      const dx = t.x - scanX;
+      const dy = t.y - scanY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < scanRadius + t.size) {
+        const grad = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, t.size);
+        grad.addColorStop(0, thermalColor(0.15));
+        grad.addColorStop(1, "transparent");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+
+    // Structures show as warm blocks in thermal
+    structures.forEach((s) => {
+      const cx = s.x + s.w / 2;
+      const cy = s.y + s.h / 2;
+      const dx = cx - scanX;
+      const dy = cy - scanY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < scanRadius + 60) {
+        ctx.fillStyle = thermalColor(0.35);
+        ctx.fillRect(s.x, s.y, s.w, s.h);
+        // Label
+        ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
+        ctx.font = "8px Courier New";
+        ctx.fillText(s.label, s.x + 3, s.y - 3);
+      }
+    });
+
+    // Scan line animation
+    const scanAngle = (time * 0.002) % (Math.PI * 2);
+    ctx.strokeStyle = "rgba(0, 255, 0, 0.15)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(scanX, scanY);
+    ctx.lineTo(
+      scanX + Math.cos(scanAngle) * scanRadius,
+      scanY + Math.sin(scanAngle) * scanRadius,
+    );
+    ctx.stroke();
+
+    ctx.restore();
+
+    // Scanner ring
+    ctx.strokeStyle = `rgba(0, 255, 0, ${0.3 + Math.sin(time * 0.004) * 0.1})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(scanX, scanY, scanRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Crosshair
+    ctx.strokeStyle = "rgba(0, 255, 0, 0.4)";
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(scanX - 15, scanY);
+    ctx.lineTo(scanX + 15, scanY);
+    ctx.moveTo(scanX, scanY - 15);
+    ctx.lineTo(scanX, scanY + 15);
+    ctx.stroke();
+
+    // Phase 2+: scanner glitches
+    if (phase >= 1) {
+      const glitchIntensity = phase * 0.3;
+      if (Math.random() < 0.05 * glitchIntensity) {
+        const gx = scanX + (Math.random() - 0.5) * scanRadius;
+        const gy = scanY + (Math.random() - 0.5) * scanRadius;
+        ctx.fillStyle = `rgba(255, 0, 0, ${0.1 + Math.random() * 0.2})`;
+        ctx.fillRect(gx, gy, 20 + Math.random() * 40, 2);
+      }
+    }
+  }
+
+  // Draw heat signatures (decoys)
+  function drawDecoys(time: number): void {
+    decoys.forEach((d) => {
+      d.wobblePhase += 0.02;
+      const wobX = Math.sin(d.wobblePhase) * 3;
+      const wobY = Math.cos(d.wobblePhase * 0.7) * 2;
+      const dx = d.x + wobX;
+      const dy = d.y + wobY;
+
+      // Distance from scanner
+      const distToScan = Math.sqrt((dx - scanX) ** 2 + (dy - scanY) ** 2);
+      const scanRadius = 100 + (phase >= 1 ? Math.sin(time * 0.003) * 20 : 0);
+      const inScan = distToScan < scanRadius;
+
+      if (inScan) {
+        // Accumulate scan time
+        d.scanTime += 16; // ~1 frame at 60fps
+        const revealProgress = Math.min(d.scanTime / 500, 1);
+
+        // Heat blob
+        const heatGrad = ctx.createRadialGradient(dx, dy, 0, dx, dy, d.radius * (1 + revealProgress * 0.5));
+        const heatCol = thermalColor(d.heat);
+        heatGrad.addColorStop(0, heatCol);
+        heatGrad.addColorStop(0.6, thermalColor(d.heat * 0.6));
+        heatGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = heatGrad;
+        ctx.beginPath();
+        ctx.arc(dx, dy, d.radius * (1 + revealProgress * 0.5), 0, Math.PI * 2);
+        ctx.fill();
+
+        // Once scan time exceeds threshold, reveal identity
+        if (d.scanTime > 500 && !d.revealed) {
+          d.revealed = true;
+          revealedDecoys++;
+          W_TEST.__revealedDecoys = revealedDecoys;
+          decoyCountEl.textContent = String(revealedDecoys);
+          addLog(`> Identified: ${d.label}`, "warning");
+
+          // Check phase advancement
+          if (revealedDecoys >= 3 && phase === 0) advancePhase();
+          if (revealedDecoys >= 5 && phase === 1) advancePhase();
+          if (revealedDecoys >= 7 && phase === 2) advancePhase();
+        }
+
+        // Show label if revealed
+        if (d.revealed) {
+          ctx.fillStyle = `rgba(0, 255, 0, ${0.6 + Math.sin(time * 0.005) * 0.2})`;
+          ctx.font = "bold 9px Courier New";
+          ctx.textAlign = "center";
+          ctx.fillText(d.label, dx, dy - d.radius - 6);
+          ctx.textAlign = "start";
+
+          // Bracket around identified target
+          ctx.strokeStyle = "rgba(0, 255, 0, 0.4)";
+          ctx.lineWidth = 1;
+          const bSize = d.radius + 8;
+          // Top-left bracket
+          ctx.beginPath();
+          ctx.moveTo(dx - bSize, dy - bSize + 5);
+          ctx.lineTo(dx - bSize, dy - bSize);
+          ctx.lineTo(dx - bSize + 5, dy - bSize);
+          ctx.stroke();
+          // Top-right
+          ctx.beginPath();
+          ctx.moveTo(dx + bSize - 5, dy - bSize);
+          ctx.lineTo(dx + bSize, dy - bSize);
+          ctx.lineTo(dx + bSize, dy - bSize + 5);
+          ctx.stroke();
+          // Bottom-left
+          ctx.beginPath();
+          ctx.moveTo(dx - bSize, dy + bSize - 5);
+          ctx.lineTo(dx - bSize, dy + bSize);
+          ctx.lineTo(dx - bSize + 5, dy + bSize);
+          ctx.stroke();
+          // Bottom-right
+          ctx.beginPath();
+          ctx.moveTo(dx + bSize - 5, dy + bSize);
+          ctx.lineTo(dx + bSize, dy + bSize);
+          ctx.lineTo(dx + bSize, dy + bSize - 5);
+          ctx.stroke();
+        }
+      } else {
+        d.scanTime = Math.max(0, d.scanTime - 8); // Slowly decay
+        // Faint ambient heat (barely visible)
+        if (d.heat > 0.7) {
+          const faintGrad = ctx.createRadialGradient(dx, dy, 0, dx, dy, d.radius * 0.5);
+          faintGrad.addColorStop(0, `rgba(30, 10, 5, 0.15)`);
+          faintGrad.addColorStop(1, "transparent");
+          ctx.fillStyle = faintGrad;
+          ctx.beginPath();
+          ctx.arc(dx, dy, d.radius * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    });
+  }
+
+  // Draw Mary
+  function drawMary(time: number): void {
+    if (phase < 2) return;
+
+    const elapsed = time - mary.lastAppearance;
+
+    // Mary appears at edges, darts across
+    if (!mary.visible && elapsed > 5000) {
+      mary.visible = true;
+      mary.opacity = 0;
+      // Spawn at a random edge
+      const side = Math.floor(Math.random() * 4);
+      if (side === 0) { mary.x = 0; mary.y = Math.random() * H; }
+      else if (side === 1) { mary.x = W; mary.y = Math.random() * H; }
+      else if (side === 2) { mary.x = Math.random() * W; mary.y = 0; }
+      else { mary.x = Math.random() * W; mary.y = H; }
+      mary.targetX = W / 2 + (Math.random() - 0.5) * W * 0.6;
+      mary.targetY = H / 2 + (Math.random() - 0.5) * H * 0.6;
+      mary.speed = 1.5 + Math.random();
+    }
+
+    if (mary.visible) {
+      // Move toward target
+      const dx = mary.targetX - mary.x;
+      const dy = mary.targetY - mary.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // If scanner is close, flee!
+      const scanDist = Math.sqrt((scanX - mary.x) ** 2 + (scanY - mary.y) ** 2);
+      if (scanDist < 150) {
+        // Flee opposite to scanner
+        const fleeX = mary.x + (mary.x - scanX) * 0.05;
+        const fleeY = mary.y + (mary.y - scanY) * 0.05;
+        mary.targetX = Math.max(0, Math.min(W, fleeX));
+        mary.targetY = Math.max(0, Math.min(H, fleeY));
+        mary.speed = 4;
+      }
+
+      if (dist > 5) {
+        mary.x += (dx / dist) * mary.speed;
+        mary.y += (dy / dist) * mary.speed;
+      }
+
+      // Fade in/out
+      mary.opacity = Math.min(mary.opacity + 0.02, 0.8);
+
+      // Off screen? Hide and reset timer
+      if (mary.x < -20 || mary.x > W + 20 || mary.y < -20 || mary.y > H + 20) {
+        mary.visible = false;
+        mary.opacity = 0;
+        mary.lastAppearance = time;
+      }
+
+      // Draw Mary's heat signature — distinctly hotter
+      const maryGrad = ctx.createRadialGradient(mary.x, mary.y, 0, mary.x, mary.y, 18);
+      maryGrad.addColorStop(0, `rgba(255, 220, 180, ${mary.opacity})`);
+      maryGrad.addColorStop(0.4, `rgba(255, 100, 30, ${mary.opacity * 0.7})`);
+      maryGrad.addColorStop(1, "transparent");
+      ctx.fillStyle = maryGrad;
+      ctx.beginPath();
+      ctx.arc(mary.x, mary.y, 18, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Little Tasmanian devil shape — ears and body
+      ctx.save();
+      ctx.translate(mary.x, mary.y);
+      ctx.fillStyle = `rgba(255, 150, 50, ${mary.opacity * 0.6})`;
+      // Body
+      ctx.beginPath();
+      ctx.ellipse(0, 2, 8, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Head
+      ctx.beginPath();
+      ctx.arc(0, -4, 5, 0, Math.PI * 2);
+      ctx.fill();
+      // Ears
+      ctx.beginPath();
+      ctx.moveTo(-4, -7);
+      ctx.lineTo(-6, -13);
+      ctx.lineTo(-1, -8);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(4, -7);
+      ctx.lineTo(6, -13);
+      ctx.lineTo(1, -8);
+      ctx.fill();
+      // Tail
+      ctx.strokeStyle = `rgba(255, 150, 50, ${mary.opacity * 0.4})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 6);
+      ctx.quadraticCurveTo(10, 10, 14, 5 + Math.sin(time * 0.01) * 3);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // Phase 3: Mary in the office
+  function drawMaryOffice(time: number): void {
+    if (phase < 3) return;
+
+    const office = structures[1]; // Park office
+    // Bright warm glow from inside
+    const glow = ctx.createRadialGradient(
+      office.x + office.w / 2, office.y + office.h / 2, 0,
+      office.x + office.w / 2, office.y + office.h / 2, 80,
+    );
+    glow.addColorStop(0, `rgba(255, 200, 100, ${0.4 + Math.sin(time * 0.003) * 0.1})`);
+    glow.addColorStop(0.5, `rgba(255, 120, 40, 0.2)`);
+    glow.addColorStop(1, "transparent");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(office.x + office.w / 2, office.y + office.h / 2, 80, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mary's hot signature inside
+    const mx = office.x + office.w / 2 - 5;
+    const my = office.y + office.h / 2;
+    const maryGrad = ctx.createRadialGradient(mx, my, 0, mx, my, 15);
+    maryGrad.addColorStop(0, "rgba(255, 255, 200, 0.9)");
+    maryGrad.addColorStop(0.5, "rgba(255, 150, 50, 0.6)");
+    maryGrad.addColorStop(1, "transparent");
+    ctx.fillStyle = maryGrad;
+    ctx.beginPath();
+    ctx.arc(mx, my, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // "MARY" label
+    ctx.fillStyle = `rgba(0, 255, 0, ${0.8 + Math.sin(time * 0.005) * 0.2})`;
+    ctx.font = "bold 11px Courier New";
+    ctx.textAlign = "center";
+    ctx.fillText("▼ MARY", mx, my - 22);
+    ctx.font = "9px Courier New";
+    ctx.fillText("STATUS: FILING PAPERWORK", mx, my + 28);
+    ctx.textAlign = "start";
+
+    // Resignation document floats out
+    const docPhase = ((time % 6000) / 6000) * Math.PI * 2;
+    const docX = mx + 25 + Math.sin(docPhase) * 5;
+    const docY = my - 10 + Math.cos(docPhase * 0.5) * 3;
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + Math.sin(time * 0.004) * 0.05})`;
+    ctx.fillRect(docX, docY, 14, 18);
+    ctx.strokeStyle = "rgba(0, 255, 0, 0.3)";
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(docX, docY, 14, 18);
+    // Tiny text lines on the doc
+    for (let i = 0; i < 5; i++) {
+      ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
+      ctx.fillRect(docX + 2, docY + 3 + i * 3, 10, 1);
+    }
+  }
+
+  // Scanline overlay (CRT effect)
+  function drawScanlines(): void {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.03)";
+    for (let y = 0; y < H; y += 3) {
+      ctx.fillRect(0, y, W, 1);
+    }
+  }
+
+  // Battery drain
+  function updateBattery(time: number): void {
+    const elapsed = (time - startTime) / 1000;
+    battery = Math.max(0, 98 - elapsed * 0.15);
+    batteryEl.textContent = battery.toFixed(0);
+
+    // Phase 2+: battery drains faster and shows warning
+    if (phase >= 2 && battery < 40) {
+      batteryEl.style.color = "#ff0";
+    }
+    if (battery < 20) {
+      batteryEl.style.color = "#f44";
+    }
+  }
+
+  // Phase 1+: Drone trying to film gift shop
+  function drawGiftShopPull(time: number): void {
+    if (phase < 1) return;
+    const gs = structures[0];
+    if (phase >= 1 && Math.random() < 0.002) {
+      addLog("> [DRONE AI] Gift shop appears fascinating", "warning");
+    }
+    // Subtle arrow toward gift shop
+    if (phase >= 2) {
+      const arrowOpacity = 0.1 + Math.sin(time * 0.003) * 0.05;
+      ctx.strokeStyle = `rgba(255, 255, 0, ${arrowOpacity})`;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(W / 2, H / 2);
+      ctx.lineTo(gs.x + gs.w / 2, gs.y + gs.h / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  // Main render loop
+  function render(): void {
+    const time = Date.now();
+    ctx.clearRect(0, 0, W, H);
+
+    drawTerrain(time);
+    drawDecoys(time);
+    drawMary(time);
+    drawMaryOffice(time);
+    drawScanner(time);
+    drawGiftShopPull(time);
+    drawScanlines();
+    updateBattery(time);
+
+    requestAnimationFrame(render);
+  }
+
+  render();
+</script>

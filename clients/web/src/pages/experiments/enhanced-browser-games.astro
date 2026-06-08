@@ -1,0 +1,1757 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base>
+  <main class="ebg-shell" id="ebg-root" data-game-status="quiet">
+    <!-- Onboarding Overlay -->
+    <div id="ebg-overlay" class="ebg-overlay">
+      <div class="ebg-overlay-card glass">
+        <span class="stadium-tag">ATHLETIC REGISTRATION</span>
+        <h2>2026 Enhanced Browser Games</h2>
+        <p>
+          Welcome, Coach. In this experimental stadium, standard anti-doping regulations have been officially suspended. 
+          To set superhuman records in scrolling, slider balancing, and heavy DOM lifting, you must inject raw, untested 
+          script stimulants into the main thread.
+        </p>
+        <div class="overlay-note">
+          ⚠️ Activating calibration will initialize spatial synthesized audio waves.
+        </div>
+        <button id="arm-button" class="ebg-btn primary" type="button">ENTER STADIUM & ARM AUDIOMETRY</button>
+      </div>
+    </div>
+
+    <!-- Main Layout Grid -->
+    <div class="ebg-grid">
+      <!-- Sidebar Control Panel -->
+      <aside class="ebg-sidebar glass">
+        <div class="ebg-brand-block">
+          <div class="live-indicator">
+            <span class="ping-dot"></span>
+            <span>TELEMETRY CONNECTED</span>
+          </div>
+          <h1>Enhanced Games</h1>
+          <p class="ebg-subtitle">Overclock browser APIs to bypass physical constraints.</p>
+        </div>
+
+        <!-- Stimulants Section -->
+        <div class="ebg-sidebar-section">
+          <h2>STIMULANT INJECTORS</h2>
+          <div class="stimulant-toggles">
+            <label class="stim-card glass" for="stim-raf">
+              <input type="checkbox" id="stim-raf" />
+              <div class="stim-details">
+                <span class="stim-title">Anabolic rAF</span>
+                <span class="stim-desc">Multiplies scroll rates and lifting velocity. Side-effect: Chaotic screen shake and blur.</span>
+              </div>
+            </label>
+
+            <label class="stim-card glass" for="stim-delay">
+              <input type="checkbox" id="stim-delay" />
+              <div class="stim-details">
+                <span class="stim-title">setTimeout Beta-Blocker</span>
+                <span class="stim-desc">Halves slider balance drift. Side-effect: Introduces 180ms cursor/input latency.</span>
+              </div>
+            </label>
+
+            <label class="stim-card glass" for="stim-epo">
+              <input type="checkbox" id="stim-epo" />
+              <div class="stim-details">
+                <span class="stim-title">Layout-Shifting EPO</span>
+                <span class="stim-desc">Auto-snaps slider control to targets. Side-effect: Displaces target position in screen space.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- System Stats -->
+        <div class="ebg-sidebar-section">
+          <h2>SYSTEM DIAGNOSTICS</h2>
+          <dl class="ebg-telemetry">
+            <div>
+              <dt>Core Temp</dt>
+              <dd id="metric-temp" class="metric-val text-cyan">37°C</dd>
+            </div>
+            <div>
+              <dt>Rendering Integrity</dt>
+              <dd id="metric-integrity" class="metric-val text-pink">100%</dd>
+            </div>
+            <div>
+              <dt>DOM Node Load</dt>
+              <dd id="metric-dom" class="metric-val">0 nodes</dd>
+            </div>
+            <div>
+              <dt>Anti-Doping Verdict</dt>
+              <dd id="metric-verdict" class="metric-val text-green" data-verdict="clean">CLEAN</dd>
+            </div>
+          </dl>
+        </div>
+
+        <button id="purge-button" class="ebg-btn secondary" type="button">PURGE ALL INJECTIONS</button>
+      </aside>
+
+      <!-- Central Stage Arena -->
+      <section class="ebg-stage glass">
+        <!-- Event Selector Tabs -->
+        <div class="ebg-tabs" role="tablist">
+          <button class="ebg-tab active" id="tab-scroll" role="tab" aria-selected="true" aria-controls="panel-scroll" type="button">
+            100M SCROLL DASH
+          </button>
+          <button class="ebg-tab" id="tab-balance" role="tab" aria-selected="false" aria-controls="panel-balance" type="button">
+            SLIDER CALIBRATION
+          </button>
+          <button class="ebg-tab" id="tab-lifting" role="tab" aria-selected="false" aria-controls="panel-lifting" type="button">
+            LOAD LIFTER
+          </button>
+        </div>
+
+        <!-- Scroll Sprint Panel -->
+        <div class="ebg-panel active" id="panel-scroll" role="tabpanel" aria-labelledby="tab-scroll">
+          <div class="panel-header">
+            <h2>100m Scroll Dash</h2>
+            <p>Race to the bottom of the track. Scroll kinetic friction is simulated. Stimulate to boost scroll speed.</p>
+          </div>
+
+          <div class="scroll-track-container glass" id="scroll-track-container" tabindex="0" aria-label="100m track vertical view">
+            <div class="scroll-track-inner">
+              <div class="scroll-milestone start">🏁 STARTING BLOCK</div>
+              <div class="scroll-milestone">25 METERS</div>
+              <div class="scroll-milestone">50 METERS</div>
+              <div class="scroll-milestone font-bold">75 METERS</div>
+              <div class="scroll-milestone finish">🏆 FINISH LINE</div>
+            </div>
+          </div>
+
+          <div class="event-hud">
+            <div class="hud-item">
+              <span class="hud-lbl">PROGRESS</span>
+              <span class="hud-val text-cyan" id="scroll-progress-val">0%</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-lbl">TIME ELAPSED</span>
+              <span class="hud-val text-pink" id="scroll-time-val">0.00s</span>
+            </div>
+            <button id="btn-start-scroll" class="ebg-btn primary" type="button">START DASH</button>
+          </div>
+        </div>
+
+        <!-- Slider Balance Panel -->
+        <div class="ebg-panel" id="panel-balance" role="tabpanel" aria-labelledby="tab-balance" style="display: none;">
+          <div class="panel-header">
+            <h2>Synchronized Slider Balance</h2>
+            <p>Keep the balance slider in the green zone (45% - 55%). The system drifts randomly. Hold balance for 10 seconds.</p>
+          </div>
+
+          <div class="balance-arena glass" id="balance-arena">
+            <div class="slider-wrapper" id="slider-wrapper">
+              <div class="target-zone" aria-hidden="true"></div>
+              <input 
+                type="range" 
+                id="balance-slider" 
+                min="0" 
+                max="100" 
+                value="50" 
+                class="neon-slider" 
+                aria-label="Balancing cursor sensor"
+              />
+            </div>
+          </div>
+
+          <div class="event-hud">
+            <div class="hud-item">
+              <span class="hud-lbl">STABLE DURATION</span>
+              <span class="hud-val text-cyan" id="balance-score-val">0.0s</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-lbl">DRIFT STATUS</span>
+              <span class="hud-val text-pink" id="balance-drift-val">STABLE</span>
+            </div>
+            <button id="btn-start-balance" class="ebg-btn primary" type="button">ENGAGE CALIBRATION</button>
+          </div>
+        </div>
+
+        <!-- Load Lifter Panel -->
+        <div class="ebg-panel" id="panel-lifting" role="tabpanel" aria-labelledby="tab-lifting" style="display: none;">
+          <div class="panel-header">
+            <h2>DOM Load Lifter</h2>
+            <p>Hold "HEAVE" to inject child nodes and lift the weight. Release in the target golden zone (85% - 95%). Going over 98% will blow the stack.</p>
+          </div>
+
+          <div class="lifting-arena glass">
+            <div class="lifting-bar-container">
+              <div class="lift-target-zone" aria-hidden="true"></div>
+              <div class="lift-progress-bar" id="lift-progress-bar"></div>
+            </div>
+            <div class="lifting-controls">
+              <button id="btn-heave" class="ebg-btn primary heave-btn" type="button">HEAVE</button>
+              <div class="lifter-log glass" id="lifter-log" aria-live="polite">
+                <div class="log-line text-cyan">> SYSTEM READY. PRESS OR HOLD HEAVE.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="event-hud">
+            <div class="hud-item">
+              <span class="hud-lbl">DOM MASS</span>
+              <span class="hud-val text-cyan" id="lift-mass-val">0 nodes</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-lbl">MAX HEAVED</span>
+              <span class="hud-val text-pink" id="lift-max-val">0 nodes</span>
+            </div>
+            <button id="btn-reset-lifting" class="ebg-btn secondary" type="button">RESET BAR</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hall of Records -->
+      <footer class="ebg-records glass">
+        <h3>ATHLETIC HALL OF RECORDS (LOCAL HISTOGRAM)</h3>
+        <div class="records-grid">
+          <div class="record-col">
+            <h4>100M DASH TOP TIME</h4>
+            <div class="record-stat" id="rec-scroll">--</div>
+          </div>
+          <div class="record-col">
+            <h4>SLIDER CALIBRATION MAX</h4>
+            <div class="record-stat" id="rec-balance">--</div>
+          </div>
+          <div class="record-col">
+            <h4>LOAD LIFTED RECORD</h4>
+            <div class="record-stat" id="rec-lifting">--</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background-color: #0b0c10;
+  }
+
+  .ebg-shell {
+    --bg-dark: #0b0c10;
+    --bg-card: rgba(15, 22, 36, 0.7);
+    --border-color: rgba(0, 240, 255, 0.15);
+    --neon-cyan: #00f0ff;
+    --neon-pink: #ff007f;
+    --neon-lime: #39ff14;
+    --neon-yellow: #fff01f;
+    --text-color: #c5c6c7;
+    --paper-color: #ffffff;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 6rem);
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    color: var(--text-color);
+    font-family: var(--font-sans);
+    overflow: hidden;
+  }
+
+  /* Overlay Onboarding Card */
+  .ebg-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: rgba(11, 12, 16, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-4);
+    backdrop-filter: blur(8px);
+    transition: opacity 300ms ease, visibility 300ms;
+  }
+
+  .ebg-overlay-card {
+    max-width: 500px;
+    padding: var(--spacing-8);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  .stadium-tag {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--neon-pink);
+    font-weight: 800;
+  }
+
+  .ebg-overlay-card h2 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: var(--paper-color);
+    margin: 0;
+  }
+
+  .overlay-note {
+    font-size: 0.85rem;
+    color: var(--neon-yellow);
+    background: rgba(255, 240, 31, 0.1);
+    padding: var(--spacing-2);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Main Grid Layout */
+  .ebg-grid {
+    display: grid;
+    grid-template-columns: minmax(18rem, 22rem) 1fr;
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    width: 100%;
+    margin: 0 auto;
+    max-width: 1400px;
+  }
+
+  /* Sidebar styling */
+  .ebg-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+    padding: var(--spacing-6);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+  }
+
+  .ebg-brand-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--neon-lime);
+    letter-spacing: 0.05em;
+  }
+
+  .ping-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--neon-lime);
+    box-shadow: 0 0 8px var(--neon-lime);
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+  }
+
+  .ebg-sidebar h1 {
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: var(--paper-color);
+    margin: 0;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .ebg-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .ebg-sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .ebg-sidebar-section h2 {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    color: var(--neon-pink);
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .stimulant-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .stim-card {
+    display: flex;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+
+  .stim-card:hover {
+    border-color: rgba(0, 240, 255, 0.3);
+    background: rgba(0, 240, 255, 0.02);
+  }
+
+  .stim-card input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--neon-cyan);
+    cursor: pointer;
+  }
+
+  .stim-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stim-title {
+    font-weight: 700;
+    color: var(--paper-color);
+    font-size: 0.95rem;
+  }
+
+  .stim-desc {
+    font-size: 0.75rem;
+    opacity: 0.75;
+    line-height: 1.25;
+  }
+
+  .ebg-telemetry {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-3);
+    margin: 0;
+  }
+
+  .ebg-telemetry div {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+  }
+
+  .ebg-telemetry dt {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    text-transform: uppercase;
+  }
+
+  .metric-val {
+    margin: 4px 0 0;
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--paper-color);
+    font-family: var(--font-mono);
+  }
+
+  .text-cyan { color: var(--neon-cyan) !important; }
+  .text-pink { color: var(--neon-pink) !important; }
+  .text-green { color: var(--neon-lime) !important; }
+  .text-yellow { color: var(--neon-yellow) !important; }
+
+  /* Tab Arena */
+  .ebg-stage {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    overflow: hidden;
+  }
+
+  .ebg-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .ebg-tab {
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-right: 1px solid var(--border-color);
+    padding: var(--spacing-4) var(--spacing-2);
+    color: var(--text-color);
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .ebg-tab:last-child {
+    border-right: none;
+  }
+
+  .ebg-tab.active {
+    background: transparent;
+    color: var(--neon-cyan);
+    box-shadow: inset 0 -2px 0 var(--neon-cyan);
+  }
+
+  .ebg-tab:hover:not(.active) {
+    background: rgba(0, 240, 255, 0.04);
+    color: var(--paper-color);
+  }
+
+  .ebg-tab:focus-visible,
+  .ebg-btn:focus-visible,
+  .stim-card:focus-within {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+  }
+
+  /* Panels */
+  .ebg-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-6);
+    gap: var(--spacing-6);
+  }
+
+  .panel-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .panel-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--paper-color);
+  }
+
+  .panel-header p {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin: 0;
+  }
+
+  /* Game 1: Scroll Dash Arena */
+  .scroll-track-container {
+    height: 280px;
+    overflow-y: scroll;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.4);
+    position: relative;
+    scroll-behavior: auto;
+    touch-action: none;
+  }
+
+  .scroll-track-inner {
+    height: 3000px; /* Long track */
+    background: 
+      linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px) 0 0 / 100% 40px,
+      linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px) 0 0 / 40px 100%;
+    position: relative;
+  }
+
+  .scroll-milestone {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    opacity: 0.4;
+    border-top: 1px dashed rgba(255, 255, 255, 0.15);
+    padding-top: 8px;
+    font-family: var(--font-mono);
+  }
+
+  .scroll-milestone:nth-child(2) { top: 750px; }
+  .scroll-milestone:nth-child(3) { top: 1500px; }
+  .scroll-milestone:nth-child(4) { top: 2250px; }
+
+  .scroll-marker {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    padding: var(--spacing-3);
+    font-weight: 900;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+  }
+
+  .scroll-marker.start {
+    top: 20px;
+    color: var(--neon-cyan);
+    border-bottom: 2px solid var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.05);
+  }
+
+  .scroll-marker.finish {
+    top: 2900px;
+    color: var(--neon-pink);
+    border-top: 2px dashed var(--neon-pink);
+    background: rgba(255, 0, 127, 0.05);
+  }
+
+  /* Game 2: Slider Balance Arena */
+  .balance-arena {
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .slider-wrapper {
+    width: 80%;
+    position: relative;
+    padding: var(--spacing-6) 0;
+    transition: transform 100ms linear;
+  }
+
+  .target-zone {
+    position: absolute;
+    left: 45%;
+    width: 10%;
+    top: 0;
+    bottom: 0;
+    background: rgba(57, 255, 20, 0.15);
+    border-left: 2px dashed var(--neon-lime);
+    border-right: 2px dashed var(--neon-lime);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+    pointer-events: none;
+  }
+
+  .neon-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .neon-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--neon-cyan);
+    border: 2px solid var(--paper-color);
+    box-shadow: 0 0 10px var(--neon-cyan);
+    cursor: grab;
+    transition: background-color 0.15s, box-shadow 0.15s;
+  }
+
+  .neon-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    background: var(--neon-pink);
+    box-shadow: 0 0 15px var(--neon-pink);
+  }
+
+  /* Game 3: Load Lifter Arena */
+  .lifting-arena {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: var(--spacing-6);
+    height: 280px;
+  }
+
+  .lifting-bar-container {
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lift-target-zone {
+    position: absolute;
+    bottom: 85%;
+    height: 10%;
+    left: 0;
+    right: 0;
+    background: rgba(255, 240, 31, 0.2);
+    border-top: 2px solid var(--neon-yellow);
+    border-bottom: 2px solid var(--neon-yellow);
+    box-shadow: 0 0 15px rgba(255, 240, 31, 0.2);
+    z-index: 1;
+  }
+
+  .lift-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0%;
+    background: linear-gradient(0deg, var(--neon-cyan), var(--neon-pink));
+    box-shadow: 0 0 20px var(--neon-pink);
+    transition: height 50ms linear;
+  }
+
+  .lifting-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    height: 100%;
+  }
+
+  .heave-btn {
+    flex: 1;
+    font-size: 1.5rem !important;
+    letter-spacing: 0.1em;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .lifter-log {
+    height: 120px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: var(--spacing-3);
+    background: rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+    gap: 4px;
+    align-content: start;
+  }
+
+  .log-line {
+    grid-column: 1 / -1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .loaded-node {
+    width: 12px;
+    height: 12px;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 4px var(--neon-cyan);
+    border-radius: 2px;
+    animation: pop 0.15s ease-out;
+  }
+
+  @keyframes pop {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+
+  /* HUD */
+  .event-hud {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: var(--spacing-4);
+    align-items: center;
+  }
+
+  .hud-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+  }
+
+  .hud-lbl {
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    display: block;
+  }
+
+  .hud-val {
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-family: var(--font-mono);
+    line-height: 1;
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* Buttons */
+  .ebg-btn {
+    border-radius: var(--radius-md);
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3) var(--spacing-6);
+  }
+
+  .ebg-btn.primary {
+    background: var(--neon-cyan);
+    color: #0b0c10;
+    border: 1px solid var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .ebg-btn.primary:hover {
+    background: #00d2e0;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+  }
+
+  .ebg-btn.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .ebg-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--paper-color);
+  }
+
+  /* Records Footer */
+  .ebg-records {
+    grid-column: 1 / -1;
+    padding: var(--spacing-6);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  .ebg-records h3 {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--neon-pink);
+    letter-spacing: 0.1em;
+    font-weight: 800;
+  }
+
+  .records-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-4);
+  }
+
+  .record-col {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-md);
+  }
+
+  .record-col h4 {
+    margin: 0 0 4px;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    letter-spacing: 0.05em;
+  }
+
+  .record-stat {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--neon-lime);
+    font-family: var(--font-mono);
+  }
+
+  /* System Glitch Animations */
+  @keyframes shake {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-3px, 2px); }
+    40% { transform: translate(3px, -2px); }
+    60% { transform: translate(-2px, -2px); }
+    80% { transform: translate(2px, 3px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  .glitch-shake {
+    animation: shake 0.1s infinite;
+  }
+
+  /* Responsive Stacking */
+  @media (max-width: 860px) {
+    .ebg-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ebg-sidebar {
+      order: 2;
+    }
+
+    .ebg-stage {
+      order: 1;
+    }
+
+    .ebg-records {
+      order: 3;
+    }
+
+    .records-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .event-hud {
+      grid-template-columns: 1fr;
+    }
+
+    .lifting-arena {
+      grid-template-columns: 2.5rem 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glitch-shake,
+    .ping-dot {
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+  // Dynamic audio check helper
+  interface AudioState {
+    ctx: AudioContext | null;
+    oscillator: OscillatorNode | null;
+    motorHum: OscillatorNode | null;
+    motorGain: GainNode | null;
+  }
+
+  const audioState: AudioState = {
+    ctx: null,
+    oscillator: null,
+    motorHum: null,
+    motorGain: null,
+  };
+
+  const initAudio = () => {
+    if (audioState.ctx) return;
+    try {
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      audioState.ctx = new AudioCtxClass();
+      
+      // Setup constant low-level electrical hum for "overclocked" engine sound
+      const ctx = audioState.ctx;
+      if (ctx) {
+        audioState.motorHum = ctx.createOscillator();
+        audioState.motorGain = ctx.createGain();
+        
+        audioState.motorHum.type = 'sawtooth';
+        audioState.motorHum.frequency.setValueAtTime(60, ctx.currentTime);
+        
+        // Lowpass filter for hum warmness
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(120, ctx.currentTime);
+        
+        audioState.motorGain.gain.setValueAtTime(0, ctx.currentTime);
+        
+        audioState.motorHum.connect(filter);
+        filter.connect(audioState.motorGain);
+        audioState.motorGain.connect(ctx.destination);
+        audioState.motorHum.start();
+      }
+    } catch (e) {
+      console.error("Audio failed to initialize", e);
+    }
+  };
+
+  const playSynthNote = (freq: number, duration: number, type: OscillatorType = 'sine') => {
+    const ctx = audioState.ctx;
+    if (!ctx || ctx.state === 'suspended') return;
+
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (err) {
+      console.warn("Synth failed to play note", err);
+    }
+  };
+
+  const playSuccessChime = () => {
+    const notes = [440, 554, 659, 880];
+    notes.forEach((freq, idx) => {
+      setTimeout(() => playSynthNote(freq, 0.25, 'sine'), idx * 80);
+    });
+  };
+
+  const playFailBuzz = () => {
+    const ctx = audioState.ctx;
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.4);
+      
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
+    } catch (e) {}
+  };
+
+  // State
+  const state = {
+    armed: false,
+    activeTab: 'scroll',
+    scoreTimer: 0,
+    scoreInterval: null as any,
+    scores: {
+      scroll: '--',
+      balance: '--',
+      lifting: '--'
+    },
+    metrics: {
+      temp: 37,
+      integrity: 100,
+      nodes: 0,
+      verdict: 'CLEAN'
+    },
+    stimulants: {
+      raf: false,
+      delay: false,
+      epo: false
+    },
+    games: {
+      scroll: {
+        active: false,
+        startTime: 0,
+        endTime: 0,
+        lastScrollTop: 0
+      },
+      balance: {
+        active: false,
+        duration: 0.0,
+        inZoneTime: 0.0,
+        value: 50
+      },
+      lifting: {
+        active: false,
+        progress: 0,
+        maxNodeCount: 0,
+        holding: false,
+        nodePool: [] as HTMLDivElement[]
+      }
+    }
+  };
+
+  // Load from local storage
+  const loadRecords = () => {
+    try {
+      const saved = localStorage.getItem('ebg-records-store');
+      if (saved) {
+        state.scores = JSON.parse(saved);
+        updateRecordsUI();
+      }
+    } catch (e) {}
+  };
+
+  const saveRecords = () => {
+    try {
+      localStorage.setItem('ebg-records-store', JSON.stringify(state.scores));
+      updateRecordsUI();
+    } catch (e) {}
+  };
+
+  const updateRecordsUI = () => {
+    const recScroll = document.getElementById('rec-scroll');
+    const recBalance = document.getElementById('rec-balance');
+    const recLifting = document.getElementById('rec-lifting');
+    
+    if (recScroll) recScroll.textContent = state.scores.scroll !== '--' ? `${state.scores.scroll}s` : '--';
+    if (recBalance) recBalance.textContent = state.scores.balance !== '--' ? `${state.scores.balance}s` : '--';
+    if (recLifting) recLifting.textContent = state.scores.lifting !== '--' ? `${state.scores.lifting} nodes` : '--';
+  };
+
+  // Elements
+  const root = document.getElementById('ebg-root');
+  const overlay = document.getElementById('ebg-overlay');
+  const armButton = document.getElementById('arm-button');
+  const purgeButton = document.getElementById('purge-button');
+  
+  const stimRAF = document.getElementById('stim-raf') as HTMLInputElement;
+  const stimDelay = document.getElementById('stim-delay') as HTMLInputElement;
+  const stimEPO = document.getElementById('stim-epo') as HTMLInputElement;
+
+  const metricTemp = document.getElementById('metric-temp');
+  const metricIntegrity = document.getElementById('metric-integrity');
+  const metricDom = document.getElementById('metric-dom');
+  const metricVerdict = document.getElementById('metric-verdict');
+
+  // Arm click
+  if (armButton && overlay && root) {
+    armButton.addEventListener('click', () => {
+      initAudio();
+      state.armed = true;
+      overlay.style.opacity = '0';
+      overlay.style.visibility = 'hidden';
+      root.dataset.gameStatus = 'armed';
+      playSynthNote(523.25, 0.15, 'sine'); // C5
+      setTimeout(() => playSynthNote(659.25, 0.15, 'sine'), 100); // E5
+      setTimeout(() => playSynthNote(783.99, 0.25, 'sine'), 200); // G5
+    });
+  }
+
+  // Update telemetry metrics display
+  const updateTelemetryUI = () => {
+    if (metricTemp) {
+      metricTemp.textContent = `${state.metrics.temp}°C`;
+      if (state.metrics.temp > 80) {
+        metricTemp.className = 'metric-val text-pink';
+      } else if (state.metrics.temp > 50) {
+        metricTemp.className = 'metric-val text-yellow';
+      } else {
+        metricTemp.className = 'metric-val text-cyan';
+      }
+    }
+
+    if (metricIntegrity) {
+      metricIntegrity.textContent = `${state.metrics.integrity}%`;
+      if (state.metrics.integrity < 40) {
+        metricIntegrity.className = 'metric-val text-pink';
+      } else if (state.metrics.integrity < 80) {
+        metricIntegrity.className = 'metric-val text-yellow';
+      } else {
+        metricIntegrity.className = 'metric-val text-cyan';
+      }
+    }
+
+    if (metricDom) {
+      metricDom.textContent = `${state.metrics.nodes} nodes`;
+    }
+
+    if (metricVerdict) {
+      metricVerdict.textContent = state.metrics.verdict;
+      metricVerdict.setAttribute('data-verdict', state.metrics.verdict.toLowerCase());
+      if (state.metrics.verdict === 'CLEAN') {
+        metricVerdict.className = 'metric-val text-green';
+      } else if (state.metrics.verdict === 'DOPED') {
+        metricVerdict.className = 'metric-val text-yellow';
+      } else if (state.metrics.verdict === 'SYSTEM CRASH') {
+        metricVerdict.className = 'metric-val text-pink';
+      }
+    }
+  };
+
+  // Recalculate metrics based on stimulants
+  const recalculateMetrics = () => {
+    let activeCount = 0;
+    if (state.stimulants.raf) activeCount++;
+    if (state.stimulants.delay) activeCount++;
+    if (state.stimulants.epo) activeCount++;
+
+    state.metrics.temp = 37 + activeCount * 21;
+    state.metrics.integrity = 100 - activeCount * 33;
+    state.metrics.verdict = activeCount > 0 ? 'DOPED' : 'CLEAN';
+
+    // Core temperature rises when doped
+    updateTelemetryUI();
+
+    // Adjust motor hum volume/frequency based on temperature
+    const ctx = audioState.ctx;
+    if (ctx && audioState.motorGain && audioState.motorHum) {
+      if (activeCount > 0) {
+        audioState.motorGain.gain.setTargetAtTime(0.06 * activeCount, ctx.currentTime, 0.2);
+        audioState.motorHum.frequency.setTargetAtTime(60 + activeCount * 18, ctx.currentTime, 0.3);
+      } else {
+        audioState.motorGain.gain.setTargetAtTime(0, ctx.currentTime, 0.2);
+      }
+    }
+  };
+
+  // Checkbox events
+  const handleStimChange = () => {
+    state.stimulants.raf = stimRAF ? stimRAF.checked : false;
+    state.stimulants.delay = stimDelay ? stimDelay.checked : false;
+    state.stimulants.epo = stimEPO ? stimEPO.checked : false;
+
+    recalculateMetrics();
+
+    if (state.armed) {
+      playSynthNote(400 + (state.stimulants.raf ? 100 : 0) + (state.stimulants.epo ? 100 : 0), 0.1, 'sawtooth');
+    }
+  };
+
+  if (stimRAF) stimRAF.addEventListener('change', handleStimChange);
+  if (stimDelay) stimDelay.addEventListener('change', handleStimChange);
+  if (stimEPO) stimEPO.addEventListener('change', handleStimChange);
+
+  // Purge button
+  if (purgeButton) {
+    purgeButton.addEventListener('click', () => {
+      if (stimRAF) stimRAF.checked = false;
+      if (stimDelay) stimDelay.checked = false;
+      if (stimEPO) stimEPO.checked = false;
+      handleStimChange();
+      resetLiftingGame();
+      if (state.armed) {
+        playSynthNote(300, 0.2, 'sine');
+      }
+    });
+  }
+
+  // ─── TABS NAVIGATION ────────────────────────────────────────────────────────
+  const tabs = Array.from(document.querySelectorAll('.ebg-tab'));
+  const panels = Array.from(document.querySelectorAll('.ebg-panel'));
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const targetPanelId = tab.getAttribute('aria-controls');
+      
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      panels.forEach(p => {
+        (p as HTMLElement).style.display = 'none';
+        p.classList.remove('active');
+      });
+
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      
+      const panel = document.getElementById(targetPanelId || '');
+      if (panel) {
+        panel.style.display = 'flex';
+        panel.classList.add('active');
+      }
+
+      state.activeTab = (targetPanelId || '').replace('panel-', '');
+      if (state.armed) {
+        playSynthNote(600, 0.05, 'sine');
+      }
+    });
+  });
+
+  // ─── GAME 1: SCROLL SPRINT ──────────────────────────────────────────────────
+  const scrollContainer = document.getElementById('scroll-track-container');
+  const btnStartScroll = document.getElementById('btn-start-scroll') as HTMLButtonElement;
+  const scrollProgressVal = document.getElementById('scroll-progress-val');
+  const scrollTimeVal = document.getElementById('scroll-time-val');
+
+  const updateScrollProgress = () => {
+    if (!scrollContainer) return;
+    const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+    if (maxScroll <= 0) return;
+    
+    const current = scrollContainer.scrollTop;
+    const progress = Math.min(100, Math.round((current / maxScroll) * 100));
+    
+    if (scrollProgressVal) {
+      scrollProgressVal.textContent = `${progress}%`;
+    }
+
+    // Interactive synthesizer sound pitching with scroll progress
+    if (state.games.scroll.active && state.armed) {
+      playSynthNote(200 + progress * 5, 0.02, 'sine');
+    }
+
+    if (progress >= 100 && state.games.scroll.active) {
+      completeScrollSprint();
+    }
+  };
+
+  const startScrollSprint = () => {
+    if (!scrollContainer || !btnStartScroll) return;
+    scrollContainer.scrollTop = 0;
+    state.games.scroll.active = true;
+    state.games.scroll.startTime = performance.now();
+    btnStartScroll.textContent = 'SCROLL!';
+    btnStartScroll.disabled = true;
+    
+    if (state.armed) {
+      playSynthNote(440, 0.1, 'sine');
+      setTimeout(() => playSynthNote(440, 0.1, 'sine'), 200);
+      setTimeout(() => playSynthNote(880, 0.3, 'sine'), 400);
+    }
+
+    if (state.scoreInterval) clearInterval(state.scoreInterval);
+    state.scoreInterval = setInterval(() => {
+      if (!state.games.scroll.active) return;
+      const elapsed = ((performance.now() - state.games.scroll.startTime) / 1000).toFixed(2);
+      if (scrollTimeVal) scrollTimeVal.textContent = `${elapsed}s`;
+    }, 30);
+  };
+
+  const completeScrollSprint = () => {
+    state.games.scroll.active = false;
+    if (state.scoreInterval) clearInterval(state.scoreInterval);
+    
+    const elapsed = ((performance.now() - state.games.scroll.startTime) / 1000).toFixed(2);
+    if (scrollTimeVal) scrollTimeVal.textContent = `${elapsed}s`;
+    if (btnStartScroll) {
+      btnStartScroll.textContent = 'COMPLETED';
+      btnStartScroll.disabled = false;
+    }
+
+    if (state.armed) {
+      playSuccessChime();
+    }
+
+    // Save score if better (lower is better)
+    const floatScore = parseFloat(elapsed);
+    const existing = state.scores.scroll;
+    if (existing === '--' || floatScore < parseFloat(existing)) {
+      state.scores.scroll = elapsed;
+      saveRecords();
+    }
+  };
+
+  if (scrollContainer) {
+    scrollContainer.addEventListener('scroll', () => {
+      updateScrollProgress();
+
+      // Anabolic rAF scroll accelerator (Satirical Overclocking)
+      if (state.stimulants.raf && state.games.scroll.active) {
+        // Boost scroll speed programmatically
+        scrollContainer.scrollTop += 60;
+        
+        // Add extreme visual side effects
+        scrollContainer.classList.add('glitch-shake');
+        scrollContainer.style.filter = `blur(${Math.random() * 3 + 1}px)`;
+        
+        // Dynamic cleanup timeout to resolve blur when scroll stops
+        const lastScroll = performance.now();
+        setTimeout(() => {
+          if (performance.now() - lastScroll >= 100) {
+            scrollContainer.classList.remove('glitch-shake');
+            scrollContainer.style.filter = 'none';
+          }
+        }, 100);
+      }
+    });
+  }
+
+  if (btnStartScroll) {
+    btnStartScroll.addEventListener('click', startScrollSprint);
+  }
+
+  // Keyboard accessibility for Scroll Dash
+  if (scrollContainer) {
+    scrollContainer.addEventListener('keydown', (e) => {
+      if (!state.games.scroll.active) return;
+      
+      const step = state.stimulants.raf ? 180 : 35;
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        scrollContainer.scrollTop += step;
+      }
+      if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        scrollContainer.scrollTop -= step;
+      }
+    });
+  }
+
+  // ─── GAME 2: SLIDER BALANCE ─────────────────────────────────────────────────
+  const balanceSlider = document.getElementById('balance-slider') as HTMLInputElement;
+  const sliderWrapper = document.getElementById('slider-wrapper');
+  const btnStartBalance = document.getElementById('btn-start-balance') as HTMLButtonElement;
+  const balanceScoreVal = document.getElementById('balance-score-val');
+  const balanceDriftVal = document.getElementById('balance-drift-val');
+
+  let balanceRAFId = 0;
+
+  const startSliderBalance = () => {
+    if (!balanceSlider || !btnStartBalance) return;
+    state.games.balance.active = true;
+    state.games.balance.duration = 0.0;
+    state.games.balance.inZoneTime = 0.0;
+    state.games.balance.value = 50;
+    balanceSlider.value = '50';
+    btnStartBalance.disabled = true;
+    btnStartBalance.textContent = 'BALANCING...';
+    
+    if (state.armed) {
+      playSynthNote(440, 0.1, 'sine');
+      setTimeout(() => playSynthNote(440, 0.1, 'sine'), 200);
+      setTimeout(() => playSynthNote(880, 0.3, 'sine'), 400);
+    }
+
+    const startTime = performance.now();
+    
+    const loop = (timestamp: number) => {
+      if (!state.games.balance.active) return;
+      
+      const elapsed = (timestamp - startTime) / 1000;
+      state.games.balance.duration = elapsed;
+
+      // Calculate drift force (random sine waves)
+      // Beta-blocker setTimeout halves the drift speed
+      const driftSpeedFactor = state.stimulants.delay ? 0.5 : 1.0;
+      const t = timestamp / 1000 * driftSpeedFactor;
+      const drift = Math.sin(t * 2.5) * 1.6 + Math.cos(t * 4.8) * 1.2;
+
+      // Adjust slider value by drift
+      let val = parseFloat(balanceSlider.value);
+      val += drift;
+      
+      // Layout-Shifting EPO Auto-Snap assist (Satirical Doping)
+      if (state.stimulants.epo) {
+        if (Math.abs(val - 50) < 15) {
+          val += (50 - val) * 0.15; // Smoothly snaps to center
+        }
+      }
+
+      val = Math.max(0, Math.min(100, val));
+      balanceSlider.value = val.toFixed(2);
+      state.games.balance.value = val;
+
+      // Check if value is in target zone (45 - 55)
+      const inZone = val >= 45 && val <= 55;
+      
+      if (inZone) {
+        state.games.balance.inZoneTime += 1 / 60; // Approx 60 FPS addition
+        if (state.armed && Math.random() < 0.15) {
+          playSynthNote(600, 0.04, 'sine'); // Stable soft beeps
+        }
+      } else {
+        if (state.armed && Math.random() < 0.1) {
+          playSynthNote(120, 0.05, 'sawtooth'); // Harsh buzz when out of bounds
+        }
+      }
+
+      // Render duration details
+      if (balanceScoreVal) {
+        balanceScoreVal.textContent = `${state.games.balance.inZoneTime.toFixed(1)}s`;
+      }
+      if (balanceDriftVal) {
+        balanceDriftVal.textContent = inZone ? 'STABLE' : 'DRIFTING!';
+        balanceDriftVal.className = inZone ? 'hud-val text-green' : 'hud-val text-pink';
+      }
+
+      // Layout EPO displacement side effect
+      if (state.stimulants.epo && sliderWrapper) {
+        const xOffset = Math.sin(t * 3.5) * 45;
+        const yOffset = Math.cos(t * 2.1) * 20;
+        sliderWrapper.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+      } else if (sliderWrapper) {
+        sliderWrapper.style.transform = 'translate(0, 0)';
+      }
+
+      // Check for completion
+      if (elapsed >= 10.0) {
+        completeSliderBalance();
+      } else {
+        balanceRAFId = requestAnimationFrame(loop);
+      }
+    };
+
+    balanceRAFId = requestAnimationFrame(loop);
+  };
+
+  const completeSliderBalance = () => {
+    state.games.balance.active = false;
+    cancelAnimationFrame(balanceRAFId);
+    
+    if (btnStartBalance) {
+      btnStartBalance.disabled = false;
+      btnStartBalance.textContent = 'ENGAGE CALIBRATION';
+    }
+
+    if (sliderWrapper) {
+      sliderWrapper.style.transform = 'translate(0, 0)';
+    }
+
+    if (state.armed) {
+      playSuccessChime();
+    }
+
+    const finalScore = state.games.balance.inZoneTime.toFixed(1);
+    const existing = state.scores.balance;
+    if (existing === '--' || parseFloat(finalScore) > parseFloat(existing)) {
+      state.scores.balance = finalScore;
+      saveRecords();
+    }
+  };
+
+  // Handle slider inputs with setTimeout delay (Beta-blocker side effect)
+  if (balanceSlider) {
+    const handleSliderInput = (e: Event) => {
+      const val = (e.target as HTMLInputElement).value;
+      if (!state.games.balance.active) return;
+      state.games.balance.value = parseFloat(val);
+    };
+
+    balanceSlider.addEventListener('input', (e) => {
+      if (state.stimulants.delay) {
+        // Delay cursor response by 180ms
+        setTimeout(() => handleSliderInput(e), 180);
+      } else {
+        handleSliderInput(e);
+      }
+    });
+  }
+
+  if (btnStartBalance) {
+    btnStartBalance.addEventListener('click', startSliderBalance);
+  }
+
+  // Keyboard input override for Slider Balance
+  if (balanceSlider) {
+    balanceSlider.addEventListener('keydown', (e) => {
+      if (!state.games.balance.active) return;
+      
+      const step = state.stimulants.delay ? 1 : 5;
+      let val = parseFloat(balanceSlider.value);
+      
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        val = Math.max(0, val - step);
+        balanceSlider.value = String(val);
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        val = Math.min(100, val + step);
+        balanceSlider.value = String(val);
+      }
+    });
+  }
+
+  // ─── GAME 3: LOAD LIFTER ────────────────────────────────────────────────────
+  const btnHeave = document.getElementById('btn-heave') as HTMLButtonElement;
+  const liftProgressBar = document.getElementById('lift-progress-bar');
+  const lifterLog = document.getElementById('lifter-log');
+  const liftMassVal = document.getElementById('lift-mass-val');
+  const liftMaxVal = document.getElementById('lift-max-val');
+  const btnResetLifting = document.getElementById('btn-reset-lifting');
+
+  let liftingLoopId = 0;
+
+  const appendMockDOMNode = () => {
+    if (!lifterLog) return;
+    const node = document.createElement('div');
+    node.className = 'loaded-node';
+    lifterLog.appendChild(node);
+    state.games.lifting.nodePool.push(node);
+    state.metrics.nodes++;
+    
+    // Auto-scroll the log container
+    lifterLog.scrollTop = lifterLog.scrollHeight;
+    updateTelemetryUI();
+  };
+
+  const clearMockDOMNodes = () => {
+    if (!lifterLog) return;
+    // Remove all loaded-node children, keeping the initial system ready text
+    const nodes = lifterLog.querySelectorAll('.loaded-node');
+    nodes.forEach(n => n.remove());
+    state.metrics.nodes -= state.games.lifting.nodePool.length;
+    state.games.lifting.nodePool = [];
+    updateTelemetryUI();
+  };
+
+  const resetLiftingGame = () => {
+    state.games.lifting.active = false;
+    state.games.lifting.progress = 0;
+    state.games.lifting.holding = false;
+    cancelAnimationFrame(liftingLoopId);
+    
+    if (liftProgressBar) liftProgressBar.style.height = '0%';
+    clearMockDOMNodes();
+    
+    if (liftMassVal) liftMassVal.textContent = '0 nodes';
+    if (lifterLog) {
+      lifterLog.innerHTML = '<div class="log-line text-cyan">> SYSTEM READY. PRESS OR HOLD HEAVE.</div>';
+    }
+    if (btnHeave) btnHeave.disabled = false;
+  };
+
+  const triggerStackOverflow = () => {
+    state.games.lifting.active = false;
+    state.games.lifting.holding = false;
+    cancelAnimationFrame(liftingLoopId);
+
+    if (btnHeave) btnHeave.disabled = true;
+    state.metrics.verdict = 'SYSTEM CRASH';
+    updateTelemetryUI();
+
+    if (state.armed) {
+      playFailBuzz();
+    }
+
+    if (lifterLog) {
+      const log = lifterLog;
+      log.innerHTML = `
+        <div class="log-line text-pink">❌ Uncaught RangeError: Maximum call stack size exceeded</div>
+        <div class="log-line text-pink">    at heave (enhanced-browser-games.astro:612)</div>
+        <div class="log-line text-pink">    at liftRecursive (enhanced-browser-games.astro:613)</div>
+        <div class="log-line text-pink">    at performHeave (enhanced-browser-games.astro:614)</div>
+        <div class="log-line text-pink">    at processQueue (enhanced-browser-games.astro:615)</div>
+        <div class="log-line text-pink">    at rAF (enhanced-browser-games.astro:616)</div>
+        <div class="log-line text-pink">> CORE THREAD OVERWHELMED. PURGE REQUIRED.</div>
+      `;
+      log.scrollTop = log.scrollHeight;
+    }
+  };
+
+  const startLiftingPress = () => {
+    if (state.metrics.verdict === 'SYSTEM CRASH') return;
+    if (state.games.lifting.active) return;
+    
+    state.games.lifting.active = true;
+    state.games.lifting.holding = true;
+    state.games.lifting.progress = 0;
+
+    if (lifterLog) {
+      lifterLog.innerHTML = '<div class="log-line text-cyan">> CHARGING HYDRAULICS...</div>';
+    }
+
+    const loop = () => {
+      if (!state.games.lifting.holding) return;
+
+      // Anabolic rAF increases lifting velocity by 4x
+      const speed = state.stimulants.raf ? 2.8 : 0.7;
+      state.games.lifting.progress = Math.min(100, state.games.lifting.progress + speed);
+
+      // Render progress bar
+      if (liftProgressBar) {
+        liftProgressBar.style.height = `${state.games.lifting.progress}%`;
+      }
+
+      // Add actual DOM node stress tests (appending nodes!)
+      const nodeAppendCount = state.stimulants.raf ? 4 : 1;
+      for (let i = 0; i < nodeAppendCount; i++) {
+        appendMockDOMNode();
+      }
+
+      const totalNodes = state.games.lifting.nodePool.length;
+      if (liftMassVal) {
+        liftMassVal.textContent = `${totalNodes} nodes`;
+      }
+
+      // Pitch synth upwards as load grows
+      if (state.armed) {
+        playSynthNote(150 + state.games.lifting.progress * 8, 0.03, 'sawtooth');
+      }
+
+      // Check for Stack Overflow
+      if (state.games.lifting.progress >= 98.0) {
+        triggerStackOverflow();
+      } else {
+        liftingLoopId = requestAnimationFrame(loop);
+      }
+    };
+
+    liftingLoopId = requestAnimationFrame(loop);
+  };
+
+  const releaseLiftingPress = () => {
+    if (!state.games.lifting.active || state.metrics.verdict === 'SYSTEM CRASH') return;
+    state.games.lifting.holding = false;
+    cancelAnimationFrame(liftingLoopId);
+
+    const progress = state.games.lifting.progress;
+    const totalNodes = state.games.lifting.nodePool.length;
+    
+    // Target zone: 85 - 95
+    const success = progress >= 85 && progress <= 95;
+
+    if (success) {
+      if (state.armed) {
+        playSuccessChime();
+      }
+      if (lifterLog) {
+        const line = document.createElement('div');
+        line.className = 'log-line text-green';
+        line.textContent = `🏆 SUCCESS! Lifted ${totalNodes} DOM elements successfully.`;
+        lifterLog.appendChild(line);
+        lifterLog.scrollTop = lifterLog.scrollHeight;
+      }
+
+      // Record max load (higher is better)
+      const existing = state.scores.lifting;
+      if (existing === '--' || totalNodes > parseInt(existing)) {
+        state.scores.lifting = String(totalNodes);
+        saveRecords();
+      }
+      
+      if (liftMaxVal) {
+        liftMaxVal.textContent = `${state.scores.lifting} nodes`;
+      }
+    } else {
+      if (state.armed) {
+        playFailBuzz();
+      }
+      if (lifterLog) {
+        const line = document.createElement('div');
+        line.className = 'log-line text-pink';
+        line.textContent = progress < 85 ? `❌ FAILED: Premature release at ${progress.toFixed(0)}%.` : `❌ FAILED: Lift over-extended.`;
+        lifterLog.appendChild(line);
+        lifterLog.scrollTop = lifterLog.scrollHeight;
+      }
+    }
+
+    state.games.lifting.active = false;
+  };
+
+  if (btnHeave) {
+    btnHeave.addEventListener('mousedown', startLiftingPress);
+    window.addEventListener('mouseup', releaseLiftingPress);
+
+    btnHeave.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startLiftingPress();
+    });
+    window.addEventListener('touchend', releaseLiftingPress);
+  }
+
+  // Keyboard accessibility for Heave button
+  if (btnHeave) {
+    btnHeave.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        startLiftingPress();
+      }
+    });
+    btnHeave.addEventListener('keyup', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        releaseLiftingPress();
+      }
+    });
+  }
+
+  if (btnResetLifting) {
+    btnResetLifting.addEventListener('click', resetLiftingGame);
+  }
+
+  // Page initialization
+  loadRecords();
+  recalculateMetrics();
+</script>
