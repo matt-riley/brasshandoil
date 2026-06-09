@@ -373,3 +373,14 @@ Carry Forward:
 - Use type-narrowing on DOM/SVG nodes inside Astro scripts (`as unknown as ...`) to satisfy production compilation rules cleanly.
 - Maintain real-time text sanitization with distinct visual feedback (e.g. status badge) so interaction mechanics are legible.
 - Ensure that mouse, touch, and keyboard interaction bounds are completely aligned, especially for rotary or radial wheels.
+
+### Session Entry
+
+Date: 2026-06-09
+Experiment: Quartz Alibi Foundry
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Keep exact shared class hooks when source contracts search literal markup, and move per-item placement into `data-*` attributes.
+- Use pointer-transparent visual layers for roaming lenses, SVG fields, and resonance effects so stable controls remain clickable.
+- If the in-app browser blocks localhost by policy, record it and rely on the already-run Playwright route checks plus `pnpm build`.

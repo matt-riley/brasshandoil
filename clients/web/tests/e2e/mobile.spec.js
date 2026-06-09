@@ -44,6 +44,7 @@ const pages = [
   "/experiments/enhanced-browser-games",
   "/experiments/operation-mary",
   "/experiments/post-detection-decorum",
+  "/experiments/quartz-alibi-foundry",
 ]
 
 test.use({

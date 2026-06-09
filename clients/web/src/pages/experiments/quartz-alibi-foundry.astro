@@ -1,0 +1,566 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Quartz Alibi Foundry">
+  <main class="qa-shell">
+    <section class="qa-console" aria-label="Quartz testimony controls">
+      <p class="qa-kicker">Mineral testimony bench / night kiln</p>
+      <h1>Quartz Alibi Foundry</h1>
+      <p class="qa-intro">
+        Sweep the lens through the cooled seam. Anneal shards into testimony,
+        forge a temporary verdict, then cool the kiln before the crystal changes
+        its recollection.
+      </p>
+
+      <div class="qa-readouts" aria-live="polite">
+        <div>
+          <span>Testimony</span>
+          <strong id="testimony-count">0</strong>
+        </div>
+        <div>
+          <span>Phase</span>
+          <strong id="phase-reading">0</strong>
+        </div>
+        <div>
+          <span>Witness</span>
+          <strong id="current-witness">none</strong>
+        </div>
+        <div>
+          <span>Verdict</span>
+          <strong id="verdict-state">unheated</strong>
+        </div>
+      </div>
+
+      <div class="qa-actions">
+        <button id="forge-button" type="button">Forge Alibi</button>
+        <button id="cool-button" type="button">Cool Kiln</button>
+      </div>
+    </section>
+
+    <section
+      id="qa-stage"
+      class="qa-stage"
+      data-awake="false"
+      data-testimony="0"
+      aria-label="Quartz alibi foundry stage"
+    >
+      <svg class="qa-field" viewBox="0 0 1000 720" aria-hidden="true">
+        <defs>
+          <filter id="qa-warp">
+            <feTurbulence baseFrequency="0.011 0.026" numOctaves="2" seed="14" />
+            <feDisplacementMap in="SourceGraphic" scale="12" />
+          </filter>
+          <linearGradient id="qa-vein" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#f8f1d3" stop-opacity="0.9" />
+            <stop offset="0.45" stop-color="#6ee7c8" stop-opacity="0.65" />
+            <stop offset="1" stop-color="#e65f69" stop-opacity="0.68" />
+          </linearGradient>
+        </defs>
+        <path class="qa-map" d="M40 520 C180 440 250 640 410 540 S650 390 820 460 950 390 990 260" />
+        <path class="qa-map qa-map-secondary" d="M70 270 C170 210 260 280 360 220 S570 90 710 190 860 280 950 180" />
+        <path class="qa-map qa-map-third" d="M120 630 C240 560 330 660 470 610 S650 510 770 560 900 620 960 500" />
+        <g filter="url(#qa-warp)">
+          <polygon points="197,198 230,148 276,194 247,256" />
+          <polygon points="410,113 468,89 512,147 474,207 412,187" />
+          <polygon points="608,263 682,226 744,286 712,371 628,355" />
+          <polygon points="770,486 832,438 902,492 883,604 798,594" />
+          <polygon points="442,476 506,426 565,500 522,605 445,575" />
+          <polygon points="242,442 302,388 360,466 328,566 252,548" />
+          <polygon points="670,106 740,72 806,142 760,229 686,202" />
+        </g>
+      </svg>
+
+      <div id="qa-lens" class="qa-lens" aria-hidden="true"></div>
+      <div class="qa-beam" aria-hidden="true"></div>
+
+      <button class="qa-shard" type="button" data-name="basalt notary" data-index="0" aria-pressed="false">
+        <span>basalt notary</span>
+      </button>
+      <button class="qa-shard" type="button" data-name="mica usher" data-index="1" aria-pressed="false">
+        <span>mica usher</span>
+      </button>
+      <button class="qa-shard" type="button" data-name="selenite clerk" data-index="2" aria-pressed="false">
+        <span>selenite clerk</span>
+      </button>
+      <button class="qa-shard" type="button" data-name="jasper bailiff" data-index="3" aria-pressed="false">
+        <span>jasper bailiff</span>
+      </button>
+      <button class="qa-shard" type="button" data-name="feldspar juror" data-index="4" aria-pressed="false">
+        <span>feldspar juror</span>
+      </button>
+      <button class="qa-shard" type="button" data-name="obsidian scribe" data-index="5" aria-pressed="false">
+        <span>obsidian scribe</span>
+      </button>
+      <button class="qa-shard" type="button" data-name="quartz foreperson" data-index="6" aria-pressed="false">
+        <span>quartz foreperson</span>
+      </button>
+
+      <div class="qa-echo" data-index="0" aria-hidden="true"></div>
+      <div class="qa-echo" data-index="1" aria-hidden="true"></div>
+      <div class="qa-echo" data-index="2" aria-hidden="true"></div>
+      <div class="qa-echo" data-index="3" aria-hidden="true"></div>
+      <div class="qa-echo" data-index="4" aria-hidden="true"></div>
+      <div class="qa-echo" data-index="5" aria-hidden="true"></div>
+      <div class="qa-echo" data-index="6" aria-hidden="true"></div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #101316;
+  }
+
+  .qa-shell {
+    --cream: #fff4cf;
+    --ink: #111316;
+    --mint: #6ee7c8;
+    --rose: #e65f69;
+    --violet: #8f7af2;
+    --amber: #f0b84f;
+    --lens-x: 50%;
+    --lens-y: 50%;
+    display: grid;
+    grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr);
+    gap: clamp(1rem, 2vw, 1.5rem);
+    width: min(100%, 1160px);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.4vw, 1.8rem);
+    color: var(--cream);
+    background:
+      linear-gradient(120deg, rgba(110, 231, 200, 0.18), transparent 24rem),
+      radial-gradient(circle at 86% 18%, rgba(230, 95, 105, 0.24), transparent 15rem),
+      linear-gradient(180deg, #17181e 0%, #111316 56%, #08090b 100%);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .qa-console {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 1rem;
+  }
+
+  .qa-kicker,
+  .qa-readouts span {
+    color: var(--mint);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 9ch;
+    color: var(--cream);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.55rem, 5.1vw, 4.7rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.9;
+    text-shadow:
+      0.04em 0.04em 0 rgba(110, 231, 200, 0.42),
+      -0.035em 0.055em 0 rgba(230, 95, 105, 0.58);
+  }
+
+  .qa-intro {
+    max-width: 31rem;
+    color: rgba(255, 244, 207, 0.82);
+    font-size: clamp(0.98rem, 1.4vw, 1.07rem);
+    line-height: 1.58;
+  }
+
+  .qa-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.72rem;
+  }
+
+  .qa-readouts div {
+    min-width: 0;
+    border: 1px solid rgba(255, 244, 207, 0.2);
+    border-radius: 8px;
+    padding: 0.8rem;
+    background: rgba(8, 9, 11, 0.58);
+  }
+
+  .qa-readouts strong {
+    display: block;
+    margin-top: 0.42rem;
+    color: var(--cream);
+    font-size: clamp(1.08rem, 2.4vw, 1.5rem);
+    line-height: 1.06;
+    overflow-wrap: anywhere;
+  }
+
+  .qa-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.72rem;
+  }
+
+  .qa-actions button {
+    min-height: 3.15rem;
+    border: 1px solid rgba(255, 244, 207, 0.34);
+    border-radius: 8px;
+    color: var(--ink);
+    background: var(--amber);
+    font: 800 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: filter 150ms ease, transform 150ms ease;
+  }
+
+  .qa-actions button:hover,
+  .qa-actions button:focus-visible {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+
+  #cool-button {
+    color: var(--cream);
+    background: #2b3340;
+  }
+
+  .qa-stage {
+    position: relative;
+    min-height: min(64rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(255, 244, 207, 0.18);
+    border-radius: 8px;
+    background:
+      linear-gradient(90deg, rgba(255, 244, 207, 0.07) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      linear-gradient(0deg, rgba(255, 244, 207, 0.055) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      radial-gradient(circle at var(--lens-x) var(--lens-y), rgba(110, 231, 200, 0.22), transparent 14rem),
+      #171a1f;
+    box-shadow:
+      inset 0 0 6rem rgba(0, 0, 0, 0.58),
+      0 1rem 2.2rem rgba(0, 0, 0, 0.3);
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .qa-field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.88;
+  }
+
+  .qa-field polygon {
+    fill: rgba(255, 244, 207, 0.1);
+    stroke: rgba(255, 244, 207, 0.4);
+    stroke-width: 3;
+  }
+
+  .qa-map {
+    fill: none;
+    stroke: url(#qa-vein);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 18 16;
+    opacity: 0.74;
+  }
+
+  .qa-map-secondary {
+    stroke-width: 5;
+    opacity: 0.52;
+  }
+
+  .qa-map-third {
+    stroke-width: 4;
+    opacity: 0.46;
+  }
+
+  .qa-lens,
+  .qa-beam {
+    position: absolute;
+    left: var(--lens-x);
+    top: var(--lens-y);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .qa-lens {
+    z-index: 4;
+    width: clamp(4rem, 9vw, 6.5rem);
+    aspect-ratio: 1;
+    border: 2px solid rgba(255, 244, 207, 0.88);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, rgba(255, 244, 207, 0.26) 0 22%, transparent 23% 100%),
+      conic-gradient(from 20deg, rgba(110, 231, 200, 0.64), rgba(230, 95, 105, 0.34), rgba(240, 184, 79, 0.54), rgba(110, 231, 200, 0.64));
+    box-shadow:
+      0 0 2.6rem rgba(110, 231, 200, 0.42),
+      inset 0 0 1.2rem rgba(8, 9, 11, 0.52);
+    mix-blend-mode: screen;
+  }
+
+  .qa-beam {
+    z-index: 1;
+    width: clamp(13rem, 25vw, 22rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(110, 231, 200, 0.18), transparent 68%);
+    filter: blur(6px);
+  }
+
+  .qa-shard {
+    position: absolute;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: clamp(4.5rem, 9vw, 7.2rem);
+    aspect-ratio: 1 / 1.15;
+    border: 1px solid rgba(255, 244, 207, 0.48);
+    border-radius: 0.5rem 1.9rem 0.55rem 1.45rem;
+    color: var(--cream);
+    background:
+      linear-gradient(140deg, rgba(255, 244, 207, 0.18), rgba(110, 231, 200, 0.14) 42%, rgba(230, 95, 105, 0.1)),
+      rgba(10, 12, 15, 0.78);
+    box-shadow:
+      inset -1rem -1.2rem 1.4rem rgba(0, 0, 0, 0.32),
+      0 0.7rem 1.5rem rgba(0, 0, 0, 0.28);
+    clip-path: polygon(50% 0, 94% 28%, 78% 100%, 18% 88%, 3% 30%);
+    cursor: pointer;
+    transform: rotate(var(--tilt));
+  }
+
+  .qa-shard span {
+    max-width: 6.5rem;
+    padding: 0.2rem;
+    font: 800 0.7rem/1.05 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-align: center;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .qa-shard:hover,
+  .qa-shard:focus-visible,
+  .qa-shard[aria-pressed="true"] {
+    outline: 2px solid var(--mint);
+    outline-offset: 3px;
+    filter: brightness(1.16);
+  }
+
+  .qa-shard[aria-pressed="true"] {
+    background:
+      linear-gradient(140deg, rgba(255, 244, 207, 0.34), rgba(110, 231, 200, 0.28) 42%, rgba(230, 95, 105, 0.23)),
+      rgba(10, 12, 15, 0.86);
+  }
+
+  .qa-shard[data-index="0"] { left: 18%; top: 20%; --tilt: -10deg; }
+  .qa-shard[data-index="1"] { left: 41%; top: 12%; --tilt: 7deg; }
+  .qa-shard[data-index="2"] { left: 66%; top: 29%; --tilt: -6deg; }
+  .qa-shard[data-index="3"] { left: 78%; top: 66%; --tilt: 9deg; }
+  .qa-shard[data-index="4"] { left: 49%; top: 64%; --tilt: -12deg; }
+  .qa-shard[data-index="5"] { left: 24%; top: 58%; --tilt: 6deg; }
+  .qa-shard[data-index="6"] { left: 73%; top: 13%; --tilt: 13deg; }
+
+  .qa-echo {
+    position: absolute;
+    z-index: 2;
+    width: clamp(6rem, 12vw, 10rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(110, 231, 200, 0.34);
+    border-radius: 50%;
+    opacity: 0.28;
+    transform: translate(-50%, -50%) scale(var(--echo-scale, 0.8));
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .qa-stage[data-testimony="1"] .qa-echo,
+  .qa-stage[data-testimony="2"] .qa-echo,
+  .qa-stage[data-testimony="3"] .qa-echo,
+  .qa-stage[data-testimony="4"] .qa-echo,
+  .qa-stage[data-testimony="5"] .qa-echo,
+  .qa-stage[data-testimony="6"] .qa-echo,
+  .qa-stage[data-testimony="7"] .qa-echo {
+    opacity: 0.5;
+  }
+
+  .qa-echo[data-index="0"] { left: 23%; top: 27%; }
+  .qa-echo[data-index="1"] { left: 47%; top: 20%; }
+  .qa-echo[data-index="2"] { left: 71%; top: 36%; }
+  .qa-echo[data-index="3"] { left: 83%; top: 74%; }
+  .qa-echo[data-index="4"] { left: 54%; top: 73%; }
+  .qa-echo[data-index="5"] { left: 30%; top: 67%; }
+  .qa-echo[data-index="6"] { left: 78%; top: 22%; }
+
+  @media (max-width: 760px) {
+    .qa-shell {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      padding: 0.85rem;
+    }
+
+    h1 {
+      max-width: 10ch;
+      font-size: clamp(2.2rem, 14vw, 3.4rem);
+    }
+
+    .qa-stage {
+      min-height: 31rem;
+    }
+
+    .qa-readouts {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .qa-shard {
+      width: clamp(3.7rem, 18vw, 5rem);
+    }
+
+    .qa-shard span {
+      font-size: 0.58rem;
+    }
+  }
+</style>
+
+<script is:inline>
+  function initQuartzAlibiFoundry() {
+    const stage = document.querySelector("#qa-stage")
+    if (!stage || stage.dataset.ready === "true") return
+    stage.dataset.ready = "true"
+
+    const lens = document.querySelector("#qa-lens")
+    const shards = Array.from(document.querySelectorAll(".qa-shard"))
+    const echoes = Array.from(document.querySelectorAll(".qa-echo"))
+    const testimonyCount = document.querySelector("#testimony-count")
+    const phaseReading = document.querySelector("#phase-reading")
+    const currentWitness = document.querySelector("#current-witness")
+    const verdictState = document.querySelector("#verdict-state")
+    const forgeButton = document.querySelector("#forge-button")
+    const coolButton = document.querySelector("#cool-button")
+    const normalizedLens = { x: 0.5, y: 0.5 }
+    const currentLens = { x: 0.5, y: 0.5 }
+    let phaseBoost = 0
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value))
+    }
+
+    function setLensFromPoint(clientX, clientY) {
+      const rect = stage.getBoundingClientRect()
+      normalizedLens.x = clamp((clientX - rect.left) / rect.width, 0, 1)
+      normalizedLens.y = clamp((clientY - rect.top) / rect.height, 0, 1)
+      stage.dataset.awake = "true"
+      updatePhase()
+    }
+
+    function countPressed() {
+      return shards.filter((shard) => shard.getAttribute("aria-pressed") === "true").length
+    }
+
+    function updatePhase() {
+      const distance = Math.hypot(normalizedLens.x - 0.5, normalizedLens.y - 0.5)
+      const reading = Math.round(clamp((1 - distance) * 52 + countPressed() * 8 + phaseBoost, 0, 99))
+      phaseReading.textContent = String(reading)
+    }
+
+    function updateVerdict(lastShard) {
+      const total = countPressed()
+      stage.dataset.testimony = String(total)
+      testimonyCount.textContent = String(total)
+      currentWitness.textContent = lastShard?.dataset.name || (total ? "chorus seam" : "none")
+      verdictState.textContent = total ? "contradictory" : "unheated"
+      updatePhase()
+    }
+
+    function toggleShard(shard) {
+      const isPressed = shard.getAttribute("aria-pressed") === "true"
+      shard.setAttribute("aria-pressed", String(!isPressed))
+      phaseBoost = 0
+      updateVerdict(shard)
+    }
+
+    shards.forEach((shard, index) => {
+      shard.addEventListener("click", () => toggleShard(shard))
+      shard.addEventListener("focus", () => {
+        const box = shard.getBoundingClientRect()
+        setLensFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+      })
+      shard.dataset.index = String(index)
+    })
+
+    stage.addEventListener("pointermove", (event) => {
+      setLensFromPoint(event.clientX, event.clientY)
+    })
+
+    stage.addEventListener("touchstart", (event) => {
+      const touch = event.touches[0]
+      if (touch) setLensFromPoint(touch.clientX, touch.clientY)
+    }, { passive: true })
+
+    stage.addEventListener("touchmove", (event) => {
+      const touch = event.touches[0]
+      if (touch) setLensFromPoint(touch.clientX, touch.clientY)
+    }, { passive: true })
+
+    stage.addEventListener("touchend", updatePhase, { passive: true })
+    stage.addEventListener("touchcancel", updatePhase, { passive: true })
+
+    document.addEventListener("keydown", (event) => {
+      const active = document.activeElement
+      if (!active?.classList?.contains("qa-shard")) return
+      const currentIndex = shards.indexOf(active)
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault()
+        shards[(currentIndex + 1) % shards.length].focus()
+      }
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault()
+        shards[(currentIndex - 1 + shards.length) % shards.length].focus()
+      }
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        toggleShard(active)
+      }
+    })
+
+    forgeButton.addEventListener("click", () => {
+      phaseBoost = 36
+      verdictState.textContent = "temporarily coherent"
+      stage.dataset.awake = "true"
+      updatePhase()
+    })
+
+    coolButton.addEventListener("click", () => {
+      phaseBoost = 0
+      shards.forEach((shard) => shard.setAttribute("aria-pressed", "false"))
+      stage.dataset.testimony = "0"
+      testimonyCount.textContent = "0"
+      phaseReading.textContent = "0"
+      currentWitness.textContent = "none"
+      verdictState.textContent = "unheated"
+    })
+
+    function animate() {
+      currentLens.x += (normalizedLens.x - currentLens.x) * 0.18
+      currentLens.y += (normalizedLens.y - currentLens.y) * 0.18
+      stage.style.setProperty("--lens-x", `${(currentLens.x * 100).toFixed(2)}%`)
+      stage.style.setProperty("--lens-y", `${(currentLens.y * 100).toFixed(2)}%`)
+      const pulse = 0.86 + countPressed() * 0.035 + Math.sin(Date.now() / 360) * 0.04
+      echoes.forEach((echo, index) => {
+        echo.style.setProperty("--echo-scale", String(pulse + index * 0.015))
+      })
+      requestAnimationFrame(animate)
+    }
+
+    updateVerdict()
+    requestAnimationFrame(animate)
+    lens.hidden = false
+  }
+
+  initQuartzAlibiFoundry()
+  document.addEventListener("astro:page-load", initQuartzAlibiFoundry)
+</script>
