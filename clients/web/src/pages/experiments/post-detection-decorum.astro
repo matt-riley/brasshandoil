@@ -1,0 +1,1172 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Post-Detection Decorum // SETI Calibration Desk">
+  <div class="decorum-desk">
+    <header class="desk-header">
+      <h1 class="page-title text-gradient">Post-Detection Decorum</h1>
+      <p class="subtitle font-mono">SETI POST-DETECTION PROTOCOL SIGN-OFF // ASSEMBLY RESOLUTION 2026.4B</p>
+    </header>
+
+    <div class="desk-grid">
+      <!-- Left Column: The Calibration Wheel -->
+      <div class="panel wheel-panel glass">
+        <h2 class="panel-title font-mono">I. Angular Signal Lock</h2>
+        <p class="panel-desc">Drag the wheel or use Arrow Keys to align the reception target with the cosmic validator coordinates.</p>
+        
+        <div class="wheel-outer">
+          <div 
+            id="validation-wheel" 
+            class="wheel-container" 
+            tabindex="0" 
+            data-angle="0"
+            aria-label="Signal Validation Dial"
+          >
+            <!-- SVG Validation Grid -->
+            <svg viewBox="0 0 400 400" class="wheel-svg" id="wheel-svg">
+              <defs>
+                <radialGradient id="glow-cyan" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#00ffcc" stop-opacity="0.6"/>
+                  <stop offset="100%" stop-color="#00ffcc" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="glow-magenta" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ff00ff" stop-opacity="0.6"/>
+                  <stop offset="100%" stop-color="#ff00ff" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="glow-yellow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ffff00" stop-opacity="0.6"/>
+                  <stop offset="100%" stop-color="#ffff00" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="core-glow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="#070a13" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+
+              <!-- Backdrop glow -->
+              <circle cx="200" cy="200" r="180" fill="url(#core-glow)" />
+
+              <!-- Constellation Lines / Radar Sweep -->
+              <g class="radar-sweep">
+                <line x1="200" y1="200" x2="200" y2="20" stroke="rgba(0, 255, 204, 0.15)" stroke-width="1.5" />
+                <path d="M 200 20 A 180 180 0 0 1 327 72 L 200 200 Z" fill="rgba(0, 255, 204, 0.03)" />
+              </g>
+
+              <!-- Concentric calibration rings -->
+              <circle cx="200" cy="200" r="180" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" fill="none" />
+              <circle cx="200" cy="200" r="130" stroke="rgba(255, 255, 255, 0.05)" stroke-dasharray="4,6" stroke-width="1" fill="none" />
+              <circle cx="200" cy="200" r="80" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" fill="none" />
+              <circle cx="200" cy="200" r="30" stroke="rgba(255, 255, 255, 0.12)" stroke-dasharray="2,3" fill="none" />
+
+              <!-- Coordinate Axes -->
+              <line x1="20" y1="200" x2="380" y2="200" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1" />
+              <line x1="200" y1="20" x2="200" y2="380" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1" />
+
+              <!-- Validator Nodes on the Wheel (Static Angles) -->
+              <!-- Node 0: 45 deg, radius 130 -->
+              <!-- cx = 200 + 130 * cos(45) = 200 + 91.9 = 292, cy = 200 + 130 * sin(45) = 292 -->
+              <g class="svg-node" id="svg-node-0" transform="translate(292, 292)">
+                <circle cx="0" cy="0" r="18" fill="url(#glow-cyan)" class="node-glow" />
+                <circle cx="0" cy="0" r="6" fill="#00ffcc" class="node-center" />
+                <circle cx="0" cy="0" r="10" stroke="#00ffcc" stroke-width="1" fill="none" class="node-ring" />
+              </g>
+
+              <!-- Node 1: 180 deg, radius 150 -->
+              <!-- cx = 200 + 150 * cos(180) = 50, cy = 200 + 150 * sin(180) = 200 -->
+              <g class="svg-node" id="svg-node-1" transform="translate(50, 200)">
+                <circle cx="0" cy="0" r="18" fill="url(#glow-magenta)" class="node-glow" />
+                <circle cx="0" cy="0" r="6" fill="#ff00ff" class="node-center" />
+                <circle cx="0" cy="0" r="10" stroke="#ff00ff" stroke-width="1" fill="none" class="node-ring" />
+              </g>
+
+              <!-- Node 2: 300 deg, radius 110 -->
+              <!-- cos(300) = 0.5, sin(300) = -0.866. cx = 200 + 110 * 0.5 = 255, cy = 200 + 110 * (-0.866) = 200 - 95.3 = 104.7 -->
+              <g class="svg-node" id="svg-node-2" transform="translate(255, 105)">
+                <circle cx="0" cy="0" r="18" fill="url(#glow-yellow)" class="node-glow" />
+                <circle cx="0" cy="0" r="6" fill="#ffff00" class="node-center" />
+                <circle cx="0" cy="0" r="10" stroke="#ffff00" stroke-width="1" fill="none" class="node-ring" />
+              </g>
+
+              <!-- Rotating Crosshair Dial Interface -->
+              <g id="svg-dial" class="dial-g">
+                <line x1="200" y1="200" x2="380" y2="200" stroke="#ff4500" stroke-width="1.5" stroke-dasharray="4,2" />
+                <circle cx="320" cy="200" r="12" stroke="#ff4500" stroke-width="2" fill="none" />
+                <path d="M 320 184 L 320 216 M 304 200 L 336 200" stroke="#ff4500" stroke-width="1" />
+              </g>
+            </svg>
+            <div class="angle-overlay font-mono"><span id="angle-display">0</span>°</div>
+          </div>
+        </div>
+        
+        <div class="keyboard-hint font-mono">
+          [ARROW KEYS] Rotate Dial // [SPACE / ENTER] Lock Current Alignment // [ESC] Reset
+        </div>
+      </div>
+
+      <!-- Right Column: Verification & Madlibs Draft -->
+      <div class="panel control-panel glass">
+        <div class="panel-section">
+          <h2 class="panel-title font-mono">II. Validator Nodes</h2>
+          <div id="system-status" class="status-indicator warning font-mono">
+            STATUS: AWAITING VERIFICATION (0/3 VALIDATED)
+          </div>
+          
+          <div class="validators-list">
+            <div class="validator-node" id="node-0" data-angle="45">
+              <div class="node-led"></div>
+              <div class="node-info">
+                <div class="node-name font-mono">NODE ALPHA (45°)</div>
+                <div class="node-details">Kepler Survey Grid // Freq: 220Hz</div>
+              </div>
+              <div class="node-verdict font-mono">UNVERIFIED</div>
+            </div>
+
+            <div class="validator-node" id="node-1" data-angle="180">
+              <div class="node-led"></div>
+              <div class="node-info">
+                <div class="node-name font-mono">NODE BETA (180°)</div>
+                <div class="node-details">VLA Array Telescope // Freq: 277Hz</div>
+              </div>
+              <div class="node-verdict font-mono">UNVERIFIED</div>
+            </div>
+
+            <div class="validator-node" id="node-2" data-angle="300">
+              <div class="node-led"></div>
+              <div class="node-info">
+                <div class="node-name font-mono">NODE GAMMA (300°)</div>
+                <div class="node-details">FAST Spherical Array // Freq: 330Hz</div>
+              </div>
+              <div class="node-verdict font-mono">UNVERIFIED</div>
+            </div>
+          </div>
+
+          <button id="lock-btn" class="btn btn-primary" disabled>
+            Lock Coordinates & Draft Dispatch
+          </button>
+        </div>
+
+        <!-- Hidden initially, revealed when coordinates are fully locked -->
+        <div id="draft-container" class="panel-section hidden">
+          <h2 class="panel-title font-mono">III. Diplomatic Notice Draft</h2>
+          <p class="panel-desc">
+            In compliance with SETI resolution 2026.4b, direct raw transcription is suspended. Select authorized diplomatic descriptions to satisfy global tranquility standards.
+          </p>
+
+          <div class="madlibs-form">
+            <div class="form-group">
+              <label for="madlib-nature" class="font-mono">Detected Event Classification:</label>
+              <select id="madlib-nature" class="select-field">
+                <option value="a harmless microwave oven anomaly">a harmless microwave oven anomaly</option>
+                <option value="a minor solar flare reflection">a minor solar flare reflection</option>
+                <option value="a very polite click">a very polite click</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="madlib-origin" class="font-mono">Estimated Origin coordinates:</label>
+              <select id="madlib-origin" class="select-field">
+                <option value="the immediate upper atmosphere">the immediate upper atmosphere</option>
+                <option value="a microwave in the staff canteen">a microwave in the staff canteen</option>
+                <option value="an unlisted terrestrial amateur radio">an unlisted terrestrial amateur radio</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="madlib-action" class="font-mono">Recommended Countermeasure:</label>
+              <select id="madlib-action" class="select-field">
+                <option value="disregard and proceed with tea break">disregard and proceed with tea break</option>
+                <option value="file under 'minor cosmic curiosity'">file under 'minor cosmic curiosity'</option>
+                <option value="adjust telescope alignment by 0.5 degrees">adjust telescope alignment by 0.5 degrees</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="custom-note" class="font-mono">Custom Officer Comments (Subject to Auto-Sanitizer):</label>
+              <textarea id="custom-note" placeholder="Write custom comments (e.g. 'I saw something strange...')"></textarea>
+              <div class="sanitizer-badge font-mono">REAL-TIME SANITIZER: ACTIVE</div>
+            </div>
+
+            <button id="transmit-btn" class="btn btn-transmit">
+              Transmit Protocol Notice to UN Security Council
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // System variables
+    let currentAngle = 0;
+    const targetNodes = [
+      { id: 0, angle: 45, frequency: 220, verified: false },
+      { id: 1, angle: 180, frequency: 277, verified: false },
+      { id: 2, angle: 300, frequency: 330, verified: false }
+    ];
+
+    // DOM Elements
+    const wheel = document.getElementById("validation-wheel") as HTMLElement;
+    const svgDial = document.getElementById("svg-dial") as unknown as SVGGraphicsElement;
+    const angleDisplay = document.getElementById("angle-display") as HTMLElement;
+    const systemStatus = document.getElementById("system-status") as HTMLElement;
+    const lockBtn = document.getElementById("lock-btn") as HTMLButtonElement;
+    const draftContainer = document.getElementById("draft-container") as HTMLElement;
+    const customNote = document.getElementById("custom-note") as HTMLTextAreaElement;
+    const transmitBtn = document.getElementById("transmit-btn") as HTMLButtonElement;
+
+    // Audio context setup
+    let audioCtx: AudioContext | null = null;
+    let mainOscillator: OscillatorNode | null = null;
+    let noiseSource: AudioBufferSourceNode | null = null;
+    let staticFilter: BiquadFilterNode | null = null;
+    let staticGain: GainNode | null = null;
+    let carrierGain: GainNode | null = null;
+    let chimeOscillator: OscillatorNode | null = null;
+    let chimeGain: GainNode | null = null;
+    let isAudioInitialized = false;
+
+    function initAudio() {
+      if (isAudioInitialized) return;
+      try {
+        const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
+        if (!AudioContextClass) return;
+        audioCtx = new AudioContextClass();
+
+        // 1. Deep carrier hum
+        mainOscillator = audioCtx.createOscillator();
+        carrierGain = audioCtx.createGain();
+        mainOscillator.type = "sine";
+        mainOscillator.frequency.value = 55; // 55Hz G1 deep hum
+        carrierGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        mainOscillator.connect(carrierGain);
+        carrierGain.connect(audioCtx.destination);
+        mainOscillator.start();
+
+        // 2. White noise static (Tuning feedback)
+        const bufferSize = audioCtx.sampleRate * 2;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        noiseSource = audioCtx.createBufferSource();
+        noiseSource.buffer = buffer;
+        noiseSource.loop = true;
+
+        staticFilter = audioCtx.createBiquadFilter();
+        staticFilter.type = "bandpass";
+        staticFilter.frequency.value = 1000;
+        staticFilter.Q.value = 4.0;
+
+        staticGain = audioCtx.createGain();
+        staticGain.gain.setValueAtTime(0.005, audioCtx.currentTime); // very low initial static
+
+        noiseSource.connect(staticFilter);
+        staticFilter.connect(staticGain);
+        staticGain.connect(audioCtx.destination);
+        noiseSource.start();
+
+        // 3. Resonant chime
+        chimeGain = audioCtx.createGain();
+        chimeGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        chimeGain.connect(audioCtx.destination);
+
+        isAudioInitialized = true;
+      } catch (err) {
+        console.error("Failed to initialize Web Audio", err);
+      }
+    }
+
+    // Audio feedback depending on wheel angle
+    function updateAudioFeedback(velocity: number) {
+      if (!audioCtx || !isAudioInitialized) return;
+
+      // Adjust static gain/frequency based on movement velocity and angle
+      if (staticGain && staticFilter) {
+        const currentGain = Math.min(0.08, 0.005 + Math.abs(velocity) * 0.05);
+        staticGain.gain.setTargetAtTime(currentGain, audioCtx.currentTime, 0.1);
+
+        const filterFreq = 400 + ((currentAngle % 90) / 90) * 1200;
+        staticFilter.frequency.setTargetAtTime(filterFreq, audioCtx.currentTime, 0.1);
+      }
+
+      // Check proximity to target nodes to play a resonant hint
+      let nearAnyNode = false;
+      targetNodes.forEach(node => {
+        if (node.verified) return;
+
+        // Angle distance
+        let diff = Math.abs(currentAngle - node.angle);
+        diff = Math.min(diff, 360 - diff); // Circular distance
+
+        if (diff < 15) {
+          nearAnyNode = true;
+          // Play resonant frequency
+          if (!chimeOscillator) {
+            chimeOscillator = audioCtx!.createOscillator();
+            chimeOscillator.type = "sine";
+            chimeOscillator.frequency.value = node.frequency;
+            chimeOscillator.connect(chimeGain!);
+            chimeOscillator.start();
+          }
+
+          // Volume increases as proximity increases
+          const volume = Math.max(0, 1 - (diff / 15)) * 0.08;
+          chimeGain!.gain.setTargetAtTime(volume, audioCtx!.currentTime, 0.05);
+        }
+      });
+
+      if (!nearAnyNode && chimeOscillator) {
+        // Fade out chime
+        chimeGain!.gain.setTargetAtTime(0, audioCtx!.currentTime, 0.1);
+        setTimeout(() => {
+          if (!nearAnyNode && chimeOscillator) {
+            try {
+              chimeOscillator.stop();
+            } catch (e) {}
+            chimeOscillator = null;
+          }
+        }, 150);
+      }
+    }
+
+    // Play chime sound on validation
+    function playValidationChime(frequency: number) {
+      if (!audioCtx || !isAudioInitialized) return;
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(frequency * 2, audioCtx.currentTime + 0.15);
+      
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.5);
+    }
+
+    // Play warning sound
+    function playWarningSound() {
+      if (!audioCtx || !isAudioInitialized) return;
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(80, audioCtx.currentTime + 0.1);
+      
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    }
+
+    // Rotate function (visual updates)
+    let animationFrameId: number | null = null;
+    let targetAngle = 0;
+    
+    function setAngle(angle: number, instant = false) {
+      currentAngle = (angle + 360) % 360;
+      targetAngle = currentAngle;
+      
+      if (instant) {
+        updateWheelTransform(currentAngle);
+      } else {
+        requestRotationUpdate();
+      }
+    }
+
+    function updateWheelTransform(angle: number) {
+      wheel.setAttribute("data-angle", Math.round(angle).toString());
+      angleDisplay.textContent = Math.round(angle).toString();
+      
+      // Update SVG dial rotation
+      svgDial.setAttribute("transform", `rotate(${angle}, 200, 200)`);
+    }
+
+    function requestRotationUpdate() {
+      if (animationFrameId !== null) return;
+      
+      let lastTime = performance.now();
+      
+      function animate(time: number) {
+        const dt = (time - lastTime) / 1000;
+        lastTime = time;
+
+        // Smoothly interpolate currentAngle toward targetAngle (handling wrap around)
+        let diff = targetAngle - currentAngle;
+        
+        // Handle shortest path rotation wrapping
+        if (diff > 180) diff -= 360;
+        if (diff < -180) diff += 360;
+        
+        const velocity = diff * 12; // speed factor
+        currentAngle = (currentAngle + velocity * dt + 360) % 360;
+        
+        updateWheelTransform(currentAngle);
+        updateAudioFeedback(velocity);
+        
+        if (Math.abs(diff) > 0.05) {
+          animationFrameId = requestAnimationFrame(animate);
+        } else {
+          currentAngle = targetAngle;
+          updateWheelTransform(currentAngle);
+          animationFrameId = null;
+          // Fade static out when motion stops
+          if (staticGain && audioCtx) {
+            staticGain.gain.setTargetAtTime(0.005, audioCtx.currentTime, 0.3);
+          }
+        }
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    // Validate the current angle against the target nodes
+    function verifyCurrentAngle() {
+      initAudio();
+      
+      let authenticatedAny = false;
+      
+      targetNodes.forEach((node, index) => {
+        if (node.verified) return;
+        
+        let diff = Math.abs(currentAngle - node.angle);
+        diff = Math.min(diff, 360 - diff);
+        
+        if (diff < 4) { // within locking range
+          node.verified = true;
+          authenticatedAny = true;
+          
+          // Update visual node indicator
+          const nodeEl = document.getElementById(`node-${index}`);
+          const svgNode = document.getElementById(`svg-node-${index}`);
+          
+          if (nodeEl) {
+            nodeEl.classList.add("verified");
+            const statusEl = nodeEl.querySelector(".node-verdict");
+            if (statusEl) statusEl.textContent = "VERIFIED";
+          }
+          if (svgNode) {
+            svgNode.classList.add("verified");
+          }
+          
+          playValidationChime(node.frequency);
+        }
+      });
+      
+      if (!authenticatedAny) {
+        playWarningSound();
+        // Shake wheel container
+        wheel.classList.add("shake");
+        setTimeout(() => wheel.classList.remove("shake"), 400);
+      }
+      
+      updateSystemStatus();
+    }
+
+    function updateSystemStatus() {
+      const verifiedCount = targetNodes.filter(n => n.verified).length;
+      systemStatus.textContent = `STATUS: ${verifiedCount === 3 ? "SYSTEM LOCKED & CALIBRATED" : `AWAITING VERIFICATION (${verifiedCount}/3 VALIDATED)`}`;
+      
+      if (verifiedCount === 3) {
+        systemStatus.classList.remove("warning");
+        systemStatus.classList.add("success");
+        lockBtn.disabled = false;
+      } else {
+        systemStatus.classList.add("warning");
+        systemStatus.classList.remove("success");
+        lockBtn.disabled = true;
+      }
+    }
+
+    // Reset verification state
+    function resetVerification() {
+      targetNodes.forEach((node, index) => {
+        node.verified = false;
+        const nodeEl = document.getElementById(`node-${index}`);
+        const svgNode = document.getElementById(`svg-node-${index}`);
+        
+        if (nodeEl) {
+          nodeEl.classList.remove("verified");
+          const statusEl = nodeEl.querySelector(".node-verdict");
+          if (statusEl) statusEl.textContent = "UNVERIFIED";
+        }
+        if (svgNode) {
+          svgNode.classList.remove("verified");
+        }
+      });
+      
+      draftContainer.classList.add("hidden");
+      lockBtn.disabled = true;
+      lockBtn.classList.remove("activated");
+      updateSystemStatus();
+      setAngle(0, true);
+    }
+
+    // Window exposure for test validation
+    (window as any).__setAngleAndLock = function(angle: number) {
+      setAngle(angle, true);
+      
+      // Directly mark verified for matching node
+      targetNodes.forEach((node, index) => {
+        if (Math.abs(angle - node.angle) < 5) {
+          node.verified = true;
+          const nodeEl = document.getElementById(`node-${index}`);
+          const svgNode = document.getElementById(`svg-node-${index}`);
+          if (nodeEl) {
+            nodeEl.classList.add("verified");
+            const statusEl = nodeEl.querySelector(".node-verdict");
+            if (statusEl) statusEl.textContent = "VERIFIED";
+          }
+          if (svgNode) {
+            svgNode.classList.add("verified");
+          }
+        }
+      });
+      
+      updateSystemStatus();
+    };
+
+    // Event Listeners: Keyboard Navigation
+    wheel.addEventListener("keydown", (e) => {
+      initAudio();
+      
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        targetAngle = (targetAngle - 5 + 360) % 360;
+        setAngle(targetAngle);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        targetAngle = (targetAngle + 5 + 360) % 360;
+        setAngle(targetAngle);
+      } else if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        verifyCurrentAngle();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        resetVerification();
+      }
+    });
+
+    // Drag-to-Rotate Pointer Interaction
+    let isDragging = false;
+    
+    function getAngleFromEvent(e: PointerEvent | TouchEvent) {
+      const rect = wheel.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      
+      let clientX = 0;
+      let clientY = 0;
+      
+      if (window.TouchEvent && e instanceof TouchEvent) {
+        if (e.touches.length > 0) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else if (e.changedTouches.length > 0) {
+          clientX = e.changedTouches[0].clientX;
+          clientY = e.changedTouches[0].clientY;
+        }
+      } else if (e instanceof PointerEvent) {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+      let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      return (angle + 360) % 360;
+    }
+
+    wheel.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      wheel.focus();
+      initAudio();
+      
+      isDragging = true;
+      wheel.setPointerCapture(e.pointerId);
+      
+      const angle = getAngleFromEvent(e);
+      targetAngle = angle;
+      setAngle(angle);
+    });
+
+    wheel.addEventListener("pointermove", (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      
+      const angle = getAngleFromEvent(e);
+      targetAngle = angle;
+      setAngle(angle);
+    });
+
+    wheel.addEventListener("pointerup", (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      try {
+        wheel.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+    });
+
+    wheel.addEventListener("pointercancel", () => {
+      isDragging = false;
+    });
+
+    // Touch Event Bindings for mobile fallback
+    wheel.addEventListener("touchstart", (e) => {
+      initAudio();
+      if (e.touches.length > 0) {
+        isDragging = true;
+        const angle = getAngleFromEvent(e);
+        targetAngle = angle;
+        setAngle(angle);
+      }
+    }, { passive: false });
+
+    wheel.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const angle = getAngleFromEvent(e);
+      targetAngle = angle;
+      setAngle(angle);
+    }, { passive: false });
+
+    wheel.addEventListener("touchend", () => {
+      isDragging = false;
+    });
+
+    // Button locks and transitions
+    lockBtn.addEventListener("click", () => {
+      initAudio();
+      draftContainer.classList.remove("hidden");
+      draftContainer.scrollIntoView({ behavior: "smooth" });
+      lockBtn.classList.add("activated");
+    });
+
+    // Custom text area auto-sanitization to prevent panic
+    const authorizedSentences = [
+      "This is a routine calibration message under Protocol 4b.",
+      "The local reception parameters indicate zero space clutter.",
+      "Transmission testing remains within nominal decibel ranges.",
+      "Please refer to Document 19a for regulatory updates.",
+      "The solar transit is displaying exceptional calmness."
+    ];
+    
+    let sentenceIndex = 0;
+    let charIndex = 0;
+
+    customNote.addEventListener("input", () => {
+      initAudio();
+      // Instead of letting them type, we replace typed text with official sanitized script character-by-character
+      const text = customNote.value;
+      if (text.length === 0) {
+        charIndex = 0;
+        return;
+      }
+      
+      // Select current sentence
+      const targetSentence = authorizedSentences[sentenceIndex % authorizedSentences.length];
+      
+      charIndex = text.length;
+      if (charIndex > targetSentence.length) {
+        // Wrap around to next sentence
+        sentenceIndex++;
+        charIndex = 1;
+        const nextSentence = authorizedSentences[sentenceIndex % authorizedSentences.length];
+        customNote.value = nextSentence.substring(0, 1);
+      } else {
+        customNote.value = targetSentence.substring(0, charIndex);
+      }
+    });
+
+    // Transmission action
+    transmitBtn.addEventListener("click", () => {
+      initAudio();
+      
+      // Disable interface & show dispatch confirmation
+      transmitBtn.disabled = true;
+      transmitBtn.textContent = "TRANSMITTING TO UN...";
+      
+      if (audioCtx) {
+        // play a futuristic transmission chirping sound
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(1800, audioCtx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+      }
+
+      setTimeout(() => {
+        alert("TRANSMISSION SUCCESSFUL. Announcement logged under protocol file 2026-06-09-DECORUM. Standard silence period initiated.");
+        resetVerification();
+        transmitBtn.disabled = false;
+        transmitBtn.textContent = "Transmit Protocol Notice to UN Security Council";
+      }, 1500);
+    });
+  </script>
+
+  <style>
+    /* Styling System */
+    .decorum-desk {
+      min-height: calc(100dvh - 80px);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      color: #e2e8f0;
+      box-sizing: border-box;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .desk-header {
+      margin-bottom: 2rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 1.5rem;
+    }
+
+    .page-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: -0.03em;
+    }
+
+    .text-gradient {
+      background: linear-gradient(135deg, #00ffcc 0%, #00d2ff 50%, #b800ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 0.5rem;
+    }
+
+    .desk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .desk-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Glassmorphic Panel Styles */
+    .panel {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      background: rgba(13, 18, 30, 0.7);
+      backdrop-filter: blur(16px) saturate(140%);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      transition: border-color 0.3s ease;
+    }
+
+    .panel:hover {
+      border-color: rgba(0, 255, 204, 0.25);
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #00ffcc;
+      margin: 0 0 0.5rem 0;
+      text-transform: uppercase;
+    }
+
+    .panel-desc {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0 1.5rem 0;
+      line-height: 1.5;
+    }
+
+    /* Calibration Wheel Styling */
+    .wheel-outer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem 0;
+      position: relative;
+    }
+
+    .wheel-container {
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      cursor: grab;
+      position: relative;
+      touch-action: none;
+      outline: none;
+      background: rgba(7, 10, 19, 0.5);
+      box-shadow: inset 0 0 40px rgba(0, 255, 204, 0.03);
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    .wheel-container:focus {
+      border-color: #ff4500;
+      box-shadow: 0 0 20px rgba(255, 69, 0, 0.15), inset 0 0 40px rgba(0, 255, 204, 0.05);
+    }
+
+    .wheel-container:active {
+      cursor: grabbing;
+    }
+
+    .wheel-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .angle-overlay {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(7, 10, 19, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: #ff4500;
+      pointer-events: none;
+    }
+
+    .keyboard-hint {
+      margin-top: 1.5rem;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.35);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* SVG Node States */
+    .svg-node {
+      opacity: 0.5;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .svg-node.verified {
+      opacity: 1;
+    }
+
+    .svg-node.verified .node-glow {
+      animation: pulse-glow 2s infinite alternate;
+    }
+
+    .svg-node.verified .node-ring {
+      animation: expand-ring 1.5s infinite linear;
+      stroke-width: 1.5px;
+    }
+
+    /* Radar Sweep Rotate */
+    .radar-sweep {
+      transform-origin: 200px 200px;
+      animation: radar-rotate 8s infinite linear;
+      pointer-events: none;
+    }
+
+    /* Validator Nodes List */
+    .status-indicator {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .status-indicator.warning {
+      background: rgba(255, 69, 0, 0.1);
+      border: 1px solid rgba(255, 69, 0, 0.3);
+      color: #ffaa88;
+    }
+
+    .status-indicator.success {
+      background: rgba(0, 255, 204, 0.1);
+      border: 1px solid rgba(0, 255, 204, 0.3);
+      color: #88ffdd;
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.15);
+    }
+
+    .validators-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .validator-node {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .validator-node.verified {
+      background: rgba(0, 255, 204, 0.03);
+      border-color: rgba(0, 255, 204, 0.2);
+    }
+
+    .validator-node.verified:nth-child(2) {
+      background: rgba(255, 0, 255, 0.03);
+      border-color: rgba(255, 0, 255, 0.2);
+    }
+
+    .validator-node.verified:nth-child(3) {
+      background: rgba(255, 255, 0, 0.03);
+      border-color: rgba(255, 255, 0, 0.2);
+    }
+
+    .node-led {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      margin-right: 1rem;
+      flex-shrink: 0;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .validator-node.verified:nth-child(1) .node-led {
+      background: #00ffcc;
+      box-shadow: 0 0 8px #00ffcc;
+    }
+
+    .validator-node.verified:nth-child(2) .node-led {
+      background: #ff00ff;
+      box-shadow: 0 0 8px #ff00ff;
+    }
+
+    .validator-node.verified:nth-child(3) .node-led {
+      background: #ffff00;
+      box-shadow: 0 0 8px #ffff00;
+    }
+
+    .node-info {
+      flex-grow: 1;
+    }
+
+    .node-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 0.03em;
+    }
+
+    .node-details {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 0.15rem;
+    }
+
+    .node-verdict {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.3);
+      transition: color 0.3s ease;
+    }
+
+    .validator-node.verified:nth-child(1) .node-verdict {
+      color: #00ffcc;
+    }
+
+    .validator-node.verified:nth-child(2) .node-verdict {
+      color: #ff00ff;
+    }
+
+    .validator-node.verified:nth-child(3) .node-verdict {
+      color: #ffff00;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: inherit;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.85rem 1.5rem;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.3s ease;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00d2ff 0%, #00ffcc 100%);
+      color: #070a13;
+      box-shadow: 0 4px 15px rgba(0, 255, 204, 0.2);
+    }
+
+    .btn-primary:not(:disabled):hover {
+      box-shadow: 0 6px 20px rgba(0, 255, 204, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary.activated {
+      background: #00ffcc;
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+    }
+
+    /* Panel sections */
+    .panel-section {
+      width: 100%;
+      box-sizing: border-box;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .panel-section.hidden {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    #draft-container {
+      margin-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 2rem;
+      animation: fade-slide-in 0.5s forwards;
+    }
+
+    /* Madlibs Form */
+    .madlibs-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .select-field, textarea {
+      background: rgba(7, 10, 19, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      color: #ffffff;
+      padding: 0.65rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .select-field:focus, textarea:focus {
+      border-color: #00ffcc;
+      box-shadow: 0 0 8px rgba(0, 255, 204, 0.15);
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .sanitizer-badge {
+      font-size: 0.65rem;
+      color: #ff4500;
+      letter-spacing: 0.05em;
+      margin-top: 0.25rem;
+      text-align: right;
+    }
+
+    .btn-transmit {
+      background: linear-gradient(135deg, #b800ff 0%, #ff00ff 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(255, 0, 255, 0.25);
+      margin-top: 0.5rem;
+    }
+
+    .btn-transmit:not(:disabled):hover {
+      box-shadow: 0 6px 20px rgba(255, 0, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Keyframes and Animations */
+    @keyframes radar-rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse-glow {
+      from { fill-opacity: 0.4; r: 15px; }
+      to { fill-opacity: 0.8; r: 24px; }
+    }
+
+    @keyframes expand-ring {
+      0% { r: 10px; opacity: 1; }
+      100% { r: 25px; opacity: 0; }
+    }
+
+    @keyframes fade-slide-in {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Shake on failed locking click */
+    .wheel-container.shake {
+      animation: shake-anim 0.35s ease-in-out;
+    }
+
+    @keyframes shake-anim {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+  </style>
+</Base>

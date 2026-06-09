@@ -362,3 +362,14 @@ Carry Forward:
   overflow specs miss.
 - Compare target geometry relative to the stage after hover interactions because
   visibility scrolling can move viewport-space bounding boxes.
+
+### Session Entry
+
+Date: 2026-06-09
+Experiment: Post-Detection Decorum
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Use type-narrowing on DOM/SVG nodes inside Astro scripts (`as unknown as ...`) to satisfy production compilation rules cleanly.
+- Maintain real-time text sanitization with distinct visual feedback (e.g. status badge) so interaction mechanics are legible.
+- Ensure that mouse, touch, and keyboard interaction bounds are completely aligned, especially for rotary or radial wheels.

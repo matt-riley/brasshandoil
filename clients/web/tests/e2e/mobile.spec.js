@@ -43,6 +43,7 @@ const pages = [
   "/experiments/bureau-borrowed-shadows",
   "/experiments/enhanced-browser-games",
   "/experiments/operation-mary",
+  "/experiments/post-detection-decorum",
 ]
 
 test.use({
