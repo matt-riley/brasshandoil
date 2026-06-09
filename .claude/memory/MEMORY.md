@@ -76,6 +76,9 @@ A positioned `<div>` with `backdrop-filter: contrast(N) saturate(N) brightness(N
 #### Canvas ImageData pixel manipulation
 `ctx.createImageData(w, h)` + direct RGBA writes to `imgData.data[idx]` + `ctx.putImageData()` gives per-pixel control for procedural visualizations. Process in 4×4 blocks for performance. Combine with `requestAnimationFrame` and `Date.now()` for animated fields. Much faster than drawing thousands of individual rects.
 
+#### HTML5 Drag and Drop API
+Set `draggable="true"` on an element, then listen for `dragstart` (call `e.dataTransfer.setData("text/plain", id)` and `effectAllowed = "move"`), and on the drop target: `dragover` (must `preventDefault()` to allow drop, set `dropEffect`), `drop` (`getData` to identify what was dropped), and `dragleave` for visual feedback. In Playwright tests, native DnD can't be driven by mouse actions — instead dispatch synthetic `DragEvent`s with a `new DataTransfer()` object. Gotcha: forgetting `preventDefault()` on `dragover` silently prevents `drop` from firing. The `dragend` event fires on the source element regardless of whether the drop succeeded — check the `dropEffect` to distinguish. `setDragImage()` allows custom drag previews.
+
 #### Canvas clip-path thermal scanner (reveal-through-darkness)
 `ctx.save() → ctx.beginPath() → ctx.arc(cursorX, cursorY, radius) → ctx.clip()` creates a circular reveal window. Inside the clip region, render a different visual layer (e.g., thermal colormap) while the rest of the canvas stays dark. `ctx.restore()` pops the clip. Layer multiple render passes: dark terrain first, clipped thermal overlay second, HUD/scanlines last. For heat signatures, `createRadialGradient` with thermal palette stops (purple → red → orange → white) gives convincing FLIR appearance. Animate the clip radius with `Math.sin()` for scanner wobble. Add CRT scanlines with semi-transparent horizontal lines every 3px. This pattern generalizes to any "reveal lens" mechanic — flashlight, x-ray, sonar, etc.
 
@@ -111,6 +114,11 @@ Store current and previous position per point; velocity is implicit as `pos - ol
 **Concept:** Inspired by Mary the Tasmanian devil escaping a Queensland wildlife park via "abnormally large leap." A thermal imaging drone interface where your cursor is the scanner. Every heat signature is a decoy (possum, warm rock, confused tourist, off-duty sniffer dog). Equipment degrades across phases — the drone AI wants to film the gift shop, sniffer dogs file for overtime. Mary is finally found in the park office filing a formal resignation from captivity.
 **Technique:** Canvas `globalCompositeOperation` via clip-path compositing — using `ctx.save()/clip()/restore()` to create a thermal scanner reveal circle. Layered canvas rendering: terrain layer, thermal overlay inside clip region, heat signature blobs with `createRadialGradient`, and CRT scanline post-processing. Multi-phase narrative driven by scan-to-reveal mechanic.
 **File:** clients/web/src/pages/experiments/operation-mary.astro
+
+### 2026-06-09 — Riksdag Resolution 2026-47
+**Concept:** Inspired by Sweden banning mobile phones in schools starting fall 2026. You are a Swedish teacher on Day 1 of enforcement. Student phones appear on desks, vibrating with TikTok and Snapchat notifications. Drag each phone into the confiscation drawer. Phones resist — they dodge, multiply, and send guilt-trip notifications. The drawer develops sentience from absorbing too much screen time.
+**Technique:** HTML5 Drag and Drop API — `draggable="true"`, `dragstart`/`dragover`/`drop`/`dragend` events, `DataTransfer.setData()`/`getData()` for passing phone identity, `effectAllowed`/`dropEffect` for cursor feedback. Combined with Web Animations API (`element.animate()`) for phone vibration, dodge, and spawn effects.
+**File:** clients/web/src/pages/experiments/riksdag-resolution.astro
 
 ## Feedback from Matt
 

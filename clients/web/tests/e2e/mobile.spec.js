@@ -45,6 +45,7 @@ const pages = [
   "/experiments/operation-mary",
   "/experiments/post-detection-decorum",
   "/experiments/quartz-alibi-foundry",
+  "/experiments/riksdag-resolution",
 ]
 
 test.use({

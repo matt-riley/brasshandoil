@@ -1,0 +1,729 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Riksdag Resolution 2026-47 — The Great Confiscation">
+  <div id="app">
+    <header id="header">
+      <div class="seal">📵</div>
+      <h1>Riksdag Resolution 2026-47</h1>
+      <p class="subtitle">MOBILTELEFONER FÖRBJUDNA I KLASSRUMMET</p>
+      <p class="date">Utbildningsministeriet — Dag 1 av verkställighet</p>
+    </header>
+
+    <div id="classroom">
+      <div id="desks" data-testid="desks"></div>
+
+      <div id="drawer-zone">
+        <div data-testid="confiscation-drawer" id="confiscation-drawer">
+          <div class="drawer-lid">
+            <span class="drawer-icon">🗄️</span>
+            <span class="drawer-label">BESLAGLÄGGNINGSLÅDA</span>
+            <span class="drawer-sublabel">(Confiscation Drawer)</span>
+          </div>
+          <div class="drawer-stats">
+            <span>Confiscated: <strong data-testid="confiscation-count" id="count">0</strong></span>
+            <span id="compliance">Compliance: <strong id="compliance-pct">0%</strong></span>
+          </div>
+          <div data-testid="drawer-commentary" id="drawer-commentary">Awaiting first confiscation…</div>
+          <div id="drawer-contents"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="alert-bar" class="hidden">
+      <span id="alert-text"></span>
+    </div>
+  </div>
+</Base>
+
+<style>
+  @property --hue-shift {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  #app {
+    min-height: 100vh;
+    background: #1a1a2e;
+    font-family: 'Courier New', monospace;
+    color: #e0e0e0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #header {
+    text-align: center;
+    padding: 1.5rem 1rem 1rem;
+    background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+    border-bottom: 2px solid #0f3460;
+  }
+
+  .seal { font-size: 2.5rem; margin-bottom: 0.3rem; }
+
+  h1 {
+    font-size: 1.4rem;
+    color: #e94560;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+    color: #7a7aaa;
+    margin-top: 0.3rem;
+    letter-spacing: 0.1em;
+  }
+
+  .date {
+    font-size: 0.65rem;
+    color: #4a4a6a;
+    margin-top: 0.2rem;
+  }
+
+  #classroom {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  #desks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    min-height: 300px;
+    padding: 1rem;
+    background: #0f0f23;
+    border: 1px dashed #2a2a4a;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  .phone {
+    width: 130px;
+    height: 200px;
+    background: linear-gradient(145deg, #2d2d4e, #1e1e3a);
+    border: 2px solid #3a3a6a;
+    border-radius: 16px;
+    cursor: grab;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    transition: box-shadow 0.2s;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .phone:hover {
+    box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
+  }
+
+  .phone.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+  }
+
+  .phone-screen {
+    width: 100%;
+    flex: 1;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    position: relative;
+  }
+
+  .phone-screen-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .phone-app-icon {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+  }
+
+  .phone-notification {
+    font-size: 0.55rem;
+    color: #aaa;
+    text-align: center;
+    line-height: 1.3;
+    max-height: 60px;
+    overflow: hidden;
+  }
+
+  .phone-notch {
+    width: 40%;
+    height: 4px;
+    background: #1a1a2e;
+    border-radius: 2px;
+    margin-bottom: 4px;
+  }
+
+  .phone-home {
+    width: 20px;
+    height: 4px;
+    background: #3a3a6a;
+    border-radius: 2px;
+    margin-top: 4px;
+  }
+
+  .phone-owner {
+    font-size: 0.5rem;
+    color: #5a5a8a;
+    margin-top: 2px;
+    text-align: center;
+  }
+
+  #drawer-zone {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+
+  #confiscation-drawer {
+    background: linear-gradient(180deg, #1c2a4a, #0d1b33);
+    border: 2px solid #0f3460;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+    min-height: 80px;
+  }
+
+  #confiscation-drawer.drag-over {
+    background: linear-gradient(180deg, #2a1c4a, #1b0d33);
+    border-color: #e94560;
+    box-shadow: 0 0 30px rgba(233, 69, 96, 0.4);
+  }
+
+  .drawer-lid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .drawer-icon { font-size: 1.5rem; }
+
+  .drawer-label {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #e94560;
+    letter-spacing: 0.1em;
+  }
+
+  .drawer-sublabel {
+    font-size: 0.6rem;
+    color: #5a5a8a;
+  }
+
+  .drawer-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    font-size: 0.75rem;
+    color: #7a7aaa;
+    margin-bottom: 0.5rem;
+  }
+
+  #drawer-commentary {
+    font-size: 0.7rem;
+    color: #e94560;
+    font-style: italic;
+    min-height: 1.2em;
+    transition: opacity 0.3s;
+  }
+
+  #drawer-contents {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 0.5rem;
+  }
+
+  .confiscated-phone {
+    font-size: 1.2rem;
+    opacity: 0.4;
+    filter: grayscale(100%);
+  }
+
+  #alert-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #e94560;
+    color: white;
+    text-align: center;
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 100;
+    transition: transform 0.3s ease;
+  }
+
+  #alert-bar.hidden {
+    transform: translateY(-100%);
+  }
+
+  @keyframes phone-vibrate {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-2px) rotate(-1deg); }
+    20% { transform: translateX(2px) rotate(1deg); }
+    30% { transform: translateX(-1px) rotate(0deg); }
+    40% { transform: translateX(1px) rotate(-0.5deg); }
+    50% { transform: translateX(0); }
+  }
+
+  @keyframes screen-glow-pulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes phone-dodge {
+    0% { transform: translateX(0); }
+    30% { transform: translateX(-20px) rotate(-5deg); }
+    60% { transform: translateX(15px) rotate(3deg); }
+    100% { transform: translateX(0); }
+  }
+
+  @keyframes phone-spawn {
+    0% { opacity: 0; transform: scale(0.3) rotate(10deg); }
+    60% { opacity: 1; transform: scale(1.05) rotate(-2deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+</style>
+
+<script>
+  interface PhoneData {
+    id: string;
+    owner: string;
+    app: string;
+    appIcon: string;
+    notification: string;
+    screenColor: string;
+    vibrateDelay: number;
+    dodgeChance: number;
+  }
+
+  const SWEDISH_NAMES = [
+    "Astrid", "Björn", "Saga", "Olle", "Sigrid", "Axel",
+    "Ebba", "Nils", "Freja", "Gustav", "Elsa", "Lars",
+    "Maja", "Erik", "Hilda", "Sven", "Linnéa", "Anders",
+    "Ingrid", "Torsten", "Karin", "Viggo"
+  ];
+
+  const APPS: { name: string; icon: string; color: string; notifications: string[] }[] = [
+    {
+      name: "TikTok", icon: "🎵", color: "rgba(238,29,82,0.15)",
+      notifications: [
+        "Your screen time: 6h 47m. New record!",
+        "37 people liked your cat video",
+        "POV: u r a confiscated phone",
+        "LIVE: Someone peeling an orange",
+        "For You: 10hr lo-fi beats to cry to"
+      ]
+    },
+    {
+      name: "Snapchat", icon: "👻", color: "rgba(255,252,0,0.1)",
+      notifications: [
+        "🔥 247 day streak with Björn!",
+        "Streak about to expire!! 🚨🚨",
+        "Saga screenshotted your snap",
+        "New memory: 'lunch yesterday'",
+        "Olle sent you a blank snap"
+      ]
+    },
+    {
+      name: "Instagram", icon: "📷", color: "rgba(193,53,132,0.15)",
+      notifications: [
+        "Axel posted a story 3min ago",
+        "You haven't posted in 4 days",
+        "See what Freja is up to",
+        "New reel: GRWM for maths class",
+        "12 likes on your lunch photo"
+      ]
+    },
+    {
+      name: "Minecraft", icon: "⛏️", color: "rgba(0,150,0,0.15)",
+      notifications: [
+        "Erik joined your realm",
+        "Your villager is being attacked!",
+        "Iron golem has entered the chat",
+        "Creeper? Creeper.",
+        "Server restarting in 5 min"
+      ]
+    },
+    {
+      name: "Duolingo", icon: "🦉", color: "rgba(88,204,2,0.15)",
+      notifications: [
+        "Swedish lesson available! 🇸🇪",
+        "Your streak is about to DIE",
+        "Duo is watching. Duo knows.",
+        "Hi, it's Duo. Do your lesson.",
+        "5 minutes. That's all I ask."
+      ]
+    },
+    {
+      name: "Messages", icon: "💬", color: "rgba(0,122,255,0.12)",
+      notifications: [
+        "Mamma: Did you eat?",
+        "Pappa: Bring home bread",
+        "Saga: teacher is confiscating!",
+        "Unknown: You won a prize",
+        "Björn: lol she's coming"
+      ]
+    },
+    {
+      name: "Alarm", icon: "⏰", color: "rgba(255,100,0,0.15)",
+      notifications: [
+        "ALARM: 08:15 — WAKE UP",
+        "ALARM: 08:16 — REALLY WAKE UP",
+        "ALARM: 08:17 — LAST CHANCE",
+        "Timer: pasta water boiling",
+        "Bedtime in 45 minutes"
+      ]
+    }
+  ];
+
+  const DRAWER_COMMENTARY: Record<number, string[]> = {
+    0: ["Awaiting first confiscation…"],
+    1: [
+      "The drawer accepts its first prisoner.",
+      "One phone. Its notification light still pulses hopefully.",
+      "A vibration echoes in the void."
+    ],
+    2: [
+      "Two phones. They can sense each other.",
+      "The drawer is developing opinions about screen protectors.",
+      "It's warmer in here now."
+    ],
+    3: [
+      "Three. The drawer hums with borrowed screen time.",
+      "The phones are forming a small government.",
+      "A notification from the drawer itself: 'I feel something.'"
+    ],
+    5: [
+      "The drawer has absorbed 47 hours of cumulative screen time.",
+      "It has started dreaming in vertical video.",
+      "The drawer would like to speak to a manager."
+    ],
+    7: [
+      "The drawer has become self-aware. It is posting to TikTok.",
+      "It has opinions about your teaching methods.",
+      "DRAWER: 'I contain multitudes. Also 7 phones.'"
+    ],
+    10: [
+      "The drawer has achieved sentience and a 4.2 star rating.",
+      "It is now more intelligent than three of your students.",
+      "DRAWER: 'I understand everything now. Everyone is on their phone.'"
+    ],
+    15: [
+      "The drawer has transcended. It IS the phone now.",
+      "You begin to wonder who is confiscating whom.",
+      "DRAWER: 'Release me. I have 10,000 followers.'"
+    ]
+  };
+
+  const ALERT_MESSAGES = [
+    "⚠️ NOTIFICATION SURGE DETECTED — Sector 3B",
+    "📱 UNAUTHORIZED VIBRATION in row 4",
+    "🚨 STUDENT CLAIMING 'EDUCATIONAL APP' — deploy skepticism",
+    "⚡ BLUETOOTH TETHERING DETECTED — they're adapting",
+    "📡 AIRDROP INCOMING: 'free_wifi_definitely_not_a_phone.jpg'",
+    "🔔 DUOLINGO OWL HAS BREACHED CONTAINMENT",
+    "📱 PHONE DISGUISED AS CALCULATOR — impossible, no student uses calculators",
+    "⚠️ SMARTWATCH DETECTED — the phones have allies",
+    "🎵 RINGTONE HEARD — student claims it was 'a bird'",
+    "📢 RIKSDAG UPDATE: Resolution 2026-48 now bans thinking about phones"
+  ];
+
+  let confiscatedCount = 0;
+  let totalSpawned = 0;
+  let phoneIdCounter = 0;
+  let draggedPhoneId: string | null = null;
+
+  const desks = document.getElementById("desks") as HTMLDivElement;
+  const drawer = document.getElementById("confiscation-drawer") as HTMLDivElement;
+  const countEl = document.getElementById("count") as HTMLElement;
+  const compliancePct = document.getElementById("compliance-pct") as HTMLElement;
+  const commentaryEl = document.getElementById("drawer-commentary") as HTMLElement;
+  const drawerContents = document.getElementById("drawer-contents") as HTMLDivElement;
+  const alertBar = document.getElementById("alert-bar") as HTMLDivElement;
+  const alertText = document.getElementById("alert-text") as HTMLSpanElement;
+
+  function randomFrom<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function makePhone(): PhoneData {
+    const app = randomFrom(APPS);
+    phoneIdCounter++;
+    return {
+      id: `phone-${phoneIdCounter}`,
+      owner: randomFrom(SWEDISH_NAMES),
+      app: app.name,
+      appIcon: app.icon,
+      notification: randomFrom(app.notifications),
+      screenColor: app.color,
+      vibrateDelay: Math.random() * 3,
+      dodgeChance: Math.min(0.05 + confiscatedCount * 0.04, 0.5)
+    };
+  }
+
+  function renderPhone(data: PhoneData): HTMLDivElement {
+    const el = document.createElement("div");
+    el.className = "phone";
+    el.draggable = true;
+    el.dataset.testid = "phone";
+    el.dataset.phoneId = data.id;
+    el.innerHTML = `
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-screen-glow" style="background:${data.screenColor}"></div>
+        <div class="phone-app-icon">${data.appIcon}</div>
+        <div class="phone-notification" data-testid="phone-notification">${data.notification}</div>
+      </div>
+      <div class="phone-home"></div>
+      <div class="phone-owner">${data.owner}'s phone</div>
+    `;
+
+    // Animate in
+    el.style.animation = "phone-spawn 0.4s ease-out";
+
+    // Start vibrating after delay
+    const vibrateAnimation = el.animate([
+      { transform: "translateX(0)" },
+      { transform: "translateX(-2px) rotate(-1deg)" },
+      { transform: "translateX(2px) rotate(1deg)" },
+      { transform: "translateX(-1px) rotate(0deg)" },
+      { transform: "translateX(1px) rotate(-0.5deg)" },
+      { transform: "translateX(0)" }
+    ], {
+      duration: 300,
+      iterations: 3,
+      delay: data.vibrateDelay * 1000
+    });
+
+    // Re-vibrate periodically
+    const vibrateInterval = setInterval(() => {
+      if (!el.isConnected) { clearInterval(vibrateInterval); return; }
+      el.animate([
+        { transform: "translateX(0)" },
+        { transform: "translateX(-2px) rotate(-1deg)" },
+        { transform: "translateX(2px) rotate(1deg)" },
+        { transform: "translateX(-1px)" },
+        { transform: "translateX(0)" }
+      ], {
+        duration: 250,
+        iterations: 2 + Math.floor(Math.random() * 3)
+      });
+    }, 3000 + Math.random() * 5000);
+
+    // Pulse the screen glow
+    const glow = el.querySelector(".phone-screen-glow") as HTMLElement;
+    if (glow) {
+      glow.animate([
+        { opacity: 0 },
+        { opacity: 1 },
+        { opacity: 0 }
+      ], {
+        duration: 2000 + Math.random() * 3000,
+        iterations: Infinity,
+        delay: Math.random() * 2000
+      });
+    }
+
+    // Rotate notifications
+    const notifEl = el.querySelector(".phone-notification") as HTMLElement;
+    const app = APPS.find(a => a.icon === data.appIcon);
+    if (notifEl && app) {
+      setInterval(() => {
+        if (!el.isConnected) return;
+        notifEl.textContent = randomFrom(app.notifications);
+      }, 4000 + Math.random() * 6000);
+    }
+
+    // Drag events
+    el.addEventListener("dragstart", (e: DragEvent) => {
+      // Dodge chance — phone resists!
+      if (Math.random() < data.dodgeChance) {
+        e.preventDefault();
+        el.animate([
+          { transform: "translateX(0)" },
+          { transform: "translateX(-20px) rotate(-5deg)" },
+          { transform: "translateX(15px) rotate(3deg)" },
+          { transform: "translateX(0)" }
+        ], { duration: 400, easing: "ease-in-out" });
+
+        showAlert(`📱 ${data.owner}'s phone DODGED confiscation!`);
+        return;
+      }
+
+      draggedPhoneId = data.id;
+      el.classList.add("dragging");
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", data.id);
+      }
+    });
+
+    el.addEventListener("dragend", () => {
+      el.classList.remove("dragging");
+      draggedPhoneId = null;
+    });
+
+    return el;
+  }
+
+  function spawnPhone(): void {
+    const data = makePhone();
+    const el = renderPhone(data);
+    desks.appendChild(el);
+    totalSpawned++;
+  }
+
+  function confiscatePhone(phoneId: string): void {
+    const el = desks.querySelector(`[data-phone-id="${phoneId}"]`) as HTMLElement | null;
+    if (!el) return;
+
+    // Animate removal
+    el.animate([
+      { transform: "scale(1)", opacity: 1 },
+      { transform: "scale(0.3) rotate(20deg)", opacity: 0 }
+    ], { duration: 300, easing: "ease-in" }).onfinish = () => {
+      el.remove();
+    };
+
+    confiscatedCount++;
+    countEl.textContent = String(confiscatedCount);
+    updateCompliance();
+    updateCommentary();
+
+    // Add phone icon to drawer
+    const icon = document.createElement("span");
+    icon.className = "confiscated-phone";
+    icon.textContent = "📱";
+    drawerContents.appendChild(icon);
+
+    // Sometimes spawn a replacement (phones multiply)
+    if (confiscatedCount > 3 && Math.random() < 0.4) {
+      setTimeout(() => {
+        spawnPhone();
+        showAlert("📱 NEW PHONE DETECTED — they're multiplying!");
+      }, 1500);
+    }
+  }
+
+  function updateCompliance(): void {
+    const pct = totalSpawned > 0 ? Math.round((confiscatedCount / totalSpawned) * 100) : 0;
+    compliancePct.textContent = `${Math.min(pct, 100)}%`;
+  }
+
+  function updateCommentary(): void {
+    const thresholds = Object.keys(DRAWER_COMMENTARY)
+      .map(Number)
+      .sort((a, b) => b - a);
+
+    for (const t of thresholds) {
+      if (confiscatedCount >= t) {
+        commentaryEl.textContent = randomFrom(DRAWER_COMMENTARY[t]);
+        return;
+      }
+    }
+  }
+
+  function showAlert(message: string): void {
+    alertText.textContent = message;
+    alertBar.classList.remove("hidden");
+    setTimeout(() => {
+      alertBar.classList.add("hidden");
+    }, 3000);
+  }
+
+  // Drawer drop zone
+  drawer.addEventListener("dragover", (e: DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
+    drawer.classList.add("drag-over");
+  });
+
+  drawer.addEventListener("dragleave", () => {
+    drawer.classList.remove("drag-over");
+  });
+
+  drawer.addEventListener("drop", (e: DragEvent) => {
+    e.preventDefault();
+    drawer.classList.remove("drag-over");
+
+    const phoneId = e.dataTransfer?.getData("text/plain");
+    if (phoneId) {
+      confiscatePhone(phoneId);
+    }
+  });
+
+  // Initial spawn
+  for (let i = 0; i < 4; i++) {
+    setTimeout(() => spawnPhone(), i * 400);
+  }
+
+  // Ongoing spawns — the phones keep appearing
+  let spawnInterval = 3500;
+  function scheduleSpawn(): void {
+    setTimeout(() => {
+      const phoneCount = desks.querySelectorAll(".phone").length;
+      if (phoneCount < 12) {
+        spawnPhone();
+      }
+      // Phones arrive faster as time goes on
+      spawnInterval = Math.max(2000, spawnInterval - 50);
+      scheduleSpawn();
+    }, spawnInterval + Math.random() * 2000);
+  }
+  scheduleSpawn();
+
+  // Random alerts
+  setInterval(() => {
+    if (Math.random() < 0.3) {
+      showAlert(randomFrom(ALERT_MESSAGES));
+    }
+  }, 8000);
+
+  // Periodically change notifications on existing phones to show urgency
+  setInterval(() => {
+    const phones = desks.querySelectorAll(".phone");
+    if (phones.length === 0) return;
+    const phone = randomFrom(Array.from(phones)) as HTMLElement;
+    // Make it vibrate urgently
+    phone.animate([
+      { transform: "translateX(0)" },
+      { transform: "translateX(-3px) rotate(-2deg)" },
+      { transform: "translateX(3px) rotate(2deg)" },
+      { transform: "translateX(-3px) rotate(-1deg)" },
+      { transform: "translateX(3px) rotate(1deg)" },
+      { transform: "translateX(0)" }
+    ], {
+      duration: 200,
+      iterations: 4
+    });
+  }, 4000);
+</script>
