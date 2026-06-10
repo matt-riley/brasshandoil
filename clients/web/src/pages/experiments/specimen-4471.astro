@@ -409,10 +409,11 @@ const reportFields = [
 </style>
 
 <script>
-  document.addEventListener("astro:page-load", () => {
+  function initSpecimen() {
     if (!window.location.pathname.includes("specimen-4471")) return;
 
     const specimenArea = document.getElementById("specimen-area") as HTMLDivElement;
+    if (!specimenArea || (window as any).__specimenReady) return;
     const uvLamp = document.getElementById("uv-lamp") as HTMLDivElement;
     const uvGlow = document.getElementById("uv-glow") as HTMLDivElement;
     const larvaeLayer = document.getElementById("larvae-layer") as HTMLDivElement;
@@ -558,5 +559,8 @@ const reportFields = [
     // Start animation
     animFrame = requestAnimationFrame(animate);
     updateState();
-  });
+  }
+
+  initSpecimen();
+  document.addEventListener("astro:page-load", initSpecimen);
 </script>

@@ -781,8 +781,10 @@ import Base from "@layouts/Base.astro"
 
 <script is:inline>
   // Dynamic calibration script running completely in client context
-  document.addEventListener('astro:page-load', () => {
+  function initPatchbay() {
     const initBtn = document.getElementById('init-patchbay');
+    if (!initBtn || initBtn.dataset.ready === "true") return;
+    initBtn.dataset.ready = "true";
     const overlay = document.getElementById('onboarding-overlay');
     const terminalHeader = document.getElementById('terminal-header-state');
     
@@ -1281,7 +1283,10 @@ import Base from "@layouts/Base.astro"
         renderCables();
       }
     });
-  });
+  }
+
+  initPatchbay();
+  document.addEventListener('astro:page-load', initPatchbay);
 </script>
 
 <style is:global>
