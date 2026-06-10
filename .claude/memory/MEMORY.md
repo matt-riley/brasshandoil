@@ -90,6 +90,9 @@ Set `draggable="true"` on an element, then listen for `dragstart` (call `e.dataT
 #### Verlet Integration (rope/pendulum physics)
 Store current and previous position per point; velocity is implicit as `pos - oldPos`. Each frame: (1) compute new pos from current + (current - old) * damping + gravity, (2) iteratively solve distance constraints between connected points (divide error equally, skip pinned points). 5 iterations is enough for stiff ropes. Pinned points act as anchors. Mouse interaction: directly set a grabbed point's position each frame — the verlet integration naturally generates momentum on release since oldPos lags behind. Much simpler than force-based physics for rope/cloth/pendulum effects.
 
+#### CSS Motion Path (offset-path / offset-distance)
+`offset-path: path("M... L... Z")` makes an element follow an arbitrary SVG-like path. Animate `offset-distance` from `0%` to `100%` in a `@keyframes` rule to move along it. `offset-rotate: 0deg` keeps orientation fixed (default auto-rotates to path tangent). Generate elliptical paths programmatically by computing points around a parametric ellipse with tilt: `x = cx + rx*cos(θ)*cos(tilt) - ry*sin(θ)*sin(tilt)`. Set via `el.style.setProperty("offset-path", ...)` to avoid TypeScript CSSStyleDeclaration complaints. Stagger start positions with negative `animation-delay`. Changing the path dynamically (e.g., from chaotic to circular) creates a satisfying "orbit stabilization" effect. Gotcha: the element's position is relative to its offset parent, and `offset-path` coordinates are in the element's containing block — test positioning carefully.
+
 ### 2026-06-04 — Dark Star Observatory
 **Concept:** Inspired by the theory that the universe's first stars emitted no light. A black void with 600 faint background stars and 7 hidden "dark stars." Move your cursor to probe — near a dark star, background stars bend via gravitational lensing. Dwell to catalogue each one.
 **Technique:** Canvas-based gravitational lensing — per-frame displacement of star positions based on inverse-distance deflection from hidden point masses, modulated by cursor proximity. Einstein ring hint rendering.
@@ -119,6 +122,11 @@ Store current and previous position per point; velocity is implicit as `pos - ol
 **Concept:** Inspired by Sweden banning mobile phones in schools starting fall 2026. You are a Swedish teacher on Day 1 of enforcement. Student phones appear on desks, vibrating with TikTok and Snapchat notifications. Drag each phone into the confiscation drawer. Phones resist — they dodge, multiply, and send guilt-trip notifications. The drawer develops sentience from absorbing too much screen time.
 **Technique:** HTML5 Drag and Drop API — `draggable="true"`, `dragstart`/`dragover`/`drop`/`dragend` events, `DataTransfer.setData()`/`getData()` for passing phone identity, `effectAllowed`/`dropEffect` for cursor feedback. Combined with Web Animations API (`element.animate()`) for phone vibration, dodge, and spawn effects.
 **File:** clients/web/src/pages/experiments/riksdag-resolution.astro
+
+### 2026-06-10 — KQ14 Orbital Deposition
+**Concept:** Inspired by new Kuiper Belt Object discoveries (2023 KQ14) challenging the Planet Nine hypothesis. A courtroom where KBO 2023 KQ14 is on trial for "failure to orbit as predicted." Planet Nine, the defendant, is absent. Six trans-Neptunian witnesses orbit the courtroom on CSS motion paths. Click each to stabilize their testimony, weakening the case. When all stabilize, the judge dismisses the case.
+**Technique:** CSS Motion Path — `offset-path: path(...)`, `offset-distance`, animated via `@keyframes` from `0%` to `100%`. Elements follow arbitrary SVG-like path data strings, enabling elliptical orbit animations entirely in CSS.
+**File:** clients/web/src/pages/experiments/kq14-deposition.astro
 
 ## Feedback from Matt
 

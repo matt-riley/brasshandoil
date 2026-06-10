@@ -4,6 +4,21 @@ Use this file as the running source of truth for review notes after each daily e
 
 ## Feedback Entries
 
+### Session Entry
+
+Date: 2026-06-10
+Experiment: Glacier Stone Concierge
+Feedback:
+- Awaiting user review.
+- Self-review: the first screenshot showed the action row clipped at 1280x720
+  despite passing visibility checks.
+Carry Forward:
+- Keep using recent science/news seeds to avoid repeated internal bureaucracy
+  motifs.
+- Add a first-viewport screenshot pass for primary controls and bottom HUDs.
+- For route-like interactions, animate the focal object and ambience while
+  keeping selectable waypoint geometry fixed for stable tests.
+
 ### Seed Entry
 
 Date: 2026-05-31
@@ -384,3 +399,16 @@ Carry Forward:
 - Keep exact shared class hooks when source contracts search literal markup, and move per-item placement into `data-*` attributes.
 - Use pointer-transparent visual layers for roaming lenses, SVG fields, and resonance effects so stable controls remain clickable.
 - If the in-app browser blocks localhost by policy, record it and rely on the already-run Playwright route checks plus `pnpm build`.
+
+### Session Entry
+
+Date: 2026-06-10
+Experiment: Transposon Torpor Modulator
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from recent news: sequences of the two-toed sloth genome revealing ancient transposon insertions responsible for metabolic torpor.
+- Implemented "jumping gene" DNA transposition mechanic where active nodes change coordinates upon hover, touch, or click.
+- Decoupled physical layout movement from state transitions by swapping genetic role markers and data-attributes, avoiding layout-jitter.
+- Coordinated AudioContext synthesizer frequencies and Canvas cellular energy simulation speed with the global metabolic accelerator rate (60.0 Hz down to 0.1 Hz).
+- Enforced strict keyboard accessibility (Tab focus and Arrow Keys navigation) and explicit user arming for AudioContext activation.
