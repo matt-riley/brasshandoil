@@ -1,0 +1,1389 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Transposon Torpor Modulator // Bradypus Biometrics">
+  <div class="modulator-container" id="modulator-root" data-equilibrium-state="unstable" data-freq="60.0">
+    <!-- Cellular Canvas Backdrop -->
+    <canvas id="cellular-canvas" class="background-canvas" aria-hidden="true"></canvas>
+
+    <!-- Header Section -->
+    <header class="modulator-header">
+      <h1 class="page-title text-gradient">Transposon Torpor Modulator</h1>
+      <p class="subtitle font-mono">BRADYPUS GENOMIC CALIBRATION // KIOSK-ID: 2026.06.10</p>
+    </header>
+
+    <!-- Onboarding / Audio Activation Overlay -->
+    <div id="torpor-overlay" class="overlay glass">
+      <div class="overlay-content">
+        <div class="overlay-icon">🦥</div>
+        <h2 class="overlay-title font-mono">GENOMIC OPTIMIZATION PROTOCOL</h2>
+        <p class="overlay-desc">
+          You are calibrating the newly sequenced genome of the two-toed sloth (<em>Choloepus didactylus</em>).
+          This portal enforces high-performance biometric outputs.
+        </p>
+        <div class="alert alert-warning font-mono">
+          WARNING: Unstable transposons (jumping genes) detected in local DNA strands.
+        </div>
+        <button id="arm-button" class="btn btn-primary">
+          Initialize Audio & Begin Calibration
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Active Workspace (Visible once armed) -->
+    <div class="workspace-grid hidden" id="workspace">
+      <!-- Left Column: The Gene Strand Sequencer -->
+      <div class="panel strand-panel glass">
+        <h2 class="panel-title font-mono">I. DNA Sequence Alignment</h2>
+        <p class="panel-desc">
+          Hover over or click genes to inspect. If you touch an active transposon, it will transpose (jump) to a new locus, destabilizing the accelerator.
+        </p>
+
+        <!-- The Gene Bead Chain -->
+        <div class="gene-chain-container">
+          <div class="gene-chain-line" aria-hidden="true"></div>
+          <div class="gene-chain" id="gene-chain" role="listbox" aria-label="Gene Sequence Chain">
+            <!-- Bead 0 -->
+            <button class="gene-bead glass" data-index="0" data-base="A" data-transposon="false" role="option" aria-selected="false">
+              <span class="bead-label font-mono">A</span>
+              <span class="bead-status font-mono">LOCUS 1</span>
+            </button>
+            <!-- Bead 1 -->
+            <button class="gene-bead glass" data-index="1" data-base="T" data-transposon="false" role="option" aria-selected="false">
+              <span class="bead-label font-mono">T</span>
+              <span class="bead-status font-mono">LOCUS 2</span>
+            </button>
+            <!-- Bead 2 (Transposon initial) -->
+            <button class="gene-bead glass transposon" data-index="2" data-base="C" data-transposon="true" role="option" aria-selected="false">
+              <span class="bead-label font-mono">C</span>
+              <span class="bead-status font-mono">JUMP_GENE</span>
+            </button>
+            <!-- Bead 3 -->
+            <button class="gene-bead glass" data-index="3" data-base="G" data-transposon="false" role="option" aria-selected="false">
+              <span class="bead-label font-mono">G</span>
+              <span class="bead-status font-mono">LOCUS 4</span>
+            </button>
+            <!-- Bead 4 -->
+            <button class="gene-bead glass" data-index="4" data-base="A" data-transposon="false" role="option" aria-selected="false">
+              <span class="bead-label font-mono">A</span>
+              <span class="bead-status font-mono">LOCUS 5</span>
+            </button>
+            <!-- Bead 5 (Transposon initial) -->
+            <button class="gene-bead glass transposon" data-index="5" data-base="T" data-transposon="true" role="option" aria-selected="false">
+              <span class="bead-label font-mono">T</span>
+              <span class="bead-status font-mono">JUMP_GENE</span>
+            </button>
+            <!-- Bead 6 -->
+            <button class="gene-bead glass" data-index="6" data-base="C" data-transposon="false" role="option" aria-selected="false">
+              <span class="bead-label font-mono">C</span>
+              <span class="bead-status font-mono">LOCUS 7</span>
+            </button>
+            <!-- Bead 7 -->
+            <button class="gene-bead glass" data-index="7" data-base="G" data-transposon="false" role="option" aria-selected="false">
+              <span class="bead-label font-mono">G</span>
+              <span class="bead-status font-mono">LOCUS 8</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="keyboard-hint font-mono">
+          [ARROW KEYS] Navigate Chain // [SPACE / ENTER] Stabilize / Inspect // [CLICK / HOVER] Transpose
+        </div>
+      </div>
+
+      <!-- Right Column: Metabolic Telemetry Dashboard -->
+      <div class="panel telemetry-panel glass">
+        <h2 class="panel-title font-mono">II. Metabolic Telemetry</h2>
+        
+        <div class="telemetry-readout">
+          <div class="readout-box">
+            <span class="readout-label font-mono">METABOLIC ACCELERATOR FREQUENCY</span>
+            <div class="readout-value font-mono" id="freq-display">60.0 Hz</div>
+          </div>
+          <div class="readout-box">
+            <span class="readout-label font-mono">SYSTEM EQUILIBRIUM STATE</span>
+            <div class="readout-value font-mono text-warning" id="equilibrium-display">ACCELERATION STATE</div>
+          </div>
+        </div>
+
+        <div class="status-gauge-container">
+          <div class="status-gauge-ring" id="gauge-ring"></div>
+          <div class="status-gauge-center font-mono">
+            <span id="speed-percent">100</span>%
+            <span class="small-label">OUTPUT</span>
+          </div>
+        </div>
+
+        <div class="log-console">
+          <div class="console-header font-mono">BIOMETRIC DIAGNOSTIC LOG</div>
+          <div class="console-lines font-mono" id="log-console-lines">
+            <div class="log-line text-success">&gt; Accelerator initialized at nominal 60.0 Hz.</div>
+            <div class="log-line text-warning">&gt; Warning: Sloth transposons actively suppressing enzymatic clocks.</div>
+          </div>
+        </div>
+
+        <button id="reset-btn" class="btn btn-danger font-mono">
+          ⚠️ EMERGENCY ACCELERATE METABOLISM (OVERCLOCK)
+        </button>
+      </div>
+    </div>
+
+    <!-- Tranquil Torpor Equilibrium Screen (Fades in when min frequency reached) -->
+    <div id="torpor-screen" class="torpor-equilibrium-screen hidden">
+      <div class="equilibrium-stars" id="constellation-bg"></div>
+      <div class="torpor-content">
+        <div class="sloth-constellation">🦥</div>
+        <h1 class="equilibrium-title text-gradient">Absolute Torpor Achieved</h1>
+        <p class="equilibrium-desc">
+          Biomimetic accelerator frequency has stabilized at <strong>0.1 Hz</strong>.
+          By conserving energy through ancient transposon insertions, the cell has reached perfect thermal and kinetic balance.
+        </p>
+        <div class="equilibrium-metrics font-mono">
+          <div class="metric-item">
+            <span class="m-val text-gradient">0.1 Hz</span>
+            <span class="m-lbl">Heartbeat</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-val text-gradient">18.5°C</span>
+            <span class="m-lbl">Core Temp</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-val text-gradient">100%</span>
+            <span class="m-lbl">Survival Prob.</span>
+          </div>
+        </div>
+        <div class="equilibrium-quote italic">
+          "Evolution is not a race. Those who wait, persist."
+        </div>
+        <button id="restart-btn" class="btn btn-tranquil font-mono">
+          Re-Initialize Portal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // System Constants
+    const frequencies = [60.0, 30.0, 15.0, 8.0, 4.0, 2.0, 1.0, 0.1];
+    const diagnosticTexts: Record<number, string[]> = {
+      60.0: [
+        "&gt; Core accelerator firing at maximum 60.0 Hz.",
+        "&gt; Alert: Sloth transposons actively suppressing enzymatic clocks."
+      ],
+      30.0: [
+        "&gt; Transposon shifted index. Metabolic ticking slows to 30.0 Hz.",
+        "&gt; Energy dissipation reduction detected. Mitochondrial tempo decreasing."
+      ],
+      15.0: [
+        "&gt; Second transposition cascade. Accelerator falls to 15.0 Hz.",
+        "&gt; Kinetic heat release halved. Cellular calmness expanding."
+      ],
+      8.0: [
+        "&gt; Locus substitution complete. Accelerator dropping to 8.0 Hz.",
+        "&gt; Diagnostic warning: Heartbeat clock falling below alert thresholds."
+      ],
+      4.0: [
+        "&gt; Severe metabolic deceleration. Frequency registered at 4.0 Hz.",
+        "&gt; Sloth torpor genes taking direct control of ribosomal compilation."
+      ],
+      2.0: [
+        "&gt; Clock ticks at 2.0 Hz. Sub-optimal productivity detected.",
+        "&gt; Biometric feedback indicates profound cellular relaxation."
+      ],
+      1.0: [
+        "&gt; Clock ticks at 1.0 Hz. Terminal optimization phase engaged.",
+        "&gt; Oxygen preservation pathways maximized."
+      ],
+      0.1: [
+        "&gt; ABSOLUTE TORPOR ENGAGED (0.1 Hz).",
+        "&gt; Energy conservation: 100%. Thermal output: Nominal. Evolutionary lifespan: Infinite."
+      ]
+    };
+
+    // State Variables
+    let currentFreqIndex = 0;
+    let transposonLocations = [2, 5]; // Indices of beads that are transposons
+    let isArmed = false;
+    let focusedBeadIndex = 0;
+
+    // Web Audio State
+    let audioCtx: AudioContext | null = null;
+    let baseDrone: OscillatorNode | null = null;
+    let baseDroneGain: GainNode | null = null;
+    let chimeGain: GainNode | null = null;
+    let tickIntervalId: number | null = null;
+    let scaleIndex = 0;
+    // Deep warm pentatonic scale (Root: C, E, G, A, C)
+    const synthNotes = [65.41, 82.41, 98.00, 110.00, 130.81, 164.81, 196.00, 220.00];
+
+    // DOM Elements
+    const root = document.getElementById("modulator-root") as HTMLElement;
+    const overlay = document.getElementById("torpor-overlay") as HTMLElement;
+    const armBtn = document.getElementById("arm-button") as HTMLButtonElement;
+    const workspace = document.getElementById("workspace") as HTMLElement;
+    const freqDisplay = document.getElementById("freq-display") as HTMLElement;
+    const equilibriumDisplay = document.getElementById("equilibrium-display") as HTMLElement;
+    const speedPercent = document.getElementById("speed-percent") as HTMLElement;
+    const logConsoleLines = document.getElementById("log-console-lines") as HTMLElement;
+    const resetBtn = document.getElementById("reset-btn") as HTMLButtonElement;
+    const torporScreen = document.getElementById("torpor-screen") as HTMLElement;
+    const restartBtn = document.getElementById("restart-btn") as HTMLButtonElement;
+    const geneChain = document.getElementById("gene-chain") as HTMLElement;
+    const gaugeRing = document.getElementById("gauge-ring") as HTMLElement;
+
+    // Canvas State
+    const canvas = document.getElementById("cellular-canvas") as HTMLCanvasElement;
+    let ctx: CanvasRenderingContext2D | null = null;
+    let particles: Array<{ x: number, y: number, vx: number, vy: number, radius: number, alpha: number, color: string }> = [];
+
+    // Initialize Canvas
+    function initCanvas() {
+      if (!canvas) return;
+      ctx = canvas.getContext("2d");
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      // Create biochemical particles
+      particles = [];
+      const particleColors = ["#10b981", "#34d399", "#f59e0b", "#fbbf24", "#059669"];
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: (Math.random() - 0.5) * 1.5,
+          radius: Math.random() * 4 + 2,
+          alpha: Math.random() * 0.4 + 0.1,
+          color: particleColors[Math.floor(Math.random() * particleColors.length)]
+        });
+      }
+
+      runCanvasLoop();
+    }
+
+    function resizeCanvas() {
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    }
+
+    function runCanvasLoop() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Get current frequency factor to slow down particle speed
+      const currentFreq = frequencies[currentFreqIndex];
+      const speedFactor = currentFreq / 60.0;
+
+      particles.forEach(p => {
+        p.x += p.vx * speedFactor;
+        p.y += p.vy * speedFactor;
+
+        // Bounce off bounds
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        ctx!.save();
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx!.fillStyle = p.color;
+        ctx!.globalAlpha = p.alpha;
+        // Glow effect for particles when slow
+        if (speedFactor < 0.2) {
+          ctx!.shadowBlur = 10;
+          ctx!.shadowColor = p.color;
+        }
+        ctx!.fill();
+        ctx!.restore();
+      });
+
+      requestAnimationFrame(runCanvasLoop);
+    }
+
+    // Audio Context Setup
+    function initAudio() {
+      try {
+        const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
+        audioCtx = new AudioContextClass();
+
+        // 1. Warm base drone
+        baseDrone = audioCtx.createOscillator();
+        baseDroneGain = audioCtx.createGain();
+        baseDrone.type = "sine";
+        baseDrone.frequency.value = 65.41; // C2 deep warm note
+        baseDroneGain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+
+        // Lowpass filter to make it warmer/muffled
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 180;
+
+        baseDrone.connect(filter);
+        filter.connect(baseDroneGain);
+        baseDroneGain.connect(audioCtx.destination);
+        baseDrone.start();
+
+        // 2. Chime Synthesizer Gain
+        chimeGain = audioCtx.createGain();
+        chimeGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        chimeGain.connect(audioCtx.destination);
+
+        // Start the heartbeat/ticking metronome
+        scheduleHeartbeat();
+      } catch (err) {
+        console.error("Failed to initialize Web Audio:", err);
+      }
+    }
+
+    // Play chime sound representing biological metabolic activity
+    function playHeartbeatChime() {
+      if (!audioCtx) return;
+
+      const currentFreq = frequencies[currentFreqIndex];
+      const speedFactor = currentFreq / 60.0;
+
+      // Create a gorgeous chime note
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+
+      // Select frequency from scale based on progress
+      // As it slows down, notes get deeper
+      let noteFreq = synthNotes[scaleIndex % synthNotes.length];
+      if (speedFactor < 0.5) noteFreq /= 2; // Drop octave
+      if (speedFactor < 0.15) noteFreq /= 2; // Drop another octave
+
+      scaleIndex++;
+
+      osc.type = speedFactor > 0.5 ? "triangle" : "sine";
+      osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
+
+      filter.type = "lowpass";
+      // Higher frequencies are filtered out as system cools down
+      filter.frequency.setValueAtTime(Math.max(120, 800 * speedFactor), audioCtx.currentTime);
+
+      // Decays slower as the frequency slows down
+      const decayTime = Math.max(0.15, 2.5 * (1.1 - speedFactor));
+      gain.gain.setValueAtTime(0.07, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + decayTime);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(chimeGain!);
+      osc.start();
+      osc.stop(audioCtx.currentTime + decayTime);
+    }
+
+    // Play quick glitch blip when transposon jumps
+    function playGlitchSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.12);
+
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    }
+
+    // Play warning sound when Reset is clicked
+    function playWarningSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(140, audioCtx.currentTime + 0.1);
+
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    // Heartbeat clock scheduling
+    function scheduleHeartbeat() {
+      if (tickIntervalId) {
+        clearInterval(tickIntervalId);
+        tickIntervalId = null;
+      }
+
+      const currentFreq = frequencies[currentFreqIndex];
+      
+      // Map display Hz to ticking intervals:
+      // 60Hz display -> ticks every 200ms
+      // 30Hz display -> ticks every 400ms
+      // 15Hz -> 750ms
+      // 8Hz -> 1250ms
+      // 4Hz -> 2000ms
+      // 2Hz -> 3500ms
+      // 1Hz -> 5000ms
+      // 0.1Hz -> 8000ms
+      let intervalMs = 200;
+      if (currentFreq === 30.0) intervalMs = 400;
+      else if (currentFreq === 15.0) intervalMs = 750;
+      else if (currentFreq === 8.0) intervalMs = 1250;
+      else if (currentFreq === 4.0) intervalMs = 2000;
+      else if (currentFreq === 2.0) intervalMs = 3500;
+      else if (currentFreq === 1.0) intervalMs = 5000;
+      else if (currentFreq === 0.1) intervalMs = 8000;
+
+      tickIntervalId = setInterval(() => {
+        playHeartbeatChime();
+        triggerVisualPulse();
+      }, intervalMs) as unknown as number;
+    }
+
+    function triggerVisualPulse() {
+      // Glow the telemetry readout briefly
+      const display = document.getElementById("freq-display");
+      if (display) {
+        display.classList.add("pulse-glow");
+        setTimeout(() => display.classList.remove("pulse-glow"), 300);
+      }
+    }
+
+    // Arming Interaction
+    armBtn.addEventListener("click", () => {
+      isArmed = true;
+      overlay.classList.add("hidden");
+      workspace.classList.remove("hidden");
+      initCanvas();
+      initAudio();
+      
+      // Update data attribute for tests
+      root.setAttribute("data-equilibrium-state", "calibrating");
+      
+      // Focus first bead
+      updateBeadFocus();
+    });
+
+    // DNA Transposon Jump logic
+    function handleBeadInteraction(index: number) {
+      if (!isArmed) return;
+
+      const isTransposon = transposonLocations.includes(index);
+
+      if (isTransposon) {
+        // Transposition event!
+        playGlitchSound();
+        triggerTransposition(index);
+      } else {
+        // Simple scan readout
+        addLogLine(`&gt; Inspected Locus ${index + 1}: Base ${getBaseName(index)}. Position stable.`);
+      }
+    }
+
+    function getBaseName(index: number): string {
+      const bead = document.querySelector(`.gene-bead[data-index="${index}"]`);
+      return bead ? bead.getAttribute("data-base") || "N" : "N";
+    }
+
+    function triggerTransposition(fromIndex: number) {
+      // Find a target index that is NOT currently a transposon
+      const nonTransposonIndices: number[] = [];
+      for (let i = 0; i < 8; i++) {
+        if (!transposonLocations.includes(i)) {
+          nonTransposonIndices.push(i);
+        }
+      }
+
+      if (nonTransposonIndices.length === 0) return;
+
+      // Pick a random destination
+      const toIndex = nonTransposonIndices[Math.floor(Math.random() * nonTransposonIndices.length)];
+
+      // Swap the transposon state in our tracker array
+      transposonLocations = transposonLocations.map(loc => loc === fromIndex ? toIndex : loc);
+
+      // Log the jump
+      addLogLine(`&gt; TRANSPOSON SHIFT: Locus ${fromIndex + 1} transposed to Locus ${toIndex + 1}!`);
+
+      // Visual feedback: add flash effect to both beads
+      const fromBead = document.querySelector(`.gene-bead[data-index="${fromIndex}"]`) as HTMLElement;
+      const toBead = document.querySelector(`.gene-bead[data-index="${toIndex}"]`) as HTMLElement;
+
+      if (fromBead && toBead) {
+        fromBead.classList.add("glitch-flash");
+        toBead.classList.add("glitch-flash");
+        
+        // Swap attributes & classes
+        fromBead.setAttribute("data-transposon", "false");
+        fromBead.classList.remove("transposon");
+        const fromLabel = fromBead.querySelector(".bead-status") as HTMLElement;
+        if (fromLabel) fromLabel.textContent = `LOCUS ${fromIndex + 1}`;
+
+        toBead.setAttribute("data-transposon", "true");
+        toBead.classList.add("transposon");
+        const toLabel = toBead.querySelector(".bead-status") as HTMLElement;
+        if (toLabel) toLabel.textContent = "JUMP_GENE";
+
+        setTimeout(() => {
+          fromBead.classList.remove("glitch-flash");
+          toBead.classList.remove("glitch-flash");
+        }, 400);
+      }
+
+      // Drop the metabolic rate
+      decelerateMetabolism();
+    }
+
+    function decelerateMetabolism() {
+      if (currentFreqIndex < frequencies.length - 1) {
+        currentFreqIndex++;
+        const newFreq = frequencies[currentFreqIndex];
+        
+        // Update display text and data attributes
+        freqDisplay.textContent = `${newFreq.toFixed(1)} Hz`;
+        root.setAttribute("data-freq", newFreq.toFixed(1).toString());
+
+        // Update CSS global transition variables based on speed
+        const speedFactor = 60.0 / newFreq;
+        document.documentElement.style.setProperty("--glow-pulse-duration", `${1.0 * speedFactor}s`);
+        
+        // Add diagnostic log lines
+        const lines = diagnosticTexts[newFreq] || [];
+        lines.forEach((line: string) => addLogLine(line));
+
+        // Adjust gauges
+        const percentage = Math.round((newFreq / 60.0) * 100);
+        speedPercent.textContent = percentage.toString();
+        gaugeRing.style.strokeDashoffset = (440 - (440 * (newFreq / 60.0))).toString();
+
+        // Adjust synth drone drone gain (quieter/deeper as it goes)
+        if (baseDroneGain && audioCtx) {
+          baseDroneGain.gain.setTargetAtTime(0.04 + (0.04 * (newFreq / 60.0)), audioCtx.currentTime, 0.5);
+          baseDrone!.frequency.setTargetAtTime(45.0 + (20.41 * (newFreq / 60.0)), audioCtx.currentTime, 0.8);
+        }
+
+        // Reschedule heartbeat ticker
+        scheduleHeartbeat();
+
+        // Check for terminal torpor state
+        if (newFreq === 0.1) {
+          engageTorporEquilibrium();
+        }
+      }
+    }
+
+    function addLogLine(html: string) {
+      if (!logConsoleLines) return;
+      const line = document.createElement("div");
+      line.className = "log-line";
+      line.innerHTML = html;
+      logConsoleLines.appendChild(line);
+      logConsoleLines.scrollTop = logConsoleLines.scrollHeight;
+
+      // Limit console history
+      while (logConsoleLines.children.length > 20) {
+        logConsoleLines.removeChild(logConsoleLines.firstChild!);
+      }
+    }
+
+    function engageTorporEquilibrium() {
+      root.setAttribute("data-equilibrium-state", "stable");
+      equilibriumDisplay.textContent = "TORPOR EQUILIBRIUM";
+      equilibriumDisplay.className = "readout-value font-mono text-success";
+
+      // Clear ticker
+      if (tickIntervalId) {
+        clearInterval(tickIntervalId);
+        tickIntervalId = null;
+      }
+
+      // Fade workspace, fade in absolute torpor screen
+      setTimeout(() => {
+        workspace.classList.add("hidden");
+        torporScreen.classList.remove("hidden");
+        torporScreen.classList.add("fade-in");
+
+        // Keep deep ambient chord playing continuously
+        if (audioCtx) {
+          // Fade drone to super-low, serene tone
+          baseDroneGain!.gain.setTargetAtTime(0.12, audioCtx.currentTime, 1.5);
+          baseDrone!.frequency.setTargetAtTime(43.65, audioCtx.currentTime, 2.0); // Deep F1 hum
+        }
+      }, 1500);
+    }
+
+    // Overclock / Reset Trigger
+    resetBtn.addEventListener("click", () => {
+      initAudio();
+      playWarningSound();
+
+      // Shake telemetry panel
+      const telemetry = document.querySelector(".telemetry-panel");
+      if (telemetry) {
+        telemetry.classList.add("shake");
+        setTimeout(() => telemetry.classList.remove("shake"), 500);
+      }
+
+      addLogLine("<span class='text-danger'>&gt; WARNING: Emergency Overclock engaged. Injecting thermal stimulus...</span>");
+      addLogLine("<span class='text-danger'>&gt; Error: Stimulation triggers jumping gene cascade!</span>");
+
+      // Instantly trigger multiple leaps in sequence
+      setTimeout(() => {
+        const activeLocs = [...transposonLocations];
+        triggerTransposition(activeLocs[0]);
+      }, 200);
+
+      setTimeout(() => {
+        const activeLocs = [...transposonLocations];
+        triggerTransposition(activeLocs[1]);
+      }, 500);
+    });
+
+    // Reset whole system
+    restartBtn.addEventListener("click", () => {
+      // Reset state
+      currentFreqIndex = 0;
+      transposonLocations = [2, 5];
+      focusedBeadIndex = 0;
+
+      // Reset DOM state
+      freqDisplay.textContent = "60.0 Hz";
+      root.setAttribute("data-freq", "60.0");
+      root.setAttribute("data-equilibrium-state", "calibrating");
+      equilibriumDisplay.textContent = "ACCELERATION STATE";
+      equilibriumDisplay.className = "readout-value font-mono text-warning";
+      speedPercent.textContent = "100";
+      gaugeRing.style.strokeDashoffset = "0";
+
+      // Reset beads attributes
+      const allBeads = document.querySelectorAll(".gene-bead");
+      allBeads.forEach((bead, i) => {
+        bead.classList.remove("glitch-flash");
+        const status = bead.querySelector(".bead-status") as HTMLElement;
+        if (i === 2 || i === 5) {
+          bead.setAttribute("data-transposon", "true");
+          bead.classList.add("transposon");
+          if (status) status.textContent = "JUMP_GENE";
+        } else {
+          bead.setAttribute("data-transposon", "false");
+          bead.classList.remove("transposon");
+          if (status) status.textContent = `LOCUS ${i + 1}`;
+        }
+      });
+
+      // Clear log console
+      logConsoleLines.innerHTML = `
+        <div class="log-line text-success">&gt; Accelerator re-initialized at nominal 60.0 Hz.</div>
+        <div class="log-line text-warning">&gt; Warning: Sloth transposons actively suppressing enzymatic clocks.</div>
+      `;
+
+      // Hide torpor screen, reveal workspace
+      torporScreen.classList.remove("fade-in");
+      torporScreen.classList.add("hidden");
+      workspace.classList.remove("hidden");
+
+      // Reset audio drone
+      if (audioCtx) {
+        baseDroneGain!.gain.setTargetAtTime(0.06, audioCtx.currentTime, 0.5);
+        baseDrone!.frequency.setTargetAtTime(65.41, audioCtx.currentTime, 0.5);
+        scheduleHeartbeat();
+      }
+
+      updateBeadFocus();
+    });
+
+    // Gene Chain Event Delegation (Pointer & Click)
+    geneChain.addEventListener("click", (e) => {
+      const bead = (e.target as HTMLElement).closest(".gene-bead") as HTMLElement;
+      if (!bead) return;
+
+      const index = parseInt(bead.getAttribute("data-index") || "0");
+      focusedBeadIndex = index;
+      updateBeadFocus();
+      handleBeadInteraction(index);
+    });
+
+    // Keyboard Navigation & Interaction inside Gene Chain
+    function updateBeadFocus() {
+      const beads = document.querySelectorAll(".gene-bead");
+      beads.forEach((bead, idx) => {
+        if (idx === focusedBeadIndex) {
+          bead.classList.add("focused");
+          (bead as HTMLElement).focus();
+          bead.setAttribute("aria-selected", "true");
+        } else {
+          bead.classList.remove("focused");
+          bead.setAttribute("aria-selected", "false");
+        }
+      });
+    }
+
+    geneChain.addEventListener("keydown", (e) => {
+      if (!isArmed) return;
+
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        focusedBeadIndex = (focusedBeadIndex + 1) % 8;
+        updateBeadFocus();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        focusedBeadIndex = (focusedBeadIndex - 1 + 8) % 8;
+        updateBeadFocus();
+      } else if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        handleBeadInteraction(focusedBeadIndex);
+      }
+    });
+
+    // Hover detection for immediate pointer transposition trigger
+    // Makes the game much more active and surprising
+    geneChain.addEventListener("pointerover", (e) => {
+      const bead = (e.target as HTMLElement).closest(".gene-bead") as HTMLElement;
+      if (!bead) return;
+
+      const index = parseInt(bead.getAttribute("data-index") || "0");
+      const isTransposon = bead.getAttribute("data-transposon") === "true";
+      
+      if (isTransposon) {
+        focusedBeadIndex = index;
+        updateBeadFocus();
+        handleBeadInteraction(index);
+      }
+    });
+
+    // Make sure we expose hook on window for E2E testing validation
+    (window as any).__simulateTransposition = function(index: number) {
+      if (isArmed) {
+        triggerTransposition(index);
+      }
+    };
+  </script>
+
+  <style>
+    /* Design Variables */
+    :root {
+      --glow-color: rgba(16, 185, 129, 0.4);
+      --glow-pulse-duration: 1.5s;
+    }
+
+    /* Core Styles */
+    .modulator-container {
+      min-height: calc(100dvh - 80px);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      color: #e2e8f0;
+      box-sizing: border-box;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .background-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .modulator-header {
+      margin-bottom: 2rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 1.5rem;
+    }
+
+    .page-title {
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      font-weight: 850;
+      margin: 0;
+      letter-spacing: -0.03em;
+    }
+
+    .text-gradient {
+      background: linear-gradient(135deg, #34d399 0%, #fbbf24 60%, #b800ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 0.5rem;
+    }
+
+    /* Glassmorphism Panel styles */
+    .glass {
+      background: rgba(13, 20, 18, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      backdrop-filter: blur(20px) saturate(130%);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .panel {
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel:hover {
+      border-color: rgba(52, 211, 153, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.08);
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #34d399;
+      margin: 0 0 0.5rem 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.5rem;
+    }
+
+    .panel-desc {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.4;
+      margin: 0 0 2rem 0;
+    }
+
+    /* Workspace Grid */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    /* Button and Controls */
+    .btn {
+      cursor: pointer;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary {
+      background: #059669;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #10b981;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      margin-top: 1.5rem;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    /* Overlay / Arming Portal */
+    .overlay {
+      margin: 2rem auto;
+      max-width: 550px;
+      width: 100%;
+      padding: 2.5rem;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .overlay-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      animation: float-sloth 4s ease-in-out infinite;
+    }
+
+    .overlay-title {
+      font-size: 1.25rem;
+      color: #fbbf24;
+      margin: 0 0 1rem 0;
+    }
+
+    .overlay-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 1.5rem;
+    }
+
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      margin-bottom: 2rem;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fbbf24;
+    }
+
+    /* DNA Sequence Sequencer Chain */
+    .gene-chain-container {
+      position: relative;
+      padding: 3rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .gene-chain-line {
+      position: absolute;
+      left: 2rem;
+      right: 2rem;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.15) 50%, rgba(52, 211, 153, 0.15) 100%);
+      z-index: 0;
+    }
+
+    .gene-chain {
+      display: flex;
+      gap: 0.75rem;
+      width: 100%;
+      justify-content: space-between;
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+
+    .gene-bead {
+      position: relative;
+      flex: 1 1 calc(25% - 0.75rem); /* Fallback for wrapping on smaller screens */
+      min-width: 70px;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .gene-bead.focused, .gene-bead:focus-visible {
+      border-color: #34d399;
+      box-shadow: 0 0 14px rgba(52, 211, 153, 0.4);
+      transform: scale(1.05);
+    }
+
+    .bead-label {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 0.15rem;
+    }
+
+    .bead-status {
+      font-size: 0.6rem;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 0.05em;
+    }
+
+    /* Active Transposon Glow and Float */
+    .gene-bead.transposon {
+      border-color: #fbbf24;
+      background: rgba(251, 191, 36, 0.15);
+      box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+      animation: float-bead var(--glow-pulse-duration) ease-in-out infinite alternate;
+    }
+
+    .gene-bead.transposon:hover {
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+      transform: scale(1.1);
+    }
+
+    .gene-bead.transposon .bead-label {
+      color: #fbbf24;
+      text-shadow: 0 0 5px rgba(251, 191, 36, 0.6);
+    }
+
+    .gene-bead.transposon .bead-status {
+      color: rgba(251, 191, 36, 0.8);
+      font-weight: 600;
+    }
+
+    /* Glitch Flash and Shake Animations */
+    .glitch-flash {
+      animation: flash-pulse 0.4s ease-out;
+    }
+
+    .shake {
+      animation: ui-shake 0.4s ease-out;
+    }
+
+    .keyboard-hint {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.35);
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    /* Telemetry Panel Elements */
+    .telemetry-readout {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .readout-box {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .readout-label {
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.1em;
+    }
+
+    .readout-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .readout-value.pulse-glow {
+      color: #fbbf24;
+      text-shadow: 0 0 12px #fbbf24;
+    }
+
+    .text-warning {
+      color: #fbbf24;
+    }
+
+    .text-success {
+      color: #34d399;
+    }
+
+    /* Circular Biometric Gauge */
+    .status-gauge-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 2rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-gauge-ring {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 8px solid rgba(255, 255, 255, 0.03);
+      box-sizing: border-box;
+    }
+
+    /* SVG Ring for exact status progress */
+    .status-gauge-container::before {
+      content: "";
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 8px solid transparent;
+      border-top-color: #34d399;
+      border-right-color: #34d399;
+      box-sizing: border-box;
+      transform: rotate(-45deg);
+      transition: transform 0.5s ease;
+      opacity: 0.15;
+    }
+
+    .status-gauge-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: #e2e8f0;
+    }
+
+    .status-gauge-center .small-label {
+      font-size: 0.6rem;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.1em;
+      margin-top: 0.25rem;
+    }
+
+    /* Diagnostic Console log */
+    .log-console {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      height: 120px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .console-header {
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .console-lines {
+      overflow-y: auto;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      scrollbar-width: thin;
+    }
+
+    .console-lines::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .console-lines::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .log-line {
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.3;
+      word-break: break-all;
+    }
+
+    /* Torpor Equilibrium Screen */
+    .torpor-equilibrium-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #0e0516 0%, #030008 100%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      box-sizing: border-box;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+    }
+
+    .torpor-equilibrium-screen.fade-in {
+      opacity: 1;
+    }
+
+    .equilibrium-stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+        radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px);
+      background-size: 550px 550px, 350px 350px;
+      background-position: 0 0, 40px 60px;
+      opacity: 0.25;
+      z-index: 0;
+    }
+
+    .torpor-content {
+      max-width: 600px;
+      text-align: center;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sloth-constellation {
+      font-size: 5rem;
+      margin-bottom: 2rem;
+      filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.5));
+      animation: float-sloth 8s ease-in-out infinite;
+    }
+
+    .equilibrium-title {
+      font-size: clamp(2.25rem, 6vw, 3.5rem);
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.03em;
+    }
+
+    .equilibrium-desc {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: rgba(226, 232, 240, 0.8);
+      margin-bottom: 2.5rem;
+    }
+
+    .equilibrium-metrics {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 450px;
+      margin-bottom: 3rem;
+      gap: 1rem;
+    }
+
+    .metric-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1rem;
+      flex: 1;
+    }
+
+    .m-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+    }
+
+    .m-lbl {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.1em;
+    }
+
+    .equilibrium-quote {
+      font-size: 0.95rem;
+      color: rgba(251, 191, 36, 0.7);
+      margin-bottom: 3rem;
+    }
+
+    .btn-tranquil {
+      background: rgba(251, 191, 36, 0.1);
+      border: 1.5px solid #fbbf24;
+      color: #fbbf24;
+      box-shadow: 0 4px 14px rgba(251, 191, 36, 0.15);
+    }
+
+    .btn-tranquil:hover {
+      background: #fbbf24;
+      color: #030008;
+      box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Keyframes and Animations */
+    @keyframes float-sloth {
+      0% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(-3deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    @keyframes float-bead {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-6px) scale(1.03); }
+    }
+
+    @keyframes flash-pulse {
+      0% {
+        background: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+        transform: scale(1.2);
+      }
+      100% {
+        background: transparent;
+        box-shadow: none;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes ui-shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Helper utility classes */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Mobile Responsive Wrap adjustments */
+    @media (max-width: 480px) {
+      .gene-chain {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+      }
+      
+      .gene-bead {
+        aspect-ratio: 1;
+        min-width: 0;
+        width: 100%;
+        padding: 0.5rem 0;
+      }
+      
+      .bead-label {
+        font-size: 1.1rem;
+      }
+      
+      .bead-status {
+        font-size: 0.5rem;
+      }
+
+      .equilibrium-metrics {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+      }
+    }
+  </style>
+</Base>

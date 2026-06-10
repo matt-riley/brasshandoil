@@ -1,0 +1,593 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Glacier Stone Concierge">
+  <main class="gsc-shell">
+    <section class="gsc-manifest" aria-label="Glacial itinerary controls">
+      <p class="gsc-kicker">Neolithic cold-chain logistics</p>
+      <h1>Glacier Stone Concierge</h1>
+      <p class="gsc-intro">
+        The Altar Stone has arrived early, damp, and carrying five conflicting
+        receipts. Stamp an itinerary across the ice map, then dispatch the
+        monument before the route becomes folklore with a clipboard.
+      </p>
+
+      <div class="gsc-readouts" aria-live="polite">
+        <div>
+          <span>Route</span>
+          <strong id="route-count">0</strong>
+        </div>
+        <div>
+          <span>Drift</span>
+          <strong id="drift-reading">0</strong>
+        </div>
+        <div>
+          <span>Checkpoint</span>
+          <strong id="current-checkpoint">none</strong>
+        </div>
+        <div>
+          <span>Delivery</span>
+          <strong id="delivery-state">awaiting ice</strong>
+        </div>
+      </div>
+
+      <div class="gsc-actions">
+        <button id="dispatch-button" type="button">Dispatch Stone</button>
+        <button id="refreeze-button" type="button">Refreeze Route</button>
+      </div>
+    </section>
+
+    <section
+      id="gsc-stage"
+      class="gsc-stage"
+      data-awake="false"
+      data-route-count="0"
+      aria-label="Glacier stone itinerary stage"
+    >
+      <svg class="gsc-map" viewBox="0 0 1100 760" aria-hidden="true">
+        <defs>
+          <linearGradient id="gsc-glow" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#60f1ff" stop-opacity="0.9" />
+            <stop offset="0.48" stop-color="#ff6b8e" stop-opacity="0.72" />
+            <stop offset="1" stop-color="#f6d85b" stop-opacity="0.84" />
+          </linearGradient>
+          <filter id="gsc-ripple">
+            <feTurbulence baseFrequency="0.018 0.034" numOctaves="2" seed="29" />
+            <feDisplacementMap in="SourceGraphic" scale="9" />
+          </filter>
+        </defs>
+        <path class="gsc-route-line" d="M128 612 C218 520 264 420 384 408 S538 282 668 318 786 208 944 126" />
+        <path class="gsc-contour" d="M74 640 C166 550 230 676 346 590 S548 510 670 594 880 642 1030 508" />
+        <path class="gsc-contour thin" d="M100 264 C224 172 340 286 454 202 S682 96 808 202 944 318 1050 250" />
+        <path class="gsc-contour hair" d="M182 716 C286 636 386 702 510 640 S720 536 880 600 1000 584 1070 548" />
+        <g filter="url(#gsc-ripple)">
+          <polygon points="116,128 294,86 384,192 322,326 136,302 48,208" />
+          <polygon points="432,510 562,438 704,510 678,680 496,708 390,620" />
+          <polygon points="780,318 968,254 1072,380 1018,548 832,520 724,430" />
+        </g>
+      </svg>
+
+      <div class="gsc-aurora" aria-hidden="true"></div>
+      <div id="gsc-stone" class="gsc-stone" aria-hidden="true">
+        <span>ALTAR<br />STONE</span>
+      </div>
+
+      <button class="gsc-waypoint" type="button" data-index="0" data-name="tidal receipt" aria-pressed="false">
+        <span>tidal receipt</span>
+      </button>
+      <button class="gsc-waypoint" type="button" data-index="1" data-name="morainal passport" aria-pressed="false">
+        <span>morainal passport</span>
+      </button>
+      <button class="gsc-waypoint" type="button" data-index="2" data-name="scree invoice" aria-pressed="false">
+        <span>scree invoice</span>
+      </button>
+      <button class="gsc-waypoint" type="button" data-index="3" data-name="chalk objection" aria-pressed="false">
+        <span>chalk objection</span>
+      </button>
+      <button class="gsc-waypoint" type="button" data-index="4" data-name="solstice customs" aria-pressed="false">
+        <span>solstice customs</span>
+      </button>
+
+      <div class="gsc-stamps" aria-label="Itinerary stamp slots">
+        <span class="gsc-stamp" data-index="0" data-stamped="false">01</span>
+        <span class="gsc-stamp" data-index="1" data-stamped="false">02</span>
+        <span class="gsc-stamp" data-index="2" data-stamped="false">03</span>
+        <span class="gsc-stamp" data-index="3" data-stamped="false">04</span>
+        <span class="gsc-stamp" data-index="4" data-stamped="false">05</span>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #07090d;
+  }
+
+  .gsc-shell {
+    --paper: #f8fbff;
+    --ink: #071018;
+    --cyan: #60f1ff;
+    --pink: #ff6b8e;
+    --yellow: #f6d85b;
+    --green: #83f29b;
+    --ice-x: 50%;
+    --ice-y: 52%;
+    --stone-x: 12%;
+    --stone-y: 80%;
+    display: grid;
+    grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr);
+    gap: clamp(1rem, 2.2vw, 1.6rem);
+    width: min(100%, 1180px);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.4vw, 1.8rem);
+    color: var(--paper);
+    background:
+      linear-gradient(135deg, rgba(96, 241, 255, 0.13), transparent 21rem),
+      linear-gradient(25deg, transparent 58%, rgba(255, 107, 142, 0.16)),
+      #07090d;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .gsc-manifest {
+    align-self: center;
+    display: grid;
+    gap: 0.78rem;
+    min-width: 0;
+  }
+
+  .gsc-kicker,
+  .gsc-readouts span {
+    color: var(--cyan);
+    font: 800 0.72rem/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 9ch;
+    color: var(--paper);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.2rem, 4.35vw, 3.8rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.9;
+    text-shadow:
+      0.05em 0.035em 0 rgba(96, 241, 255, 0.45),
+      -0.04em 0.06em 0 rgba(255, 107, 142, 0.52);
+  }
+
+  .gsc-intro {
+    max-width: 31rem;
+    color: rgba(248, 251, 255, 0.82);
+    font-size: clamp(0.98rem, 1.5vw, 1.08rem);
+    line-height: 1.46;
+  }
+
+  .gsc-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.72rem;
+  }
+
+  .gsc-readouts div {
+    min-width: 0;
+    border: 1px solid rgba(248, 251, 255, 0.2);
+    border-radius: 8px;
+    padding: 0.66rem 0.72rem;
+    background: rgba(2, 6, 12, 0.62);
+  }
+
+  .gsc-readouts strong {
+    display: block;
+    margin-top: 0.42rem;
+    color: var(--paper);
+    font-size: clamp(1.04rem, 2.3vw, 1.42rem);
+    line-height: 1.06;
+    overflow-wrap: anywhere;
+  }
+
+  .gsc-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.72rem;
+  }
+
+  .gsc-actions button {
+    min-height: 2.75rem;
+    border: 1px solid rgba(248, 251, 255, 0.32);
+    border-radius: 8px;
+    color: var(--ink);
+    background: var(--yellow);
+    font: 900 0.8rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: filter 150ms ease, transform 150ms ease;
+  }
+
+  .gsc-actions button:hover,
+  .gsc-actions button:focus-visible {
+    filter: brightness(1.09);
+    transform: translateY(-1px);
+  }
+
+  #refreeze-button {
+    color: var(--paper);
+    background: #152130;
+  }
+
+  .gsc-stage {
+    position: relative;
+    min-height: min(64rem, calc(100vh - 10.5rem));
+    overflow: hidden;
+    border: 1px solid rgba(248, 251, 255, 0.18);
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at var(--ice-x) var(--ice-y), rgba(96, 241, 255, 0.24), transparent 13rem),
+      linear-gradient(115deg, rgba(248, 251, 255, 0.08) 0 14%, transparent 14% 28%, rgba(96, 241, 255, 0.08) 28% 42%, transparent 42%),
+      #0b1017;
+    box-shadow:
+      inset 0 0 6rem rgba(0, 0, 0, 0.58),
+      0 1rem 2.1rem rgba(0, 0, 0, 0.34);
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .gsc-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.92;
+  }
+
+  .gsc-map polygon {
+    fill: rgba(248, 251, 255, 0.08);
+    stroke: rgba(248, 251, 255, 0.3);
+    stroke-width: 3;
+    clip-path: polygon(4% 22%, 56% 2%, 98% 42%, 78% 98%, 18% 86%);
+  }
+
+  .gsc-route-line {
+    fill: none;
+    stroke: url(#gsc-glow);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 22 15;
+  }
+
+  .gsc-contour {
+    fill: none;
+    stroke: rgba(96, 241, 255, 0.38);
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  .gsc-contour.thin {
+    stroke: rgba(255, 107, 142, 0.34);
+    stroke-width: 4;
+  }
+
+  .gsc-contour.hair {
+    stroke: rgba(246, 216, 91, 0.3);
+    stroke-width: 3;
+  }
+
+  .gsc-aurora {
+    position: absolute;
+    left: var(--ice-x);
+    top: var(--ice-y);
+    z-index: 1;
+    width: clamp(13rem, 30vw, 25rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      conic-gradient(from 60deg, rgba(96, 241, 255, 0.22), rgba(255, 107, 142, 0.22), rgba(131, 242, 155, 0.18), rgba(96, 241, 255, 0.22));
+    filter: blur(16px);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  .gsc-stone {
+    position: absolute;
+    left: var(--stone-x);
+    top: var(--stone-y);
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: clamp(5.5rem, 11vw, 8.6rem);
+    aspect-ratio: 1 / 0.78;
+    color: var(--ink);
+    background:
+      linear-gradient(135deg, rgba(248, 251, 255, 0.96), rgba(96, 241, 255, 0.65) 44%, rgba(255, 107, 142, 0.44)),
+      #dcecff;
+    clip-path: polygon(14% 18%, 54% 0, 94% 20%, 84% 90%, 28% 100%, 4% 62%);
+    box-shadow:
+      0 0 2.4rem rgba(96, 241, 255, 0.42),
+      inset -1rem -0.8rem 1.1rem rgba(7, 16, 24, 0.25);
+    transform: translate(-50%, -50%) rotate(var(--stone-tilt, -8deg));
+    transition: left 420ms cubic-bezier(0.2, 0.8, 0.2, 1), top 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .gsc-stone span {
+    font: 950 clamp(0.64rem, 1.2vw, 0.86rem)/0.94 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  .gsc-waypoint {
+    position: absolute;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: clamp(4.8rem, 9vw, 7.6rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(248, 251, 255, 0.5);
+    border-radius: 50%;
+    color: var(--paper);
+    background:
+      radial-gradient(circle at 32% 24%, rgba(248, 251, 255, 0.26), transparent 28%),
+      rgba(4, 11, 18, 0.78);
+    clip-path: polygon(50% 0, 94% 18%, 100% 68%, 68% 100%, 18% 90%, 0 38%);
+    box-shadow:
+      inset 0 0 1.3rem rgba(96, 241, 255, 0.12),
+      0 0.8rem 1.4rem rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+  }
+
+  .gsc-waypoint span {
+    max-width: 6rem;
+    padding: 0.24rem;
+    font: 850 0.66rem/1.04 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-align: center;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .gsc-waypoint:hover,
+  .gsc-waypoint:focus-visible,
+  .gsc-waypoint[aria-pressed="true"] {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+    filter: brightness(1.16);
+  }
+
+  .gsc-waypoint[aria-pressed="true"] {
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 32% 24%, rgba(248, 251, 255, 0.5), transparent 30%),
+      var(--green);
+  }
+
+  .gsc-waypoint[data-index="0"] { left: 13%; top: 77%; }
+  .gsc-waypoint[data-index="1"] { left: 29%; top: 58%; }
+  .gsc-waypoint[data-index="2"] { left: 47%; top: 50%; }
+  .gsc-waypoint[data-index="3"] { left: 65%; top: 39%; }
+  .gsc-waypoint[data-index="4"] { left: 83%; top: 18%; }
+
+  .gsc-stamps {
+    position: absolute;
+    right: clamp(0.8rem, 2vw, 1.2rem);
+    bottom: clamp(0.8rem, 2vw, 1.2rem);
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    max-width: min(19rem, calc(100% - 1.6rem));
+    pointer-events: none;
+  }
+
+  .gsc-stamp {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    aspect-ratio: 1;
+    border: 1px dashed rgba(248, 251, 255, 0.46);
+    border-radius: 50%;
+    color: rgba(248, 251, 255, 0.58);
+    background: rgba(7, 16, 24, 0.68);
+    font: 900 0.72rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .gsc-stamp[data-stamped="true"] {
+    border-style: solid;
+    color: var(--ink);
+    background: var(--yellow);
+    transform: rotate(-9deg);
+  }
+
+  @media (max-width: 760px) {
+    .gsc-shell {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      padding: 0.85rem;
+    }
+
+    h1 {
+      max-width: 10ch;
+      font-size: clamp(2.15rem, 13vw, 3.4rem);
+    }
+
+    .gsc-stage {
+      min-height: 32rem;
+    }
+
+    .gsc-waypoint {
+      width: clamp(3.9rem, 18vw, 5rem);
+    }
+
+    .gsc-waypoint span {
+      font-size: 0.56rem;
+    }
+  }
+</style>
+
+<script is:inline>
+  function initGlacierStoneConcierge() {
+    const stage = document.querySelector("#gsc-stage")
+    if (!stage || stage.dataset.ready === "true") return
+    stage.dataset.ready = "true"
+
+    const stone = document.querySelector("#gsc-stone")
+    const waypoints = Array.from(document.querySelectorAll(".gsc-waypoint"))
+    const stamps = Array.from(document.querySelectorAll(".gsc-stamp"))
+    const routeCount = document.querySelector("#route-count")
+    const driftReading = document.querySelector("#drift-reading")
+    const currentCheckpoint = document.querySelector("#current-checkpoint")
+    const deliveryState = document.querySelector("#delivery-state")
+    const dispatchButton = document.querySelector("#dispatch-button")
+    const refreezeButton = document.querySelector("#refreeze-button")
+    const normalizedIce = { x: 0.5, y: 0.52 }
+    const currentIce = { x: 0.5, y: 0.52 }
+    const selected = new Set()
+    const stoneStops = [
+      { x: 13, y: 77, tilt: -10 },
+      { x: 29, y: 58, tilt: 7 },
+      { x: 47, y: 50, tilt: -5 },
+      { x: 65, y: 39, tilt: 9 },
+      { x: 83, y: 18, tilt: -12 },
+    ]
+    let dispatchBoost = 0
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value))
+    }
+
+    function setIceFromPoint(clientX, clientY) {
+      const rect = stage.getBoundingClientRect()
+      normalizedIce.x = clamp((clientX - rect.left) / rect.width, 0, 1)
+      normalizedIce.y = clamp((clientY - rect.top) / rect.height, 0, 1)
+      stage.dataset.awake = "true"
+      updateDrift()
+    }
+
+    function updateDrift() {
+      const distance = Math.hypot(normalizedIce.x - 0.5, normalizedIce.y - 0.52)
+      const reading = Math.round(clamp(distance * 72 + selected.size * 9 + dispatchBoost, 0, 99))
+      driftReading.textContent = String(reading)
+    }
+
+    function moveStoneTo(index) {
+      const stop = stoneStops[index]
+      if (!stop) return
+      stage.style.setProperty("--stone-x", `${stop.x}%`)
+      stage.style.setProperty("--stone-y", `${stop.y}%`)
+      stage.style.setProperty("--stone-tilt", `${stop.tilt}deg`)
+    }
+
+    function refreshRoute(lastWaypoint) {
+      const total = selected.size
+      stage.dataset.routeCount = String(total)
+      routeCount.textContent = String(total)
+      currentCheckpoint.textContent = lastWaypoint?.dataset.name || (total ? "ice committee" : "none")
+      deliveryState.textContent = total ? "partly escorted" : "awaiting ice"
+      waypoints.forEach((waypoint, index) => {
+        const isStamped = selected.has(index)
+        waypoint.setAttribute("aria-pressed", String(isStamped))
+        stamps[index].dataset.stamped = String(isStamped)
+      })
+      updateDrift()
+    }
+
+    function selectWaypoint(waypoint) {
+      const index = Number(waypoint.dataset.index)
+      selected.add(index)
+      dispatchBoost = 0
+      moveStoneTo(index)
+      refreshRoute(waypoint)
+    }
+
+    waypoints.forEach((waypoint) => {
+      waypoint.addEventListener("click", () => selectWaypoint(waypoint))
+      waypoint.addEventListener("focus", () => {
+        const box = waypoint.getBoundingClientRect()
+        setIceFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+      })
+    })
+
+    stage.addEventListener("pointermove", (event) => {
+      setIceFromPoint(event.clientX, event.clientY)
+    })
+
+    stage.addEventListener("touchstart", (event) => {
+      const touch = event.touches[0]
+      if (touch) setIceFromPoint(touch.clientX, touch.clientY)
+    }, { passive: true })
+
+    stage.addEventListener("touchmove", (event) => {
+      const touch = event.touches[0]
+      if (touch) setIceFromPoint(touch.clientX, touch.clientY)
+    }, { passive: true })
+
+    stage.addEventListener("touchend", updateDrift, { passive: true })
+    stage.addEventListener("touchcancel", updateDrift, { passive: true })
+
+    document.addEventListener("keydown", (event) => {
+      const active = document.activeElement
+      if (!active?.classList?.contains("gsc-waypoint")) return
+      const currentIndex = waypoints.indexOf(active)
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault()
+        waypoints[(currentIndex + 1) % waypoints.length].focus()
+      }
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault()
+        waypoints[(currentIndex - 1 + waypoints.length) % waypoints.length].focus()
+      }
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        selectWaypoint(active)
+      }
+    })
+
+    dispatchButton.addEventListener("click", () => {
+      dispatchBoost = 42
+      deliveryState.textContent = "delivered to arguing chalk"
+      stage.dataset.awake = "true"
+      updateDrift()
+    })
+
+    refreezeButton.addEventListener("click", () => {
+      selected.clear()
+      dispatchBoost = 0
+      moveStoneTo(0)
+      currentCheckpoint.textContent = "none"
+      deliveryState.textContent = "awaiting ice"
+      routeCount.textContent = "0"
+      driftReading.textContent = "0"
+      stage.dataset.routeCount = "0"
+      waypoints.forEach((waypoint, index) => {
+        waypoint.setAttribute("aria-pressed", "false")
+        stamps[index].dataset.stamped = "false"
+      })
+    })
+
+    function animate() {
+      currentIce.x += (normalizedIce.x - currentIce.x) * 0.16
+      currentIce.y += (normalizedIce.y - currentIce.y) * 0.16
+      stage.style.setProperty("--ice-x", `${(currentIce.x * 100).toFixed(2)}%`)
+      stage.style.setProperty("--ice-y", `${(currentIce.y * 100).toFixed(2)}%`)
+      if (stone) {
+        const bob = Math.sin(Date.now() / 440) * (selected.size ? 2.2 : 0.8)
+        stone.style.translate = `0 ${bob.toFixed(2)}px`
+      }
+      requestAnimationFrame(animate)
+    }
+
+    refreshRoute()
+    moveStoneTo(0)
+    requestAnimationFrame(animate)
+  }
+
+  initGlacierStoneConcierge()
+  document.addEventListener("astro:page-load", initGlacierStoneConcierge)
+</script>

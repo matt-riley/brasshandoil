@@ -46,6 +46,9 @@ const pages = [
   "/experiments/post-detection-decorum",
   "/experiments/quartz-alibi-foundry",
   "/experiments/riksdag-resolution",
+  "/experiments/glacier-stone-concierge",
+  "/experiments/kq14-deposition",
+  "/experiments/transposon-torpor-modulator",
 ]
 
 test.use({

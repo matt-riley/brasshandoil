@@ -1,0 +1,670 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="KQ14 Orbital Deposition — Kuiper Belt Courtroom">
+  <div id="courtroom">
+    <header id="court-header">
+      <div class="seal">⚖️</div>
+      <h1 data-testid="case-heading">In re: 2023 KQ14 — Failure to Orbit as Predicted</h1>
+      <p class="docket">Docket No. SOL-2026-0914 &bull; Outer Solar System Circuit Court</p>
+      <p class="charge">Charge: Wilful deviation from projected trans-Neptunian trajectory, in violation of the Planet Nine Gravitational Mandate (Hypothetical)</p>
+    </header>
+
+    <div id="court-body">
+      <div id="orbit-arena">
+        <svg id="path-svg" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Elliptical orbit paths rendered here by script -->
+        </svg>
+        <div id="witnesses"></div>
+        <div data-testid="defendant-chair" id="defendant-chair">
+          <div class="chair-label">DEFENDANT</div>
+          <div class="chair-name">Planet Nine</div>
+          <div class="chair-status">[ ABSENT — CONTEMPT OF COURT ]</div>
+          <div class="chair-empty">🪑</div>
+        </div>
+      </div>
+
+      <aside id="sidebar">
+        <div id="case-status">
+          <h2>Case Status</h2>
+          <div class="stat-row">
+            <span>Witnesses Stabilized:</span>
+            <strong data-testid="stabilization-count" id="stab-count">0</strong>
+            <span id="stab-total">/ ?</span>
+          </div>
+          <div class="stat-row">
+            <span>Evidence for Planet Nine:</span>
+            <div id="evidence-bar">
+              <div id="evidence-fill"></div>
+            </div>
+            <span id="evidence-pct">100%</span>
+          </div>
+          <div class="stat-row">
+            <span>Judicial Composure:</span>
+            <span id="composure">Measured</span>
+          </div>
+        </div>
+
+        <div data-testid="transcript" id="transcript">
+          <h2>Court Transcript</h2>
+          <div id="transcript-entries"></div>
+        </div>
+      </aside>
+    </div>
+
+    <div data-testid="verdict" id="verdict" class="hidden">
+      <div class="verdict-seal">⚖️</div>
+      <h2 id="verdict-title">VERDICT</h2>
+      <p id="verdict-text">Case dismissed — insufficient gravitational evidence.</p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  @property --orbit-hue {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 200;
+  }
+
+  #courtroom {
+    min-height: 100vh;
+    background: #0a0a12;
+    color: #c8c8d4;
+    font-family: "Courier New", monospace;
+    padding: 1rem;
+    overflow: hidden;
+  }
+
+  #court-header {
+    text-align: center;
+    border-bottom: 1px solid #2a2a3a;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .seal {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  #court-header h1 {
+    font-size: 1.1rem;
+    color: #e8e8f0;
+    margin: 0 0 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  .docket {
+    font-size: 0.75rem;
+    color: #666;
+    margin: 0;
+  }
+
+  .charge {
+    font-size: 0.7rem;
+    color: #886644;
+    margin: 0.3rem 0 0;
+    font-style: italic;
+    max-width: 600px;
+    margin-inline: auto;
+  }
+
+  #court-body {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  #orbit-arena {
+    position: relative;
+    height: 420px;
+    border: 1px solid #1a1a2a;
+    border-radius: 8px;
+    overflow: hidden;
+    background: radial-gradient(ellipse at center, #0e0e1a 0%, #060610 100%);
+  }
+
+  #path-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  #path-svg path {
+    fill: none;
+    stroke: #1a1a3a;
+    stroke-width: 1;
+    stroke-dasharray: 4 6;
+  }
+
+  #witnesses {
+    position: absolute;
+    inset: 0;
+  }
+
+  [data-testid="witness-kbo"] {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    offset-rotate: 0deg;
+    animation: orbit-travel var(--orbit-duration, 8s) linear infinite;
+    transition: filter 0.3s, transform 0.3s;
+    z-index: 2;
+  }
+
+  [data-testid="witness-kbo"]:hover {
+    filter: brightness(1.5);
+    transform: scale(1.2);
+  }
+
+  [data-testid="witness-kbo"][data-stabilized="true"] {
+    animation-name: orbit-stable;
+    filter: hue-rotate(90deg) brightness(1.3);
+  }
+
+  [data-testid="witness-kbo"][data-stabilized="true"]::after {
+    content: "STABILIZED";
+    position: absolute;
+    bottom: -14px;
+    font-size: 0.45rem;
+    color: #4a8;
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+  }
+
+  .kbo-body {
+    width: 16px;
+    height: 14px;
+    background: radial-gradient(circle at 40% 40%, #aaa, #444);
+    border-radius: 40% 50% 45% 55%;
+    box-shadow: 0 0 6px rgba(150, 150, 200, 0.4);
+  }
+
+  .kbo-name {
+    font-size: 0.5rem;
+    color: #88a;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+
+  @keyframes orbit-travel {
+    from { offset-distance: 0%; }
+    to { offset-distance: 100%; }
+  }
+
+  @keyframes orbit-stable {
+    from { offset-distance: 0%; }
+    to { offset-distance: 100%; }
+  }
+
+  #defendant-chair {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    text-align: center;
+    padding: 0.8rem;
+    border: 1px dashed #332;
+    border-radius: 4px;
+    background: rgba(20, 15, 10, 0.7);
+    z-index: 1;
+  }
+
+  .chair-label {
+    font-size: 0.55rem;
+    color: #665;
+    letter-spacing: 0.2em;
+  }
+
+  .chair-name {
+    font-size: 0.9rem;
+    color: #554433;
+    font-weight: bold;
+    text-decoration: line-through;
+    margin: 0.2rem 0;
+  }
+
+  .chair-status {
+    font-size: 0.5rem;
+    color: #993;
+    animation: flicker 2s ease-in-out infinite;
+  }
+
+  .chair-empty {
+    font-size: 1.5rem;
+    opacity: 0.4;
+    margin-top: 0.3rem;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  #sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  #case-status {
+    border: 1px solid #1a1a2a;
+    border-radius: 6px;
+    padding: 0.8rem;
+    background: rgba(10, 10, 20, 0.6);
+  }
+
+  #case-status h2, #transcript h2 {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: #667;
+    margin: 0 0 0.6rem;
+    text-transform: uppercase;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .stat-row span {
+    color: #889;
+  }
+
+  .stat-row strong {
+    color: #dde;
+  }
+
+  #evidence-bar {
+    flex: 1;
+    height: 8px;
+    background: #1a1a2a;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  #evidence-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #622, #944);
+    transition: width 0.6s ease;
+    border-radius: 4px;
+  }
+
+  #transcript {
+    border: 1px solid #1a1a2a;
+    border-radius: 6px;
+    padding: 0.8rem;
+    background: rgba(10, 10, 20, 0.6);
+    flex: 1;
+    overflow-y: auto;
+    max-height: 300px;
+  }
+
+  #transcript-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .transcript-entry {
+    font-size: 0.65rem;
+    line-height: 1.4;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #111;
+    color: #99a;
+  }
+
+  .transcript-entry .speaker {
+    color: #aab;
+    font-weight: bold;
+  }
+
+  .transcript-entry.judge .speaker { color: #ca8; }
+  .transcript-entry.witness .speaker { color: #8ac; }
+  .transcript-entry.clerk .speaker { color: #8ca; }
+  .transcript-entry.outburst .speaker { color: #c66; }
+
+  #verdict {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 5, 10, 0.95);
+    z-index: 100;
+    text-align: center;
+    animation: fadeIn 1s ease;
+  }
+
+  #verdict.hidden {
+    display: none;
+  }
+
+  .verdict-seal {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  #verdict h2 {
+    font-size: 1.5rem;
+    color: #c8a;
+    letter-spacing: 0.3em;
+    margin: 0 0 1rem;
+  }
+
+  #verdict p {
+    font-size: 0.9rem;
+    color: #aab;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (max-width: 700px) {
+    #court-body {
+      grid-template-columns: 1fr;
+    }
+    #orbit-arena {
+      height: 300px;
+    }
+  }
+</style>
+
+<script>
+  interface WitnessKBO {
+    name: string;
+    designation: string;
+    eccentricity: number;
+    testimony: string;
+    stabilized: boolean;
+    element: HTMLElement | null;
+    pathD: string;
+    duration: number;
+  }
+
+  interface CourtWindow extends Window {
+    __triggerVerdict?: () => void;
+    __witnesses?: WitnessKBO[];
+  }
+
+  const witnesses: WitnessKBO[] = [
+    {
+      name: "Sedna",
+      designation: "90377",
+      eccentricity: 0.85,
+      testimony: "I was pulled into a highly elliptical orbit. Something massive did this to me… or so I was told.",
+      stabilized: false,
+      element: null,
+      pathD: "",
+      duration: 7,
+    },
+    {
+      name: "2012 VP113",
+      designation: "VP113",
+      eccentricity: 0.69,
+      testimony: "My argument of perihelion clusters suspiciously with the others. But is that evidence, or coincidence?",
+      stabilized: false,
+      element: null,
+      pathD: "",
+      duration: 9,
+    },
+    {
+      name: "2013 SY99",
+      designation: "SY99",
+      eccentricity: 0.93,
+      testimony: "I orbit so far out that I should be influenced by the defendant. I feel nothing.",
+      stabilized: false,
+      element: null,
+      pathD: "",
+      duration: 11,
+    },
+    {
+      name: "2015 TG387",
+      designation: "TG387",
+      eccentricity: 0.94,
+      testimony: "They call me 'The Goblin.' I was supposed to prove Planet Nine. Instead I just orbit… normally.",
+      stabilized: false,
+      element: null,
+      pathD: "",
+      duration: 8,
+    },
+    {
+      name: "2023 KQ14",
+      designation: "KQ14",
+      eccentricity: 0.7,
+      testimony: "I am the accused. My orbit is stable. I apologize for being dynamically unremarkable.",
+      stabilized: false,
+      element: null,
+      pathD: "",
+      duration: 6,
+    },
+    {
+      name: "2017 OF201",
+      designation: "OF201",
+      eccentricity: 0.88,
+      testimony: "My orbit was supposed to be unstable if Planet Nine exists. It is not unstable. Case closed, surely?",
+      stabilized: false,
+      element: null,
+      pathD: "",
+      duration: 10,
+    },
+  ];
+
+  const transcriptLines: { speaker: string; text: string; type: string }[] = [
+    { speaker: "BAILIFF", text: "All rise. The Outer Solar System Circuit Court is now in session.", type: "clerk" },
+    { speaker: "JUDGE OORT", text: "The defendant, 'Planet Nine,' has failed to appear for the fourth consecutive epoch. We proceed in absentia.", type: "judge" },
+    { speaker: "CLERK", text: "Case SOL-2026-0914: failure to orbit as predicted. Six trans-Neptunian witnesses are present.", type: "clerk" },
+    { speaker: "JUDGE OORT", text: "Counselor, your witnesses' orbits appear… chaotic. Are they prepared to testify?", type: "judge" },
+    { speaker: "PROSECUTOR", text: "Your Honor, each witness orbits erratically — alleged evidence of the defendant's gravitational influence. We ask the court to examine each orbit for independent stability.", type: "clerk" },
+    { speaker: "JUDGE OORT", text: "Very well. Click each witness to stabilize their testimony. If their orbit holds without Planet Nine… well.", type: "judge" },
+  ];
+
+  let stabilizedCount = 0;
+  let transcriptIndex = 0;
+  const totalWitnesses = witnesses.length;
+
+  const svg = document.getElementById("path-svg") as unknown as SVGSVGElement | null;
+  const witnessContainer = document.getElementById("witnesses");
+  const transcriptContainer = document.getElementById("transcript-entries");
+  const stabCountEl = document.getElementById("stab-count");
+  const stabTotalEl = document.getElementById("stab-total");
+  const evidenceFill = document.getElementById("evidence-fill");
+  const evidencePct = document.getElementById("evidence-pct");
+  const composureEl = document.getElementById("composure");
+  const verdictEl = document.getElementById("verdict");
+
+  function generateEllipsePath(
+    cx: number,
+    cy: number,
+    rx: number,
+    ry: number,
+    tilt: number,
+  ): string {
+    // Generate elliptical path data for offset-path
+    const cos = Math.cos(tilt);
+    const sin = Math.sin(tilt);
+    const points: string[] = [];
+    const steps = 72;
+    for (let i = 0; i <= steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      const x = cx + rx * Math.cos(angle) * cos - ry * Math.sin(angle) * sin;
+      const y = cy + rx * Math.cos(angle) * sin + ry * Math.sin(angle) * cos;
+      points.push(`${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+    points.push("Z");
+    return points.join(" ");
+  }
+
+  function addTranscriptEntry(
+    speaker: string,
+    text: string,
+    type: string,
+  ): void {
+    if (!transcriptContainer) return;
+    const entry = document.createElement("div");
+    entry.className = `transcript-entry ${type}`;
+    entry.innerHTML = `<span class="speaker">${speaker}:</span> ${text}`;
+    transcriptContainer.appendChild(entry);
+    entry.scrollIntoView({ behavior: "smooth", block: "end" });
+  }
+
+  function drainInitialTranscript(): void {
+    const next = (): void => {
+      if (transcriptIndex < transcriptLines.length) {
+        const line = transcriptLines[transcriptIndex];
+        addTranscriptEntry(line.speaker, line.text, line.type);
+        transcriptIndex++;
+        setTimeout(next, 800 + Math.random() * 600);
+      }
+    };
+    next();
+  }
+
+  const stabilizationComments: string[] = [
+    "The witness's orbit holds steady without gravitational assistance. Curious.",
+    "Another orbit resolved. The evidence thins like the heliosphere.",
+    "Stability confirmed. The defendant's influence appears… imaginary.",
+    "Orbital mechanics do not lie. The prosecution shifts uncomfortably.",
+    "If Planet Nine exists, it is remarkably hands-off. Cosmically negligent, even.",
+    "Final witness stabilized. There is nothing left to orbit around.",
+  ];
+
+  const judgeReactions: string[] = [
+    "Measured",
+    "Slightly irked",
+    "Pensive",
+    "Rubbing temples",
+    "Staring into void",
+    "Existential doubt",
+    "Verdict imminent",
+  ];
+
+  function handleStabilize(w: WitnessKBO): void {
+    if (w.stabilized) return;
+    w.stabilized = true;
+    stabilizedCount++;
+
+    if (w.element) {
+      w.element.setAttribute("data-stabilized", "true");
+      // Slow the orbit to indicate stability
+      w.element.style.setProperty("animation-duration", `${w.duration * 2.5}s`);
+    }
+
+    if (stabCountEl) stabCountEl.textContent = String(stabilizedCount);
+
+    const pct = Math.max(0, 100 - (stabilizedCount / totalWitnesses) * 100);
+    if (evidenceFill) evidenceFill.style.width = `${pct}%`;
+    if (evidencePct) evidencePct.textContent = `${Math.round(pct)}%`;
+
+    if (composureEl && judgeReactions[stabilizedCount]) {
+      composureEl.textContent = judgeReactions[stabilizedCount];
+    }
+
+    // Witness testimony
+    addTranscriptEntry(w.name.toUpperCase(), w.testimony, "witness");
+
+    // Court commentary
+    setTimeout(() => {
+      const comment = stabilizationComments[stabilizedCount - 1] || "...";
+      addTranscriptEntry("JUDGE OORT", comment, "judge");
+
+      if (stabilizedCount >= totalWitnesses) {
+        setTimeout(triggerVerdict, 2000);
+      }
+    }, 1200);
+  }
+
+  function triggerVerdict(): void {
+    addTranscriptEntry(
+      "JUDGE OORT",
+      "The court finds: no evidence that Planet Nine exerted gravitational influence on any witness. Case dismissed. The defendant remains at large — or rather, remains nonexistent. Court is adjourned for the next 10,000 years.",
+      "judge",
+    );
+
+    setTimeout(() => {
+      if (verdictEl) {
+        verdictEl.classList.remove("hidden");
+        // Animate the orbit arena
+        const arena = document.getElementById("orbit-arena");
+        if (arena) {
+          arena.style.setProperty("transition", "filter 2s, opacity 2s");
+          arena.style.setProperty("filter", "blur(4px) brightness(0.3)");
+          arena.style.setProperty("opacity", "0.4");
+        }
+      }
+    }, 1500);
+  }
+
+  // Expose test hook
+  (window as unknown as CourtWindow).__triggerVerdict = triggerVerdict;
+  (window as unknown as CourtWindow).__witnesses = witnesses;
+
+  function initWitnesses(): void {
+    if (!witnessContainer || !svg) return;
+
+    if (stabTotalEl) stabTotalEl.textContent = `/ ${totalWitnesses}`;
+
+    witnesses.forEach((w, i) => {
+      // Generate orbital path
+      const cx = 300;
+      const cy = 200;
+      const rx = 120 + i * 30;
+      const ry = 70 + i * 18;
+      const tilt = -0.2 + i * 0.15;
+      w.pathD = generateEllipsePath(cx, cy, rx, ry, tilt);
+      w.duration = w.duration + i * 0.5;
+
+      // Add SVG path visualization
+      const svgPath = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path",
+      );
+      svgPath.setAttribute("d", w.pathD);
+      svg.appendChild(svgPath);
+
+      // Create witness DOM element
+      const el = document.createElement("div");
+      el.setAttribute("data-testid", "witness-kbo");
+      el.setAttribute("data-stabilized", "false");
+      el.setAttribute("data-name", w.name);
+      el.style.setProperty("offset-path", `path("${w.pathD}")`);
+      el.style.setProperty("--orbit-duration", `${w.duration}s`);
+      el.style.setProperty("animation-duration", `${w.duration}s`);
+      // Stagger start positions
+      el.style.setProperty("animation-delay", `${-i * 1.5}s`);
+
+      el.innerHTML = `
+        <div class="kbo-body"></div>
+        <span class="kbo-name">${w.designation}</span>
+      `;
+
+      el.addEventListener("click", () => handleStabilize(w));
+      witnessContainer.appendChild(el);
+      w.element = el;
+    });
+  }
+
+  // Init
+  initWitnesses();
+  drainInitialTranscript();
+</script>
+</Base>
