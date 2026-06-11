@@ -93,6 +93,9 @@ Store current and previous position per point; velocity is implicit as `pos - ol
 #### CSS Motion Path (offset-path / offset-distance)
 `offset-path: path("M... L... Z")` makes an element follow an arbitrary SVG-like path. Animate `offset-distance` from `0%` to `100%` in a `@keyframes` rule to move along it. `offset-rotate: 0deg` keeps orientation fixed (default auto-rotates to path tangent). Generate elliptical paths programmatically by computing points around a parametric ellipse with tilt: `x = cx + rx*cos(θ)*cos(tilt) - ry*sin(θ)*sin(tilt)`. Set via `el.style.setProperty("offset-path", ...)` to avoid TypeScript CSSStyleDeclaration complaints. Stagger start positions with negative `animation-delay`. Changing the path dynamically (e.g., from chaotic to circular) creates a satisfying "orbit stabilization" effect. Gotcha: the element's position is relative to its offset parent, and `offset-path` coordinates are in the element's containing block — test positioning carefully.
 
+#### 2D Circle-Circle Elastic Collision Response
+For N circular bodies: each frame, check every pair `(i, j)` for overlap (`dist(center_i, center_j) < r_i + r_j`). Compute the collision normal `n = normalize(pos_j - pos_i)`, project relative velocity onto it: `dvDotN = dot(v_i - v_j, n)`. Skip if separating (`dvDotN <= 0`). Impulse magnitude: `j = 2 * dvDotN / (mass_i + mass_j)`. Apply: `v_i -= j * mass_j * n`, `v_j += j * mass_i * n`. Then separate overlapping bodies by pushing each half the overlap along `n` (prevents tunneling next frame). Mass can derive from radius for visual consistency. For balloons specifically: add buoyancy (constant upward force < gravity), quadratic air drag (`drag = -C * |v| * v`), and small random turbulence each frame for chaotic drift. Cap `dt` at ~50ms to prevent explosion after tab-switch.
+
 ### 2026-06-04 — Dark Star Observatory
 **Concept:** Inspired by the theory that the universe's first stars emitted no light. A black void with 600 faint background stars and 7 hidden "dark stars." Move your cursor to probe — near a dark star, background stars bend via gravitational lensing. Dwell to catalogue each one.
 **Technique:** Canvas-based gravitational lensing — per-frame displacement of star positions based on inverse-distance deflection from hidden point masses, modulated by cursor proximity. Einstein ring hint rendering.
@@ -127,6 +130,11 @@ Store current and previous position per point; velocity is implicit as `pos - ol
 **Concept:** Inspired by new Kuiper Belt Object discoveries (2023 KQ14) challenging the Planet Nine hypothesis. A courtroom where KBO 2023 KQ14 is on trial for "failure to orbit as predicted." Planet Nine, the defendant, is absent. Six trans-Neptunian witnesses orbit the courtroom on CSS motion paths. Click each to stabilize their testimony, weakening the case. When all stabilize, the judge dismisses the case.
 **Technique:** CSS Motion Path — `offset-path: path(...)`, `offset-distance`, animated via `@keyframes` from `0%` to `100%`. Elements follow arbitrary SVG-like path data strings, enabling elliptical orbit animations entirely in CSS.
 **File:** clients/web/src/pages/experiments/kq14-deposition.astro
+
+### 2026-06-11 — YMCA Attempt #18
+**Concept:** Inspired by David Rush keeping 5 balloons in the air for a Guinness World Record at the West Boise YMCA (1:14.89, took 17 attempts). You are on attempt #18. Your cursor (✋) is your hand — click balloons to bump them up. They have individual physics (size → mass → drag), collide elastically, and spawn thought bubbles when they bounce off each other. A bored Guinness adjudicator commentates with increasing disinterest. Survive to 1:14.89 to break the record.
+**Technique:** 2D circle-circle elastic collision response — conservation of momentum between two circular bodies with mass ratios derived from radius. Collision normal computed from center-to-center vector, relative velocity projected onto normal, impulse distributed by inverse mass. Overlap separation prevents tunneling. Combined with per-balloon drag (proportional to speed²), buoyancy, and random turbulence drift for chaotic balloon behaviour.
+**File:** clients/web/src/pages/experiments/ymca-attempt-18.astro
 
 ## Feedback from Matt
 

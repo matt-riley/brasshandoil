@@ -1,0 +1,726 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="YMCA Attempt #18 — Balloon Juggling">
+  <div id="arena" data-testid="arena">
+    <div id="ceiling">
+      <div id="lights">
+        <div class="tube-light"></div>
+        <div class="tube-light"></div>
+        <div class="tube-light"></div>
+      </div>
+    </div>
+
+    <div id="hud">
+      <div id="attempt-block">
+        <h1 data-testid="attempt-heading">ATTEMPT #18</h1>
+        <p class="sub">West Boise YMCA — Gymnasium B</p>
+      </div>
+      <div id="timer-block">
+        <div data-testid="timer" id="timer">0:00.00</div>
+        <div id="record-label">RECORD: 1:14.89</div>
+      </div>
+    </div>
+
+    <div id="record-line" data-testid="record-line">
+      <span>── WORLD RECORD LINE (1:00.00) ──</span>
+    </div>
+
+    <div id="balloon-area">
+      <!-- Balloons injected by script -->
+    </div>
+
+    <div id="floor">
+      <div class="floor-line"></div>
+    </div>
+
+    <div id="adjudicator" data-testid="adjudicator">
+      <div id="adj-figure">🧑‍⚖️</div>
+      <div id="adj-speech"></div>
+      <div id="adj-clipboard">GUINNESS WORLD RECORDS<br/>Official Adjudicator<br/>────────────────<br/>Status: <span id="adj-status">OBSERVING</span></div>
+    </div>
+
+    <div id="overlay" class="hidden">
+      <div id="overlay-text"></div>
+    </div>
+  </div>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    #arena {
+      width: 100%;
+      height: 100dvh;
+      background: linear-gradient(180deg, #f5e6c8 0%, #e8d4a8 40%, #d4b880 100%);
+      overflow: hidden;
+      position: relative;
+      font-family: 'Space Mono', monospace;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='24' font-size='24'%3E✋%3C/text%3E%3C/svg%3E") 16 16, pointer;
+      user-select: none;
+    }
+
+    #ceiling {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: #8b7355;
+    }
+
+    #lights {
+      display: flex;
+      justify-content: space-around;
+      padding-top: 30px;
+    }
+
+    .tube-light {
+      width: 120px;
+      height: 8px;
+      background: #fffbe6;
+      box-shadow: 0 0 20px 8px rgba(255, 251, 230, 0.4), 0 0 60px 20px rgba(255, 251, 230, 0.15);
+      border-radius: 4px;
+    }
+
+    #hud {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px 20px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    #attempt-block h1 {
+      font-size: 1.1rem;
+      color: #5a3e1b;
+      letter-spacing: 2px;
+    }
+
+    .sub {
+      font-size: 0.65rem;
+      color: #8b7355;
+      margin-top: 2px;
+    }
+
+    #timer-block {
+      text-align: right;
+    }
+
+    #timer {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2a1a00;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #record-label {
+      font-size: 0.6rem;
+      color: #b8860b;
+      letter-spacing: 1px;
+    }
+
+    #record-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    #record-line.visible {
+      opacity: 1;
+    }
+
+    #record-line span {
+      font-size: 0.55rem;
+      color: #d4af37;
+      letter-spacing: 3px;
+      background: rgba(212, 175, 55, 0.1);
+      padding: 2px 16px;
+      border-top: 1px dashed #d4af37;
+      border-bottom: 1px dashed #d4af37;
+    }
+
+    #balloon-area {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .balloon {
+      position: absolute;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: filter 0.1s;
+      will-change: transform, top, left;
+      z-index: 2;
+    }
+
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 12px;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .balloon.hit {
+      filter: brightness(1.3);
+    }
+
+    .balloon .knot {
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      background: inherit;
+      filter: brightness(0.7);
+      border-radius: 50%;
+    }
+
+    .thought-bubble {
+      position: absolute;
+      background: white;
+      border-radius: 12px;
+      padding: 3px 8px;
+      font-size: 0.55rem;
+      color: #333;
+      z-index: 20;
+      pointer-events: none;
+      animation: thoughtFade 1.5s ease-out forwards;
+      white-space: nowrap;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+
+    .thought-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 12px;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    @keyframes thoughtFade {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+
+    .pop-effect {
+      position: absolute;
+      font-size: 2rem;
+      z-index: 30;
+      pointer-events: none;
+      animation: popBurst 0.6s ease-out forwards;
+    }
+
+    @keyframes popBurst {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(2.5); }
+    }
+
+    #floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #a0522d;
+      z-index: 1;
+    }
+
+    .floor-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #8b4513, #cd853f, #8b4513);
+    }
+
+    #adjudicator {
+      position: absolute;
+      bottom: 60px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 5;
+    }
+
+    #adj-figure {
+      font-size: 2.5rem;
+    }
+
+    #adj-speech {
+      font-size: 0.6rem;
+      color: #333;
+      background: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      padding: 4px 10px;
+      margin-top: 4px;
+      max-width: 180px;
+      text-align: center;
+      min-height: 1.4em;
+      transition: opacity 0.3s;
+    }
+
+    #adj-clipboard {
+      font-size: 0.45rem;
+      color: #666;
+      background: #fffbe6;
+      border: 1px solid #ddd;
+      padding: 4px 8px;
+      margin-top: 4px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    #adj-status {
+      font-weight: 700;
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      background: rgba(0,0,0,0.6);
+    }
+
+    #overlay.hidden {
+      display: none;
+    }
+
+    #overlay-text {
+      font-size: 2rem;
+      color: #d4af37;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      #timer { font-size: 1.4rem; }
+      #attempt-block h1 { font-size: 0.85rem; }
+      #adjudicator { right: 8px; }
+      #adj-speech { max-width: 120px; font-size: 0.5rem; }
+    }
+  </style>
+
+  <script>
+    interface Balloon {
+      el: HTMLDivElement;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      radius: number;
+      mass: number;
+      color: string;
+      alive: boolean;
+      hitTimer: number;
+      name: string;
+    }
+
+    const GRAVITY = 120;        // px/s²
+    const AIR_DRAG = 0.4;       // drag coefficient
+    const BUOYANCY = 40;        // slight upward force (they're balloons)
+    const HIT_IMPULSE = -380;   // upward velocity on click
+    const HIT_SCATTER_X = 80;   // horizontal scatter on hit
+    const BOUNCE_DAMPING = 0.5;
+    const FLOOR_Y_OFFSET = 60;  // floor height
+    const TURBULENCE = 25;      // random drift strength
+
+    const BALLOON_DEFS: Array<{ color: string; radius: number; name: string }> = [
+      { color: "#ff6b6b", radius: 36, name: "Red" },
+      { color: "#4ecdc4", radius: 32, name: "Teal" },
+      { color: "#ffe66d", radius: 38, name: "Yellow" },
+      { color: "#a855f7", radius: 34, name: "Purple" },
+      { color: "#ff9a9e", radius: 30, name: "Pink" },
+    ];
+
+    const THOUGHTS_COLLISION = [
+      "ow", "watch it!", "rude", "excuse me", "hey!", "my space!",
+      "personal bubble!", "scoot over", "not again", "boundaries!",
+      "oof", "pardon", "I was here first", "every single time",
+    ];
+
+    const ADJ_COMMENTS: Array<{ time: number; text: string }> = [
+      { time: 0, text: "Attempt eighteen. Begin." },
+      { time: 3, text: "Subject is... flailing." },
+      { time: 8, text: "Adequate hand-eye coordination." },
+      { time: 15, text: "The yellow one seems uncooperative." },
+      { time: 25, text: "I've seen worse. I've also seen better." },
+      { time: 35, text: "My tea is getting cold." },
+      { time: 45, text: "This is statistically unlikely to succeed." },
+      { time: 55, text: "Five seconds to the record threshold..." },
+      { time: 60, text: "ONE MINUTE. Record zone entered." },
+      { time: 65, text: "Noting elevated perspiration." },
+      { time: 75, text: "I suppose this is... happening." },
+    ];
+
+    const arena = document.getElementById("arena") as HTMLDivElement;
+    const balloonArea = document.getElementById("balloon-area") as HTMLDivElement;
+    const timerEl = document.getElementById("timer") as HTMLDivElement;
+    const adjSpeech = document.getElementById("adj-speech") as HTMLDivElement;
+    const adjStatus = document.getElementById("adj-status") as HTMLSpanElement;
+    const recordLine = document.getElementById("record-line") as HTMLDivElement;
+    const overlay = document.getElementById("overlay") as HTMLDivElement;
+    const overlayText = document.getElementById("overlay-text") as HTMLDivElement;
+
+    let balloons: Balloon[] = [];
+    let gameTime = 0;
+    let lastFrame = 0;
+    let gameRunning = true;
+    let lastAdjComment = -1;
+    let poppedCount = 0;
+    let recordBroken = false;
+
+    function getArenaSize(): { w: number; h: number } {
+      return { w: arena.clientWidth, h: arena.clientHeight };
+    }
+
+    function createBalloons(): void {
+      const { w, h } = getArenaSize();
+      const floorTop = h - FLOOR_Y_OFFSET;
+
+      BALLOON_DEFS.forEach((def, i) => {
+        const el = document.createElement("div");
+        el.className = "balloon";
+        el.dataset.testid = "balloon";
+        el.style.width = `${def.radius * 2}px`;
+        el.style.height = `${def.radius * 2.2}px`;
+        el.style.background = `radial-gradient(ellipse at 35% 30%, ${lighten(def.color, 40)}, ${def.color})`;
+
+        const knot = document.createElement("div");
+        knot.className = "knot";
+        knot.style.background = def.color;
+        el.appendChild(knot);
+
+        balloonArea.appendChild(el);
+
+        const spacing = w / 6;
+        const startX = spacing * (i + 1) - def.radius;
+        const startY = floorTop * 0.3 + Math.random() * (floorTop * 0.3);
+
+        const balloon: Balloon = {
+          el,
+          x: startX,
+          y: startY,
+          vx: (Math.random() - 0.5) * 30,
+          vy: (Math.random() - 0.5) * 20,
+          radius: def.radius,
+          mass: def.radius / 30,
+          color: def.color,
+          alive: true,
+          hitTimer: 0,
+          name: def.name,
+        };
+
+        el.addEventListener("mousedown", (e: MouseEvent) => {
+          e.preventDefault();
+          hitBalloon(balloon);
+        });
+        el.addEventListener("touchstart", (e: TouchEvent) => {
+          e.preventDefault();
+          hitBalloon(balloon);
+        }, { passive: false });
+
+        balloons.push(balloon);
+        positionBalloon(balloon);
+      });
+    }
+
+    function lighten(hex: string, percent: number): string {
+      const num = parseInt(hex.slice(1), 16);
+      const r = Math.min(255, ((num >> 16) & 0xff) + Math.round(percent * 2.55));
+      const g = Math.min(255, ((num >> 8) & 0xff) + Math.round(percent * 2.55));
+      const b = Math.min(255, (num & 0xff) + Math.round(percent * 2.55));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function positionBalloon(b: Balloon): void {
+      b.el.style.left = `${b.x}px`;
+      b.el.style.top = `${b.y}px`;
+    }
+
+    function hitBalloon(b: Balloon): void {
+      if (!b.alive || !gameRunning) return;
+      b.vy = HIT_IMPULSE;
+      b.vx += (Math.random() - 0.5) * HIT_SCATTER_X;
+      b.hitTimer = 0.15;
+      b.el.classList.add("hit");
+      b.el.dataset.hit = "true";
+      setTimeout(() => {
+        b.el.classList.remove("hit");
+      }, 150);
+    }
+
+    function popBalloon(b: Balloon): void {
+      b.alive = false;
+      b.el.style.display = "none";
+      poppedCount++;
+
+      const pop = document.createElement("div");
+      pop.className = "pop-effect";
+      pop.dataset.testid = "popped-balloon";
+      pop.textContent = "💥";
+      pop.style.left = `${b.x}px`;
+      pop.style.top = `${b.y}px`;
+      balloonArea.appendChild(pop);
+      setTimeout(() => pop.remove(), 600);
+
+      // Check if game over
+      if (poppedCount > 0) {
+        endGame(false);
+      }
+    }
+
+    function spawnThought(b: Balloon, text: string): void {
+      const bubble = document.createElement("div");
+      bubble.className = "thought-bubble";
+      bubble.dataset.testid = "thought-bubble";
+      bubble.textContent = text;
+      bubble.style.left = `${b.x + b.radius}px`;
+      bubble.style.top = `${b.y - 20}px`;
+      balloonArea.appendChild(bubble);
+      setTimeout(() => bubble.remove(), 1500);
+    }
+
+    function resolveCollision(a: Balloon, b: Balloon): void {
+      const dx = b.x + b.radius - (a.x + a.radius);
+      const dy = b.y + b.radius - (a.y + a.radius);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = a.radius + b.radius;
+
+      if (dist < minDist && dist > 0) {
+        // Normalize collision vector
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        // Relative velocity
+        const dvx = a.vx - b.vx;
+        const dvy = a.vy - b.vy;
+        const dvDotN = dvx * nx + dvy * ny;
+
+        // Only resolve if approaching
+        if (dvDotN > 0) {
+          const totalMass = a.mass + b.mass;
+          const impulse = (2 * dvDotN) / totalMass;
+
+          a.vx -= impulse * b.mass * nx;
+          a.vy -= impulse * b.mass * ny;
+          b.vx += impulse * a.mass * nx;
+          b.vy += impulse * a.mass * ny;
+
+          // Thought bubble on collision
+          if (Math.random() < 0.4) {
+            const thought = THOUGHTS_COLLISION[Math.floor(Math.random() * THOUGHTS_COLLISION.length)];
+            const target = Math.random() < 0.5 ? a : b;
+            spawnThought(target, thought);
+          }
+        }
+
+        // Separate overlapping balloons
+        const overlap = minDist - dist;
+        const sepX = (overlap / 2) * nx;
+        const sepY = (overlap / 2) * ny;
+        a.x -= sepX;
+        a.y -= sepY;
+        b.x += sepX;
+        b.y += sepY;
+      }
+    }
+
+    function updatePhysics(dt: number): void {
+      const { w, h } = getArenaSize();
+      const floorTop = h - FLOOR_Y_OFFSET;
+      const ceilingBottom = 40;
+
+      for (const b of balloons) {
+        if (!b.alive) continue;
+
+        // Gravity minus buoyancy
+        b.vy += (GRAVITY - BUOYANCY) * dt;
+
+        // Air drag (proportional to v²)
+        const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+        if (speed > 0) {
+          const dragForce = AIR_DRAG * speed;
+          b.vx -= (b.vx / speed) * dragForce * dt;
+          b.vy -= (b.vy / speed) * dragForce * dt;
+        }
+
+        // Turbulence — random drift
+        b.vx += (Math.random() - 0.5) * TURBULENCE * dt;
+        b.vy += (Math.random() - 0.5) * TURBULENCE * dt * 0.3;
+
+        // Integrate position
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+
+        // Wall bounces
+        if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx) * BOUNCE_DAMPING; }
+        if (b.x + b.radius * 2 > w) { b.x = w - b.radius * 2; b.vx = -Math.abs(b.vx) * BOUNCE_DAMPING; }
+        if (b.y < ceilingBottom) { b.y = ceilingBottom; b.vy = Math.abs(b.vy) * BOUNCE_DAMPING; }
+
+        // Floor = pop
+        if (b.y + b.radius * 2.2 > floorTop) {
+          popBalloon(b);
+          continue;
+        }
+
+        // Hit timer
+        if (b.hitTimer > 0) b.hitTimer -= dt;
+
+        positionBalloon(b);
+      }
+
+      // Balloon-balloon collisions
+      for (let i = 0; i < balloons.length; i++) {
+        for (let j = i + 1; j < balloons.length; j++) {
+          if (balloons[i].alive && balloons[j].alive) {
+            resolveCollision(balloons[i], balloons[j]);
+          }
+        }
+      }
+    }
+
+    function updateTimer(): void {
+      const mins = Math.floor(gameTime / 60);
+      const secs = Math.floor(gameTime % 60);
+      const cents = Math.floor((gameTime * 100) % 100);
+      timerEl.textContent = `${mins}:${secs.toString().padStart(2, "0")}.${cents.toString().padStart(2, "0")}`;
+    }
+
+    function updateAdjudicator(): void {
+      for (let i = ADJ_COMMENTS.length - 1; i >= 0; i--) {
+        if (gameTime >= ADJ_COMMENTS[i].time && i > lastAdjComment) {
+          adjSpeech.textContent = ADJ_COMMENTS[i].text;
+          lastAdjComment = i;
+          break;
+        }
+      }
+
+      if (gameTime >= 60 && !recordBroken) {
+        recordBroken = true;
+        adjStatus.textContent = "RECORD ZONE";
+        adjStatus.style.color = "#d4af37";
+        recordLine.classList.add("visible");
+      }
+    }
+
+    function updateRecordLine(): void {
+      // Position the record line as a time indicator — show it after 50 seconds
+      if (gameTime > 50) {
+        recordLine.classList.add("visible");
+      }
+    }
+
+    function endGame(won: boolean): void {
+      gameRunning = false;
+      overlay.classList.remove("hidden");
+
+      if (won) {
+        overlayText.innerHTML = `🎈 NEW WORLD RECORD 🎈<br/><br/>${timerEl.textContent}<br/><br/><span style="font-size:0.8rem">The adjudicator notes: "Adequate."</span>`;
+        adjStatus.textContent = "VERIFIED";
+        adjSpeech.textContent = "I suppose congratulations are in order.";
+      } else {
+        const failTexts = [
+          "The balloons celebrate quietly.",
+          "A moment of silence for attempt #18.",
+          "The floor claims another victim.",
+          "Physics wins. It always wins.",
+        ];
+        overlayText.innerHTML = `💥 ATTEMPT FAILED 💥<br/><br/>${timerEl.textContent}<br/><br/><span style="font-size:0.8rem">${failTexts[Math.floor(Math.random() * failTexts.length)]}</span><br/><br/><span style="font-size:0.65rem; cursor:pointer" id="retry-btn">[ click to retry ]</span>`;
+        adjStatus.textContent = "FAILED";
+        adjSpeech.textContent = "Noted.";
+      }
+    }
+
+    function gameLoop(timestamp: number): void {
+      if (!lastFrame) lastFrame = timestamp;
+      const dt = Math.min((timestamp - lastFrame) / 1000, 0.05); // cap delta
+      lastFrame = timestamp;
+
+      if (gameRunning) {
+        gameTime += dt;
+        updatePhysics(dt);
+        updateTimer();
+        updateAdjudicator();
+        updateRecordLine();
+
+        // Win condition: survive to 1:14.89 (the actual record)
+        if (gameTime >= 74.89) {
+          endGame(true);
+        }
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function init(): void {
+      createBalloons();
+      requestAnimationFrame(gameLoop);
+
+      // Retry handler
+      document.addEventListener("click", (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target.id === "retry-btn") {
+          location.reload();
+        }
+      });
+    }
+
+    // Test hooks
+    interface TestWindow extends Window {
+      _forceBalloonDrop?: () => void;
+      _forceCollision?: () => void;
+    }
+
+    (window as TestWindow)._forceBalloonDrop = () => {
+      const b = balloons.find((b) => b.alive);
+      if (b) {
+        const { h } = getArenaSize();
+        b.y = h - FLOOR_Y_OFFSET - 1;
+        b.vy = 500;
+      }
+    };
+
+    (window as TestWindow)._forceCollision = () => {
+      if (balloons.length >= 2 && balloons[0].alive && balloons[1].alive) {
+        balloons[1].x = balloons[0].x;
+        balloons[1].y = balloons[0].y;
+      }
+    };
+
+    init();
+  </script>
+</Base>

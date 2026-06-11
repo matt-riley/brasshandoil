@@ -51,6 +51,7 @@ const pages = [
   "/experiments/transposon-torpor-modulator",
   "/experiments/archive-unlicensed-rain",
   "/experiments/twistronic-lattice-tuner",
+  "/experiments/ymca-attempt-18",
 ]
 
 test.use({
