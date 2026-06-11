@@ -1,0 +1,1289 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Twistronic Lattice Tuner // Sub-Kelvin Calibration">
+  <div class="tuner-container" id="calibration-root" data-pattern="honeycomb" data-angle="0.0" data-coherence="0">
+    <!-- Cryogenic Ambient Particle Canvas -->
+    <canvas id="cryo-canvas" class="background-canvas" aria-hidden="true"></canvas>
+
+    <!-- Header Section -->
+    <header class="tuner-header">
+      <h1 class="page-title text-gradient">Twistronic Lattice Tuner</h1>
+      <p class="subtitle font-mono">SUB-KELVIN LATTICE CALIBRATION // UNIT-IV</p>
+    </header>
+
+    <!-- Onboarding / Audio Activation Overlay -->
+    <div id="arming-overlay" class="overlay glass">
+      <div class="overlay-content">
+        <div class="overlay-icon">❄️</div>
+        <h2 class="overlay-title font-mono">CRYOGENIC ALIGNMENT PROTOCOL</h2>
+        <p class="overlay-desc">
+          You are calibrating a bilayer quantum lattice. By twisting the top layer relative to the bottom, you manipulate the moiré interference field to achieve zero-resistance superconductivity.
+        </p>
+        <div class="alert alert-info font-mono">
+          CALIBRATION GOAL: Locate the Magic Angle of exactly <strong class="text-gold">1.1°</strong> to trigger quantum coherence.
+        </div>
+        <button id="arm-button" class="btn btn-primary">
+          Initialize Audio & Cryostat
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workspace (Visible once armed) -->
+    <div class="workspace-grid hidden" id="workspace">
+      <!-- Left Column: The Lattice Viewport -->
+      <div class="panel viewport-panel glass">
+        <div class="panel-header">
+          <h2 class="panel-title font-mono">I. Interference Field</h2>
+          <span class="status-indicator font-mono" id="status-display">DISORDERED LATTICE</span>
+        </div>
+        
+        <div class="lattice-container">
+          <!-- Two overlaying SVG layers that create moiré patterns -->
+          <div class="lattice-stage" id="lattice-stage">
+            <svg id="svg-lattice" width="100%" height="100%" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <!-- Honeycomb Dot Pattern -->
+                <pattern id="pattern-honeycomb" width="24" height="24" patternUnits="userSpaceOnUse">
+                  <circle cx="12" cy="12" r="2.5" class="pattern-dot" />
+                  <circle cx="0" cy="0" r="1.5" class="pattern-dot" />
+                  <circle cx="24" cy="0" r="1.5" class="pattern-dot" />
+                  <circle cx="0" cy="24" r="1.5" class="pattern-dot" />
+                  <circle cx="24" cy="24" r="1.5" class="pattern-dot" />
+                  <circle cx="6" cy="6" r="1.5" class="pattern-dot-sub" />
+                  <circle cx="18" cy="6" r="1.5" class="pattern-dot-sub" />
+                  <circle cx="6" cy="18" r="1.5" class="pattern-dot-sub" />
+                  <circle cx="18" cy="18" r="1.5" class="pattern-dot-sub" />
+                </pattern>
+
+                <!-- Linear Stripe Pattern -->
+                <pattern id="pattern-fresnel" width="16" height="400" patternUnits="userSpaceOnUse">
+                  <line x1="8" y1="0" x2="8" y2="400" class="pattern-line" stroke-width="3" />
+                </pattern>
+                
+                <!-- Concentric Circular Pattern (rendered dynamically inside g) -->
+              </defs>
+
+              <!-- Base Static Layer -->
+              <g id="layer-static" class="lattice-layer">
+                <rect width="400" height="400" fill="url(#pattern-honeycomb)" />
+                <g id="concentric-static" class="concentric-group hidden"></g>
+              </g>
+
+              <!-- Twisted Rotating Layer -->
+              <g id="layer-twisted" class="lattice-layer rotatable-layer">
+                <rect width="400" height="400" fill="url(#pattern-honeycomb)" />
+                <g id="concentric-twisted" class="concentric-group hidden" transform="translate(4, 4)"></g>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="keyboard-hint font-mono">
+          [SCROLL] Zoom/Twist // [ARROW LEFT/RIGHT] Twist ±0.1° // [SHIFT + ARROWS] Twist ±1.0°
+        </div>
+      </div>
+
+      <!-- Right Column: Control Panel & Telemetry -->
+      <div class="panel control-panel glass">
+        <h2 class="panel-title font-mono">II. Lattice Controls</h2>
+
+        <!-- Telemetry Display -->
+        <div class="telemetry-grid">
+          <div class="telemetry-box">
+            <span class="box-label font-mono">TWIST ANGLE</span>
+            <div class="box-value font-mono text-cyan" id="angle-display">0.0°</div>
+          </div>
+          <div class="telemetry-box">
+            <span class="box-label font-mono">COHERENCE RATING</span>
+            <div class="box-value font-mono text-gold" id="coherence-display">0%</div>
+          </div>
+          <div class="telemetry-box full-width">
+            <span class="box-label font-mono">THERMAL NOISE / RESISTANCE</span>
+            <div class="box-value font-mono text-warning" id="resistance-display">998.4 Ω</div>
+          </div>
+        </div>
+
+        <!-- Pattern Selector -->
+        <div class="pattern-selector">
+          <span class="selector-label font-mono">SELECT GRAPHENE STRUCTURE:</span>
+          <div class="button-group">
+            <button class="btn btn-selector active" data-pattern="honeycomb">Honeycomb Mesh</button>
+            <button class="btn btn-selector" data-pattern="fresnel">Linear Stripes</button>
+            <button class="btn btn-selector" data-pattern="penrose">Concentric Rings</button>
+          </div>
+        </div>
+
+        <!-- Rotary Dial -->
+        <div class="dial-container">
+          <div class="dial-wrapper">
+            <div id="rotary-dial" class="rotary-dial" role="slider" aria-label="Lattice Twist Angle Dial" aria-valuemin="-45" aria-valuemax="45" aria-valuenow="0" tabindex="0">
+              <div class="dial-face">
+                <div class="dial-pointer"></div>
+                <div class="dial-center"></div>
+              </div>
+              <div class="dial-ticks"></div>
+            </div>
+            <span class="dial-hint font-mono">DRAG OR USE WHEEL TO TWIST DIAL</span>
+          </div>
+        </div>
+
+        <button id="submit-btn" class="btn btn-danger font-mono" disabled>
+          🔒 SUBMIT COHERENT CALIBRATION REPORT
+        </button>
+      </div>
+    </div>
+
+    <!-- Success / Superconductivity Equilibrium Screen -->
+    <div id="success-screen" class="success-screen hidden">
+      <div class="success-content glass">
+        <div class="success-icon">⚡</div>
+        <h1 class="success-title text-gradient">Superconductivity Achieved</h1>
+        <p class="success-desc">
+          Bilayer lattices aligned at exactly <strong class="text-gold">1.1°</strong>. Resistance has collapsed to absolute zero (<strong class="text-gold">0.00000000 Ω</strong>), establishing a stable, macroscopic quantum state.
+        </p>
+        <div class="success-metrics font-mono">
+          <div class="metric-box">
+            <span class="m-val text-gradient">1.1000°</span>
+            <span class="m-lbl">Twist Angle</span>
+          </div>
+          <div class="metric-box">
+            <span class="m-val text-gradient">100.0%</span>
+            <span class="m-lbl">Coherence</span>
+          </div>
+          <div class="metric-box">
+            <span class="m-val text-gradient">0.015 K</span>
+            <span class="m-lbl">Cryo Temp</span>
+          </div>
+        </div>
+        <div class="success-quote italic">
+          "At the magic angle, the chaotic becomes coherent."
+        </div>
+        <button id="restart-btn" class="btn btn-tranquil font-mono">
+          Recalibrate Cryostat
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Audio State
+    let audioCtx: AudioContext | null = null;
+    let baseDrone: OscillatorNode | null = null;
+    let baseDroneGain: GainNode | null = null;
+    let synthNodes: OscillatorNode[] = [];
+    let synthGain: GainNode | null = null;
+    let noiseNode: AudioWorkletNode | ScriptProcessorNode | null = null;
+    let noiseGain: GainNode | null = null;
+
+    // Harmonic Chord Notes (C Major 9 / C maj 7 / Gsus4 depending on structure)
+    const chordFrequencies: Record<string, number[]> = {
+      honeycomb: [130.81, 164.81, 196.00, 246.94], // C3, E3, G3, B3 (Warm Cmaj7)
+      fresnel: [146.83, 196.00, 220.00, 293.66],   // D3, G3, A3, D4 (Open Gsus4)
+      penrose: [130.81, 155.56, 196.00, 233.08]    // C3, Eb3, G3, Bb3 (Cool Cmin7)
+    };
+
+    // State Variables
+    let currentAngle = 0.0; // Degrees of twist
+    let coherence = 0;      // Percentage of coherence (100% at exactly 1.1)
+    let isArmed = false;
+    let activePattern = "honeycomb";
+    let isDraggingDial = false;
+    let dragStartAngle = 0;
+    let dragStartTwist = 0;
+
+    // DOM Elements
+    const root = document.getElementById("calibration-root") as HTMLElement;
+    const armingOverlay = document.getElementById("arming-overlay") as HTMLElement;
+    const armButton = document.getElementById("arm-button") as HTMLButtonElement;
+    const workspace = document.getElementById("workspace") as HTMLElement;
+    const rotaryDial = document.getElementById("rotary-dial") as HTMLElement;
+    const angleDisplay = document.getElementById("angle-display") as HTMLElement;
+    const coherenceDisplay = document.getElementById("coherence-display") as HTMLElement;
+    const resistanceDisplay = document.getElementById("resistance-display") as HTMLElement;
+    const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+    const successScreen = document.getElementById("success-screen") as HTMLElement;
+    const restartBtn = document.getElementById("restart-btn") as HTMLButtonElement;
+    const statusDisplay = document.getElementById("status-display") as HTMLElement;
+    
+    // Pattern rectangles and group elements
+    const layerStatic = document.getElementById("layer-static") as unknown as SVGElement;
+    const layerTwisted = document.getElementById("layer-twisted") as unknown as SVGElement;
+    const staticRect = layerStatic?.querySelector("rect") as unknown as SVGRectElement;
+    const twistedRect = layerTwisted?.querySelector("rect") as unknown as SVGRectElement;
+    const concentricStatic = document.getElementById("concentric-static") as unknown as SVGElement;
+    const concentricTwisted = document.getElementById("concentric-twisted") as unknown as SVGElement;
+
+    // Setup Concentric Rings
+    function setupConcentricRings() {
+      if (!concentricStatic || !concentricTwisted) return;
+      concentricStatic.innerHTML = "";
+      concentricTwisted.innerHTML = "";
+
+      for (let r = 8; r <= 320; r += 12) {
+        // Static rings
+        const c1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c1.setAttribute("cx", "200");
+        c1.setAttribute("cy", "200");
+        c1.setAttribute("r", r.toString());
+        c1.setAttribute("stroke", "currentColor");
+        c1.setAttribute("stroke-width", "2.5");
+        c1.setAttribute("fill", "none");
+        c1.setAttribute("class", "pattern-circle");
+        concentricStatic.appendChild(c1);
+
+        // Twisted rings
+        const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c2.setAttribute("cx", "200");
+        c2.setAttribute("cy", "200");
+        c2.setAttribute("r", r.toString());
+        c2.setAttribute("stroke", "currentColor");
+        c2.setAttribute("stroke-width", "2.5");
+        c2.setAttribute("fill", "none");
+        c2.setAttribute("class", "pattern-circle");
+        concentricTwisted.appendChild(c2);
+      }
+    }
+
+    setupConcentricRings();
+
+    // Canvas Background Animation
+    const canvas = document.getElementById("cryo-canvas") as HTMLCanvasElement;
+    let canvasCtx: CanvasRenderingContext2D | null = null;
+    let particles: Array<{ x: number, y: number, vx: number, vy: number, radius: number, alpha: number, color: string }> = [];
+
+    function initCanvas() {
+      if (!canvas) return;
+      canvasCtx = canvas.getContext("2d");
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      // Create biochemical cryogenic nodes
+      particles = [];
+      const particleColors = ["#06b6d4", "#3b82f6", "#10b981", "#fbbf24", "#0ea5e9"];
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 1.0,
+          vy: (Math.random() - 0.5) * 1.0,
+          radius: Math.random() * 3 + 1.5,
+          alpha: Math.random() * 0.3 + 0.1,
+          color: particleColors[Math.floor(Math.random() * particleColors.length)]
+        });
+      }
+
+      runCanvasLoop();
+    }
+
+    function resizeCanvas() {
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    }
+
+    function runCanvasLoop() {
+      if (!canvasCtx || !canvas) return;
+      canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Cryogenic particles condense and gather at high coherence
+      const speedFactor = Math.max(0.1, 1.0 - (coherence / 100.0));
+      const gatheringStrength = coherence / 100.0;
+
+      particles.forEach(p => {
+        // If high coherence, drift towards center
+        if (gatheringStrength > 0.1) {
+          const dx = (canvas.width / 2) - p.x;
+          const dy = (canvas.height / 2) - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > 10) {
+            p.x += (dx / dist) * gatheringStrength * 1.5;
+            p.y += (dy / dist) * gatheringStrength * 1.5;
+          }
+        }
+
+        p.x += p.vx * speedFactor;
+        p.y += p.vy * speedFactor;
+
+        // Wrap around bounds
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        canvasCtx!.beginPath();
+        canvasCtx!.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        canvasCtx!.fillStyle = p.color;
+        
+        // Intensify glow near center or magic angle
+        if (gatheringStrength > 0.7) {
+          canvasCtx!.shadowBlur = 15;
+          canvasCtx!.shadowColor = "#f59e0b";
+          canvasCtx!.globalAlpha = p.alpha + 0.3;
+        } else {
+          canvasCtx!.shadowBlur = 0;
+          canvasCtx!.globalAlpha = p.alpha;
+        }
+        
+        canvasCtx!.fill();
+      });
+
+      requestAnimationFrame(runCanvasLoop);
+    }
+
+    // Audio Context & Synth Initializer
+    function initAudio() {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioCtx = new AudioContextClass();
+
+        // 1. Core deep cryogenic hum (55 Hz - A1)
+        baseDrone = audioCtx.createOscillator();
+        baseDroneGain = audioCtx.createGain();
+        baseDrone.type = "sine";
+        baseDrone.frequency.value = 55.0; 
+        baseDroneGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+
+        const droneFilter = audioCtx.createBiquadFilter();
+        droneFilter.type = "lowpass";
+        droneFilter.frequency.value = 120;
+
+        baseDrone.connect(droneFilter);
+        droneFilter.connect(baseDroneGain);
+        baseDroneGain.connect(audioCtx.destination);
+        baseDrone.start();
+
+        // 2. Coherence Multi-oscillator Synth
+        synthGain = audioCtx.createGain();
+        synthGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        synthGain.connect(audioCtx.destination);
+
+        const currentNotes = chordFrequencies[activePattern];
+        synthNodes = currentNotes.map(freq => {
+          const osc = audioCtx!.createOscillator();
+          osc.type = "sine";
+          // Start with chaotic, detuned frequencies
+          const detuneAmount = (Math.random() - 0.5) * 80; // discordant
+          osc.frequency.setValueAtTime(freq + detuneAmount, audioCtx!.currentTime);
+          
+          const filter = audioCtx!.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(300, audioCtx!.currentTime);
+          
+          osc.connect(filter);
+          filter.connect(synthGain!);
+          osc.start();
+          return osc;
+        });
+
+        // 3. Thermal resistance noise
+        // Using a ScriptProcessorNode as a simple fallback for browser-wide white noise generator
+        // since AudioWorklets require external JS files.
+        const bufferSize = 4096;
+        noiseNode = audioCtx.createScriptProcessor(bufferSize, 1, 1);
+        noiseNode.onaudioprocess = function(e) {
+          const outputBuffer = e.outputBuffer;
+          const channelData = outputBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            channelData[i] = (Math.random() * 2 - 1) * 0.1; // scale down
+          }
+        };
+
+        const noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = "bandpass";
+        noiseFilter.frequency.value = 800;
+        noiseFilter.Q.value = 1.0;
+
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.12, audioCtx.currentTime); // High noise initially
+
+        noiseNode.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+
+        // Update synth & noise immediately based on current state
+        updateSynthAudio();
+      } catch (err) {
+        console.error("Audio initialization failed:", err);
+      }
+    }
+
+    // Dynamic Sound updates based on Angle and Coherence
+    function updateSynthAudio() {
+      if (!audioCtx || !baseDroneGain || !synthGain || !noiseGain) return;
+
+      const deviation = Math.abs(currentAngle - 1.1);
+      
+      // Coherence calculation: 100% at exactly 1.1, drop off very fast
+      // (within ±0.5° has some coherence, closer is higher)
+      let calculatedCoherence = 0;
+      if (deviation <= 0.5) {
+        calculatedCoherence = Math.round((1 - (deviation / 0.5)) * 100);
+      }
+      coherence = calculatedCoherence;
+      
+      root.setAttribute("data-coherence", coherence.toString());
+      coherenceDisplay.textContent = `${coherence}%`;
+
+      // Telemetry update
+      let resistance = 998.4;
+      if (coherence > 0) {
+        resistance = Math.max(0, parseFloat((998.4 * (1 - coherence / 100)).toFixed(4)));
+      }
+      resistanceDisplay.textContent = coherence === 100 ? "0.0000 Ω" : `${resistance.toFixed(1)} Ω`;
+
+      // 1. Noise level decreases as coherence increases
+      const noiseVol = Math.max(0.0, 0.12 * (1 - coherence / 100.0));
+      noiseGain.gain.setTargetAtTime(noiseVol, audioCtx.currentTime, 0.1);
+
+      // 2. Synth chord gain increases as coherence increases
+      const synthVol = Math.max(0.0, 0.20 * (coherence / 100.0));
+      synthGain.gain.setTargetAtTime(synthVol, audioCtx.currentTime, 0.15);
+
+      // 3. Slide oscillators into perfect tune as coherence grows
+      const chord = chordFrequencies[activePattern];
+      synthNodes.forEach((osc, idx) => {
+        const targetFreq = chord[idx];
+        // At 0% coherence, detune is wild. At 100% coherence, detune is 0
+        const detuneFactor = Math.sin((idx + 1) * 100) * 45 * (1 - coherence / 100.0);
+        osc.frequency.setTargetAtTime(targetFreq + detuneFactor, audioCtx!.currentTime, 0.1);
+      });
+
+      // 4. Submit button enablement
+      if (coherence === 100) {
+        submitBtn.removeAttribute("disabled");
+        submitBtn.className = "btn btn-gold font-mono";
+        statusDisplay.textContent = "SUPERCONDUCTIVE COHERENCE";
+        statusDisplay.className = "status-indicator font-mono text-gold pulse-gold";
+      } else {
+        submitBtn.setAttribute("disabled", "true");
+        submitBtn.className = "btn btn-danger font-mono";
+        statusDisplay.textContent = coherence > 50 ? "PHASE TRANSITION" : "DISORDERED LATTICE";
+        statusDisplay.className = "status-indicator font-mono";
+      }
+    }
+
+    // Render Pattern updates
+    function setPattern(pattern: string) {
+      activePattern = pattern;
+      root.setAttribute("data-pattern", pattern);
+
+      // Show/hide concentric circle tags vs standard rect fills
+      if (pattern === "penrose") {
+        if (staticRect && twistedRect && concentricStatic && concentricTwisted) {
+          staticRect.classList.add("hidden");
+          twistedRect.classList.add("hidden");
+          concentricStatic.classList.remove("hidden");
+          concentricTwisted.classList.remove("hidden");
+        }
+      } else {
+        if (staticRect && twistedRect && concentricStatic && concentricTwisted) {
+          staticRect.classList.remove("hidden");
+          twistedRect.classList.remove("hidden");
+          concentricStatic.classList.add("hidden");
+          concentricTwisted.classList.add("hidden");
+
+          const fillUrl = `url(#pattern-${pattern})`;
+          staticRect.setAttribute("fill", fillUrl);
+          twistedRect.setAttribute("fill", fillUrl);
+        }
+      }
+
+      // If audio initialized, immediately shift the synthesizer base chord frequencies
+      if (audioCtx && synthNodes.length > 0) {
+        const targetNotes = chordFrequencies[pattern];
+        synthNodes.forEach((osc, idx) => {
+          osc.frequency.setTargetAtTime(targetNotes[idx], audioCtx!.currentTime, 0.3);
+        });
+      }
+      
+      updateSynthAudio();
+    }
+
+    // Dial Rotator helper
+    function updateLatticeRotation(angle: number) {
+      // Constraints: limit between -45 and 45
+      currentAngle = parseFloat(Math.min(45, Math.max(-45, angle)).toFixed(1));
+      
+      root.setAttribute("data-angle", currentAngle.toFixed(1));
+      angleDisplay.textContent = `${currentAngle.toFixed(1)}°`;
+
+      // Rotate dial pointer
+      const pointer = rotaryDial.querySelector(".dial-pointer") as HTMLElement;
+      if (pointer) {
+        // Map current angle to dial rotation.
+        // -45° to 45° twist maps to -180° to 180° dial pointer rotation
+        const pointerRotation = currentAngle * 4;
+        pointer.style.transform = `rotate(${pointerRotation}deg)`;
+      }
+
+      // Rotate twisted lattice layer in SVG around its center (200, 200)
+      if (layerTwisted) {
+        layerTwisted.style.transform = `rotate(${currentAngle}deg)`;
+        layerTwisted.style.transformOrigin = "200px 200px";
+      }
+
+      // Sync slider state accessibility
+      rotaryDial.setAttribute("aria-valuenow", currentAngle.toString());
+
+      updateSynthAudio();
+    }
+
+    // Arming Interaction
+    armButton.addEventListener("click", () => {
+      isArmed = true;
+      armingOverlay.classList.add("hidden");
+      workspace.classList.remove("hidden");
+      initCanvas();
+      initAudio();
+      updateLatticeRotation(0.0);
+      rotaryDial.focus();
+    });
+
+    // Keyboard handlers
+    rotaryDial.addEventListener("keydown", (e) => {
+      if (!isArmed) return;
+      
+      let step = 0.1;
+      if (e.shiftKey) {
+        step = 1.0;
+      }
+
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+        e.preventDefault();
+        updateLatticeRotation(currentAngle + step);
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+        e.preventDefault();
+        updateLatticeRotation(currentAngle - step);
+      }
+    });
+
+    // Scroll Wheel Rotation
+    const latticeStage = document.getElementById("lattice-stage") as HTMLElement;
+
+    function handleWheelScroll(e: WheelEvent) {
+      if (!isArmed) return;
+      e.preventDefault();
+
+      // Scrolling adjusts the twist angle
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      updateLatticeRotation(currentAngle + delta);
+    }
+
+    if (latticeStage) {
+      latticeStage.addEventListener("wheel", handleWheelScroll, { passive: false });
+    }
+    if (rotaryDial) {
+      rotaryDial.addEventListener("wheel", handleWheelScroll, { passive: false });
+    }
+
+    // Pointer/Drag logic for Rotary Dial
+    function getAngleFromEvent(e: MouseEvent | TouchEvent, rect: DOMRect) {
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      let clientX = 0;
+      let clientY = 0;
+      if (e instanceof MouseEvent) {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      } else if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      }
+
+      const dx = clientX - centerX;
+      const dy = clientY - centerY;
+      return Math.atan2(dy, dx) * (180 / Math.PI);
+    }
+
+    function startDrag(e: MouseEvent | TouchEvent) {
+      if (!isArmed) return;
+      const rect = rotaryDial.getBoundingClientRect();
+      const clickAngle = getAngleFromEvent(e, rect);
+      
+      isDraggingDial = true;
+      dragStartAngle = clickAngle;
+      dragStartTwist = currentAngle;
+      
+      document.addEventListener("mousemove", dragMove);
+      document.addEventListener("mouseup", endDrag);
+      document.addEventListener("touchmove", dragMove, { passive: false });
+      document.addEventListener("touchend", endDrag);
+
+      rotaryDial.classList.add("active");
+    }
+
+    function dragMove(e: MouseEvent | TouchEvent) {
+      if (!isDraggingDial) return;
+      
+      // Prevent scroll on mobile drag
+      if (e instanceof TouchEvent) {
+        e.preventDefault();
+      }
+
+      const rect = rotaryDial.getBoundingClientRect();
+      const currentClickAngle = getAngleFromEvent(e, rect);
+      
+      let angleDiff = currentClickAngle - dragStartAngle;
+      // Normalize angle diff
+      if (angleDiff > 180) angleDiff -= 360;
+      if (angleDiff < -180) angleDiff += 360;
+
+      // Twist sensitivity: dial rotation maps to smaller twist angle
+      const targetTwist = dragStartTwist + (angleDiff / 4);
+      updateLatticeRotation(targetTwist);
+    }
+
+    function endDrag() {
+      if (isDraggingDial) {
+        isDraggingDial = false;
+        document.removeEventListener("mousemove", dragMove);
+        document.removeEventListener("mouseup", endDrag);
+        document.removeEventListener("touchmove", dragMove);
+        document.removeEventListener("touchend", endDrag);
+        rotaryDial.classList.remove("active");
+      }
+    }
+
+    if (rotaryDial) {
+      rotaryDial.addEventListener("mousedown", startDrag);
+      rotaryDial.addEventListener("touchstart", startDrag, { passive: true });
+    }
+
+    // Pattern buttons
+    const patternButtons = document.querySelectorAll(".btn-selector");
+    patternButtons.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const pattern = target.getAttribute("data-pattern") || "honeycomb";
+        
+        patternButtons.forEach(b => b.classList.remove("active"));
+        target.classList.add("active");
+
+        setPattern(pattern);
+      });
+    });
+
+    // Submit calibration report (completing the task)
+    submitBtn.addEventListener("click", () => {
+      workspace.classList.add("hidden");
+      successScreen.classList.remove("hidden");
+      successScreen.classList.add("fade-in");
+
+      // Set audio drone to a pure, beautiful, infinite resonant drone (C major chords)
+      if (audioCtx && baseDroneGain && synthGain && noiseGain) {
+        noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2); // absolute zero noise
+        synthGain.gain.setTargetAtTime(0.28, audioCtx.currentTime, 0.5); // beautiful harmonic volumes
+        
+        // Clean sinusoids
+        synthNodes.forEach((osc, idx) => {
+          const chord = chordFrequencies[activePattern];
+          osc.type = "sine";
+          osc.frequency.setTargetAtTime(chord[idx], audioCtx!.currentTime, 0.5);
+        });
+
+        // Warm up low drone
+        baseDrone!.frequency.setTargetAtTime(65.41, audioCtx.currentTime, 1.0);
+        baseDroneGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 1.0);
+      }
+    });
+
+    // Restart/recalibrate
+    restartBtn.addEventListener("click", () => {
+      successScreen.classList.remove("fade-in");
+      successScreen.classList.add("hidden");
+      workspace.classList.remove("hidden");
+      
+      updateLatticeRotation(0.0);
+      rotaryDial.focus();
+    });
+
+    // Expose window hooks for Playwright tests to accurately test and calibrate
+    (window as any).__setTwistAngle = function(angle: number) {
+      if (isArmed) {
+        updateLatticeRotation(angle);
+      }
+    };
+  </script>
+
+  <style>
+    /* Tuner CSS Design System */
+    :root {
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      --gold-glow: rgba(245, 158, 11, 0.4);
+      --pattern-color: #06b6d4;
+      --pattern-sub-color: rgba(6, 182, 212, 0.25);
+    }
+
+    .tuner-container {
+      min-height: calc(100dvh - 80px);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      color: #e2e8f0;
+      box-sizing: border-box;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .background-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .tuner-header {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .page-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      opacity: 0.6;
+      margin: 0;
+    }
+
+    /* Onboarding Overlay */
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 500px;
+      padding: 2.5rem;
+      border-radius: 1rem;
+      text-align: center;
+      z-index: 100;
+    }
+
+    .overlay-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: breathe 3s infinite ease-in-out;
+    }
+
+    .overlay-title {
+      font-size: 1.25rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      color: #3b82f6;
+    }
+
+    .overlay-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      opacity: 0.85;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .alert-info {
+      background: rgba(14, 165, 233, 0.1);
+      color: #7dd3fc;
+      border-color: rgba(14, 165, 233, 0.2);
+    }
+
+    /* Workspace layout */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .panel {
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      margin: 0;
+      color: #94a3b8;
+    }
+
+    .status-indicator {
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      background: rgba(255,255,255,0.05);
+      padding: 0.25rem 0.6rem;
+      border-radius: 1rem;
+      color: #94a3b8;
+    }
+
+    /* Lattice Viewport */
+    .lattice-container {
+      background: #090d16;
+      border-radius: 0.75rem;
+      aspect-ratio: 1/1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      flex-grow: 1;
+    }
+
+    .lattice-stage {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      cursor: ns-resize;
+    }
+
+    .lattice-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: var(--pattern-color);
+      transition: transform 0.05s linear;
+    }
+
+    .pattern-dot {
+      fill: currentColor;
+    }
+
+    .pattern-dot-sub {
+      fill: var(--pattern-sub-color);
+    }
+
+    .pattern-line {
+      stroke: currentColor;
+      stroke-linecap: round;
+      opacity: 0.8;
+    }
+
+    .pattern-circle {
+      stroke: currentColor;
+      opacity: 0.85;
+    }
+
+    /* Blend Mode difference gives the spectacular moiré pattern! */
+    .rotatable-layer {
+      mix-blend-mode: difference;
+      color: #ffffff; /* White creates inversion difference */
+    }
+
+    /* Concentric layout configurations */
+    .concentric-group {
+      color: inherit;
+    }
+
+    .keyboard-hint {
+      font-size: 0.7rem;
+      text-align: center;
+      opacity: 0.4;
+      margin-top: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Right column: controls */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .telemetry-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .telemetry-box.full-width {
+      grid-column: span 2;
+    }
+
+    .box-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+    }
+
+    .box-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* Pattern selector styling */
+    .pattern-selector {
+      margin-bottom: 1.5rem;
+    }
+
+    .selector-label {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      display: block;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-selector {
+      flex: 1;
+      font-size: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 0.35rem;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-selector:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    .btn-selector.active {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: #06b6d4;
+      color: #22d3ee;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+
+    /* Rotary Dial Controller */
+    .dial-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-grow: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .dial-wrapper {
+      text-align: center;
+    }
+
+    .rotary-dial {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #1e293b 0%, #0f172a 100%);
+      border: 4px solid #334155;
+      box-shadow: 
+        0 10px 25px rgba(0,0,0,0.5),
+        inset 0 2px 5px rgba(255,255,255,0.1);
+      position: relative;
+      cursor: grab;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .rotary-dial:focus {
+      border-color: #0ea5e9;
+      box-shadow: 
+        0 0 15px rgba(14, 165, 233, 0.4),
+        0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .rotary-dial.active {
+      cursor: grabbing;
+      border-color: #22d3ee;
+    }
+
+    .dial-face {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .dial-pointer {
+      width: 4px;
+      height: 40px;
+      background: #06b6d4;
+      position: absolute;
+      top: 15px;
+      left: calc(50% - 2px);
+      border-radius: 2px;
+      transform-origin: bottom center;
+      transition: transform 0.05s linear;
+      box-shadow: 0 0 8px #06b6d4;
+    }
+
+    .dial-center {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 2px solid #475569;
+      position: absolute;
+      top: calc(50% - 8px);
+      left: calc(50% - 8px);
+    }
+
+    .dial-hint {
+      font-size: 0.65rem;
+      color: #475569;
+      display: block;
+      margin-top: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+
+    .submit-btn {
+      width: 100%;
+    }
+
+    /* Success Screen overlay */
+    .success-screen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      z-index: 100;
+    }
+
+    .success-content {
+      padding: 3rem;
+      border-radius: 1.5rem;
+      text-align: center;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.1);
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      animation: pulse-gold-glow 2s infinite ease-in-out;
+      color: #fbbf24;
+    }
+
+    .success-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .success-desc {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .success-metrics {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 2.5rem;
+      gap: 1rem;
+    }
+
+    .metric-box {
+      flex: 1;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 1rem;
+      border-radius: 0.75rem;
+    }
+
+    .m-val {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .m-lbl {
+      font-size: 0.7rem;
+      color: #64748b;
+      letter-spacing: 0.05em;
+    }
+
+    .success-quote {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Common Button details */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #0ea5e9;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #0284c7;
+      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #f87171;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-gold {
+      background: #f59e0b;
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+      animation: button-glow 1.5s infinite alternate;
+    }
+
+    .btn-gold:hover {
+      background: #d97706;
+    }
+
+    .btn-tranquil {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .btn-tranquil:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Gradients and animations */
+    .text-gradient {
+      background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .glass {
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.03);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .pulse-gold {
+      animation: text-pulse-gold 1.5s infinite alternate;
+    }
+
+    /* Keyframes */
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    @keyframes text-pulse-gold {
+      0% { text-shadow: 0 0 4px rgba(245, 158, 11, 0.2); color: #f59e0b; }
+      100% { text-shadow: 0 0 12px rgba(245, 158, 11, 0.7); color: #fbbf24; }
+    }
+
+    @keyframes button-glow {
+      0% { box-shadow: 0 0 5px rgba(245, 158, 11, 0.3); }
+      100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.8); }
+    }
+
+    @keyframes pulse-gold-glow {
+      0%, 100% { filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.4)); }
+      50% { filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.9)); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .page-title {
+        font-size: 1.75rem;
+      }
+
+      .tuner-container {
+        padding: 1rem;
+      }
+      
+      .panel {
+        padding: 1.25rem;
+      }
+    }
+
+    @media (max-width: 375px) {
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .telemetry-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .telemetry-box.full-width {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</Base>

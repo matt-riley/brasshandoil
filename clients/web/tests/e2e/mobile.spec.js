@@ -50,6 +50,7 @@ const pages = [
   "/experiments/kq14-deposition",
   "/experiments/transposon-torpor-modulator",
   "/experiments/archive-unlicensed-rain",
+  "/experiments/twistronic-lattice-tuner",
 ]
 
 test.use({

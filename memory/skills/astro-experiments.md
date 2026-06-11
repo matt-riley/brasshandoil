@@ -16,6 +16,7 @@
 - User feedback should always be recorded in repo memory and promoted into reusable skills when it becomes a pattern.
 - In inline Astro scripts, guard required DOM nodes once with `instanceof` checks, then copy them into explicitly typed non-null aliases (`const x: HTMLDivElement = rawX`) so TypeScript keeps the narrowing across nested closures and helper functions.
 - When exposing debug/test hooks on `window` (for example `__officeSimulateReturn`), cast `window` to a narrow local type (`Window & { hook?: fn }`) instead of relying on implicit `any`.
+- When casting generic DOM elements retrieved via `document.getElementById` or `querySelector` to SVG types (like `SVGElement` or `SVGRectElement`), cast through `unknown` (e.g., `as unknown as SVGElement`) to prevent TypeScript compiler errors arising from disjoint type hierarchies.
 
 ## Open Questions
 
