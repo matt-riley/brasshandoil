@@ -412,3 +412,14 @@ Carry Forward:
 - Decoupled physical layout movement from state transitions by swapping genetic role markers and data-attributes, avoiding layout-jitter.
 - Coordinated AudioContext synthesizer frequencies and Canvas cellular energy simulation speed with the global metabolic accelerator rate (60.0 Hz down to 0.1 Hz).
 - Enforced strict keyboard accessibility (Tab focus and Arrow Keys navigation) and explicit user arming for AudioContext activation.
+
+### Session Entry
+
+Date: 2026-06-11
+Experiment: Archive of Unlicensed Rain
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Rotated into a municipal weather archive to avoid another science-console or central probe composition.
+- Normal click tests are worth keeping; they caught a hover transform that replaced the base translate/rotate and made a visible drop miss clicks.
+- Keep semantic `data-*` state on animated visual objects so E2E can verify whimsical state changes without sampling pixels.

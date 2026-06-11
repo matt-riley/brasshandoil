@@ -1,0 +1,629 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Archive of Unlicensed Rain">
+  <main id="rain-archive" class="rain-shell">
+    <section class="rain-console" aria-label="Rain archive clerk desk">
+      <p class="rain-kicker">Municipal weather counter / basement window 4</p>
+      <h1>Archive of Unlicensed Rain</h1>
+      <p class="rain-intro">
+        Select a drop, press it against the stamp pad, and file a permit before
+        the ceiling decides precipitation is a form of correspondence.
+      </p>
+
+      <div class="rain-readouts" aria-live="polite">
+        <div>
+          <span>Licensed</span>
+          <strong id="licensed-count">0</strong>
+        </div>
+        <div>
+          <span>Storm debt</span>
+          <strong id="storm-debt">0</strong>
+        </div>
+        <div>
+          <span>Current drop</span>
+          <strong id="current-drop">none</strong>
+        </div>
+        <div>
+          <span>Archive</span>
+          <strong id="archive-status">unfiled</strong>
+        </div>
+      </div>
+
+      <div class="rain-actions">
+        <button id="stamp-current" type="button">Stamp Current</button>
+        <button id="reset-archive" type="button">Dry Counter</button>
+      </div>
+    </section>
+
+    <section
+      id="storm-pane"
+      class="storm-pane"
+      data-awake="false"
+      data-licensed="0"
+      aria-label="Interactive pane of unlicensed rain drops"
+    >
+      <div class="pane-sky" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <button
+        id="stamp-pad"
+        class="stamp-pad"
+        type="button"
+        aria-label="Stamp selected rain permit"
+      >
+        <span>PERMIT</span>
+      </button>
+
+      <button class="rain-drop" type="button" data-name="skylight" data-index="0" aria-pressed="false">
+        <span>skylight</span>
+      </button>
+      <button class="rain-drop" type="button" data-name="awning" data-index="1" aria-pressed="false">
+        <span>awning</span>
+      </button>
+      <button class="rain-drop" type="button" data-name="gutters" data-index="2" aria-pressed="false">
+        <span>gutters</span>
+      </button>
+      <button class="rain-drop" type="button" data-name="briefcase" data-index="3" aria-pressed="false">
+        <span>briefcase</span>
+      </button>
+      <button class="rain-drop" type="button" data-name="lamp cord" data-index="4" aria-pressed="false">
+        <span>lamp cord</span>
+      </button>
+      <button class="rain-drop" type="button" data-name="map drawer" data-index="5" aria-pressed="false">
+        <span>map drawer</span>
+      </button>
+      <button class="rain-drop" type="button" data-name="typewriter" data-index="6" aria-pressed="false">
+        <span>typewriter</span>
+      </button>
+
+      <div class="permit-rack" aria-hidden="true">
+        <div class="permit-slip" data-stamped="false"><b>skylight</b><i></i></div>
+        <div class="permit-slip" data-stamped="false"><b>awning</b><i></i></div>
+        <div class="permit-slip" data-stamped="false"><b>gutters</b><i></i></div>
+        <div class="permit-slip" data-stamped="false"><b>briefcase</b><i></i></div>
+        <div class="permit-slip" data-stamped="false"><b>lamp cord</b><i></i></div>
+        <div class="permit-slip" data-stamped="false"><b>map drawer</b><i></i></div>
+        <div class="permit-slip" data-stamped="false"><b>typewriter</b><i></i></div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #101317;
+  }
+
+  :global(.container) {
+    max-inline-size: none;
+    padding-inline: 0;
+  }
+
+  .rain-shell {
+    --paper: #f5f0df;
+    --ink: #101317;
+    --blue: #69b7d6;
+    --red: #d85745;
+    --yellow: #f2c55d;
+    --green: #48c18c;
+    display: grid;
+    grid-template-columns: minmax(17rem, 24rem) minmax(0, 1fr);
+    gap: clamp(1rem, 2vw, 1.6rem);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.2vw, 1.8rem);
+    color: var(--paper);
+    background:
+      radial-gradient(circle at 82% 18%, rgba(105, 183, 214, 0.26), transparent 17rem),
+      linear-gradient(135deg, rgba(72, 193, 140, 0.14), transparent 22rem),
+      linear-gradient(180deg, #28313a 0%, #171b20 46%, #101317 100%);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .rain-console {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 1rem;
+  }
+
+  .rain-kicker,
+  .rain-readouts span {
+    margin: 0;
+    color: var(--yellow);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 9ch;
+    margin: 0;
+    color: var(--paper);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.5rem, 5.3vw, 5rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.88;
+    text-shadow:
+      0.045em 0.05em 0 rgba(216, 87, 69, 0.6),
+      -0.04em 0.04em 0 rgba(105, 183, 214, 0.62);
+  }
+
+  .rain-intro {
+    max-width: 32rem;
+    margin: 0;
+    color: rgba(245, 240, 223, 0.82);
+    font-size: clamp(0.98rem, 1.35vw, 1.08rem);
+    line-height: 1.62;
+  }
+
+  .rain-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .rain-readouts div {
+    min-width: 0;
+    border: 1px solid rgba(245, 240, 223, 0.22);
+    border-radius: 8px;
+    padding: 0.8rem;
+    background: rgba(16, 19, 23, 0.58);
+  }
+
+  .rain-readouts strong {
+    display: block;
+    margin-top: 0.45rem;
+    color: var(--paper);
+    font-size: clamp(1.04rem, 2.2vw, 1.45rem);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  .rain-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  .rain-actions button,
+  .stamp-pad {
+    min-height: 3.2rem;
+    border: 1px solid rgba(245, 240, 223, 0.36);
+    border-radius: 8px;
+    color: var(--ink);
+    background: var(--yellow);
+    font: 850 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
+  }
+
+  .rain-actions button:hover,
+  .stamp-pad:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+
+  #reset-archive {
+    color: var(--paper);
+    background: #34414d;
+  }
+
+  .storm-pane {
+    position: relative;
+    min-height: min(64rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(245, 240, 223, 0.22);
+    border-radius: 8px;
+    background:
+      linear-gradient(90deg, rgba(245, 240, 223, 0.08) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      linear-gradient(0deg, rgba(245, 240, 223, 0.07) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      radial-gradient(circle at var(--cursor-x, 52%) var(--cursor-y, 42%), rgba(105, 183, 214, 0.26), transparent 16rem),
+      #1b2228;
+    box-shadow:
+      inset 0 0 6rem rgba(0, 0, 0, 0.48),
+      0 1rem 2.5rem rgba(0, 0, 0, 0.28);
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .pane-sky,
+  .pane-sky span {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .pane-sky {
+    opacity: 0.92;
+    background:
+      repeating-linear-gradient(108deg, transparent 0 1.25rem, rgba(105, 183, 214, 0.16) 1.3rem 1.42rem),
+      linear-gradient(180deg, rgba(16, 19, 23, 0.1), rgba(16, 19, 23, 0.62));
+  }
+
+  .pane-sky span {
+    inline-size: 0.16rem;
+    block-size: 8rem;
+    inset-block-start: -12%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, transparent, rgba(245, 240, 223, 0.86), transparent);
+    transform: rotate(12deg);
+    animation: rainFall 1.7s linear infinite;
+  }
+
+  .pane-sky span:nth-child(1) { inset-inline-start: 11%; animation-delay: -0.2s; }
+  .pane-sky span:nth-child(2) { inset-inline-start: 29%; animation-delay: -0.9s; }
+  .pane-sky span:nth-child(3) { inset-inline-start: 48%; animation-delay: -0.45s; }
+  .pane-sky span:nth-child(4) { inset-inline-start: 68%; animation-delay: -1.2s; }
+  .pane-sky span:nth-child(5) { inset-inline-start: 86%; animation-delay: -0.68s; }
+
+  .stamp-pad {
+    position: absolute;
+    inset-inline-start: 50%;
+    inset-block-start: 50%;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    inline-size: clamp(6rem, 13vw, 9rem);
+    block-size: clamp(6rem, 13vw, 9rem);
+    min-height: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(245, 240, 223, 0.88) 0 18%, transparent 19%),
+      radial-gradient(circle, #d85745 0 61%, #8f2f2c 62% 100%);
+    box-shadow:
+      0 0 0 0.6rem rgba(216, 87, 69, 0.18),
+      0 1.1rem 2rem rgba(0, 0, 0, 0.34);
+    transform: translate(-50%, -50%);
+  }
+
+  .stamp-pad:hover {
+    transform: translate(-50%, calc(-50% - 1px));
+  }
+
+  .stamp-pad span {
+    border: 2px solid rgba(16, 19, 23, 0.68);
+    border-radius: 999px;
+    padding: 0.45rem 0.55rem;
+    color: #15110f;
+    background: rgba(245, 240, 223, 0.65);
+  }
+
+  .rain-drop {
+    position: absolute;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    inline-size: clamp(4.6rem, 8.2vw, 6.7rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(245, 240, 223, 0.52);
+    border-radius: 58% 42% 58% 42% / 70% 70% 30% 30%;
+    color: var(--paper);
+    background:
+      radial-gradient(circle at 34% 25%, rgba(245, 240, 223, 0.92), transparent 0.5rem),
+      linear-gradient(145deg, rgba(105, 183, 214, 0.94), rgba(52, 83, 112, 0.78));
+    box-shadow:
+      inset 0 -1rem 1.8rem rgba(20, 39, 55, 0.5),
+      0 0.8rem 1.3rem rgba(0, 0, 0, 0.28);
+    cursor: pointer;
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: filter 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+  }
+
+  .rain-drop span {
+    max-width: 5.2rem;
+    transform: rotate(-45deg);
+    color: #0d1418;
+    font: 850 0.64rem/1.05 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.02em;
+    text-align: center;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .rain-drop[aria-pressed="true"] {
+    filter: saturate(1.35) brightness(1.1);
+    box-shadow:
+      inset 0 -1rem 1.8rem rgba(20, 39, 55, 0.36),
+      0 0 0 0.45rem rgba(242, 197, 93, 0.24),
+      0 0.8rem 1.3rem rgba(0, 0, 0, 0.28);
+  }
+
+  .rain-drop:hover {
+    filter: brightness(1.08);
+  }
+
+  .rain-drop[data-licensed="true"] {
+    opacity: 0.66;
+    background:
+      radial-gradient(circle at 34% 25%, rgba(245, 240, 223, 0.75), transparent 0.5rem),
+      linear-gradient(145deg, rgba(72, 193, 140, 0.92), rgba(50, 95, 78, 0.82));
+  }
+
+  .rain-drop:nth-of-type(2) { inset-inline-start: 16%; inset-block-start: 22%; }
+  .rain-drop:nth-of-type(3) { inset-inline-start: 35%; inset-block-start: 14%; }
+  .rain-drop:nth-of-type(4) { inset-inline-start: 68%; inset-block-start: 20%; }
+  .rain-drop:nth-of-type(5) { inset-inline-start: 84%; inset-block-start: 43%; }
+  .rain-drop:nth-of-type(6) { inset-inline-start: 69%; inset-block-start: 76%; }
+  .rain-drop:nth-of-type(7) { inset-inline-start: 38%; inset-block-start: 84%; }
+  .rain-drop:nth-of-type(8) { inset-inline-start: 15%; inset-block-start: 63%; }
+
+  .permit-rack {
+    position: absolute;
+    inset-inline: clamp(0.75rem, 2.2vw, 1.5rem);
+    inset-block-end: clamp(0.75rem, 2.2vw, 1.5rem);
+    z-index: 3;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.45rem;
+    pointer-events: none;
+  }
+
+  .permit-slip {
+    min-width: 0;
+    border: 1px solid rgba(16, 19, 23, 0.3);
+    border-radius: 6px;
+    padding: 0.55rem 0.45rem;
+    color: #1a1814;
+    background:
+      linear-gradient(90deg, rgba(16, 19, 23, 0.08) 1px, transparent 1px) 0 0 / 0.52rem 100%,
+      #f5f0df;
+    box-shadow: 0 0.55rem 0.9rem rgba(0, 0, 0, 0.22);
+    transform: rotate(var(--tilt, -1deg));
+  }
+
+  .permit-slip:nth-child(2n) { --tilt: 1.4deg; }
+  .permit-slip:nth-child(3n) { --tilt: -2.2deg; }
+
+  .permit-slip b {
+    display: block;
+    font: 800 0.62rem/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .permit-slip i {
+    display: block;
+    min-block-size: 1.55rem;
+    margin-top: 0.35rem;
+    border: 2px solid rgba(216, 87, 69, 0.18);
+    border-radius: 50%;
+  }
+
+  .permit-slip[data-stamped="true"] i {
+    border-color: rgba(216, 87, 69, 0.82);
+    background:
+      linear-gradient(12deg, transparent 42%, rgba(216, 87, 69, 0.82) 43% 57%, transparent 58%),
+      radial-gradient(circle, transparent 0 42%, rgba(216, 87, 69, 0.82) 43% 48%, transparent 49%);
+  }
+
+  @keyframes rainFall {
+    from { translate: 0 -20%; opacity: 0; }
+    18% { opacity: 1; }
+    to { translate: 8rem 108%; opacity: 0; }
+  }
+
+  @media (max-width: 820px) {
+    .rain-shell {
+      grid-template-columns: 1fr;
+      min-height: calc(100vh - 5rem);
+      overflow: visible;
+    }
+
+    .rain-console {
+      align-self: start;
+    }
+
+    .storm-pane {
+      min-height: 34rem;
+    }
+
+    .permit-rack {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .rain-readouts,
+    .rain-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .storm-pane {
+      min-height: 37rem;
+    }
+
+    .rain-drop {
+      inline-size: 4.25rem;
+    }
+
+    .rain-drop span {
+      font-size: 0.55rem;
+    }
+
+    .permit-rack {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<script is:inline>
+  const root = document.querySelector("#rain-archive")
+  const pane = document.querySelector("#storm-pane")
+  const stampPad = document.querySelector("#stamp-pad")
+  const drops = Array.from(document.querySelectorAll(".rain-drop"))
+  const slips = Array.from(document.querySelectorAll(".permit-slip"))
+  const licensedCount = document.querySelector("#licensed-count")
+  const stormDebt = document.querySelector("#storm-debt")
+  const currentDrop = document.querySelector("#current-drop")
+  const archiveStatus = document.querySelector("#archive-status")
+  const stampCurrent = document.querySelector("#stamp-current")
+  const resetArchive = document.querySelector("#reset-archive")
+
+  const normalizedCursor = { x: 0.52, y: 0.42 }
+  const licensed = new Set()
+  let selectedIndex = -1
+  let debt = 0
+  let dragIndex = -1
+  let drift = 0
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value))
+  }
+
+  function setCursorFromClient(clientX, clientY) {
+    const box = pane.getBoundingClientRect()
+    normalizedCursor.x = clamp((clientX - box.left) / box.width, 0, 1)
+    normalizedCursor.y = clamp((clientY - box.top) / box.height, 0, 1)
+    pane.style.setProperty("--cursor-x", `${(normalizedCursor.x * 100).toFixed(2)}%`)
+    pane.style.setProperty("--cursor-y", `${(normalizedCursor.y * 100).toFixed(2)}%`)
+    pane.dataset.awake = "true"
+    debt = Math.max(debt, Math.round((normalizedCursor.x + normalizedCursor.y) * 19))
+    updateReadouts()
+  }
+
+  function isInsideStampPad(clientX, clientY) {
+    const box = stampPad.getBoundingClientRect()
+    return clientX >= box.left && clientX <= box.right && clientY >= box.top && clientY <= box.bottom
+  }
+
+  function selectDrop(index) {
+    selectedIndex = ((index % drops.length) + drops.length) % drops.length
+    drops.forEach((drop, dropIndex) => {
+      drop.setAttribute("aria-pressed", String(dropIndex === selectedIndex))
+    })
+    currentDrop.textContent = drops[selectedIndex].dataset.name
+  }
+
+  function licenseDrop(index = selectedIndex) {
+    if (index < 0 || licensed.has(index)) {
+      return
+    }
+    licensed.add(index)
+    pane.dataset.licensed = String(licensed.size)
+    drops[index].dataset.licensed = "true"
+    slips[index].dataset.stamped = "true"
+    debt += 7 + index
+    if (licensed.size === drops.length) {
+      archiveStatus.textContent = "fully docketed"
+    } else {
+      archiveStatus.textContent = "provisional"
+    }
+    updateReadouts()
+  }
+
+  function resetDesk() {
+    licensed.clear()
+    selectedIndex = -1
+    debt = 0
+    dragIndex = -1
+    pane.dataset.licensed = "0"
+    pane.dataset.awake = "false"
+    drops.forEach((drop) => {
+      drop.setAttribute("aria-pressed", "false")
+      drop.dataset.licensed = "false"
+    })
+    slips.forEach((slip) => {
+      slip.dataset.stamped = "false"
+    })
+    currentDrop.textContent = "none"
+    archiveStatus.textContent = "unfiled"
+    updateReadouts()
+  }
+
+  function updateReadouts() {
+    licensedCount.textContent = String(licensed.size)
+    stormDebt.textContent = String(debt)
+  }
+
+  drops.forEach((drop, index) => {
+    drop.addEventListener("click", () => selectDrop(index))
+    drop.addEventListener("pointerdown", (event) => {
+      dragIndex = index
+      selectDrop(index)
+      drop.setPointerCapture?.(event.pointerId)
+    })
+    drop.addEventListener("pointerup", (event) => {
+      if (dragIndex === index && isInsideStampPad(event.clientX, event.clientY)) {
+        licenseDrop(index)
+      }
+      dragIndex = -1
+    })
+  })
+
+  pane.addEventListener("pointermove", (event) => {
+    setCursorFromClient(event.clientX, event.clientY)
+    if (dragIndex >= 0 && event.target === stampPad) {
+      licenseDrop(dragIndex)
+    }
+  })
+
+  pane.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0]
+    if (touch) {
+      setCursorFromClient(touch.clientX, touch.clientY)
+    }
+  }, { passive: true })
+
+  pane.addEventListener("touchmove", (event) => {
+    const touch = event.touches[0]
+    if (touch) {
+      setCursorFromClient(touch.clientX, touch.clientY)
+    }
+  }, { passive: true })
+
+  stampPad.addEventListener("click", () => licenseDrop())
+  stampCurrent.addEventListener("click", () => licenseDrop())
+  resetArchive.addEventListener("click", resetDesk)
+
+  document.addEventListener("keydown", (event) => {
+    const activeIndex = drops.indexOf(document.activeElement)
+    if (activeIndex === -1) {
+      return
+    }
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault()
+      const next = (activeIndex + 1) % drops.length
+      drops[next].focus()
+      selectDrop(next)
+    }
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault()
+      const previous = (activeIndex - 1 + drops.length) % drops.length
+      drops[previous].focus()
+      selectDrop(previous)
+    }
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      selectDrop(activeIndex)
+    }
+    if (event.key >= "1" && event.key <= "7") {
+      const next = Number(event.key) - 1
+      drops[next].focus()
+      selectDrop(next)
+    }
+  })
+
+  function animate() {
+    drift += 0.016
+    root.style.setProperty("--drift", drift.toFixed(3))
+    if (pane.dataset.awake === "true" && licensed.size < drops.length) {
+      debt = Math.max(debt, Math.round(4 + Math.sin(drift) * 3 + normalizedCursor.x * 20))
+      updateReadouts()
+    }
+    requestAnimationFrame(animate)
+  }
+
+  updateReadouts()
+  requestAnimationFrame(animate)
+</script>

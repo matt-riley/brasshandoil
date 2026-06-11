@@ -49,6 +49,7 @@ const pages = [
   "/experiments/glacier-stone-concierge",
   "/experiments/kq14-deposition",
   "/experiments/transposon-torpor-modulator",
+  "/experiments/archive-unlicensed-rain",
 ]
 
 test.use({

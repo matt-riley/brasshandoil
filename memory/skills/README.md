@@ -10,6 +10,7 @@ Use one file per theme when a lesson becomes durable enough to guide future expe
 - anti-patterns to avoid next time
 
 ## Recent additions
+- [stable-hover-transforms.md](stable-hover-transforms.md)
 - [first-viewport-action-framing.md](first-viewport-action-framing.md)
 - [exact-test-hooks-with-data-positioning.md](exact-test-hooks-with-data-positioning.md)
 - [relative-stage-geometry-e2e.md](relative-stage-geometry-e2e.md)
