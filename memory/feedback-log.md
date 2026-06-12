@@ -6,6 +6,18 @@ Use this file as the running source of truth for review notes after each daily e
 
 ### Session Entry
 
+Date: 2026-06-12
+Experiment: Voyager Telemetry Recalibrator
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from recent news: Voyager 1 utilizing a backup transmitter from 1977 to contact Earth after a telemetry glitch.
+- Coupled a dynamic 2D canvas particle grid with FM synthesizers using OscillatorNode and ScriptProcessorNode for authentic retro white-noise generation.
+- Added strict TS-safe DOM element checking and type annotations to pass global `astro check` and production builds.
+- Provided full support for keyboard navigation (arrows and space/enter) and responsive viewport checks (avoiding overflow at 375px width).
+
+### Session Entry
+
 Date: 2026-06-11
 Experiment: Twistronic Lattice Tuner
 Feedback:
@@ -436,3 +448,17 @@ Carry Forward:
 - Rotated into a municipal weather archive to avoid another science-console or central probe composition.
 - Normal click tests are worth keeping; they caught a hover transform that replaced the base translate/rotate and made a visible drop miss clicks.
 - Keep semantic `data-*` state on animated visual objects so E2E can verify whimsical state changes without sampling pixels.
+
+### Session Entry
+
+Date: 2026-06-12
+Experiment: Semaphore Loom for Stray Colors
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Rotated into a color-signal loom to avoid another archive, stamp, or desk
+  interaction.
+- Gate ambient animation away from semantic readouts until the scene is awake;
+  idle counters should stay exactly idle.
+- Visual smoke after green tests caught headline clearance and misleading idle
+  resonance, so keep it in the daily loop.

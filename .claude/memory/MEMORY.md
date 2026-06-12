@@ -73,6 +73,9 @@ A positioned `<div>` with `backdrop-filter: contrast(N) saturate(N) brightness(N
 #### SVG feTurbulence + feDisplacementMap (organic distortion)
 `<feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="42">` generates Perlin-style noise; `<feDisplacementMap in="SourceGraphic" in2="noise" scale="N">` warps the source pixels by that noise. Animate `seed` (increment each frame) and modulate `baseFrequency` with `Math.sin()` for a writhing, organic feel. `scale` controls intensity (0 = none, 30+ = heavy distortion). Apply to any element via `filter: url(#id)`. Use separate filters for different intensities on different parts of the page. Gotcha: filter region defaults can clip distorted pixels — use `x="-20%" y="-20%" width="140%" height="140%"` to avoid.
 
+#### Canvas Path2D + isPointInPath() hit testing
+`new Path2D()` creates a reusable path object; `.rect()`, `.arc()`, `.moveTo()`/`.lineTo()` build the shape. Then `ctx.isPointInPath(path, x, y)` returns true if the point is inside the path's fill region — native canvas hit testing without DOM elements or manual bounding-box checks. Works with arbitrary shapes (not just rects). Build Path2D objects once at init, reuse each frame. Coordinates must match the canvas's internal resolution (multiply by `devicePixelRatio` if the canvas is scaled). Much cleaner than checking `x > rect.left && x < rect.right && ...` for complex shapes. `isPointInStroke()` is the stroke-only variant. Gotcha: paths must be re-created if the canvas is resized and exhibit positions change.
+
 #### Canvas ImageData pixel manipulation
 `ctx.createImageData(w, h)` + direct RGBA writes to `imgData.data[idx]` + `ctx.putImageData()` gives per-pixel control for procedural visualizations. Process in 4×4 blocks for performance. Combine with `requestAnimationFrame` and `Date.now()` for animated fields. Much faster than drawing thousands of individual rects.
 
@@ -135,6 +138,11 @@ For N circular bodies: each frame, check every pair `(i, j)` for overlap (`dist(
 **Concept:** Inspired by David Rush keeping 5 balloons in the air for a Guinness World Record at the West Boise YMCA (1:14.89, took 17 attempts). You are on attempt #18. Your cursor (✋) is your hand — click balloons to bump them up. They have individual physics (size → mass → drag), collide elastically, and spawn thought bubbles when they bounce off each other. A bored Guinness adjudicator commentates with increasing disinterest. Survive to 1:14.89 to break the record.
 **Technique:** 2D circle-circle elastic collision response — conservation of momentum between two circular bodies with mass ratios derived from radius. Collision normal computed from center-to-center vector, relative velocity projected onto normal, impulse distributed by inverse mass. Overlap separation prevents tunneling. Combined with per-balloon drag (proportional to speed²), buoyancy, and random turbulence drift for chaotic balloon behaviour.
 **File:** clients/web/src/pages/experiments/ymca-attempt-18.astro
+
+### 2026-06-12 — Speed Trap — Camera Unit 7
+**Concept:** Inspired by the Volo Museum's KITT replica (Knight Rider) receiving a $50 speeding ticket from NYC while on static display for years. You are malfunctioning Camera Unit 7, an automated traffic camera outside a museum. Your cursor is a targeting reticle. Hover over exhibits (T-Rex skeleton, Mona Lisa poster, security guard, potted fern, a pigeon, an exit sign, and KITT) to get absurd speed readings. Click to issue citations. KITT's speed escalates with every ticket issued. After 5 citations, KITT's scanner light activates and it begins requesting legal counsel.
+**Technique:** Canvas `Path2D` + `isPointInPath()` for hit detection — native canvas method that tests whether a point falls inside a previously-defined Path2D object, enabling per-shape hit testing without DOM elements or bounding-box math. Also: custom canvas drawing for each exhibit (car silhouette, skeleton wireframe, guard figure).
+**File:** clients/web/src/pages/experiments/speed-trap.astro
 
 ## Feedback from Matt
 
