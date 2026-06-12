@@ -1,0 +1,1502 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Voyager Telemetry Recalibrator // Deep Space FDS Restoration">
+  <div class="telemetry-container" id="telemetry-root" data-carrier="2110.0" data-quarantined="false" data-reallocated="false">
+    <!-- CRT Scanline Overlay -->
+    <div class="crt-overlay" aria-hidden="true"></div>
+    <div class="crt-flicker" aria-hidden="true"></div>
+
+    <!-- Retro Starfield Canvas Background -->
+    <canvas id="space-canvas" class="background-canvas" aria-hidden="true"></canvas>
+
+    <!-- Header Section -->
+    <header class="telemetry-header">
+      <h1 class="page-title text-gradient">Voyager Telemetry Recalibrator</h1>
+      <p class="subtitle font-mono">FLIGHT DATA SYSTEM (FDS) RECOVERY // DSS-14 GOLDSTONE</p>
+    </header>
+
+    <!-- Onboarding / Audio Activation Overlay -->
+    <div id="arming-overlay" class="overlay glass">
+      <div class="overlay-content">
+        <div class="overlay-icon">🛰️</div>
+        <h2 class="overlay-title font-mono">FDS TELEMETRY GLITCH DETECTED</h2>
+        <p class="overlay-desc">
+          Voyager 1's Flight Data System is transmitting corrupted telemetry due to a degraded memory sector. We must quarantine the damaged block, reallocate the FDS partition, and tune the carrier frequency to establish a lock.
+        </p>
+        <div class="alert alert-warning font-mono">
+          RECOVERY INSTRUCTIONS:<br/>
+          1. Find & select the corrupted pulsing memory sector in the FDS matrix.<br/>
+          2. Lock carrier frequency to Voyager's S-band downlink of exactly <strong class="text-cyan">2114.6 MHz</strong>.
+        </div>
+        <button id="arm-button" class="btn btn-primary">
+          Establish Deep Space Link
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workspace (Visible once armed) -->
+    <div class="workspace-grid hidden" id="workspace">
+      <!-- Left Panel: FDS Memory Matrix -->
+      <div class="panel memory-panel glass">
+        <div class="panel-header">
+          <h2 class="panel-title font-mono">I. FDS Memory Matrix</h2>
+          <span class="status-indicator font-mono" id="memory-status">READING MEMORY...</span>
+        </div>
+
+        <div class="memory-grid-container">
+          <!-- Memory matrix 16x16 grid -->
+          <div id="memory-grid" class="memory-grid" role="grid" aria-label="FDS Memory Map" tabindex="0">
+            <!-- Programmatically populated via JS -->
+          </div>
+        </div>
+
+        <div class="memory-controls">
+          <div class="selection-details font-mono">
+            SECTOR: <span id="selected-sector-display">NONE</span><br/>
+            STATUS: <span id="selected-status-display">NO SELECTION</span>
+          </div>
+          <button id="quarantine-btn" class="btn btn-warning font-mono" disabled>
+            ⚠️ Quarantine Sector
+          </button>
+        </div>
+
+        <div class="keyboard-hint font-mono">
+          [ARROW KEYS] Move virtual cursor // [SPACE/ENTER] Select sector
+        </div>
+      </div>
+
+      <!-- Right Panel: Signal Recovery & Telemetry -->
+      <div class="panel control-panel glass">
+        <h2 class="panel-title font-mono">II. Downlink Control</h2>
+
+        <!-- Telemetry HUD -->
+        <div class="telemetry-grid">
+          <div class="telemetry-box">
+            <span class="box-label font-mono">DOWNLINK BAND</span>
+            <div class="box-value font-mono text-cyan" id="band-display">S-BAND</div>
+          </div>
+          <div class="telemetry-box">
+            <span class="box-label font-mono">CARRIER LOCKED AT</span>
+            <div class="box-value font-mono text-gold" id="frequency-display">2110.0 MHz</div>
+          </div>
+          <div class="telemetry-box full-width">
+            <span class="box-label font-mono">SIGNAL STRENGTH</span>
+            <div class="signal-bar-container">
+              <div class="signal-bar-fill" id="signal-bar"></div>
+              <span class="signal-value font-mono" id="signal-strength-display">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carrier Frequency Slider -->
+        <div class="frequency-tuner-box">
+          <label for="carrier-slider" class="selector-label font-mono">CARRIER FREQUENCY CALIBRATION:</label>
+          <div class="slider-wrapper">
+            <input type="range" id="carrier-slider" class="carrier-slider" min="2110.0" max="2120.0" step="0.1" value="2110.0" aria-label="Carrier Frequency" />
+            <div class="slider-ticks font-mono">
+              <span>2110.0</span>
+              <span>2115.0</span>
+              <span>2120.0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Signal Decoded Visualizer -->
+        <div class="visualizer-container">
+          <span class="box-label font-mono">DECODED GOLDEN RECORD GRAPHIC</span>
+          <div class="scope-stage">
+            <svg id="decoded-graphic" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <!-- Grid background -->
+              <defs>
+                <pattern id="grid-pattern" width="10" height="10" patternUnits="userSpaceOnUse">
+                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(6, 182, 212, 0.1)" stroke-width="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+              
+              <!-- Golden Record Diagram drawn slowly based on signal strength -->
+              <!-- Outer circle -->
+              <circle cx="100" cy="100" r="80" class="decoded-path record-circle" />
+              <!-- Inner circle -->
+              <circle cx="100" cy="100" r="15" class="decoded-path record-center" />
+              <!-- Cartridge pointer line -->
+              <line x1="100" y1="100" x2="155" y2="45" class="decoded-path record-needle" />
+              <!-- Binary codes / tick lines representing hydrogen transition -->
+              <line x1="20" y1="100" x2="40" y2="100" class="decoded-path binary-tick" />
+              <line x1="160" y1="100" x2="180" y2="100" class="decoded-path binary-tick" />
+              <!-- Pulsar map lines -->
+              <line x1="100" y1="100" x2="60" y2="70" class="decoded-path pulsar-line" />
+              <line x1="100" y1="100" x2="70" y2="130" class="decoded-path pulsar-line" />
+              <line x1="100" y1="100" x2="130" y2="140" class="decoded-path pulsar-line" />
+              <line x1="100" y1="100" x2="145" y2="85" class="decoded-path pulsar-line" />
+              <line x1="100" y1="100" x2="100" y2="35" class="decoded-path pulsar-line" />
+            </svg>
+            <div id="static-overlay" class="scope-static"></div>
+          </div>
+        </div>
+
+        <div class="system-actions">
+          <span class="status-indicator font-mono" id="status-display">SIGNAL LOST // FDS FAILURE</span>
+          <button id="reallocate-btn" class="btn btn-danger font-mono" disabled>
+            🔒 Initiate FDS Memory Reallocation
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success / Golden Record Playback Screen -->
+    <div id="success-screen" class="success-screen hidden">
+      <div class="success-content glass">
+        <div class="success-icon">🛸</div>
+        <h1 class="success-title text-gradient">Voyager Telemetry Restored</h1>
+        <p class="success-desc font-mono">
+          FDS memory defragmented and S-band carrier locked at <strong class="text-cyan">2114.6 MHz</strong>. Deep Space Station 14 has successfully received the Golden Record data packet.
+        </p>
+        <div class="success-metrics font-mono">
+          <div class="metric-box">
+            <span class="m-val text-gradient">2114.6 MHz</span>
+            <span class="m-lbl">Lock Frequency</span>
+          </div>
+          <div class="metric-box">
+            <span class="m-val text-gradient">100.0%</span>
+            <span class="m-lbl">Signal Quality</span>
+          </div>
+          <div class="metric-box">
+            <span class="m-val text-gradient">15.1B mi</span>
+            <span class="m-lbl">Distance</span>
+          </div>
+        </div>
+        <div class="player-container glass">
+          <p class="player-title font-mono text-gold">▼ PLAYBACK: GOLDEN RECORD GREETINGS</p>
+          <div class="wave-visualizer" id="wave-visualizer">
+            <!-- Generates wave visualizer blocks -->
+          </div>
+          <p class="success-quote italic">
+            "Hello from the children of planet Earth."
+          </p>
+        </div>
+        <button id="restart-btn" class="btn btn-tranquil font-mono">
+          Reset Telemetry Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State Variables
+    let currentFrequency = 2110.0;
+    const targetFrequency = 2114.6;
+    let corruptedIndex = 87; // Row 5, Col 7 (87)
+    let selectedIndex = -1;
+    let isQuarantined = false;
+    let isReallocated = false;
+    let isArmed = false;
+    
+    // Keyboard navigation cursor position (index)
+    let virtualCursorIndex = 0;
+
+    // Web Audio State
+    let audioCtx: AudioContext | null = null;
+    let noiseNode: ScriptProcessorNode | null = null;
+    let noiseGain: GainNode | null = null;
+    let carrierOsc: OscillatorNode | null = null;
+    let carrierGain: GainNode | null = null;
+    let signalGain: GainNode | null = null;
+    let melodyInterval: any = null;
+
+    // DOM Elements
+    const root = document.getElementById("telemetry-root")!;
+    const armingOverlay = document.getElementById("arming-overlay")!;
+    const armButton = document.getElementById("arm-button")!;
+    const workspace = document.getElementById("workspace")!;
+    const memoryGrid = document.getElementById("memory-grid")!;
+    const carrierSlider = document.getElementById("carrier-slider") as HTMLInputElement;
+    const frequencyDisplay = document.getElementById("frequency-display")!;
+    const signalBar = document.getElementById("signal-bar")!;
+    const signalStrengthDisplay = document.getElementById("signal-strength-display")!;
+    const quarantineBtn = document.getElementById("quarantine-btn")!;
+    const reallocateBtn = document.getElementById("reallocate-btn")!;
+    const successScreen = document.getElementById("success-screen")!;
+    const restartBtn = document.getElementById("restart-btn")!;
+    const statusDisplay = document.getElementById("status-display")!;
+    const memoryStatus = document.getElementById("memory-status")!;
+    const selectedSectorDisplay = document.getElementById("selected-sector-display")!;
+    const selectedStatusDisplay = document.getElementById("selected-status-display")!;
+    const staticOverlay = document.getElementById("static-overlay")!;
+    const decodedGraphic = document.getElementById("decoded-graphic")!;
+
+    // Initialize 16x16 memory grid cells
+    function initMemoryGrid() {
+      if (!memoryGrid) return;
+      memoryGrid.innerHTML = "";
+      
+      for (let i = 0; i < 256; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("memory-cell");
+        cell.setAttribute("data-index", i.toString());
+        cell.setAttribute("role", "gridcell");
+        
+        // Random Hex data for visualization
+        if (i === corruptedIndex) {
+          cell.textContent = "ERR";
+          cell.classList.add("corrupted");
+        } else {
+          // Generate realistic flight telemetry hexadecimal
+          const hex = Math.floor(Math.random() * 256).toString(16).toUpperCase().padStart(2, "0");
+          cell.textContent = hex;
+        }
+
+        cell.addEventListener("click", () => handleCellSelect(i));
+        memoryGrid.appendChild(cell);
+      }
+      
+      updateVirtualCursor();
+    }
+
+    function handleCellSelect(index: number) {
+      if (!isArmed || isReallocated) return;
+      selectedIndex = index;
+      virtualCursorIndex = index;
+      
+      // Update cell visual states
+      const cells = memoryGrid.querySelectorAll(".memory-cell");
+      cells.forEach((cell, idx) => {
+        (cell as HTMLElement).classList.toggle("selected", idx === index);
+      });
+
+      // Update panel details
+      const row = Math.floor(index / 16).toString(16).toUpperCase();
+      const col = (index % 16).toString(16).toUpperCase();
+      selectedSectorDisplay.textContent = `0x${row}${col}`;
+
+      if (index === corruptedIndex) {
+        if (isQuarantined) {
+          selectedStatusDisplay.textContent = "QUARANTINED";
+          quarantineBtn.setAttribute("disabled", "true");
+        } else {
+          selectedStatusDisplay.textContent = "DEGRADED (SECTOR CORRUPTION)";
+          selectedStatusDisplay.className = "text-danger font-mono animate-pulse";
+          quarantineBtn.removeAttribute("disabled");
+        }
+      } else {
+        selectedStatusDisplay.textContent = "STABLE";
+        selectedStatusDisplay.className = "text-success font-mono";
+        quarantineBtn.setAttribute("disabled", "true");
+      }
+
+      updateTelemetryState();
+      
+      // Play a short synth diagnostic beep
+      playDiagnosticBeep(index);
+    }
+
+    function playDiagnosticBeep(index: number) {
+      if (!audioCtx) return;
+      
+      const beepOsc = audioCtx.createOscillator();
+      const beepGain = audioCtx.createGain();
+      
+      beepOsc.type = "sine";
+      // Map memory index to pitch
+      const pitch = 300 + (index * 4);
+      beepOsc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
+      
+      beepGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      beepGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+      
+      beepOsc.connect(beepGain);
+      beepGain.connect(audioCtx.destination);
+      beepOsc.start();
+      beepOsc.stop(audioCtx.currentTime + 0.15);
+    }
+
+    // Keyboard navigation helper
+    function updateVirtualCursor() {
+      const cells = memoryGrid.querySelectorAll(".memory-cell");
+      cells.forEach((cell, idx) => {
+        (cell as HTMLElement).classList.toggle("focused", idx === virtualCursorIndex);
+      });
+    }
+
+    // Keydown event listener on memory grid
+    memoryGrid.addEventListener("keydown", (e) => {
+      if (!isArmed || isReallocated) return;
+      
+      let newIndex = virtualCursorIndex;
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        newIndex = (virtualCursorIndex + 1) % 256;
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        newIndex = (virtualCursorIndex - 1 + 256) % 256;
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (virtualCursorIndex + 16 < 256) {
+          newIndex = virtualCursorIndex + 16;
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (virtualCursorIndex - 16 >= 0) {
+          newIndex = virtualCursorIndex - 16;
+        }
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleCellSelect(virtualCursorIndex);
+      }
+
+      if (newIndex !== virtualCursorIndex) {
+        virtualCursorIndex = newIndex;
+        updateVirtualCursor();
+        // Play a very quiet click for focus shifting
+        playDiagnosticBeep(virtualCursorIndex);
+      }
+    });
+
+    // Space/Stars animation
+    const canvas = document.getElementById("space-canvas") as HTMLCanvasElement | null;
+    let canvasCtx: CanvasRenderingContext2D | null = null;
+    let stars: Array<{ x: number; y: number; size: number; speed: number; alpha: number }> = [];
+
+    function initStars() {
+      if (!canvas) return;
+      canvasCtx = canvas.getContext("2d");
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      stars = [];
+      for (let i = 0; i < 60; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 1.5 + 0.5,
+          speed: Math.random() * 0.1 + 0.02,
+          alpha: Math.random() * 0.8 + 0.2
+        });
+      }
+      runStarsLoop();
+    }
+
+    function resizeCanvas() {
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    }
+
+    function runStarsLoop() {
+      if (!canvasCtx || !canvas) return;
+      canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Calculate dynamic speed based on frequency calibration accuracy
+      const deviation = Math.abs(currentFrequency - targetFrequency);
+      const warpFactor = deviation < 0.2 ? 5.0 : 1.0;
+
+      stars.forEach(s => {
+        s.y += s.speed * warpFactor;
+        if (s.y > canvas.height) {
+          s.y = 0;
+          s.x = Math.random() * canvas.width;
+        }
+
+        if (canvasCtx) {
+          canvasCtx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+          canvasCtx.fillRect(s.x, s.y, s.size, s.size);
+        }
+      });
+
+      requestAnimationFrame(runStarsLoop);
+    }
+
+    // Audio Link Initialization
+    function initAudio() {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioCtx = new AudioContextClass();
+
+        // 1. Telemetry / Downlink noise (bandpass filtered white noise)
+        const bufferSize = 4096;
+        noiseNode = audioCtx.createScriptProcessor(bufferSize, 1, 1);
+        noiseNode.onaudioprocess = function(e: AudioProcessingEvent) {
+          const outputBuffer = e.outputBuffer;
+          const channelData = outputBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            channelData[i] = (Math.random() * 2 - 1) * 0.15;
+          }
+        };
+
+        const noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = "bandpass";
+        noiseFilter.frequency.setValueAtTime(1200, audioCtx.currentTime);
+        noiseFilter.Q.setValueAtTime(1.5, audioCtx.currentTime);
+
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.25, audioCtx.currentTime); // Loud initially
+
+        noiseNode.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+
+        // 2. S-band Carrier lock sine wave (representing raw radio frequency)
+        carrierOsc = audioCtx.createOscillator();
+        carrierOsc.type = "sine";
+        carrierOsc.frequency.setValueAtTime(220, audioCtx.currentTime); // Low humming
+
+        carrierGain = audioCtx.createGain();
+        carrierGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+
+        carrierOsc.connect(carrierGain);
+        carrierGain.connect(audioCtx.destination);
+        carrierOsc.start();
+
+        // 3. Clear Telemetry Data stream synth
+        signalGain = audioCtx.createGain();
+        signalGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        signalGain.connect(audioCtx.destination);
+
+        // Schedule periodic telemetry clicks/pings (simulated FDS packets)
+        let pingCount = 0;
+        const melody = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50]; // Beautiful cosmic tones
+        
+        melodyInterval = setInterval(() => {
+          if (!audioCtx || !isArmed) return;
+          
+          // Calculate volume based on frequency match and remapping
+          const deviation = Math.abs(currentFrequency - targetFrequency);
+          if (deviation > 2.0 || !isQuarantined) return; 
+
+          const signalStrength = Math.max(0, 1.0 - (deviation / 2.0));
+          const toneOsc = audioCtx.createOscillator();
+          const toneGain = audioCtx.createGain();
+
+          toneOsc.type = "sine";
+          // If 100% carrier lock and reallocated, play beautiful melodies. Otherwise play chaotic beeps.
+          let freqVal = 0;
+          if (isReallocated && deviation < 0.05) {
+            freqVal = melody[pingCount % melody.length];
+          } else {
+            freqVal = 400 + Math.random() * 600;
+          }
+          
+          toneOsc.frequency.setValueAtTime(freqVal, audioCtx.currentTime);
+          
+          // Volume rises with signal strength
+          const volume = 0.12 * signalStrength * (isReallocated ? 1.0 : 0.4);
+          toneGain.gain.setValueAtTime(volume, audioCtx.currentTime);
+          toneGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+
+          toneOsc.connect(toneGain);
+          toneGain.connect(audioCtx.destination);
+          
+          toneOsc.start();
+          toneOsc.stop(audioCtx.currentTime + 0.15);
+          
+          pingCount++;
+        }, 300);
+
+        updateTelemetryAudio();
+      } catch (err) {
+        console.error("Failed to initialize telemetry audio:", err);
+      }
+    }
+
+    function updateTelemetryAudio() {
+      if (!audioCtx || !noiseGain || !carrierGain || !carrierOsc) return;
+
+      const deviation = Math.abs(currentFrequency - targetFrequency);
+      
+      // Signal strength: 100% when exactly 2114.6 and memory is quarantined
+      let signalPercent = 0;
+      if (deviation <= 2.0) {
+        signalPercent = Math.round((1.0 - (deviation / 2.0)) * 100);
+      }
+      
+      // Noise gain decreases to 0 as we tune to the lock frequency
+      const noiseVol = Math.max(0.01, 0.25 * (1.0 - (signalPercent / 100.0)));
+      noiseGain.gain.setTargetAtTime(noiseVol, audioCtx.currentTime, 0.1);
+
+      // Carrier gain increases as we get closer to lock, pitch shifts to pure hum
+      const carrierVol = Math.min(0.08, 0.02 + 0.06 * (signalPercent / 100.0));
+      carrierGain.gain.setTargetAtTime(carrierVol, audioCtx.currentTime, 0.15);
+      
+      const carrierFreq = 220 + (100 * (1.0 - (deviation / 10.0)));
+      carrierOsc.frequency.setTargetAtTime(carrierFreq, audioCtx.currentTime, 0.1);
+    }
+
+    function updateTelemetryState() {
+      const deviation = Math.abs(currentFrequency - targetFrequency);
+      
+      // Calculate signal quality percentage
+      let signalPercent = 0;
+      if (deviation <= 2.0) {
+        signalPercent = Math.round((1.0 - (deviation / 2.0)) * 100);
+      }
+
+      root.setAttribute("data-carrier", currentFrequency.toFixed(1));
+      frequencyDisplay.textContent = `${currentFrequency.toFixed(1)} MHz`;
+
+      // Static opacity reduces as signal improves
+      if (staticOverlay) {
+        staticOverlay.style.opacity = (1.0 - (signalPercent / 100.0)).toString();
+      }
+
+      // Signal Strength bars
+      if (signalBar) {
+        signalBar.style.width = `${signalPercent}%`;
+        
+        // Color shifts from Red -> Amber -> Cyan
+        if (signalPercent > 80) {
+          signalBar.style.background = "#06b6d4";
+          signalStrengthDisplay.className = "signal-value font-mono text-cyan";
+        } else if (signalPercent > 40) {
+          signalBar.style.background = "#fbbf24";
+          signalStrengthDisplay.className = "signal-value font-mono text-warning";
+        } else {
+          signalBar.style.background = "#ef4444";
+          signalStrengthDisplay.className = "signal-value font-mono text-danger";
+        }
+      }
+      
+      signalStrengthDisplay.textContent = `${signalPercent}%`;
+
+      // Golden Record SVG paths reveal themselves based on signal percentage
+      const paths = decodedGraphic.querySelectorAll(".decoded-path");
+      const pathRevealCount = Math.floor((signalPercent / 100) * paths.length);
+      paths.forEach((path, idx) => {
+        if (idx < pathRevealCount) {
+          (path as HTMLElement).classList.add("revealed");
+        } else {
+          (path as HTMLElement).classList.remove("revealed");
+        }
+      });
+
+      // Overall telemetry recovery state progression
+      if (!isQuarantined) {
+        statusDisplay.textContent = "SIGNAL LOST // FDS FAILURE";
+        statusDisplay.className = "status-indicator font-mono text-danger";
+        reallocateBtn.setAttribute("disabled", "true");
+        memoryStatus.textContent = "DEGRADED SECTOR BLOCKING PARITY";
+        memoryStatus.className = "status-indicator font-mono text-danger";
+      } else if (!isReallocated) {
+        memoryStatus.textContent = "SECTOR 0x57 QUARANTINED";
+        memoryStatus.className = "status-indicator font-mono text-warning";
+        
+        if (signalPercent === 100) {
+          statusDisplay.textContent = "CARRIER LOCK ESTABLISHED";
+          statusDisplay.className = "status-indicator font-mono text-gold pulse-gold";
+          reallocateBtn.removeAttribute("disabled");
+        } else {
+          statusDisplay.textContent = "TUNING S-BAND carrier...";
+          statusDisplay.className = "status-indicator font-mono text-warning";
+          reallocateBtn.setAttribute("disabled", "true");
+        }
+      } else {
+        // Fully reallocated and carrier locked
+        memoryStatus.textContent = "MEMORY DEFRAGMENTED & SYNCED";
+        memoryStatus.className = "status-indicator font-mono text-success";
+        
+        if (signalPercent === 100) {
+          statusDisplay.textContent = "PACKET SUCCESS // INITIATE PLAYBACK";
+          statusDisplay.className = "status-indicator font-mono text-success";
+          reallocateBtn.removeAttribute("disabled");
+          reallocateBtn.textContent = "🔓 TRANSMIT PACKET TO BASE STATION";
+        } else {
+          statusDisplay.textContent = "CARRIER LOST DURING TRANSFER";
+          statusDisplay.className = "status-indicator font-mono text-warning";
+          reallocateBtn.setAttribute("disabled", "true");
+        }
+      }
+
+      updateTelemetryAudio();
+    }
+
+    // Interactive slider logic
+    if (carrierSlider) {
+      carrierSlider.addEventListener("input", (e) => {
+        const target = e.target as HTMLInputElement;
+        currentFrequency = parseFloat(target.value);
+        updateTelemetryState();
+      });
+      
+      // Keyboard support for slider focus increments
+      carrierSlider.addEventListener("keydown", (e) => {
+        let step = 0.1;
+        if (e.shiftKey) {
+          step = 0.5;
+        }
+
+        if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+          e.preventDefault();
+          currentFrequency = Math.min(2120.0, currentFrequency + step);
+          carrierSlider.value = currentFrequency.toString();
+          updateTelemetryState();
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+          e.preventDefault();
+          currentFrequency = Math.max(2110.0, currentFrequency - step);
+          carrierSlider.value = currentFrequency.toString();
+          updateTelemetryState();
+        }
+      });
+    }
+
+    // Arming protocol
+    armButton.addEventListener("click", () => {
+      isArmed = true;
+      armingOverlay.classList.add("hidden");
+      workspace.classList.remove("hidden");
+      
+      initMemoryGrid();
+      initStars();
+      initAudio();
+      
+      updateTelemetryState();
+    });
+
+    // Quarantine button
+    quarantineBtn.addEventListener("click", () => {
+      if (selectedIndex === corruptedIndex) {
+        isQuarantined = true;
+        root.setAttribute("data-quarantined", "true");
+        
+        const cell = memoryGrid.querySelector(".corrupted");
+        if (cell) {
+          cell.classList.remove("corrupted");
+          cell.classList.add("quarantined");
+          cell.textContent = "LOC"; // locked sector
+        }
+        
+        handleCellSelect(corruptedIndex); // refresh displays
+      }
+    });
+
+    // Reallocate button
+    reallocateBtn.addEventListener("click", () => {
+      if (isQuarantined && Math.abs(currentFrequency - targetFrequency) < 0.05) {
+        if (!isReallocated) {
+          // Trigger reallocation animation in FDS grid
+          isReallocated = true;
+          root.setAttribute("data-reallocated", "true");
+          
+          const cells = memoryGrid.querySelectorAll(".memory-cell");
+          // Defragment visual sweep
+          cells.forEach((cell, idx) => {
+            setTimeout(() => {
+              if (idx !== corruptedIndex) {
+                (cell as HTMLElement).classList.add("reallocated");
+                // Shuffle data blocks away
+                cell.textContent = Math.floor(Math.random() * 256).toString(16).toUpperCase().padStart(2, "0");
+              }
+            }, idx * 4);
+          });
+
+          setTimeout(() => {
+            updateTelemetryState();
+          }, 1100);
+        } else {
+          // Packets successfully received, switch to success overlay
+          workspace.classList.add("hidden");
+          successScreen.classList.remove("hidden");
+          
+          // Play a beautiful, infinite resonant space chime chord (using Golden Record audio synthesis)
+          playGoldenRecordGreetings();
+        }
+      }
+    });
+
+    // Generate simulated audio greetings from Golden Record
+    function playGoldenRecordGreetings() {
+      if (!audioCtx) return;
+
+      // Clean up telemetry generators
+      if (noiseGain) noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
+      if (carrierGain) carrierGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
+      if (melodyInterval) clearInterval(melodyInterval);
+
+      // Synthesize a cosmic ambient synthesizer melody
+      const playMelodyNote = (freq: number, startTime: number, duration: number, vol: number) => {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, startTime);
+        
+        gainNode.gain.setValueAtTime(vol, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start(startTime);
+        osc.stop(startTime + duration + 0.1);
+      };
+
+      // Play C Major Pentatonic arpeggio (harmonic cosmos)
+      const now = audioCtx.currentTime;
+      const notes = [261.63, 329.63, 392.00, 440.00, 523.25, 659.25, 783.99, 880.00, 1046.50];
+      notes.forEach((freq, idx) => {
+        playMelodyNote(freq, now + idx * 0.4, 2.5, 0.18);
+      });
+
+      // Render a simple dynamic CSS audio wave block display on screen
+      const waveContainer = document.getElementById("wave-visualizer");
+      if (waveContainer) {
+        waveContainer.innerHTML = "";
+        for (let i = 0; i < 40; i++) {
+          const bar = document.createElement("div");
+          bar.classList.add("wave-bar");
+          bar.style.height = `${10 + Math.random() * 80}%`;
+          bar.style.animationDelay = `${i * 0.05}s`;
+          waveContainer.appendChild(bar);
+        }
+      }
+    }
+
+    // Restart recalibrator
+    restartBtn.addEventListener("click", () => {
+      isQuarantined = false;
+      isReallocated = false;
+      currentFrequency = 2110.0;
+      selectedIndex = -1;
+      virtualCursorIndex = 0;
+      
+      root.setAttribute("data-quarantined", "false");
+      root.setAttribute("data-reallocated", "false");
+      
+      reallocateBtn.textContent = "🔒 Initiate FDS Memory Reallocation";
+      reallocateBtn.setAttribute("disabled", "true");
+      
+      if (carrierSlider) {
+        carrierSlider.value = "2110.0";
+      }
+
+      successScreen.classList.add("hidden");
+      workspace.classList.remove("hidden");
+      
+      initMemoryGrid();
+      updateTelemetryState();
+    });
+
+    // Expose browser hooks for Playwright tests
+    (window as any).__quarantineCorruptedSector = function() {
+      if (isArmed) {
+        isQuarantined = true;
+        root.setAttribute("data-quarantined", "true");
+        const cell = memoryGrid.querySelector(".corrupted");
+        if (cell) {
+          cell.classList.remove("corrupted");
+          cell.classList.add("quarantined");
+          cell.textContent = "LOC";
+        }
+        handleCellSelect(corruptedIndex);
+      }
+    };
+
+    (window as any).__setCarrierFrequency = function(freq: number | string) {
+      if (isArmed) {
+        currentFrequency = parseFloat(freq as string);
+        if (carrierSlider) {
+          carrierSlider.value = freq.toString();
+        }
+        updateTelemetryState();
+      }
+    };
+  </script>
+
+  <style>
+    /* Telemetry Panel CSS Design System */
+    :root {
+      --cyan-glow: rgba(6, 182, 212, 0.35);
+      --gold-glow: rgba(245, 158, 11, 0.35);
+      --red-glow: rgba(239, 68, 68, 0.35);
+      --crt-green: #10b981;
+      --crt-bg: #090d16;
+    }
+
+    .telemetry-container {
+      min-height: calc(100dvh - 80px);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      color: #e2e8f0;
+      box-sizing: border-box;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      background: var(--crt-bg);
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    .background-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* CRT monitor scanlines styling */
+    .crt-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.25) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 99;
+      pointer-events: none;
+    }
+
+    .crt-flicker {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(18, 16, 16, 0.05);
+      opacity: 0;
+      z-index: 98;
+      pointer-events: none;
+      animation: crt-flicker-anim 0.15s infinite;
+    }
+
+    @keyframes crt-flicker-anim {
+      0% { opacity: 0.17; }
+      50% { opacity: 0.03; }
+      100% { opacity: 0.12; }
+    }
+
+    .telemetry-header {
+      margin-bottom: 1.5rem;
+      text-align: center;
+      border-bottom: 2px solid rgba(6, 182, 212, 0.2);
+      padding-bottom: 1rem;
+    }
+
+    .page-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      margin: 0 0 0.25rem 0;
+      color: #06b6d4;
+      text-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      color: rgba(6, 182, 212, 0.75);
+      margin: 0;
+    }
+
+    /* Glass Panels */
+    .panel {
+      background: rgba(13, 20, 35, 0.8);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      backdrop-filter: blur(12px);
+      transition: border-color 0.3s ease;
+      min-width: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(6, 182, 212, 0.1);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      margin: 0;
+      color: #06b6d4;
+    }
+
+    .status-indicator {
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Grid Layout */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    @media (max-width: 868px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Memory Grid map styling */
+    .memory-grid-container {
+      background: rgba(4, 8, 16, 0.6);
+      border: 1px solid rgba(6, 182, 212, 0.1);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 4px;
+      min-width: 380px;
+      outline: none;
+    }
+
+    .memory-cell {
+      aspect-ratio: 1;
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.1);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: rgba(6, 182, 212, 0.6);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .memory-cell:hover {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: #06b6d4;
+      color: #fff;
+    }
+
+    .memory-cell.focused {
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+
+    .memory-cell.selected {
+      background: rgba(59, 130, 246, 0.35);
+      border-color: #3b82f6;
+      color: #fff;
+    }
+
+    .memory-cell.corrupted {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #ef4444;
+      font-weight: bold;
+      animation: cell-corrupted-pulse 1s infinite alternate;
+    }
+
+    .memory-cell.quarantined {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: #f59e0b;
+      color: #f59e0b;
+      font-weight: bold;
+    }
+
+    .memory-cell.reallocated {
+      animation: cell-defrag-sweep 0.4s ease;
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: rgba(16, 185, 129, 0.8);
+    }
+
+    @keyframes cell-corrupted-pulse {
+      0% { background: rgba(239, 68, 68, 0.1); box-shadow: none; }
+      100% { background: rgba(239, 68, 68, 0.4); box-shadow: 0 0 6px rgba(239, 68, 68, 0.6); }
+    }
+
+    @keyframes cell-defrag-sweep {
+      0% { transform: scale(1.15); background: rgba(16, 185, 129, 0.5); }
+      100% { transform: scale(1); background: rgba(16, 185, 129, 0.1); }
+    }
+
+    .memory-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.1);
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .selection-details {
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .keyboard-hint {
+      font-size: 0.75rem;
+      opacity: 0.5;
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+
+    /* Downlink controls */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .telemetry-box {
+      background: rgba(6, 182, 212, 0.03);
+      border: 1px solid rgba(6, 182, 212, 0.1);
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .telemetry-box.full-width {
+      grid-column: span 2;
+    }
+
+    .box-label {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .box-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    /* Signal strengths */
+    .signal-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    .signal-bar-fill {
+      height: 8px;
+      width: 0%;
+      border-radius: 4px;
+      background: #ef4444;
+      transition: width 0.2s ease, background-color 0.2s ease;
+    }
+
+    .signal-value {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    /* Frequency Tuner */
+    .frequency-tuner-box {
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.1);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .selector-label {
+      font-size: 0.8rem;
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    .slider-wrapper {
+      padding: 0 0.5rem;
+    }
+
+    .carrier-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(6, 182, 212, 0.15);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .carrier-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #06b6d4;
+      box-shadow: 0 0 8px var(--cyan-glow);
+      transition: background 0.15s ease;
+    }
+
+    .carrier-slider:focus::-webkit-slider-thumb {
+      box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.3), 0 0 8px var(--cyan-glow);
+    }
+
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      opacity: 0.5;
+      margin-top: 0.5rem;
+    }
+
+    /* Decoded Graphic Visualizer */
+    .visualizer-container {
+      background: rgba(4, 8, 16, 0.6);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scope-stage {
+      aspect-ratio: 1.8;
+      background: #040810;
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 0.25rem;
+      position: relative;
+      overflow: hidden;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scope-stage svg {
+      height: 95%;
+      width: auto;
+    }
+
+    .scope-static {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 1;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* SVG vectors revealing effects */
+    .decoded-path {
+      stroke: #06b6d4;
+      stroke-width: 1.5;
+      fill: none;
+      opacity: 0;
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      transition: opacity 0.5s ease;
+    }
+
+    .decoded-path.revealed {
+      opacity: 0.95;
+      animation: path-reveal-anim 2s forwards linear;
+      filter: drop-shadow(0 0 2px var(--cyan-glow));
+    }
+
+    @keyframes path-reveal-anim {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .system-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+
+    /* Buttons design system */
+    .btn {
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #06b6d4;
+      color: #090d16;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: #22d3ee;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.6);
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: #090d16;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-warning:hover:not(:disabled) {
+      background: #fbbf24;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.6);
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #f87171;
+    }
+
+    .btn-tranquil {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #06b6d4;
+    }
+
+    .btn-tranquil:hover {
+      background: rgba(6, 182, 212, 0.25);
+    }
+
+    /* Overlays */
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 520px;
+      padding: 2.5rem;
+      border-radius: 1rem;
+      text-align: center;
+      z-index: 100;
+    }
+
+    .overlay-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      animation: float-logo 4s infinite ease-in-out;
+    }
+
+    @keyframes float-logo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .overlay-title {
+      font-size: 1.25rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      color: #ef4444;
+      text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    }
+
+    .overlay-desc {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      opacity: 0.85;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      margin-bottom: 2rem;
+      text-align: left;
+      line-height: 1.5;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #f59e0b;
+    }
+
+    /* Success Screen */
+    .success-screen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+    }
+
+    .success-content {
+      width: 100%;
+      max-width: 600px;
+      padding: 3rem;
+      border-radius: 1rem;
+      text-align: center;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 1.25rem;
+      animation: spin-record 20s infinite linear;
+    }
+
+    @keyframes spin-record {
+      to { transform: rotate(360deg); }
+    }
+
+    .success-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #10b981;
+      margin-bottom: 0.5rem;
+    }
+
+    .success-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      opacity: 0.85;
+      margin-bottom: 2rem;
+    }
+
+    .success-metrics {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .metric-box {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      flex: 1;
+    }
+
+    .m-val {
+      font-size: 1.25rem;
+      font-weight: bold;
+      display: block;
+      color: #10b981;
+    }
+
+    .m-lbl {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .player-container {
+      background: rgba(4, 8, 16, 0.7);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .player-title {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .wave-visualizer {
+      height: 48px;
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .wave-bar {
+      width: 4px;
+      height: 10%;
+      background: #fbbf24;
+      border-radius: 2px;
+      animation: audio-wave-pulse 1.2s infinite ease-in-out alternate;
+    }
+
+    @keyframes audio-wave-pulse {
+      0% { height: 10%; }
+      100% { height: 95%; }
+    }
+
+    .success-quote {
+      font-size: 0.85rem;
+      opacity: 0.75;
+      margin: 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .pulse-gold {
+      animation: pulse-gold-glow 1.5s infinite alternate;
+    }
+
+    @keyframes pulse-gold-glow {
+      0% { text-shadow: 0 0 2px rgba(245, 158, 11, 0.2); }
+      100% { text-shadow: 0 0 10px rgba(245, 158, 11, 0.7); }
+    }
+
+    /* Glass Effect Utilities */
+    .glass {
+      background: rgba(13, 20, 35, 0.7);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 480px) {
+      .telemetry-container {
+        padding: 0.75rem;
+      }
+      .panel {
+        padding: 1rem;
+      }
+      .overlay {
+        padding: 1.5rem;
+        width: 95%;
+      }
+      .telemetry-grid {
+        grid-template-columns: 1fr;
+      }
+      .telemetry-box.full-width {
+        grid-column: span 1;
+      }
+      .success-metrics {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .success-content {
+        padding: 1.5rem;
+      }
+      .memory-grid {
+        gap: 2px;
+      }
+    }
+  </style>
+</Base>

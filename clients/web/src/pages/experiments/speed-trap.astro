@@ -1,0 +1,1082 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Speed Trap — Camera Unit 7">
+  <div id="interface">
+    <header id="cam-header">
+      <div id="cam-id" data-testid="camera-heading">
+        <span class="blink">●</span> CAMERA UNIT 7 — AUTOMATED TRAFFIC ENFORCEMENT
+      </div>
+      <div id="cam-meta">
+        <span data-testid="camera-status">STATUS: <span id="status-text">MALFUNCTION — STILL OPERATIONAL</span></span>
+        <span>LOC: VOLO MUSEUM, IL — EXTERIOR LOT B</span>
+        <span id="clock"></span>
+      </div>
+    </header>
+
+    <div id="main-area">
+      <div id="feed-container">
+        <canvas id="camera-feed" data-testid="camera-feed" tabindex="0" aria-label="Interactive Traffic Enforcement Camera Feed"></canvas>
+        <div id="speed-readout" data-testid="speed-readout" class="hidden">
+          <div id="speed-value">0</div>
+          <div id="speed-unit">MPH</div>
+          <div id="target-label"></div>
+        </div>
+        <div id="feed-overlay">
+          <div class="corner tl"></div>
+          <div class="corner tr"></div>
+          <div class="corner bl"></div>
+          <div class="corner br"></div>
+          <div id="timestamp"></div>
+          <div id="feed-label">LIVE FEED — LOT B SOUTH</div>
+        </div>
+      </div>
+
+      <div id="sidebar">
+        <div id="target-panel" data-testid="target-panel">
+          <h3>DETECTED SUBJECTS</h3>
+          <div id="subject-list"></div>
+        </div>
+
+        <div id="citation-panel">
+          <h3>CITATIONS ISSUED</h3>
+          <div id="citation-count-display">
+            <span id="citation-number" data-testid="citation-count">0</span>
+            <span class="label">TOTAL</span>
+          </div>
+          <div id="fine-total">
+            <span id="fine-amount">$0.00</span>
+            <span class="label">FINES LEVIED</span>
+          </div>
+        </div>
+
+        <div id="citation-log" data-testid="citation-log">
+          <h3>VIOLATION LOG</h3>
+          <div id="log-entries"></div>
+        </div>
+
+        <div id="kitt-panel" class="hidden">
+          <div id="kitt-scanner"></div>
+          <div id="kitt-message" data-testid="kitt-message"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+
+    :root {
+      --cam-green: #00ff41;
+      --cam-red: #ff3333;
+      --cam-amber: #ffaa00;
+      --cam-dim: #1a3a1a;
+      --cam-bg: #0a0f0a;
+      --cam-panel: #0d150d;
+      --cam-border: #1a3a1a;
+      --kitt-red: #ff0000;
+    }
+
+    #interface {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--cam-bg);
+      color: var(--cam-green);
+      min-height: 100vh;
+      padding: 8px;
+      box-sizing: border-box;
+      font-size: 11px;
+      cursor: crosshair;
+      overflow-y: auto;
+    }
+
+    #cam-header {
+      border: 1px solid var(--cam-border);
+      padding: 6px 10px;
+      margin-bottom: 8px;
+      background: var(--cam-panel);
+    }
+
+    #cam-id {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    #cam-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      margin-top: 4px;
+      color: var(--cam-dim);
+      font-size: 10px;
+    }
+
+    #cam-meta span:first-child {
+      color: var(--cam-amber);
+    }
+
+    .blink {
+      animation: blink 1s step-end infinite;
+      color: var(--cam-red);
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    #main-area {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 8px;
+      height: calc(100vh - 70px);
+    }
+
+    @media (max-width: 768px) {
+      #main-area {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      #feed-container {
+        height: 50vh;
+        min-height: 280px;
+      }
+    }
+
+    #feed-container {
+      position: relative;
+      border: 1px solid var(--cam-border);
+      background: #000;
+      overflow: hidden;
+    }
+
+    #camera-feed {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #feed-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-color: var(--cam-green);
+      border-style: solid;
+      border-width: 0;
+      opacity: 0.5;
+    }
+    .corner.tl { top: 10px; left: 10px; border-top-width: 2px; border-left-width: 2px; }
+    .corner.tr { top: 10px; right: 10px; border-top-width: 2px; border-right-width: 2px; }
+    .corner.bl { bottom: 10px; left: 10px; border-bottom-width: 2px; border-left-width: 2px; }
+    .corner.br { bottom: 10px; right: 10px; border-bottom-width: 2px; border-right-width: 2px; }
+
+    #timestamp {
+      position: absolute;
+      bottom: 12px;
+      left: 14px;
+      font-size: 10px;
+      color: var(--cam-green);
+      opacity: 0.6;
+    }
+
+    #feed-label {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-size: 9px;
+      color: var(--cam-green);
+      opacity: 0.4;
+      letter-spacing: 1px;
+    }
+
+    #speed-readout {
+      position: fixed;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid var(--cam-green);
+      padding: 6px 10px;
+      z-index: 100;
+      text-align: center;
+      min-width: 80px;
+    }
+
+    #speed-readout.hidden {
+      display: none;
+    }
+
+    #speed-readout.violation {
+      border-color: var(--cam-red);
+    }
+
+    #speed-readout.violation #speed-value {
+      color: var(--cam-red);
+    }
+
+    #speed-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--cam-green);
+      line-height: 1;
+    }
+
+    #speed-unit {
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
+    #target-label {
+      font-size: 8px;
+      margin-top: 2px;
+      color: var(--cam-amber);
+      white-space: nowrap;
+    }
+
+    #sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    #sidebar > div {
+      border: 1px solid var(--cam-border);
+      padding: 8px;
+      background: var(--cam-panel);
+    }
+
+    #sidebar h3 {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--cam-dim);
+      margin: 0 0 6px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--cam-border);
+    }
+
+    .subject-entry {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      font-size: 10px;
+      border-bottom: 1px solid rgba(0,255,65,0.05);
+    }
+
+    .subject-entry .name {
+      color: var(--cam-green);
+    }
+
+    .subject-entry .speed {
+      color: var(--cam-amber);
+      font-weight: 500;
+    }
+
+    .subject-entry.kitt-entry .name {
+      color: var(--kitt-red);
+    }
+
+    .subject-entry.kitt-entry .speed {
+      color: var(--kitt-red);
+      font-weight: 700;
+    }
+
+    #citation-count-display, #fine-total {
+      text-align: center;
+      margin: 6px 0;
+    }
+
+    #citation-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--cam-red);
+      display: block;
+      line-height: 1;
+    }
+
+    #fine-amount {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--cam-amber);
+      display: block;
+      line-height: 1;
+    }
+
+    .label {
+      font-size: 8px;
+      color: var(--cam-dim);
+      letter-spacing: 2px;
+    }
+
+    #log-entries {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      font-size: 9px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(0,255,65,0.05);
+      color: var(--cam-green);
+    }
+
+    .log-entry .violation-type {
+      color: var(--cam-red);
+      font-weight: 500;
+    }
+
+    .log-entry .fine-amt {
+      color: var(--cam-amber);
+    }
+
+    #kitt-panel {
+      border-color: var(--kitt-red) !important;
+      background: rgba(20, 0, 0, 0.9) !important;
+    }
+
+    #kitt-panel.hidden {
+      display: none;
+    }
+
+    #kitt-scanner {
+      height: 4px;
+      background: linear-gradient(90deg, transparent, var(--kitt-red), transparent);
+      background-size: 40% 100%;
+      background-repeat: no-repeat;
+      animation: kitt-scan 1.5s ease-in-out infinite alternate;
+      margin-bottom: 8px;
+    }
+
+    @keyframes kitt-scan {
+      from { background-position: 0% 0; }
+      to { background-position: 100% 0; }
+    }
+
+    #kitt-message {
+      font-size: 10px;
+      color: var(--kitt-red);
+      line-height: 1.5;
+    }
+
+    /* Scanline effect on the feed */
+    #feed-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.15) 2px,
+        rgba(0, 0, 0, 0.15) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Flash effect when issuing citation */
+    @keyframes flash {
+      0% { opacity: 0.7; }
+      100% { opacity: 0; }
+    }
+
+    .citation-flash {
+      position: absolute;
+      inset: 0;
+      background: white;
+      animation: flash 0.3s ease-out forwards;
+      pointer-events: none;
+    }
+  </style>
+
+  <script>
+    interface Exhibit {
+      id: string;
+      name: string;
+      description: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      baseSpeed: number;
+      currentSpeed: number;
+      speedJitter: number;
+      color: string;
+      emoji: string;
+      ticketed: number;
+      path: Path2D | null;
+    }
+
+    interface Citation {
+      target: string;
+      speed: number;
+      fine: number;
+      violation: string;
+      time: string;
+    }
+
+    // --- State ---
+    let exhibits: Exhibit[] = [];
+    let citations: Citation[] = [];
+    let hoveredExhibit: Exhibit | null = null;
+    let mouseX = 0;
+    let mouseY = 0;
+    let kittSpeed = 36;
+    let kittAwakened = false;
+    let animFrameId = 0;
+    let canvasRect: DOMRect | null = null;
+    let virtualCursorX = 0.5;
+    let virtualCursorY = 0.5;
+    let usingKeyboard = false;
+
+    const violations = [
+      "EXCEEDING POSTED LIMIT",
+      "RECKLESS VELOCITY",
+      "FAILURE TO REMAIN STATIONARY",
+      "UNAUTHORIZED MOMENTUM",
+      "SPEEDING IN A MUSEUM ZONE",
+      "AGGRESSIVE STILLNESS",
+      "KINETIC MISCONDUCT",
+      "UNLAWFUL ACCELERATION (ALLEGED)",
+      "VELOCITY WITHOUT A PERMIT",
+      "SUSPICIOUS RATE OF DISPLACEMENT",
+    ];
+
+    const kittMessages = [
+      "Michael, I believe there has been a misunderstanding. I have not moved in 4,327 days.",
+      "The fine now exceeds my original sticker price. This is fiscally untenable.",
+      "I am requesting legal representation. Preferably someone who handles cases for inanimate objects.",
+      "I have run 14,000 simulations. In none of them am I guilty.",
+      "The security guard is doing 3 mph. Ticket HIM.",
+      "I would like to speak to a manager. Or a mechanic. Either will do.",
+    ];
+
+    function initExhibits(cw: number, ch: number): void {
+      const pad = 0.08;
+      exhibits = [
+        {
+          id: "trex", name: "T-REX SKELETON", description: "Tyrannosaurus Rex (cast replica)",
+          x: cw * 0.12, y: ch * 0.2, width: cw * 0.18, height: ch * 0.35,
+          baseSpeed: 0, currentSpeed: 267, speedJitter: 40, color: "#d4c5a0",
+          emoji: "🦴", ticketed: 0, path: null,
+        },
+        {
+          id: "mona", name: "MONA LISA (POSTER)", description: "Gift shop poster, framed",
+          x: cw * 0.35, y: ch * 0.15, width: cw * 0.1, height: ch * 0.2,
+          baseSpeed: 0, currentSpeed: 88, speedJitter: 12, color: "#c4a265",
+          emoji: "🖼️", ticketed: 0, path: null,
+        },
+        {
+          id: "guard", name: "SECURITY GUARD", description: "Gerald, 62, standing",
+          x: cw * 0.55, y: ch * 0.3, width: cw * 0.08, height: ch * 0.3,
+          baseSpeed: 0, currentSpeed: 3, speedJitter: 2, color: "#4a6fa5",
+          emoji: "💂", ticketed: 0, path: null,
+        },
+        {
+          id: "fern", name: "POTTED FERN", description: "Nephrolepis exaltata",
+          x: cw * 0.78, y: ch * 0.55, width: cw * 0.1, height: ch * 0.18,
+          baseSpeed: 0, currentSpeed: 0.002, speedJitter: 0.001, color: "#2d8a4e",
+          emoji: "🌿", ticketed: 0, path: null,
+        },
+        {
+          id: "kitt", name: "1982 PONTIAC TRANS AM (KITT)", description: "Knight Industries Two Thousand — plate: KNIGHT",
+          x: cw * 0.3, y: ch * 0.55, width: cw * 0.35, height: ch * 0.3,
+          baseSpeed: 0, currentSpeed: kittSpeed, speedJitter: 5, color: "#1a1a1a",
+          emoji: "🚗", ticketed: 0, path: null,
+        },
+        {
+          id: "pigeon", name: "PIGEON", description: "Columba livia (trespassing)",
+          x: cw * 0.7, y: ch * 0.12, width: cw * 0.06, height: ch * 0.08,
+          baseSpeed: 0, currentSpeed: 42, speedJitter: 20, color: "#8a8a9a",
+          emoji: "🐦", ticketed: 0, path: null,
+        },
+        {
+          id: "exit", name: "EXIT SIGN", description: "Illuminated, legally required",
+          x: cw * 0.85, y: ch * 0.05, width: cw * 0.1, height: ch * 0.06,
+          baseSpeed: 0, currentSpeed: 670616629, speedJitter: 1000000, color: "#ff0000",
+          emoji: "🚪", ticketed: 0, path: null,
+        },
+      ];
+
+      // Build Path2D for each exhibit (for isPointInPath hit testing)
+      for (const ex of exhibits) {
+        const p = new Path2D();
+        p.rect(ex.x, ex.y, ex.width, ex.height);
+        ex.path = p;
+      }
+    }
+
+    function formatSpeed(speed: number): string {
+      if (speed > 1000000) return speed.toExponential(1);
+      if (speed < 1) return speed.toFixed(3);
+      return Math.round(speed).toString();
+    }
+
+    function formatFine(citations: number, baseSpeed: number): number {
+      const base = 50;
+      const multiplier = Math.min(baseSpeed / 25, 100);
+      return Math.round(base * multiplier * (1 + citations * 0.5));
+    }
+
+    function pickViolation(): string {
+      return violations[Math.floor(Math.random() * violations.length)];
+    }
+
+    function nowTimestamp(): string {
+      const d = new Date();
+      return d.toISOString().replace("T", " ").slice(0, 19);
+    }
+
+    // --- Canvas drawing ---
+    function drawScene(ctx: CanvasRenderingContext2D, cw: number, ch: number, time: number): void {
+      // Dark museum background
+      ctx.fillStyle = "#0a0a0a";
+      ctx.fillRect(0, 0, cw, ch);
+
+      // Floor
+      ctx.fillStyle = "#1a1510";
+      ctx.fillRect(0, ch * 0.85, cw, ch * 0.15);
+      // Floor tiles
+      ctx.strokeStyle = "#2a2520";
+      ctx.lineWidth = 1;
+      for (let i = 0; i < cw; i += 60) {
+        ctx.beginPath();
+        ctx.moveTo(i, ch * 0.85);
+        ctx.lineTo(i, ch);
+        ctx.stroke();
+      }
+
+      // Walls
+      ctx.fillStyle = "#151515";
+      ctx.fillRect(0, 0, cw, ch * 0.85);
+
+      // Ambient museum lighting — dim pools
+      const grad = ctx.createRadialGradient(cw * 0.5, ch * 0.1, 10, cw * 0.5, ch * 0.4, ch * 0.5);
+      grad.addColorStop(0, "rgba(255, 240, 200, 0.06)");
+      grad.addColorStop(1, "transparent");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, cw, ch);
+
+      // Draw exhibits
+      for (const ex of exhibits) {
+        drawExhibit(ctx, ex, time);
+      }
+
+      // Reticle at mouse position
+      if (canvasRect && canvasRect.width > 0 && canvasRect.height > 0) {
+        const rx = (mouseX - canvasRect.left) / canvasRect.width;
+        const ry = (mouseY - canvasRect.top) / canvasRect.height;
+        const cx = rx * cw;
+        const cy = ry * ch;
+        drawReticle(ctx, cx, cy, hoveredExhibit !== null);
+      }
+
+      // Scanlines already handled by CSS
+    }
+
+    function drawExhibit(ctx: CanvasRenderingContext2D, ex: Exhibit, time: number): void {
+      const isHovered = hoveredExhibit?.id === ex.id;
+      const alpha = isHovered ? 0.6 : 0.25;
+
+      // Exhibit bounding area (subtle)
+      ctx.fillStyle = `rgba(${hexToRgb(ex.color)}, ${alpha * 0.3})`;
+      ctx.fillRect(ex.x, ex.y, ex.width, ex.height);
+
+      // Border
+      ctx.strokeStyle = isHovered
+        ? `rgba(0, 255, 65, ${0.6 + Math.sin(time * 0.005) * 0.2})`
+        : `rgba(${hexToRgb(ex.color)}, 0.3)`;
+      ctx.lineWidth = isHovered ? 2 : 1;
+      ctx.strokeRect(ex.x, ex.y, ex.width, ex.height);
+
+      // KITT special drawing — car shape
+      if (ex.id === "kitt") {
+        drawKitt(ctx, ex, time);
+      } else if (ex.id === "trex") {
+        drawTrex(ctx, ex);
+      } else if (ex.id === "guard") {
+        drawGuard(ctx, ex, time);
+      } else {
+        // Generic exhibit — emoji centered
+        ctx.font = `${Math.min(ex.width, ex.height) * 0.5}px serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(ex.emoji, ex.x + ex.width / 2, ex.y + ex.height / 2);
+      }
+
+      // Label below
+      ctx.font = "10px 'JetBrains Mono', monospace";
+      ctx.fillStyle = isHovered ? "#00ff41" : "rgba(0,255,65,0.3)";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText(ex.name, ex.x + ex.width / 2, ex.y + ex.height + 4);
+
+      // Ticketed indicator
+      if (ex.ticketed > 0) {
+        ctx.fillStyle = "rgba(255, 51, 51, 0.7)";
+        ctx.font = "bold 9px 'JetBrains Mono', monospace";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "top";
+        ctx.fillText(`×${ex.ticketed}`, ex.x + ex.width - 2, ex.y + 2);
+      }
+    }
+
+    function drawKitt(ctx: CanvasRenderingContext2D, ex: Exhibit, time: number): void {
+      const cx = ex.x + ex.width / 2;
+      const cy = ex.y + ex.height / 2;
+      const w = ex.width * 0.85;
+      const h = ex.height * 0.5;
+
+      // Car body
+      ctx.fillStyle = "#111";
+      ctx.beginPath();
+      ctx.moveTo(cx - w / 2, cy + h / 4);
+      ctx.lineTo(cx - w / 2 + w * 0.15, cy - h / 2);
+      ctx.lineTo(cx + w / 2 - w * 0.15, cy - h / 2);
+      ctx.lineTo(cx + w / 2, cy + h / 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Lower body
+      ctx.fillStyle = "#0a0a0a";
+      ctx.fillRect(cx - w / 2, cy + h / 4, w, h / 3);
+
+      // Wheels
+      ctx.fillStyle = "#222";
+      ctx.beginPath();
+      ctx.arc(cx - w * 0.3, cy + h / 4 + h / 3, h * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + w * 0.3, cy + h / 4 + h / 3, h * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // KITT scanner bar
+      if (kittAwakened) {
+        const scanX = cx - w * 0.3 + Math.sin(time * 0.004) * w * 0.3 + w * 0.3;
+        const scanGrad = ctx.createRadialGradient(scanX, cy - h / 2 + 8, 2, scanX, cy - h / 2 + 8, 20);
+        scanGrad.addColorStop(0, "rgba(255, 0, 0, 0.9)");
+        scanGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = scanGrad;
+        ctx.fillRect(cx - w * 0.3, cy - h / 2 + 3, w * 0.6, 10);
+        // Core dot
+        ctx.fillStyle = "#ff0000";
+        ctx.beginPath();
+        ctx.arc(scanX, cy - h / 2 + 8, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // License plate
+      ctx.fillStyle = "#d4a832";
+      ctx.fillRect(cx - 20, cy + h / 4 + h / 3 - 4, 40, 10);
+      ctx.fillStyle = "#1a1a6a";
+      ctx.font = "bold 7px 'JetBrains Mono', monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("KNIGHT", cx, cy + h / 4 + h / 3 + 1);
+    }
+
+    function drawTrex(ctx: CanvasRenderingContext2D, ex: Exhibit): void {
+      const cx = ex.x + ex.width / 2;
+      const cy = ex.y + ex.height * 0.4;
+      // Simplified T-Rex skeleton silhouette
+      ctx.strokeStyle = ex.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      // Spine
+      ctx.moveTo(cx - ex.width * 0.35, cy);
+      ctx.lineTo(cx + ex.width * 0.2, cy);
+      // Head
+      ctx.lineTo(cx + ex.width * 0.3, cy - ex.height * 0.15);
+      ctx.lineTo(cx + ex.width * 0.35, cy - ex.height * 0.1);
+      ctx.lineTo(cx + ex.width * 0.2, cy);
+      // Tail
+      ctx.moveTo(cx - ex.width * 0.35, cy);
+      ctx.lineTo(cx - ex.width * 0.4, cy - ex.height * 0.08);
+      // Legs
+      ctx.moveTo(cx - ex.width * 0.1, cy);
+      ctx.lineTo(cx - ex.width * 0.15, cy + ex.height * 0.4);
+      ctx.lineTo(cx - ex.width * 0.08, cy + ex.height * 0.45);
+      ctx.moveTo(cx + ex.width * 0.05, cy);
+      ctx.lineTo(cx + ex.width * 0.0, cy + ex.height * 0.4);
+      ctx.lineTo(cx + ex.width * 0.07, cy + ex.height * 0.45);
+      // Ribs
+      for (let i = 0; i < 5; i++) {
+        const rx = cx - ex.width * 0.2 + i * ex.width * 0.08;
+        ctx.moveTo(rx, cy);
+        ctx.lineTo(rx - 3, cy + ex.height * 0.12);
+      }
+      ctx.stroke();
+    }
+
+    function drawGuard(ctx: CanvasRenderingContext2D, ex: Exhibit, time: number): void {
+      const cx = ex.x + ex.width / 2;
+      const baseY = ex.y + ex.height;
+      // Simple standing figure
+      ctx.fillStyle = ex.color;
+      // Head
+      ctx.beginPath();
+      ctx.arc(cx, ex.y + ex.height * 0.12, ex.width * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      // Body
+      ctx.fillRect(cx - ex.width * 0.3, ex.y + ex.height * 0.22, ex.width * 0.6, ex.height * 0.4);
+      // Legs
+      ctx.fillRect(cx - ex.width * 0.25, ex.y + ex.height * 0.62, ex.width * 0.2, ex.height * 0.35);
+      ctx.fillRect(cx + ex.width * 0.05, ex.y + ex.height * 0.62, ex.width * 0.2, ex.height * 0.35);
+      // Eyes (blinking)
+      const blinkPhase = Math.sin(time * 0.002);
+      if (blinkPhase > -0.9) {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(cx - 5, ex.y + ex.height * 0.1, 3, 3);
+        ctx.fillRect(cx + 2, ex.y + ex.height * 0.1, 3, 3);
+      }
+    }
+
+    function drawReticle(ctx: CanvasRenderingContext2D, x: number, y: number, locked: boolean): void {
+      const r = locked ? 25 : 20;
+      const color = locked ? "#ff3333" : "#00ff41";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash(locked ? [] : [4, 4]);
+
+      // Outer ring
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Crosshairs
+      ctx.beginPath();
+      ctx.moveTo(x - r - 8, y);
+      ctx.lineTo(x - r + 6, y);
+      ctx.moveTo(x + r - 6, y);
+      ctx.lineTo(x + r + 8, y);
+      ctx.moveTo(x, y - r - 8);
+      ctx.lineTo(x, y - r + 6);
+      ctx.moveTo(x, y + r - 6);
+      ctx.lineTo(x, y + r + 8);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+
+      // Center dot
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function hexToRgb(hex: string): string {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `${r},${g},${b}`;
+    }
+
+    // --- Hit testing with isPointInPath ---
+    function hitTest(ctx: CanvasRenderingContext2D, px: number, py: number): Exhibit | null {
+      console.log("hitTest query coordinates:", { px, py, canvasWidth: ctx.canvas.width, canvasHeight: ctx.canvas.height });
+      for (const ex of exhibits) {
+        const inPath = ex.path && ctx.isPointInPath(ex.path, px, py);
+        console.log(`exhibit ${ex.id}:`, { x: ex.x, y: ex.y, w: ex.width, h: ex.height, inPath });
+        if (inPath) {
+          return ex;
+        }
+      }
+      return null;
+    }
+
+    // --- UI updates ---
+    function updateSubjectList(): void {
+      const list = document.getElementById("subject-list");
+      if (!list) return;
+      list.innerHTML = exhibits.map(ex => {
+        const isKitt = ex.id === "kitt";
+        const cls = isKitt ? "subject-entry kitt-entry" : "subject-entry";
+        const speed = ex.id === "kitt" ? formatSpeed(kittSpeed) : formatSpeed(ex.currentSpeed + (Math.random() - 0.5) * ex.speedJitter);
+        return `<div class="${cls}"><span class="name">${ex.emoji} ${ex.name}</span><span class="speed">${speed} mph</span></div>`;
+      }).join("");
+    }
+
+    function updateCitationLog(): void {
+      const log = document.getElementById("log-entries");
+      if (!log) return;
+      log.innerHTML = citations.slice().reverse().map(c =>
+        `<div class="log-entry" data-testid="citation-entry">
+          <span class="violation-type">${c.violation}</span><br/>
+          ${c.target} — ${c.speed} mph — <span class="fine-amt">$${c.fine}</span><br/>
+          <span style="opacity:0.4">${c.time}</span>
+        </div>`
+      ).join("");
+    }
+
+    function updateCounters(): void {
+      const countEl = document.getElementById("citation-number");
+      const fineEl = document.getElementById("fine-amount");
+      if (countEl) countEl.textContent = citations.length.toString();
+      if (fineEl) {
+        const total = citations.reduce((sum, c) => sum + c.fine, 0);
+        fineEl.textContent = `$${total.toLocaleString()}.00`;
+      }
+    }
+
+    function issueCitation(ex: Exhibit): void {
+      const speed = ex.id === "kitt" ? kittSpeed : ex.currentSpeed + (Math.random() - 0.5) * ex.speedJitter;
+      const fine = formatFine(ex.ticketed, speed);
+      const citation: Citation = {
+        target: ex.name,
+        speed: Math.round(speed * 100) / 100,
+        fine,
+        violation: pickViolation(),
+        time: nowTimestamp(),
+      };
+      citations.push(citation);
+      ex.ticketed++;
+
+      // KITT speed escalates with each citation issued anywhere
+      kittSpeed *= 1.3 + Math.random() * 0.2;
+      const kitt = exhibits.find(e => e.id === "kitt");
+      if (kitt) kitt.currentSpeed = kittSpeed;
+
+      // Flash effect
+      const container = document.getElementById("feed-container");
+      if (container) {
+        const flash = document.createElement("div");
+        flash.className = "citation-flash";
+        container.appendChild(flash);
+        flash.addEventListener("animationend", () => flash.remove());
+      }
+
+      updateCounters();
+      updateCitationLog();
+      updateSubjectList();
+
+      // Check KITT awakening
+      if (citations.length >= 5 && !kittAwakened) {
+        triggerKittAwaken();
+      } else if (kittAwakened && citations.length % 3 === 0) {
+        showKittMessage();
+      }
+    }
+
+    function triggerKittAwaken(): void {
+      kittAwakened = true;
+      const panel = document.getElementById("kitt-panel");
+      if (panel) panel.classList.remove("hidden");
+      showKittMessage();
+    }
+
+    function showKittMessage(): void {
+      const msgEl = document.getElementById("kitt-message");
+      if (!msgEl) return;
+      const idx = Math.min(Math.floor((citations.length - 5) / 3), kittMessages.length - 1);
+      const msg = kittMessages[Math.max(0, idx)];
+      msgEl.textContent = `"${msg}"`;
+    }
+
+    // --- Clock ---
+    function updateClock(): void {
+      const el = document.getElementById("clock");
+      if (el) el.textContent = new Date().toLocaleTimeString();
+    }
+
+    function updateTimestamp(): void {
+      const el = document.getElementById("timestamp");
+      if (el) el.textContent = nowTimestamp();
+    }
+
+    // --- Main loop ---
+    function setup(): void {
+      const canvas = document.getElementById("camera-feed") as HTMLCanvasElement | null;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      function resize(): void {
+        if (!canvas) return;
+        const parent = canvas.parentElement;
+        if (!parent) return;
+        const dpr = window.devicePixelRatio || 1;
+        const w = parent.clientWidth;
+        const h = parent.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+        canvasRect = canvas.getBoundingClientRect();
+        initExhibits(canvas.width, canvas.height);
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+
+      const clampVal = (val: number, min: number, max: number) => Math.min(max, Math.max(min, val));
+
+      function handlePointerMove(clientX: number, clientY: number) {
+        if (!canvas || !ctx) return;
+        const rect = canvas.getBoundingClientRect();
+        canvasRect = rect;
+        console.log("handlePointerMove values:", { clientX, clientY, rectLeft: rect.left, rectTop: rect.top, rectWidth: rect.width, rectHeight: rect.height });
+        
+        // Save viewport coordinates for rendering reticle and positioning tooltip
+        mouseX = clientX;
+        mouseY = clientY;
+        
+        const relX = clampVal((clientX - rect.left) / rect.width, 0, 1);
+        const relY = clampVal((clientY - rect.top) / rect.height, 0, 1);
+        
+        if (!usingKeyboard) {
+          virtualCursorX = relX;
+          virtualCursorY = relY;
+        }
+        
+        // Map relative coordinates to canvas buffer coordinates
+        const px = relX * canvas.width;
+        const py = relY * canvas.height;
+        
+        hoveredExhibit = hitTest(ctx, px, py);
+        
+        const readout = document.getElementById("speed-readout");
+        const speedVal = document.getElementById("speed-value");
+        const targetLbl = document.getElementById("target-label");
+        if (readout && speedVal && targetLbl) {
+          if (hoveredExhibit) {
+            readout.classList.remove("hidden");
+            readout.classList.toggle("violation", hoveredExhibit.currentSpeed > 25);
+            const speed = hoveredExhibit.id === "kitt"
+              ? kittSpeed
+              : hoveredExhibit.currentSpeed + (Math.random() - 0.5) * hoveredExhibit.speedJitter;
+            speedVal.textContent = formatSpeed(speed);
+            targetLbl.textContent = hoveredExhibit.name;
+            readout.style.left = (clientX + 20) + "px";
+            readout.style.top = (clientY - 40) + "px";
+          } else {
+            readout.classList.add("hidden");
+          }
+        }
+      }
+
+      // Mouse tracking
+      canvas.addEventListener("mousemove", (e: MouseEvent) => {
+        usingKeyboard = false;
+        handlePointerMove(e.clientX, e.clientY);
+      });
+
+      canvas.addEventListener("mouseleave", () => {
+        hoveredExhibit = null;
+        const readout = document.getElementById("speed-readout");
+        if (readout) readout.classList.add("hidden");
+      });
+
+      canvas.addEventListener("click", () => {
+        if (hoveredExhibit) {
+          issueCitation(hoveredExhibit);
+        }
+      });
+
+      // Touch tracking
+      canvas.addEventListener("touchstart", (e: TouchEvent) => {
+        const touch = e.touches[0];
+        if (touch) {
+          usingKeyboard = false;
+          handlePointerMove(touch.clientX, touch.clientY);
+        }
+      }, { passive: true });
+
+      canvas.addEventListener("touchmove", (e: TouchEvent) => {
+        const touch = e.touches[0];
+        if (touch) {
+          usingKeyboard = false;
+          handlePointerMove(touch.clientX, touch.clientY);
+        }
+      }, { passive: true });
+
+      canvas.addEventListener("touchend", () => {
+        hoveredExhibit = null;
+        const readout = document.getElementById("speed-readout");
+        if (readout) readout.classList.add("hidden");
+      });
+
+      canvas.addEventListener("touchcancel", () => {
+        hoveredExhibit = null;
+        const readout = document.getElementById("speed-readout");
+        if (readout) readout.classList.add("hidden");
+      });
+
+      // Keyboard navigation
+      canvas.addEventListener("keydown", (e: KeyboardEvent) => {
+        let moved = false;
+        if (e.key === "ArrowUp") {
+          virtualCursorY = Math.max(0, virtualCursorY - 0.05);
+          moved = true;
+        } else if (e.key === "ArrowDown") {
+          virtualCursorY = Math.min(1, virtualCursorY + 0.05);
+          moved = true;
+        } else if (e.key === "ArrowLeft") {
+          virtualCursorX = Math.max(0, virtualCursorX - 0.05);
+          moved = true;
+        } else if (e.key === "ArrowRight") {
+          virtualCursorX = Math.min(1, virtualCursorX + 0.05);
+          moved = true;
+        } else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (hoveredExhibit) {
+            issueCitation(hoveredExhibit);
+          }
+        }
+
+        if (moved) {
+          e.preventDefault();
+          usingKeyboard = true;
+          canvasRect = canvas.getBoundingClientRect();
+          const clientX = canvasRect.left + virtualCursorX * canvasRect.width;
+          const clientY = canvasRect.top + virtualCursorY * canvasRect.height;
+          handlePointerMove(clientX, clientY);
+        }
+      });
+
+      // Animation loop
+      function loop(time: number): void {
+        if (!ctx || !canvas) return;
+        drawScene(ctx, canvas.width, canvas.height, time);
+        animFrameId = requestAnimationFrame(loop);
+      }
+      animFrameId = requestAnimationFrame(loop);
+
+      // Periodic updates
+      updateSubjectList();
+      setInterval(updateSubjectList, 2000);
+      setInterval(updateClock, 1000);
+      setInterval(updateTimestamp, 1000);
+      updateClock();
+      updateTimestamp();
+
+      // KITT speed drifts upward even without interaction
+      setInterval(() => {
+        kittSpeed += Math.random() * 2;
+        const kitt = exhibits.find(e => e.id === "kitt");
+        if (kitt) kitt.currentSpeed = kittSpeed;
+      }, 3000);
+
+      // Test hooks
+      (window as Window & { _getKittSpeed?: () => number })._getKittSpeed = () => kittSpeed;
+      (window as Window & { _triggerKittAwaken?: () => void })._triggerKittAwaken = () => {
+        for (let i = 0; i < 5; i++) {
+          citations.push({
+            target: "TEST", speed: 99, fine: 50,
+            violation: "TEST CITATION", time: nowTimestamp(),
+          });
+        }
+        updateCounters();
+        triggerKittAwaken();
+      };
+    }
+
+    // Run on page load (handles Astro view transitions)
+    document.addEventListener("astro:page-load", setup);
+    if (document.readyState !== "loading") {
+      setup();
+    }
+  </script>
+</Base>

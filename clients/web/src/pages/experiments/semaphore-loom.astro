@@ -1,0 +1,709 @@
+---
+import Base from "@layouts/Base.astro"
+
+const signals = [
+  { glyph: "red whisper", tone: "urgent velvet", color: "#ff5b5b" },
+  { glyph: "amber refusal", tone: "warm static", color: "#f3b84a" },
+  { glyph: "cyan apology", tone: "cold bell", color: "#50d9d2" },
+  { glyph: "green hush", tone: "soft voltage", color: "#7bd66f" },
+  { glyph: "white detour", tone: "chalk flare", color: "#f6f2db" },
+  { glyph: "violet afterimage", tone: "late echo", color: "#b985ff" },
+]
+---
+
+<Base title="Semaphore Loom for Stray Colors">
+  <main id="semaphore-loom" class="loom-shell">
+    <section class="loom-brief" aria-label="Signal loom controls">
+      <p class="loom-kicker">Color authority / roof station 19</p>
+      <h1>Semaphore Loom for Stray Colors</h1>
+      <p class="loom-copy">
+        Weave loose colors into a visible phrase, then broadcast it before the
+        night assigns every hue to the wrong address.
+      </p>
+
+      <div class="loom-readouts" aria-live="polite">
+        <div>
+          <span>Woven</span>
+          <strong id="woven-count">0</strong>
+        </div>
+        <div>
+          <span>Glyph</span>
+          <strong id="current-glyph">none</strong>
+        </div>
+        <div>
+          <span>Resonance</span>
+          <strong id="resonance-index">0</strong>
+        </div>
+        <div>
+          <span>Broadcast</span>
+          <strong id="broadcast-state">unwoven</strong>
+        </div>
+      </div>
+
+      <div class="loom-actions">
+        <button id="broadcast-button" type="button">Broadcast</button>
+        <button id="unweave-button" type="button">Unweave</button>
+      </div>
+    </section>
+
+    <section
+      id="signal-rig"
+      class="signal-rig"
+      data-awake="false"
+      data-woven="0"
+      aria-label="Interactive semaphore color loom"
+    >
+      <div class="signal-sky" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+
+      <div class="signal-mast" aria-hidden="true">
+        <span></span>
+      </div>
+
+      <div class="thread-field" aria-hidden="true">
+        {signals.map((signal, index) => (
+          <div
+            class="signal-thread"
+            data-lit="false"
+            style={`--thread-color: ${signal.color}; --thread-index: ${index};`}
+          ></div>
+        ))}
+      </div>
+
+      <div id="phrase-ribbon" class="phrase-ribbon" aria-label="Woven color phrase">
+        <span>awaiting color</span>
+      </div>
+
+      <div class="loom-keybank" aria-label="Color signal keys">
+        {signals.map((signal, index) => (
+          <button
+            class="loom-key"
+            type="button"
+            data-glyph={signal.glyph}
+            data-tone={signal.tone}
+            data-index={index}
+            style={`--key-color: ${signal.color}; --key-index: ${index};`}
+            aria-pressed="false"
+          >
+            <b>{signal.glyph}</b>
+            <span>{signal.tone}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #12120f;
+  }
+
+  :global(.container) {
+    max-inline-size: none;
+    padding-inline: 0;
+  }
+
+  .loom-shell {
+    --paper: #f6f2db;
+    --ink: #12120f;
+    --rail: rgba(246, 242, 219, 0.16);
+    --cursor-x: 50%;
+    --cursor-y: 42%;
+    display: grid;
+    grid-template-columns: minmax(17rem, 25rem) minmax(0, 1fr);
+    gap: clamp(1.35rem, 3vw, 2.2rem);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.1vw, 1.8rem);
+    color: var(--paper);
+    background:
+      linear-gradient(120deg, rgba(255, 91, 91, 0.18), transparent 21rem),
+      radial-gradient(circle at 76% 24%, rgba(80, 217, 210, 0.28), transparent 18rem),
+      radial-gradient(circle at 82% 84%, rgba(243, 184, 74, 0.16), transparent 16rem),
+      #12120f;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .loom-brief {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 1rem;
+  }
+
+  .loom-kicker,
+  .loom-readouts span {
+    margin: 0;
+    color: #50d9d2;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 10ch;
+    margin: 0;
+    color: var(--paper);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.35rem, 4.7vw, 4.45rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.9;
+    text-shadow:
+      0.04em 0.05em 0 rgba(255, 91, 91, 0.64),
+      -0.04em 0.035em 0 rgba(80, 217, 210, 0.58);
+  }
+
+  .loom-copy {
+    max-width: 33rem;
+    margin: 0;
+    color: rgba(246, 242, 219, 0.82);
+    font-size: clamp(0.98rem, 1.3vw, 1.08rem);
+    line-height: 1.62;
+  }
+
+  .loom-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .loom-readouts div {
+    min-width: 0;
+    border: 1px solid var(--rail);
+    border-radius: 8px;
+    padding: 0.78rem;
+    background: rgba(18, 18, 15, 0.68);
+  }
+
+  .loom-readouts strong {
+    display: block;
+    margin-top: 0.42rem;
+    color: var(--paper);
+    font-size: clamp(1rem, 2.1vw, 1.42rem);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .loom-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  .loom-actions button {
+    min-height: 3.15rem;
+    border: 1px solid rgba(246, 242, 219, 0.28);
+    border-radius: 8px;
+    color: var(--ink);
+    background: #f3b84a;
+    font: 850 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 160ms ease, filter 160ms ease;
+  }
+
+  .loom-actions button:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+
+  #unweave-button {
+    color: var(--paper);
+    background: #29281f;
+  }
+
+  .signal-rig {
+    position: relative;
+    min-height: min(65rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(246, 242, 219, 0.22);
+    border-radius: 8px;
+    background:
+      linear-gradient(90deg, rgba(246, 242, 219, 0.08) 1px, transparent 1px) 0 0 / 4rem 4rem,
+      linear-gradient(0deg, rgba(246, 242, 219, 0.07) 1px, transparent 1px) 0 0 / 4rem 4rem,
+      radial-gradient(circle at var(--cursor-x) var(--cursor-y), rgba(185, 133, 255, 0.28), transparent 16rem),
+      radial-gradient(circle at 50% 105%, rgba(123, 214, 111, 0.18), transparent 22rem),
+      #191914;
+    box-shadow:
+      inset 0 0 6rem rgba(0, 0, 0, 0.52),
+      0 1rem 2.4rem rgba(0, 0, 0, 0.3);
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .signal-sky,
+  .thread-field,
+  .signal-mast,
+  .loom-keybank {
+    position: absolute;
+    inset: 0;
+  }
+
+  .signal-sky {
+    pointer-events: none;
+    opacity: 0.72;
+  }
+
+  .signal-sky i {
+    position: absolute;
+    width: clamp(5rem, 12vw, 10rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(246, 242, 219, 0.18);
+    border-radius: 999px;
+    transform: translate(-50%, -50%) scale(calc(0.7 + var(--i, 0) * 0.12));
+    animation: drift-ring 8s ease-in-out infinite alternate;
+  }
+
+  .signal-sky i:nth-child(1) { --i: 0; left: 15%; top: 22%; border-color: rgba(255, 91, 91, 0.36); }
+  .signal-sky i:nth-child(2) { --i: 1; left: 78%; top: 18%; border-color: rgba(80, 217, 210, 0.36); animation-delay: -1s; }
+  .signal-sky i:nth-child(3) { --i: 2; left: 62%; top: 68%; border-color: rgba(243, 184, 74, 0.34); animation-delay: -2s; }
+  .signal-sky i:nth-child(4) { --i: 3; left: 25%; top: 76%; border-color: rgba(123, 214, 111, 0.32); animation-delay: -3s; }
+  .signal-sky i:nth-child(5) { --i: 4; left: 44%; top: 36%; border-color: rgba(246, 242, 219, 0.24); animation-delay: -4s; }
+  .signal-sky i:nth-child(6) { --i: 5; left: 88%; top: 78%; border-color: rgba(185, 133, 255, 0.32); animation-delay: -5s; }
+
+  .signal-mast {
+    pointer-events: none;
+  }
+
+  .signal-mast::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 12%;
+    bottom: 12%;
+    width: 0.42rem;
+    border-radius: 999px;
+    background: linear-gradient(#f6f2db, #50d9d2 48%, #ff5b5b);
+    box-shadow: 0 0 2rem rgba(246, 242, 219, 0.32);
+    transform: translateX(-50%);
+  }
+
+  .signal-mast span {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    width: clamp(9rem, 24vw, 17rem);
+    height: clamp(9rem, 24vw, 17rem);
+    border: 1px solid rgba(246, 242, 219, 0.2);
+    border-radius: 999px;
+    background:
+      conic-gradient(
+        from calc(var(--spin, 0deg) + 90deg),
+        rgba(255, 91, 91, 0.46),
+        rgba(243, 184, 74, 0.38),
+        rgba(80, 217, 210, 0.44),
+        rgba(123, 214, 111, 0.36),
+        rgba(185, 133, 255, 0.42),
+        rgba(255, 91, 91, 0.46)
+      );
+    filter: saturate(1.2);
+    transform: translate(-50%, -50%);
+    opacity: 0.82;
+    mix-blend-mode: screen;
+  }
+
+  .signal-thread {
+    --lit: 0;
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: min(58vw, 38rem);
+    height: 0.32rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--thread-color), transparent);
+    opacity: calc(0.18 + var(--lit) * 0.72);
+    filter: blur(calc(0.8px - var(--lit) * 0.35px));
+    transform:
+      translate(-50%, -50%)
+      rotate(calc(-58deg + var(--thread-index) * 23deg))
+      scaleX(calc(0.48 + var(--lit) * 0.52));
+    transform-origin: center;
+    transition: opacity 180ms ease, filter 180ms ease, transform 220ms ease;
+  }
+
+  .signal-thread[data-lit="true"] {
+    --lit: 1;
+  }
+
+  .phrase-ribbon {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1rem, 4vw, 2rem);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+    width: min(42rem, calc(100% - 2rem));
+    min-height: 3.3rem;
+    border: 1px solid rgba(246, 242, 219, 0.22);
+    border-radius: 8px;
+    padding: 0.7rem;
+    color: rgba(246, 242, 219, 0.86);
+    background: rgba(18, 18, 15, 0.68);
+    transform: translateX(-50%);
+  }
+
+  .phrase-ribbon span,
+  .phrase-ribbon b {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.85rem;
+    border-radius: 999px;
+    padding: 0.38rem 0.7rem;
+    background: rgba(246, 242, 219, 0.09);
+    color: inherit;
+    font: 750 0.72rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .loom-keybank {
+    pointer-events: none;
+  }
+
+  .loom-key {
+    position: absolute;
+    left: 20%;
+    top: 18%;
+    display: grid;
+    align-content: center;
+    gap: 0.22rem;
+    width: clamp(7.2rem, 13vw, 9.3rem);
+    min-height: 4.9rem;
+    border: 1px solid color-mix(in srgb, var(--key-color), white 35%);
+    border-radius: 8px;
+    padding: 0.65rem;
+    color: var(--paper);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--key-color), #12120f 62%), rgba(18, 18, 15, 0.9));
+    box-shadow:
+      inset 0 0 0 1px rgba(246, 242, 219, 0.1),
+      0 0 1.4rem color-mix(in srgb, var(--key-color), transparent 68%);
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: box-shadow 150ms ease, filter 150ms ease, transform 150ms ease;
+  }
+
+  .loom-key:hover,
+  .loom-key:focus-visible,
+  .loom-key[aria-pressed="true"] {
+    filter: brightness(1.12);
+    outline: none;
+    box-shadow:
+      inset 0 0 0 1px rgba(246, 242, 219, 0.22),
+      0 0 2.2rem color-mix(in srgb, var(--key-color), transparent 36%);
+    transform: translate(-50%, -50%);
+  }
+
+  .loom-key[aria-pressed="true"] {
+    border-color: var(--paper);
+  }
+
+  .loom-key:nth-child(2) {
+    left: 50%;
+  }
+
+  .loom-key:nth-child(3) {
+    left: 80%;
+  }
+
+  .loom-key:nth-child(4) {
+    left: 20%;
+    top: 74%;
+  }
+
+  .loom-key:nth-child(5) {
+    left: 50%;
+    top: 74%;
+  }
+
+  .loom-key:nth-child(6) {
+    left: 80%;
+    top: 74%;
+  }
+
+  .loom-key b,
+  .loom-key span {
+    display: block;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .loom-key b {
+    font-size: clamp(0.86rem, 1.2vw, 1rem);
+    line-height: 1.05;
+  }
+
+  .loom-key span {
+    color: rgba(246, 242, 219, 0.72);
+    font: 700 0.66rem/1.15 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @keyframes drift-ring {
+    from {
+      transform: translate(-50%, -50%) scale(calc(0.7 + var(--i, 0) * 0.12)) rotate(0deg);
+    }
+    to {
+      transform: translate(calc(-50% + 0.8rem), calc(-50% - 0.8rem)) scale(calc(0.76 + var(--i, 0) * 0.12)) rotate(18deg);
+    }
+  }
+
+  @media (max-width: 860px) {
+    .loom-shell {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+
+    .loom-brief {
+      align-self: start;
+      padding-block: 0;
+    }
+
+    h1 {
+      max-width: 12ch;
+      font-size: clamp(2.4rem, 12vw, 4rem);
+    }
+
+    .signal-rig {
+      min-height: 36rem;
+    }
+
+    .loom-key {
+      width: clamp(6.4rem, 27vw, 8.1rem);
+      min-height: 4.4rem;
+    }
+
+    .signal-thread {
+      width: 145vw;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .loom-shell {
+      padding: 0.8rem;
+    }
+
+    .loom-readouts,
+    .loom-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .signal-rig {
+      min-height: 40rem;
+    }
+
+    .loom-key {
+      width: min(8rem, 38vw);
+      min-height: 4.15rem;
+      padding: 0.52rem;
+    }
+
+    .loom-key:nth-child(1) {
+      left: 28%;
+      top: 14%;
+    }
+
+    .loom-key:nth-child(2) {
+      left: 72%;
+      top: 14%;
+    }
+
+    .loom-key:nth-child(3) {
+      left: 28%;
+      top: 36%;
+    }
+
+    .loom-key:nth-child(4) {
+      left: 72%;
+      top: 36%;
+    }
+
+    .loom-key:nth-child(5) {
+      left: 28%;
+      top: 58%;
+    }
+
+    .loom-key:nth-child(6) {
+      left: 72%;
+      top: 58%;
+    }
+
+    .phrase-ribbon {
+      bottom: 0.8rem;
+      width: calc(100% - 1rem);
+    }
+  }
+</style>
+
+<script is:inline>
+  const rig = document.getElementById("signal-rig")
+  const keys = Array.from(document.querySelectorAll(".loom-key"))
+  const threads = Array.from(document.querySelectorAll(".signal-thread"))
+  const wovenCount = document.getElementById("woven-count")
+  const currentGlyph = document.getElementById("current-glyph")
+  const resonanceIndex = document.getElementById("resonance-index")
+  const broadcastState = document.getElementById("broadcast-state")
+  const phraseRibbon = document.getElementById("phrase-ribbon")
+  const broadcastButton = document.getElementById("broadcast-button")
+  const unweaveButton = document.getElementById("unweave-button")
+
+  const normalizedCursor = { x: 0.5, y: 0.42 }
+  const woven = []
+  let selectedIndex = -1
+  let resonance = 0
+  let broadcasting = false
+  let rafId = 0
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
+
+  function updateCursor(clientX, clientY) {
+    const rect = rig.getBoundingClientRect()
+    normalizedCursor.x = clamp((clientX - rect.left) / rect.width, 0, 1)
+    normalizedCursor.y = clamp((clientY - rect.top) / rect.height, 0, 1)
+    rig.style.setProperty("--cursor-x", `${normalizedCursor.x * 100}%`)
+    rig.style.setProperty("--cursor-y", `${normalizedCursor.y * 100}%`)
+    rig.dataset.awake = "true"
+  }
+
+  function renderPhrase() {
+    phraseRibbon.replaceChildren()
+
+    if (woven.length === 0) {
+      const empty = document.createElement("span")
+      empty.textContent = "awaiting color"
+      phraseRibbon.append(empty)
+      return
+    }
+
+    for (const entry of woven) {
+      const item = document.createElement("b")
+      item.textContent = entry
+      phraseRibbon.append(item)
+    }
+  }
+
+  function selectSignal(index) {
+    selectedIndex = clamp(index, 0, keys.length - 1)
+    keys.forEach((key, keyIndex) => {
+      key.setAttribute("aria-pressed", String(keyIndex === selectedIndex))
+    })
+    currentGlyph.textContent = keys[selectedIndex].dataset.glyph
+  }
+
+  function weaveSignal(index) {
+    selectSignal(index)
+    const key = keys[selectedIndex]
+    const glyph = key.dataset.glyph
+
+    if (!woven.includes(glyph)) {
+      woven.push(glyph)
+    }
+
+    threads[selectedIndex].dataset.lit = "true"
+    rig.dataset.woven = String(woven.length)
+    wovenCount.textContent = String(woven.length)
+    broadcastState.textContent = woven.length >= 3 ? "ready" : "gathering"
+    resonance = Math.max(resonance, woven.length * 9)
+    renderPhrase()
+  }
+
+  function unweave() {
+    woven.length = 0
+    selectedIndex = -1
+    resonance = 0
+    broadcasting = false
+    rig.dataset.woven = "0"
+    wovenCount.textContent = "0"
+    currentGlyph.textContent = "none"
+    resonanceIndex.textContent = "0"
+    broadcastState.textContent = "unwoven"
+    keys.forEach((key) => key.setAttribute("aria-pressed", "false"))
+    threads.forEach((thread) => (thread.dataset.lit = "false"))
+    renderPhrase()
+  }
+
+  function broadcast() {
+    if (woven.length === 0) {
+      broadcastState.textContent = "unwoven"
+      return
+    }
+
+    broadcasting = true
+    broadcastState.textContent = "broadcasting"
+    resonance = Math.max(resonance, 28 + woven.length * 6)
+  }
+
+  function tick() {
+    const cursorPulse = rig.dataset.awake === "true"
+      ? Math.round((normalizedCursor.x + normalizedCursor.y) * 12)
+      : 0
+    const target = broadcasting ? 64 + woven.length * 8 : woven.length * 12 + cursorPulse
+    resonance += (target - resonance) * 0.08
+    resonanceIndex.textContent = String(Math.round(resonance))
+    rig.style.setProperty("--spin", `${Math.round(resonance * 2)}deg`)
+    rafId = requestAnimationFrame(tick)
+  }
+
+  keys.forEach((key, index) => {
+    key.addEventListener("click", () => weaveSignal(index))
+    key.addEventListener("focus", () => selectSignal(index))
+  })
+
+  rig.addEventListener("pointermove", (event) => updateCursor(event.clientX, event.clientY))
+  rig.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0]
+    if (touch) updateCursor(touch.clientX, touch.clientY)
+  }, { passive: true })
+  rig.addEventListener("touchmove", (event) => {
+    const touch = event.touches[0]
+    if (touch) updateCursor(touch.clientX, touch.clientY)
+  }, { passive: true })
+  rig.addEventListener("touchend", () => {
+    rig.dataset.awake = String(woven.length > 0)
+  })
+  rig.addEventListener("touchcancel", () => {
+    rig.dataset.awake = String(woven.length > 0)
+  })
+
+  document.addEventListener("keydown", (event) => {
+    const activeKey = document.activeElement?.classList?.contains("loom-key")
+    if (!activeKey) return
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault()
+      const nextIndex = (selectedIndex + 1 + keys.length) % keys.length
+      keys[nextIndex].focus()
+      selectSignal(nextIndex)
+    }
+
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault()
+      const nextIndex = (selectedIndex - 1 + keys.length) % keys.length
+      keys[nextIndex].focus()
+      selectSignal(nextIndex)
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      weaveSignal(selectedIndex < 0 ? 0 : selectedIndex)
+    }
+  })
+
+  broadcastButton.addEventListener("click", broadcast)
+  unweaveButton.addEventListener("click", unweave)
+
+  renderPhrase()
+  rafId = requestAnimationFrame(tick)
+  window.addEventListener("pagehide", () => cancelAnimationFrame(rafId), { once: true })
+</script>

@@ -52,6 +52,8 @@ const pages = [
   "/experiments/archive-unlicensed-rain",
   "/experiments/twistronic-lattice-tuner",
   "/experiments/ymca-attempt-18",
+  "/experiments/speed-trap",
+  "/experiments/voyager-telemetry-recalibrator",
 ]
 
 test.use({
