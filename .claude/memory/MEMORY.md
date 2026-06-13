@@ -76,6 +76,9 @@ A positioned `<div>` with `backdrop-filter: contrast(N) saturate(N) brightness(N
 #### Canvas Path2D + isPointInPath() hit testing
 `new Path2D()` creates a reusable path object; `.rect()`, `.arc()`, `.moveTo()`/`.lineTo()` build the shape. Then `ctx.isPointInPath(path, x, y)` returns true if the point is inside the path's fill region — native canvas hit testing without DOM elements or manual bounding-box checks. Works with arbitrary shapes (not just rects). Build Path2D objects once at init, reuse each frame. Coordinates must match the canvas's internal resolution (multiply by `devicePixelRatio` if the canvas is scaled). Much cleaner than checking `x > rect.left && x < rect.right && ...` for complex shapes. `isPointInStroke()` is the stroke-only variant. Gotcha: paths must be re-created if the canvas is resized and exhibit positions change.
 
+#### Progressive CSS Filter Degradation as Game Mechanic
+Apply CSS `filter` functions cumulatively to a container to simulate sensory loss or environmental change. Each interaction adds another filter to the chain: `saturate(0)` kills color, `contrast(0.4)` flattens figure-ground, `blur(3px)` removes detail, `brightness(0.25)` dims everything. Build the chain as an array of strings, join with space, and assign to `element.style.filter`. Pair with `@property` typed custom properties for smooth transitions on non-standard values (e.g., `--warmth` as `<number>` to drive gradient opacity via `calc()`). The key insight: the page's own rendering becomes the feedback mechanism — users viscerally experience what the game entity experiences, rather than reading about it. Works for any progressive transformation narrative: going blind, entering atmosphere, time decay, etc.
+
 #### Canvas ImageData pixel manipulation
 `ctx.createImageData(w, h)` + direct RGBA writes to `imgData.data[idx]` + `ctx.putImageData()` gives per-pixel control for procedural visualizations. Process in 4×4 blocks for performance. Combine with `requestAnimationFrame` and `Date.now()` for animated fields. Much faster than drawing thousands of individual rects.
 
@@ -143,6 +146,11 @@ For N circular bodies: each frame, check every pair `(i, j)` for overlap (`dist(
 **Concept:** Inspired by the Volo Museum's KITT replica (Knight Rider) receiving a $50 speeding ticket from NYC while on static display for years. You are malfunctioning Camera Unit 7, an automated traffic camera outside a museum. Your cursor is a targeting reticle. Hover over exhibits (T-Rex skeleton, Mona Lisa poster, security guard, potted fern, a pigeon, an exit sign, and KITT) to get absurd speed readings. Click to issue citations. KITT's speed escalates with every ticket issued. After 5 citations, KITT's scanner light activates and it begins requesting legal counsel.
 **Technique:** Canvas `Path2D` + `isPointInPath()` for hit detection — native canvas method that tests whether a point falls inside a previously-defined Path2D object, enabling per-shape hit testing without DOM elements or bounding-box math. Also: custom canvas drawing for each exhibit (car silhouette, skeleton wireframe, guard figure).
 **File:** clients/web/src/pages/experiments/speed-trap.astro
+
+### 2026-06-13 — Deer Ked — Voluntary Blindness Protocol
+**Concept:** Inspired by the discovery that deer keds (Lipoptena cervi) sacrifice their sight after finding a host, shedding wings and reducing vision gene activity. You are a deer ked. Click vision genes to silence them one by one — the page loses color (grayscale), contrast, acuity (blur), and luminance. As each vision gene dies, a corresponding feeding gene awakens. Wings detach and flutter away on the first silencing. When all vision genes are silenced, the final state reveals: you will feed forever, blind.
+**Technique:** Progressive CSS filter degradation as game mechanic — cumulative `filter` chains (`saturate(0)`, `contrast(0.4)`, `blur(3px)`, `brightness(0.25)`) applied to the scene element as each gene is silenced. CSS `@property` for typed custom property animation (`--warmth`). MutationObserver on style attributes to sync filter state. Dynamic DOM generation with `data-testid` attributes for Playwright testability.
+**File:** clients/web/src/pages/experiments/deer-ked-protocol.astro
 
 ## Feedback from Matt
 

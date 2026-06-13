@@ -6,6 +6,20 @@ Use this file as the running source of truth for review notes after each daily e
 
 ### Session Entry
 
+Date: 2026-06-13
+Experiment: Viscoelastic Rice Lock
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from recent news: Soft-robotics dampeners utilizing non-Newtonian starch suspension to absorb impact shocks.
+- Implemented shear-thinning viscoelastic starch particle matrix physics in canvas, transitioning from stable solid mesh to fluid liquid phase based on probe velocity.
+- Added 4-hub calibration connection bridge requirement.
+- Fixed click interception issues in E2E tests by globally disabling and hiding `<astro-dev-toolbar>` via CSS `:global()` in the test environment, and utilizing `{ force: true }` for playwright click actions.
+- Avoided E2E test resets during hook-based fast-track calibration by resetting cursor speed and aligning lastCursor coordinates to prevent simulated cursor teleportation from triggering high shear dilution.
+- Prevented horizontal scroll viewport overflow on mobile (375px) by utilizing `min-width: 0` on CSS grid/flex items and dynamically scaling canvas stage dimensions using `aspect-ratio: 1 / 1` and media queries to stack button and telemetry grids vertically.
+
+### Session Entry
+
 Date: 2026-06-12
 Experiment: Voyager Telemetry Recalibrator
 Feedback:
@@ -462,3 +476,16 @@ Carry Forward:
   idle counters should stay exactly idle.
 - Visual smoke after green tests caught headline clearance and misleading idle
   resonance, so keep it in the daily loop.
+
+### Session Entry
+
+Date: 2026-06-13
+Experiment: Pollen Parcel Bureau
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Rotate into bright daylight palettes when recent pages skew dark or nocturnal.
+- Keep canvas smoke tests simple: checking for any drawn alpha is enough for
+  decorative field proof without brittle screenshot comparison.
+- Run Astro build and the root Node suite sequentially; parallel verification
+  can collide on Vite inspector ports because the suite has a nested build test.

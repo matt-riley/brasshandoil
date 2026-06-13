@@ -29,3 +29,9 @@ This is a playground for whimsy, creativity and pushing the boundaries of the we
 - Safely modeled recursive "Stack Overflow" errors using capped threshold checks and mock stack traces to maintain test determinism and prevent test runner freezes.
 ### 8. Continuous Mouse Repositioning Loop for Dwell-Time Interaction Stability
 - Implemented a continuous mouse movement loop in Playwright E2E tests that repeatedly calculates the canvas bounding box and repositions the cursor onto normalized target positions. This guarantees that mouse proximity events remain correctly tracked over a prolonged dwell-time (~2.5 seconds), preventing cursor drift due to concurrent layout shifts, resizing, or timing delays during parallel test suite execution.
+
+### 9. Shear-Thinning Viscoelastic Flow Simulation and Connection Link Calibration
+- Engineered a relative coordinate-based physical starch-suspension particle mesh where probe velocity dynamics govern structural phase transitions (shearing from solid to liquid).
+- Implemented sequenced hub collision logic that resets paths when velocity bounds are exceeded, accompanied by real-time non-Newtonian viscosity metrics and Web Audio drone/squelch feedback.
+- Coupled standard keyboard navigation controls with a Spacebar-based slow-dampening step modifier, enabling high-precision, low-velocity keyboard steering for robust E2E test automation.
+
