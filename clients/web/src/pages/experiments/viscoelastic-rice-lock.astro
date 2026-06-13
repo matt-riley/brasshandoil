@@ -1,0 +1,1575 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Viscoelastic Rice Lock // Starch-Based Dampening Calibration">
+  <div class="lock-container" id="viscoelastic-root" data-phase="solid" data-hubs-connected="0" data-density="medium">
+    <!-- CRT Grid and Scanlines for Premium Retro-Sci-Fi Look -->
+    <div class="crt-overlay" aria-hidden="true"></div>
+    <div class="crt-flicker" aria-hidden="true"></div>
+
+    <!-- Background matrix canvas -->
+    <canvas id="starch-canvas" class="background-canvas" aria-hidden="true"></canvas>
+
+    <!-- Header -->
+    <header class="lock-header">
+      <h1 class="page-title text-gradient">Viscoelastic Rice Lock</h1>
+      <p class="subtitle font-mono">NON-NEWTONIAN DAMPENER SYSTEM // CALIBRATION CHAMBER</p>
+    </header>
+
+    <!-- Arming Overlay for Web Audio activation -->
+    <div id="arming-overlay" class="overlay glass">
+      <div class="overlay-content">
+        <div class="overlay-icon">🌾</div>
+        <h2 class="overlay-title font-mono">STARCH-SUSPENSION LINK INITIALIZATION</h2>
+        <p class="overlay-desc">
+          You are calibrating a soft-robotics actuator filled with a shear-thinning smart starch matrix.
+          The material liquefies under sudden shear, but remains solid under slow, continuous compression.
+        </p>
+        <div class="alert alert-info font-mono text-left">
+          <strong>CALIBRATION SEQUENCE:</strong><br/>
+          1. Activate the probe and guide it slowly across the suspension.<br/>
+          2. Trace a solid bridge from <span class="text-cyan">Hub A</span> &rarr; <span class="text-cyan">B</span> &rarr; <span class="text-cyan">C</span> &rarr; <span class="text-cyan">D</span> in sequence.<br/>
+          3. <strong>CRITICAL:</strong> Keep probe velocity below <strong class="text-gold">10 px/f</strong>. Moving too fast liquefies the matrix, ruptures the connections, and resets the bridge.
+        </div>
+        <button id="arm-button" class="btn btn-primary font-mono">
+          Arm Probe & Synthesizer
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="workspace-grid hidden" id="workspace">
+      <!-- Left Panel: Starch Suspension Stage -->
+      <div class="panel stage-panel glass">
+        <div class="panel-header">
+          <h2 class="panel-title font-mono">I. Rheological Stage</h2>
+          <span class="status-indicator font-mono" id="phase-status">SOLID MATRIX</span>
+        </div>
+
+        <div class="canvas-stage-wrapper">
+          <div class="canvas-stage" id="canvas-stage">
+            <canvas id="interaction-canvas" width="400" height="400"></canvas>
+            
+            <!-- Virtual Keyboard Cursor Overlay -->
+            <svg id="virtual-cursor" class="virtual-cursor-svg" viewBox="0 0 40 40" aria-hidden="true">
+              <circle cx="20" cy="20" r="12" class="cursor-ring" />
+              <line x1="20" y1="0" x2="20" y2="40" class="cursor-line" />
+              <line x1="0" y1="20" x2="40" y2="20" class="cursor-line" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <!-- Checkbox for keyboard slow-drag mode -->
+          <label class="checkbox-container font-mono">
+            <input type="checkbox" id="dampen-drive" />
+            <span class="checkmark"></span>
+            Dampened Slow-Motion Drive (Spacebar)
+          </label>
+        </div>
+
+        <div class="keyboard-hint font-mono">
+          [ARROW KEYS] Steer Probe (Fast) // [SPACE + ARROW KEYS] Steer slowly // [MOUSE/TOUCH] Drag slowly
+        </div>
+      </div>
+
+      <!-- Right Panel: Telemetry & Controls -->
+      <div class="panel control-panel glass">
+        <h2 class="panel-title font-mono">II. System Telemetry</h2>
+
+        <div class="telemetry-grid">
+          <div class="telemetry-box">
+            <span class="box-label font-mono">PROBE VELOCITY</span>
+            <div class="box-value font-mono text-cyan" id="speed-display">0.0 px/f</div>
+          </div>
+          <div class="telemetry-box">
+            <span class="box-label font-mono">SHEAR DILUTION STATUS</span>
+            <div class="box-value font-mono text-gold" id="dilution-display">0.0%</div>
+          </div>
+          <div class="telemetry-box full-width">
+            <span class="box-label font-mono">DYNAMIC VISCOSITY (Pa·s)</span>
+            <div class="viscosity-bar-container">
+              <div class="viscosity-bar-fill" id="viscosity-bar"></div>
+              <span class="viscosity-value font-mono" id="viscosity-display">12.0 Pa·s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Density settings -->
+        <div class="density-selector">
+          <span class="selector-label font-mono">SUSPENSION DENSITY STATE:</span>
+          <div class="button-group">
+            <button class="btn btn-selector active" data-density="medium">Medium Density</button>
+            <button class="btn btn-selector" data-density="dense">Dense Matrix</button>
+            <button class="btn btn-selector" data-density="oatmeal">Emulsified Starch</button>
+          </div>
+        </div>
+
+        <!-- Connection Progress Panel -->
+        <div class="connection-hub-panel">
+          <span class="panel-section-title font-mono">CALIBRATION HUBS PATHWAY:</span>
+          <div class="hubs-grid">
+            <div class="hub-status-card" id="hub-card-A" data-status="inactive">
+              <span class="hub-name font-mono">HUB A</span>
+              <span class="hub-indicator"></span>
+            </div>
+            <div class="hub-status-card" id="hub-card-B" data-status="inactive">
+              <span class="hub-name font-mono">HUB B</span>
+              <span class="hub-indicator"></span>
+            </div>
+            <div class="hub-status-card" id="hub-card-C" data-status="inactive">
+              <span class="hub-name font-mono">HUB C</span>
+              <span class="hub-indicator"></span>
+            </div>
+            <div class="hub-status-card" id="hub-card-D" data-status="inactive">
+              <span class="hub-name font-mono">HUB D</span>
+              <span class="hub-indicator"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="system-actions">
+          <span class="status-indicator font-mono text-danger" id="status-display">CALIBRATION INCOMPLETE</span>
+          <button id="lock-btn" class="btn btn-danger font-mono" disabled>
+            🔒 Submit Actuator Lock
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="success-screen" class="success-screen hidden">
+      <div class="success-content glass">
+        <div class="success-icon">🍚</div>
+        <h1 class="success-title text-gradient">Actuator Lock Stabilized</h1>
+        <p class="success-desc">
+          Smart starch matrix successfully aligned and solidified. Dynamic viscosity is locked at <strong class="text-gold">15.0 Pa·s</strong>. Soft-robotics dampener is now resilient to external impact shocks.
+        </p>
+        <div class="success-metrics font-mono">
+          <div class="metric-box">
+            <span class="m-val text-gradient" id="final-density-display">Medium</span>
+            <span class="m-lbl">Matrix State</span>
+          </div>
+          <div class="metric-box">
+            <span class="m-val text-gradient">15.0 Pa·s</span>
+            <span class="m-lbl">Starch Viscosity</span>
+          </div>
+          <div class="metric-box">
+            <span class="m-val text-gradient">100.0%</span>
+            <span class="m-lbl">Bridge Stability</span>
+          </div>
+        </div>
+        <div class="success-quote italic">
+          "Patience yields the strongest structures."
+        </div>
+        <button id="restart-btn" class="btn btn-tranquil font-mono">
+          Reset Dampening calibration
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // System State Variables
+    let isArmed = false;
+    let isLocked = false;
+    let phase = "solid"; // solid or liquid
+    let density = "medium"; // medium, dense, oatmeal
+    let currentSpeed = 0.0;
+    let dilutionPercent = 0.0;
+    let viscosity = 12.0; // 0.2 (liquid) to 15.0 (solid)
+    
+    // Position Tracking
+    let cursorX = 200;
+    let cursorY = 200;
+    let lastCursorX = 200;
+    let lastCursorY = 200;
+    
+    // Keyboard virtual cursor position
+    let keyboardCursorX = 200;
+    let keyboardCursorY = 200;
+
+    // Contact Hubs Setup
+    const hubs = [
+      { id: "A", name: "Hub A", x: 80, y: 80, r: 24, active: false },
+      { id: "B", name: "Hub B", x: 320, y: 80, r: 24, active: false },
+      { id: "C", name: "Hub C", x: 320, y: 320, r: 24, active: false },
+      { id: "D", name: "Hub D", x: 80, y: 320, r: 24, active: false }
+    ];
+    let connectedHubsCount = 0;
+
+    // Velocity limits and calculations
+    const SPEED_LIMIT = 10.0; // px/frame threshold for shearing
+    const RECOVERY_RATE = 0.08; // Viscosity recovery per frame
+    
+    // Particle matrix simulation
+    interface Particle {
+      x: number;
+      y: number;
+      ox: number;
+      oy: number;
+      vx: number;
+      vy: number;
+      size: number;
+      alpha: number;
+      phase: number; // local phase state
+    }
+    let particles: Particle[] = [];
+    const PARTICLE_COUNT = 150;
+
+    // Web Audio Synthesizer State
+    let audioCtx: AudioContext | null = null;
+    let droneOsc: OscillatorNode | null = null;
+    let droneGain: GainNode | null = null;
+    let noiseNode: ScriptProcessorNode | null = null;
+    let noiseGain: GainNode | null = null;
+    let squelchFilter: BiquadFilterNode | null = null;
+    let resonantSynthGain: GainNode | null = null;
+
+    // DOM Elements
+    const root = document.getElementById("viscoelastic-root")!;
+    const armingOverlay = document.getElementById("arming-overlay")!;
+    const armButton = document.getElementById("arm-button")!;
+    const workspace = document.getElementById("workspace")!;
+    const interactionCanvas = document.getElementById("interaction-canvas") as HTMLCanvasElement;
+    const virtualCursor = document.getElementById("virtual-cursor") as unknown as SVGElement;
+    const phaseStatus = document.getElementById("phase-status")!;
+    const dampenDrive = document.getElementById("dampen-drive") as HTMLInputElement;
+    const speedDisplay = document.getElementById("speed-display")!;
+    const dilutionDisplay = document.getElementById("dilution-display")!;
+    const viscosityDisplay = document.getElementById("viscosity-display")!;
+    const viscosityBar = document.getElementById("viscosity-bar")!;
+    const statusDisplay = document.getElementById("status-display")!;
+    const lockBtn = document.getElementById("lock-btn") as HTMLButtonElement;
+    const successScreen = document.getElementById("success-screen")!;
+    const restartBtn = document.getElementById("restart-btn")!;
+    const finalDensityDisplay = document.getElementById("final-density-display")!;
+
+    // Background Canvas (Ambient starch lines)
+    const bgCanvas = document.getElementById("starch-canvas") as HTMLCanvasElement;
+    let bgCtx: CanvasRenderingContext2D | null = null;
+    let bgParticles: Array<{ x: number, y: number, speed: number, alpha: number }> = [];
+
+    function initBgCanvas() {
+      if (!bgCanvas) return;
+      bgCtx = bgCanvas.getContext("2d");
+      resizeBgCanvas();
+      window.addEventListener("resize", resizeBgCanvas);
+
+      bgParticles = [];
+      for (let i = 0; i < 40; i++) {
+        bgParticles.push({
+          x: Math.random() * bgCanvas.width,
+          y: Math.random() * bgCanvas.height,
+          speed: Math.random() * 0.2 + 0.05,
+          alpha: Math.random() * 0.15 + 0.05
+        });
+      }
+      runBgLoop();
+    }
+
+    function resizeBgCanvas() {
+      if (bgCanvas) {
+        bgCanvas.width = window.innerWidth;
+        bgCanvas.height = window.innerHeight;
+      }
+    }
+
+    function runBgLoop() {
+      if (!bgCtx || !bgCanvas) return;
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+      // Render drifting starch matrix fibers
+      bgCtx.strokeStyle = "rgba(245, 230, 200, 0.04)";
+      bgCtx.lineWidth = 1;
+
+      bgParticles.forEach(p => {
+        p.y += p.speed;
+        if (p.y > bgCanvas.height) {
+          p.y = 0;
+          p.x = Math.random() * bgCanvas.width;
+        }
+
+        bgCtx!.beginPath();
+        bgCtx!.moveTo(p.x, p.y);
+        bgCtx!.lineTo(p.x + 30, p.y + 40);
+        bgCtx!.stroke();
+      });
+
+      requestAnimationFrame(runBgLoop);
+    }
+
+    // Interaction Stage Setup
+    let stageCtx: CanvasRenderingContext2D | null = null;
+
+    function initStage() {
+      if (!interactionCanvas) return;
+      stageCtx = interactionCanvas.getContext("2d");
+      
+      // Initialize matrix particles
+      particles = [];
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        // Place particles on a slightly noisy grid to look crystalline initially
+        const row = Math.floor(i / 12);
+        const col = i % 12;
+        const ox = 30 + col * 31 + (Math.random() - 0.5) * 8;
+        const oy = 30 + row * 31 + (Math.random() - 0.5) * 8;
+        
+        particles.push({
+          x: ox,
+          y: oy,
+          ox: ox,
+          oy: oy,
+          vx: 0,
+          vy: 0,
+          size: Math.random() * 3 + 2,
+          alpha: Math.random() * 0.3 + 0.4,
+          phase: 1.0 // solid
+        });
+      }
+
+      // Add mouse/touch events
+      interactionCanvas.addEventListener("mousemove", handlePointerMove);
+      interactionCanvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+      interactionCanvas.addEventListener("touchstart", handleTouchStart, { passive: true });
+      interactionCanvas.addEventListener("mouseenter", () => {
+        if (isArmed) {
+          lastCursorX = cursorX;
+          lastCursorY = cursorY;
+        }
+      });
+
+      // Position keyboard virtual cursor initially
+      updateVirtualCursorPos(200, 200);
+
+      runStageLoop();
+    }
+
+    function handlePointerMove(e: MouseEvent) {
+      if (!isArmed || isLocked) return;
+      const rect = interactionCanvas.getBoundingClientRect();
+      
+      // Normalized relative coordinate tracking
+      const relativeX = (e.clientX - rect.left) / rect.width;
+      const relativeY = (e.clientY - rect.top) / rect.height;
+      
+      const targetX = Math.max(0, Math.min(400, relativeX * 400));
+      const targetY = Math.max(0, Math.min(400, relativeY * 400));
+
+      updateCursorState(targetX, targetY);
+    }
+
+    function handleTouchStart(e: TouchEvent) {
+      if (!isArmed || isLocked || e.touches.length === 0) return;
+      const rect = interactionCanvas.getBoundingClientRect();
+      const relativeX = (e.touches[0].clientX - rect.left) / rect.width;
+      const relativeY = (e.touches[0].clientY - rect.top) / rect.height;
+      
+      cursorX = Math.max(0, Math.min(400, relativeX * 400));
+      cursorY = Math.max(0, Math.min(400, relativeY * 400));
+      lastCursorX = cursorX;
+      lastCursorY = cursorY;
+    }
+
+    function handleTouchMove(e: TouchEvent) {
+      if (!isArmed || isLocked || e.touches.length === 0) return;
+      e.preventDefault(); // prevent scroll on touch drag
+
+      const rect = interactionCanvas.getBoundingClientRect();
+      const relativeX = (e.touches[0].clientX - rect.left) / rect.width;
+      const relativeY = (e.touches[0].clientY - rect.top) / rect.height;
+      
+      const targetX = Math.max(0, Math.min(400, relativeX * 400));
+      const targetY = Math.max(0, Math.min(400, relativeY * 400));
+
+      updateCursorState(targetX, targetY);
+    }
+
+    function updateCursorState(x: number, y: number) {
+      cursorX = x;
+      cursorY = y;
+      
+      // Update virtual overlay coordinates as well
+      keyboardCursorX = x;
+      keyboardCursorY = y;
+      updateVirtualCursorPos(x, y);
+    }
+
+    function updateVirtualCursorPos(x: number, y: number) {
+      if (virtualCursor) {
+        virtualCursor.style.left = `${x}px`;
+        virtualCursor.style.top = `${y}px`;
+      }
+    }
+
+    // Keyboard navigation cursor bindings
+    document.addEventListener("keydown", (e) => {
+      if (!isArmed || isLocked) return;
+
+      const activeElement = document.activeElement;
+      // Guard to allow normal form/button interaction
+      if (activeElement && (activeElement.tagName === "BUTTON" || activeElement.tagName === "INPUT" && activeElement !== dampenDrive)) {
+        if (e.key === "Enter" || e.key === " ") return;
+      }
+
+      // Check if keys are arrows
+      const arrowKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+      if (arrowKeys.includes(e.key)) {
+        e.preventDefault();
+
+        // Calculate step size
+        // If dampenDrive is checked OR spacebar is held down, use small steps
+        const isDampened = dampenDrive.checked || e.code === "Space" || e.key === " ";
+        const step = isDampened ? 4 : 20; // 4px keeps speed below 10 threshold, 20px exceeds it!
+
+        let dx = 0;
+        let dy = 0;
+
+        if (e.key === "ArrowUp") dy = -step;
+        if (e.key === "ArrowDown") dy = step;
+        if (e.key === "ArrowLeft") dx = -step;
+        if (e.key === "ArrowRight") dx = step;
+
+        const newX = Math.max(0, Math.min(400, keyboardCursorX + dx));
+        const newY = Math.max(0, Math.min(400, keyboardCursorY + dy));
+
+        keyboardCursorX = newX;
+        keyboardCursorY = newY;
+        updateCursorState(newX, newY);
+      }
+    });
+
+    // Spacebar listener on document to check/uncheck dampen drive checkbox
+    document.addEventListener("keydown", (e) => {
+      if (!isArmed || isLocked) return;
+      if (e.code === "Space" || e.key === " ") {
+        // Only trigger checkbox behavior if we aren't focused on a button
+        if (document.activeElement?.tagName !== "BUTTON") {
+          e.preventDefault();
+          dampenDrive.checked = true;
+        }
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.code === "Space" || e.key === " ") {
+        dampenDrive.checked = false;
+      }
+    });
+
+    // Starch matrix simulation step and draw
+    function runStageLoop() {
+      if (!stageCtx || !interactionCanvas) return;
+      stageCtx.clearRect(0, 0, 400, 400);
+
+      // 1. Calculate Velocity & Viscosity
+      const dx = cursorX - lastCursorX;
+      const dy = cursorY - lastCursorY;
+      const rawSpeed = Math.sqrt(dx * dx + dy * dy);
+      
+      // Smooth the speed readout slightly
+      currentSpeed = currentSpeed * 0.85 + rawSpeed * 0.15;
+      
+      // Viscoelastic phase state transition
+      // If speed exceeds limit, shear dilution (liquefaction) increases rapidly
+      if (currentSpeed > SPEED_LIMIT) {
+        dilutionPercent = Math.min(100, dilutionPercent + (currentSpeed - SPEED_LIMIT) * 4.0);
+      } else {
+        // Recovers slowly back to solid state
+        dilutionPercent = Math.max(0, dilutionPercent - RECOVERY_RATE * 100);
+      }
+
+      phase = dilutionPercent > 40 ? "liquid" : "solid";
+      root.setAttribute("data-phase", phase);
+
+      // Map dilution to viscosity (Solid = 15 Pa·s, Liquid = 0.2 Pa·s)
+      const maxVisc = density === "dense" ? 20.0 : (density === "oatmeal" ? 25.0 : 15.0);
+      const minVisc = 0.2;
+      viscosity = maxVisc - (dilutionPercent / 100) * (maxVisc - minVisc);
+
+      // Update telemetry text
+      speedDisplay.textContent = `${currentSpeed.toFixed(1)} px/f`;
+      dilutionDisplay.textContent = `${dilutionPercent.toFixed(1)}%`;
+      viscosityDisplay.textContent = `${viscosity.toFixed(2)} Pa·s`;
+      
+      // Update Viscosity Bar width and color
+      if (viscosityBar) {
+        const percent = (viscosity / maxVisc) * 100;
+        viscosityBar.style.width = `${percent}%`;
+        
+        if (phase === "liquid") {
+          viscosityBar.style.background = "#ef4444"; // sheared / red
+          phaseStatus.textContent = "SHEARED (LIQUID)";
+          phaseStatus.className = "status-indicator font-mono text-danger animate-pulse";
+        } else {
+          viscosityBar.style.background = "#3b82f6"; // solid / blue
+          phaseStatus.textContent = "STABLE MATRIX (SOLID)";
+          phaseStatus.className = "status-indicator font-mono text-cyan";
+        }
+      }
+
+      // Check Hub Connections sequence
+      checkHubCollision();
+
+      // Update UI displays for Hub Cards
+      hubs.forEach(hub => {
+        const card = document.getElementById(`hub-card-${hub.id}`);
+        if (card) {
+          if (hub.active) {
+            card.setAttribute("data-status", "active");
+          } else {
+            card.setAttribute("data-status", "inactive");
+          }
+        }
+      });
+
+      // System Actions locking status
+      if (connectedHubsCount === 4) {
+        statusDisplay.textContent = "EQUILIBRIUM REACHED // ACTUATOR ARMED";
+        statusDisplay.className = "status-indicator font-mono text-gold pulse-gold";
+        lockBtn.removeAttribute("disabled");
+        lockBtn.className = "btn btn-gold font-mono";
+      } else {
+        statusDisplay.textContent = connectedHubsCount > 0 
+          ? `BRIDGES FORMING [${connectedHubsCount}/4]...`
+          : "CALIBRATION INCOMPLETE";
+        statusDisplay.className = "status-indicator font-mono text-danger";
+        lockBtn.setAttribute("disabled", "true");
+        lockBtn.className = "btn btn-danger font-mono";
+      }
+
+      // 2. Render Calibration Hubs (A, B, C, D)
+      hubs.forEach((hub, idx) => {
+        // Draw connection hub circles
+        stageCtx!.beginPath();
+        stageCtx!.arc(hub.x, hub.y, hub.r, 0, Math.PI * 2);
+        
+        // Coloring: active hubs glow cyan/gold
+        if (hub.active) {
+          stageCtx!.fillStyle = "rgba(6, 182, 212, 0.15)";
+          stageCtx!.strokeStyle = "#06b6d4";
+          stageCtx!.shadowColor = "#06b6d4";
+          stageCtx!.shadowBlur = 10;
+        } else if (idx === connectedHubsCount) {
+          // Current target hub flashes gold
+          const pulse = Math.sin(Date.now() * 0.006) * 0.15 + 0.2;
+          stageCtx!.fillStyle = `rgba(245, 158, 11, ${pulse})`;
+          stageCtx!.strokeStyle = "#f59e0b";
+          stageCtx!.shadowColor = "#f59e0b";
+          stageCtx!.shadowBlur = 6;
+        } else {
+          stageCtx!.fillStyle = "rgba(255, 255, 255, 0.03)";
+          stageCtx!.strokeStyle = "rgba(255, 255, 255, 0.2)";
+          stageCtx!.shadowBlur = 0;
+        }
+        
+        stageCtx!.lineWidth = 2;
+        stageCtx!.fill();
+        stageCtx!.stroke();
+        stageCtx!.shadowBlur = 0; // reset
+
+        // Label Text
+        stageCtx!.font = "11px Outfit, Inter, sans-serif";
+        stageCtx!.fillStyle = hub.active ? "#06b6d4" : (idx === connectedHubsCount ? "#f59e0b" : "rgba(255, 255, 255, 0.4)");
+        stageCtx!.textAlign = "center";
+        stageCtx!.textBaseline = "middle";
+        stageCtx!.fillText(hub.id, hub.x, hub.y);
+      });
+
+      // 3. Render Solid Bridges (Connected Hub Paths)
+      if (connectedHubsCount > 0 && phase === "solid") {
+        stageCtx!.beginPath();
+        stageCtx!.moveTo(hubs[0].x, hubs[0].y);
+        
+        for (let i = 1; i < connectedHubsCount; i++) {
+          stageCtx!.lineTo(hubs[i].x, hubs[i].y);
+        }
+        
+        // Also draw line to current cursor
+        stageCtx!.lineTo(cursorX, cursorY);
+        
+        stageCtx!.strokeStyle = "rgba(6, 182, 212, 0.6)";
+        stageCtx!.lineWidth = 4;
+        stageCtx!.shadowColor = "#06b6d4";
+        stageCtx!.shadowBlur = 12;
+        stageCtx!.stroke();
+        stageCtx!.shadowBlur = 0; // reset
+      }
+
+      // 4. Update and Draw Particles
+      particles.forEach(p => {
+        // Physical forces:
+        // Particles always want to return to their home coords (ox, oy)
+        const homeDx = p.ox - p.x;
+        const homeDy = p.oy - p.y;
+        
+        // Spring return forces (stronger in solid state)
+        const springK = phase === "solid" ? 0.04 : 0.005;
+        p.vx += homeDx * springK;
+        p.vy += homeDy * springK;
+
+        // Interaction forces from probe:
+        const probeDx = cursorX - p.x;
+        const probeDy = cursorY - p.y;
+        const dist = Math.sqrt(probeDx * probeDx + probeDy * probeDy);
+        
+        if (dist < 45) {
+          // If in liquid phase, probe repels particles violently (shearing)
+          if (phase === "liquid") {
+            const force = (45 - dist) * 0.15;
+            const angle = Math.atan2(probeDy, probeDx);
+            p.vx -= Math.cos(angle) * force;
+            p.vy -= Math.sin(angle) * force;
+          } else {
+            // In solid phase, probe slightly attracts/drags particles (forming elastic dent)
+            const force = (45 - dist) * 0.04;
+            const angle = Math.atan2(probeDy, probeDx);
+            p.vx += Math.cos(angle) * force;
+            p.vy += Math.sin(angle) * force;
+          }
+        }
+
+        // Friction dampening
+        const friction = phase === "solid" ? 0.80 : 0.94;
+        p.vx *= friction;
+        p.vy *= friction;
+
+        // Update position
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Render particle
+        stageCtx!.beginPath();
+        stageCtx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        
+        // Color shifts depending on phase
+        if (phase === "liquid") {
+          stageCtx!.fillStyle = `rgba(239, 68, 68, ${p.alpha})`; // scattered red
+        } else {
+          stageCtx!.fillStyle = `rgba(245, 230, 200, ${p.alpha})`; // warm starch white
+        }
+        stageCtx!.fill();
+
+        // Connect near neighbors if in solid phase to show structural matrix mesh
+        if (phase === "solid") {
+          particles.forEach(other => {
+            if (p !== other) {
+              const odx = other.x - p.x;
+              const ody = other.y - p.y;
+              const odist = odx * odx + ody * ody;
+              if (odist < 900) { // ~30px distance
+                stageCtx!.beginPath();
+                stageCtx!.moveTo(p.x, p.y);
+                stageCtx!.lineTo(other.x, other.y);
+                stageCtx!.strokeStyle = "rgba(245, 230, 200, 0.07)";
+                stageCtx!.lineWidth = 0.5;
+                stageCtx!.stroke();
+              }
+            }
+          });
+        }
+      });
+
+      // 5. Draw Target Reticle at active cursor
+      stageCtx!.beginPath();
+      stageCtx!.arc(cursorX, cursorY, 6, 0, Math.PI * 2);
+      stageCtx!.fillStyle = phase === "liquid" ? "#ef4444" : "#f59e0b";
+      stageCtx!.fill();
+
+      // Save last coordinates
+      lastCursorX = cursorX;
+      lastCursorY = cursorY;
+
+      // Audio state updates
+      updateAudioFeedback();
+
+      requestAnimationFrame(runStageLoop);
+    }
+
+    function checkHubCollision() {
+      // If phase shifts to liquid, immediately reset connection bridge!
+      if (phase === "liquid" && connectedHubsCount > 0) {
+        connectedHubsCount = 0;
+        hubs.forEach(h => h.active = false);
+        root.setAttribute("data-hubs-connected", "0");
+        playResonantAlert(); // audio reset chime
+        return;
+      }
+
+      // Check sequence connection A -> B -> C -> D
+      if (connectedHubsCount < 4) {
+        const nextHub = hubs[connectedHubsCount];
+        const dx = cursorX - nextHub.x;
+        const dy = cursorY - nextHub.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= nextHub.r) {
+          nextHub.active = true;
+          connectedHubsCount++;
+          root.setAttribute("data-hubs-connected", connectedHubsCount.toString());
+          playResonantChime(connectedHubsCount); // success tone
+        }
+      }
+    }
+
+    // Audio Synthesis Control
+    function initAudio() {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioCtx = new AudioContextClass();
+
+        // 1. Solid-state background drone (82.4 Hz - E2)
+        droneOsc = audioCtx.createOscillator();
+        droneGain = audioCtx.createGain();
+        
+        droneOsc.type = "sawtooth";
+        droneOsc.frequency.setValueAtTime(82.4, audioCtx.currentTime);
+        
+        // Filter out high sawtooth frequencies to make it a warm hum
+        const droneFilter = audioCtx.createBiquadFilter();
+        droneFilter.type = "lowpass";
+        droneFilter.frequency.setValueAtTime(150, audioCtx.currentTime);
+        
+        droneGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        
+        droneOsc.connect(droneFilter);
+        droneFilter.connect(droneGain);
+        droneGain.connect(audioCtx.destination);
+        droneOsc.start();
+
+        // 2. Liquid-state squelching noise generator
+        const bufferSize = 4096;
+        noiseNode = audioCtx.createScriptProcessor(bufferSize, 1, 1);
+        noiseNode.onaudioprocess = function(e) {
+          const outputBuffer = e.outputBuffer;
+          const channelData = outputBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            channelData[i] = (Math.random() * 2 - 1);
+          }
+        };
+
+        squelchFilter = audioCtx.createBiquadFilter();
+        squelchFilter.type = "bandpass";
+        squelchFilter.frequency.setValueAtTime(300, audioCtx.currentTime);
+        squelchFilter.Q.setValueAtTime(4.0, audioCtx.currentTime);
+
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.0, audioCtx.currentTime); // quiet initially
+
+        noiseNode.connect(squelchFilter);
+        squelchFilter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+
+        // 3. Hub connections resonant chord synthesizer
+        resonantSynthGain = audioCtx.createGain();
+        resonantSynthGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        resonantSynthGain.connect(audioCtx.destination);
+
+      } catch (e) {
+        console.error("Failed to initialize viscoelastic audio context:", e);
+      }
+    }
+
+    function updateAudioFeedback() {
+      if (!audioCtx || !droneGain || !noiseGain || !squelchFilter) return;
+
+      // Solid-state drone hum is louder and deeper when matrix is solid
+      const droneVolume = phase === "solid" ? 0.08 : 0.02;
+      droneGain.gain.setTargetAtTime(droneVolume, audioCtx.currentTime, 0.15);
+
+      // Noise gain increases with dilution/speed to simulate liquid sloshing
+      const speedFactor = Math.min(1.0, currentSpeed / 25.0);
+      const targetNoiseVol = phase === "liquid" ? (0.15 * speedFactor) : 0.0;
+      noiseGain.gain.setTargetAtTime(targetNoiseVol, audioCtx.currentTime, 0.1);
+
+      // Sweep squelch bandpass frequency with speed to simulate wet squelching
+      const filterFreq = 250 + (currentSpeed * 40.0);
+      squelchFilter.frequency.setTargetAtTime(Math.min(1800, filterFreq), audioCtx.currentTime, 0.1);
+    }
+
+    function playResonantChime(step: number) {
+      if (!audioCtx || !resonantSynthGain) return;
+
+      const scale = [261.63, 293.66, 329.63, 392.00, 440.00]; // C Major pentatonic
+      const freq = scale[(step - 1) % scale.length];
+
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+      gainNode.gain.setValueAtTime(0.20, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+
+      osc.connect(gainNode);
+      gainNode.connect(resonantSynthGain);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.8);
+    }
+
+    function playResonantAlert() {
+      if (!audioCtx || !resonantSynthGain) return;
+
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      // Discordant double buzz
+      osc1.type = "sawtooth";
+      osc1.frequency.setValueAtTime(146.83, audioCtx.currentTime); // D3
+      osc2.type = "sawtooth";
+      osc2.frequency.setValueAtTime(151.83, audioCtx.currentTime); // Detuned
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+
+      gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(resonantSynthGain);
+
+      osc1.start();
+      osc2.start();
+      osc1.stop(audioCtx.currentTime + 0.4);
+      osc2.stop(audioCtx.currentTime + 0.4);
+    }
+
+    function playSuccessEquilibriumChord() {
+      if (!audioCtx || !resonantSynthGain) return;
+
+      // Clean up drone
+      if (droneGain) droneGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
+      if (noiseGain) noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
+
+      const notes = [130.81, 164.81, 196.00, 261.63, 329.63, 392.00, 523.25]; // Beautiful deep C Major chord
+      notes.forEach((freq, idx) => {
+        const osc = audioCtx!.createOscillator();
+        const gainNode = audioCtx!.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, audioCtx!.currentTime);
+
+        const startTime = audioCtx!.currentTime + idx * 0.08;
+        gainNode.gain.setValueAtTime(0, audioCtx!.currentTime);
+        gainNode.gain.setValueAtTime(0.15, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + 3.0);
+
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx!.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 3.1);
+      });
+    }
+
+    // Arming Interaction
+    armButton.addEventListener("click", () => {
+      isArmed = true;
+      armingOverlay.classList.add("hidden");
+      workspace.classList.remove("hidden");
+      
+      initBgCanvas();
+      initStage();
+      initAudio();
+    });
+
+    // Density state adjustments
+    const densityButtons = document.querySelectorAll(".btn-selector");
+    densityButtons.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const target = e.currentTarget as HTMLElement;
+        density = target.getAttribute("data-density") || "medium";
+        
+        root.setAttribute("data-density", density);
+        densityButtons.forEach(b => b.classList.remove("active"));
+        target.classList.add("active");
+
+        // Play diagnostic beep
+        if (audioCtx) {
+          const osc = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(440 + (density === "dense" ? 100 : (density === "oatmeal" ? 200 : 0)), audioCtx.currentTime);
+          gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+          osc.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.15);
+        }
+      });
+    });
+
+    // Submit Lock Button
+    lockBtn.addEventListener("click", () => {
+      if (connectedHubsCount === 4 && phase === "solid") {
+        isLocked = true;
+        workspace.classList.add("hidden");
+        successScreen.classList.remove("hidden");
+        successScreen.classList.add("fade-in");
+
+        // Set final state displays
+        finalDensityDisplay.textContent = density.charAt(0).toUpperCase() + density.slice(1) + " Starch";
+
+        playSuccessEquilibriumChord();
+      }
+    });
+
+    // Reset Lock Calibration
+    restartBtn.addEventListener("click", () => {
+      isLocked = false;
+      connectedHubsCount = 0;
+      hubs.forEach(h => h.active = false);
+      root.setAttribute("data-hubs-connected", "0");
+      dilutionPercent = 0.0;
+      currentSpeed = 0.0;
+      cursorX = 200;
+      cursorY = 200;
+      keyboardCursorX = 200;
+      keyboardCursorY = 200;
+
+      successScreen.classList.remove("fade-in");
+      successScreen.classList.add("hidden");
+      workspace.classList.remove("hidden");
+
+      updateVirtualCursorPos(200, 200);
+
+      // Re-initialize background drone
+      if (audioCtx && droneGain) {
+        droneGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      }
+    });
+
+    // E2E Playwright testing hooks
+    (window as any).__connectCalibrationHubs = function() {
+      if (isArmed) {
+        // Fast-track connecting hubs slowly for E2E validation without triggering shear-dilution
+        connectedHubsCount = 4;
+        hubs.forEach(h => h.active = true);
+        root.setAttribute("data-hubs-connected", "4");
+        
+        // Place cursor at Hub D coordinates to represent alignment
+        cursorX = hubs[3].x;
+        cursorY = hubs[3].y;
+        lastCursorX = cursorX;
+        lastCursorY = cursorY;
+        currentSpeed = 0.0;
+        dilutionPercent = 0.0;
+        phase = "solid";
+        root.setAttribute("data-phase", "solid");
+        
+        updateVirtualCursorPos(cursorX, cursorY);
+      }
+    };
+
+    (window as any).__setShearVelocity = function(pxPerFrame: number) {
+      if (isArmed) {
+        currentSpeed = pxPerFrame;
+        if (currentSpeed > SPEED_LIMIT) {
+          dilutionPercent = 100.0;
+          phase = "liquid";
+        } else {
+          dilutionPercent = 0.0;
+          phase = "solid";
+        }
+        root.setAttribute("data-phase", phase);
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      --gold-glow: rgba(245, 158, 11, 0.4);
+      --glass-bg: rgba(15, 20, 28, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.07);
+    }
+
+    .lock-container {
+      min-height: calc(100dvh - 80px);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      color: #f1f5f9;
+      box-sizing: border-box;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .background-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .lock-header {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .page-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      opacity: 0.6;
+      margin: 0;
+    }
+
+    /* Onboarding Overlay */
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 95%;
+      max-width: 520px;
+      padding: 2rem;
+      border-radius: 1rem;
+      text-align: center;
+      z-index: 100;
+    }
+
+    .overlay-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+      animation: bounce 2.5s infinite ease-in-out;
+    }
+
+    .overlay-title {
+      font-size: 1.25rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+      color: #3b82f6;
+    }
+
+    .overlay-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+      opacity: 0.85;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .alert-info {
+      background: rgba(59, 130, 246, 0.1);
+      color: #93c5fd;
+    }
+
+    .text-left {
+      text-align: left;
+    }
+
+    /* Workspace Layout */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+      flex-grow: 1;
+    }
+
+    @media (max-width: 768px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      border-radius: 0.75rem;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.5rem;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    .status-indicator {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Starch Stage Canvas styling */
+    .canvas-stage-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      min-width: 0;
+    }
+
+    .canvas-stage {
+      position: relative;
+      width: 400px;
+      max-width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+
+    #interaction-canvas {
+      display: block;
+      background: radial-gradient(circle at center, #111827 0%, #030712 100%);
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    /* Virtual Crosshair SVG Overlay */
+    .virtual-cursor-svg {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: none;
+      z-index: 10;
+    }
+
+    .cursor-ring {
+      fill: none;
+      stroke: #f59e0b;
+      stroke-width: 1.5;
+      stroke-dasharray: 4, 2;
+      animation: rotate-cursor 8s linear infinite;
+    }
+
+    .cursor-line {
+      stroke: rgba(245, 158, 11, 0.4);
+      stroke-width: 1;
+    }
+
+    @keyframes rotate-cursor {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Controls Row Checkbox style */
+    .controls-row {
+      margin-bottom: 0.75rem;
+    }
+
+    .checkbox-container {
+      display: block;
+      position: relative;
+      padding-left: 2rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      user-select: none;
+      color: #94a3b8;
+    }
+
+    .checkbox-container input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 1.2rem;
+      width: 1.2rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.25rem;
+    }
+
+    .checkbox-container:hover input ~ .checkmark {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .checkbox-container input:checked ~ .checkmark {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+
+    .checkbox-container input:checked ~ .checkmark:after {
+      display: block;
+    }
+
+    .checkbox-container .checkmark:after {
+      left: 6px;
+      top: 2px;
+      width: 4px;
+      height: 8px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .keyboard-hint {
+      font-size: 0.75rem;
+      opacity: 0.5;
+      text-align: center;
+    }
+
+    /* Telemetry Panel styling */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .telemetry-box {
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+    }
+
+    .full-width {
+      grid-column: span 2;
+    }
+
+    .box-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .box-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    /* Viscosity bar fill */
+    .viscosity-bar-container {
+      display: flex;
+      align-items: center;
+      height: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.25rem;
+      overflow: hidden;
+      position: relative;
+      margin-top: 0.25rem;
+    }
+
+    .viscosity-bar-fill {
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.1s linear, background-color 0.2s ease;
+      width: 80%;
+    }
+
+    .viscosity-value {
+      position: absolute;
+      right: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    /* Density selections */
+    .density-selector {
+      margin-bottom: 1.5rem;
+    }
+
+    .selector-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .btn-selector {
+      font-size: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.35rem;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-selector:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+    }
+
+    .btn-selector.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: #3b82f6;
+      color: #60a5fa;
+    }
+
+    /* Hubs status cards */
+    .connection-hub-panel {
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.01);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+
+    .panel-section-title {
+      font-size: 0.8rem;
+      color: #64748b;
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    .hubs-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+
+    .hub-status-card {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 0.35rem;
+      padding: 0.5rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      min-height: 55px;
+    }
+
+    .hub-name {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .hub-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: none;
+      transition: all 0.3s ease;
+    }
+
+    .hub-status-card[data-status="active"] .hub-indicator {
+      background: #06b6d4;
+      box-shadow: 0 0 8px #06b6d4;
+    }
+
+    .hub-status-card[data-status="active"] .hub-name {
+      color: #06b6d4;
+      font-weight: bold;
+    }
+
+    /* System Actions */
+    .system-actions {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+
+    .system-actions .status-indicator {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.4rem;
+      border-radius: 0.35rem;
+    }
+
+    /* Success Screen overlay */
+    .success-screen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 95%;
+      max-width: 540px;
+      z-index: 100;
+    }
+
+    .success-content {
+      padding: 2.5rem;
+      border-radius: 1rem;
+      text-align: center;
+    }
+
+    .success-icon {
+      font-size: 3.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .success-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .success-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+      opacity: 0.85;
+    }
+
+    .success-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .metric-box {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .m-val {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 0.15rem;
+    }
+
+    .m-lbl {
+      font-size: 0.65rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .success-quote {
+      font-size: 0.9rem;
+      color: #f59e0b;
+      opacity: 0.85;
+      margin-bottom: 2rem;
+    }
+
+    /* Utility Animations */
+    .hidden {
+      display: none !important;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -46%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .pulse-gold {
+      animation: pulseGold 2s infinite;
+      border: 1px solid #f59e0b !important;
+      background: rgba(245, 158, 11, 0.1) !important;
+    }
+
+    @keyframes pulseGold {
+      0%, 100% { box-shadow: 0 0 2px rgba(245, 158, 11, 0.2); }
+      50% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.5); }
+    }
+
+    /* Mobile Responsive Optimizations to prevent horizontal scroll overflow */
+    @media (max-width: 480px) {
+      .lock-container {
+        padding: 0.75rem !important;
+      }
+      .panel {
+        padding: 1rem !important;
+      }
+      .overlay {
+        padding: 1.25rem !important;
+        width: 92% !important;
+      }
+      .button-group {
+        grid-template-columns: 1fr !important;
+      }
+      .telemetry-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .full-width {
+        grid-column: span 1 !important;
+      }
+      .success-metrics {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* Prevent dev-toolbar click interception in E2E tests */
+    :global(astro-dev-toolbar) {
+      display: none !important;
+      pointer-events: none !important;
+    }
+  </style>
+</Base>

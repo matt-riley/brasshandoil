@@ -54,6 +54,10 @@ const pages = [
   "/experiments/ymca-attempt-18",
   "/experiments/speed-trap",
   "/experiments/voyager-telemetry-recalibrator",
+  "/experiments/deer-ked-protocol",
+  "/experiments/pollen-parcel-bureau",
+  "/experiments/semaphore-loom",
+  "/experiments/viscoelastic-rice-lock",
 ]
 
 test.use({

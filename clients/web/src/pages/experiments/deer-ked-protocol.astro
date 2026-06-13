@@ -1,0 +1,785 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Deer Ked — Voluntary Blindness Protocol">
+  <div id="experiment" data-testid="world">
+    <!-- Scene: the forest the ked sees before landing -->
+    <div id="scene">
+      <div id="forest">
+        <div class="tree" style="--x: 15%; --h: 180px; --hue: 130;"></div>
+        <div class="tree" style="--x: 30%; --h: 220px; --hue: 120;"></div>
+        <div class="tree" style="--x: 50%; --h: 200px; --hue: 140;"></div>
+        <div class="tree" style="--x: 70%; --h: 240px; --hue: 125;"></div>
+        <div class="tree" style="--x: 85%; --h: 190px; --hue: 135;"></div>
+      </div>
+      <div id="deer" data-testid="deer">
+        <div class="deer-body"></div>
+        <div class="deer-head"></div>
+        <div class="deer-antler left"></div>
+        <div class="deer-antler right"></div>
+        <div class="deer-legs">
+          <div class="leg"></div>
+          <div class="leg"></div>
+          <div class="leg"></div>
+          <div class="leg"></div>
+        </div>
+      </div>
+      <div id="wings" data-testid="wings">
+        <div class="wing left-wing"></div>
+        <div class="wing right-wing"></div>
+      </div>
+    </div>
+
+    <!-- The ked's genome terminal -->
+    <div id="terminal">
+      <div id="terminal-header">
+        <span class="blink">●</span>
+        <span>LIPOPTENA CERVI — GENE EXPRESSION MONITOR</span>
+        <span id="species-note">Blood-feeding ectoparasite · Order Diptera</span>
+      </div>
+
+      <div id="panels">
+        <div id="vision-panel" data-testid="genome-panel">
+          <h3>VISION GENES <span class="panel-tag">— click to silence</span></h3>
+          <div id="gene-list">
+            <!-- Populated by script -->
+          </div>
+        </div>
+
+        <div id="feeding-panel">
+          <h3>FEEDING GENES <span class="panel-tag dormant">— dormant</span></h3>
+          <div id="feeding-list">
+            <!-- Populated by script -->
+          </div>
+        </div>
+      </div>
+
+      <div id="status-bar">
+        <span id="wing-status">WINGS: ATTACHED</span>
+        <span id="vision-pct">VISION: 100%</span>
+        <span id="feeding-pct">FEEDING: 0%</span>
+      </div>
+    </div>
+
+    <div id="final-state" data-testid="final-state">
+      <div id="final-text">
+        <p class="final-title">ADAPTATION COMPLETE</p>
+        <p class="final-body">You have shed your wings. You have silenced your eyes.<br>
+        You are now permanently attached to your host.<br>
+        You will never fly again. You will never see again.<br>
+        But you will feed. Forever.</p>
+        <p class="final-note">— Lipoptena cervi does this voluntarily, every generation.</p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @property --warmth {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0;
+    }
+
+    #experiment {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: #0a1a0a;
+      transition: filter 0.8s ease;
+      font-family: 'Courier New', monospace;
+      color: #c0ffc0;
+    }
+
+    /* === SCENE === */
+    #scene {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 55%;
+      background: linear-gradient(180deg, #0d1f0d 0%, #1a3a1a 40%, #2a4a1a 70%, #3a5a2a 100%);
+      overflow: hidden;
+    }
+
+    .tree {
+      position: absolute;
+      bottom: 0;
+      left: var(--x);
+      width: 4px;
+      height: var(--h);
+      background: hsl(var(--hue), 20%, 15%);
+    }
+    .tree::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 80px;
+      background: radial-gradient(ellipse, hsl(var(--hue), 40%, 20%) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    /* Deer */
+    #deer {
+      position: absolute;
+      bottom: 20%;
+      left: 55%;
+      transform: translateX(-50%);
+    }
+    .deer-body {
+      width: 80px;
+      height: 45px;
+      background: #8B6914;
+      border-radius: 40px 50px 20px 20px;
+      position: relative;
+    }
+    .deer-head {
+      width: 30px;
+      height: 28px;
+      background: #9B7924;
+      border-radius: 50% 50% 40% 40%;
+      position: absolute;
+      top: -10px;
+      right: -20px;
+    }
+    .deer-head::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: #111;
+      border-radius: 50%;
+      position: absolute;
+      top: 8px;
+      right: 6px;
+    }
+    .deer-antler {
+      position: absolute;
+      top: -28px;
+      width: 3px;
+      height: 22px;
+      background: #6B5910;
+    }
+    .deer-antler.left {
+      right: -8px;
+      transform: rotate(-15deg);
+    }
+    .deer-antler.right {
+      right: -18px;
+      transform: rotate(15deg);
+    }
+    .deer-antler::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      width: 3px;
+      height: 10px;
+      background: #6B5910;
+    }
+    .deer-antler.left::before {
+      left: -6px;
+      transform: rotate(-30deg);
+    }
+    .deer-antler.right::before {
+      right: -6px;
+      transform: rotate(30deg);
+    }
+    .deer-legs .leg {
+      position: absolute;
+      width: 4px;
+      height: 30px;
+      background: #7B5910;
+      bottom: -30px;
+    }
+    .deer-legs .leg:nth-child(1) { left: 10px; }
+    .deer-legs .leg:nth-child(2) { left: 25px; }
+    .deer-legs .leg:nth-child(3) { left: 50px; }
+    .deer-legs .leg:nth-child(4) { left: 65px; }
+
+    /* Wings */
+    #wings {
+      position: absolute;
+      bottom: calc(20% + 50px);
+      left: calc(55% - 10px);
+      z-index: 5;
+      transition: opacity 0.5s;
+    }
+    .wing {
+      position: absolute;
+      width: 28px;
+      height: 12px;
+      background: rgba(200, 200, 200, 0.4);
+      border: 1px solid rgba(200, 200, 200, 0.6);
+      animation: flutter 0.3s ease-in-out infinite alternate;
+    }
+    .wing.left-wing {
+      border-radius: 50% 50% 20% 50%;
+      transform-origin: right center;
+      right: 5px;
+    }
+    .wing.right-wing {
+      border-radius: 50% 50% 50% 20%;
+      transform-origin: left center;
+      left: 15px;
+      animation-delay: 0.15s;
+    }
+    @keyframes flutter {
+      from { transform: rotateX(0deg) rotateZ(-5deg); }
+      to { transform: rotateX(40deg) rotateZ(5deg); }
+    }
+
+    #wings.detached .wing {
+      animation: fallAway 2s ease-in forwards;
+    }
+    #wings.detached .wing.right-wing {
+      animation-delay: 0.3s;
+    }
+    @keyframes fallAway {
+      0% { transform: translateY(0) rotate(0); opacity: 1; }
+      30% { transform: translateY(20px) rotate(45deg) translateX(20px); opacity: 0.8; }
+      60% { transform: translateY(80px) rotate(120deg) translateX(-10px); opacity: 0.5; }
+      100% { transform: translateY(200px) rotate(270deg) translateX(30px); opacity: 0; }
+    }
+
+    /* === TERMINAL === */
+    #terminal {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      background: rgba(0, 15, 0, 0.95);
+      border-top: 1px solid #2a5a2a;
+      padding: 12px 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #5a9a5a;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #1a3a1a;
+    }
+    #species-note {
+      margin-left: auto;
+      font-size: 9px;
+      color: #3a6a3a;
+    }
+
+    .blink {
+      color: #4f4;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    #panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #vision-panel, #feeding-panel {
+      overflow-y: auto;
+    }
+
+    h3 {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #6aba6a;
+      margin: 0 0 8px 0;
+      font-weight: normal;
+    }
+    .panel-tag {
+      color: #3a6a3a;
+      font-size: 9px;
+    }
+    .panel-tag.dormant {
+      color: #5a3a3a;
+    }
+
+    /* Gene rows */
+    .gene-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      border: 1px solid #1a3a1a;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .gene-row:hover:not(.silenced) {
+      border-color: #4a8a4a;
+      background: rgba(40, 80, 40, 0.2);
+    }
+    .gene-row.silenced {
+      border-color: #3a1a1a;
+      background: rgba(40, 10, 10, 0.3);
+      cursor: default;
+    }
+    .gene-row.silenced .gene-name {
+      text-decoration: line-through;
+      color: #5a3a3a;
+    }
+    .gene-status {
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      min-width: 60px;
+      text-align: center;
+    }
+    .gene-status.active {
+      background: rgba(40, 80, 40, 0.4);
+      color: #6aba6a;
+    }
+    .gene-status.silenced {
+      background: rgba(80, 20, 20, 0.4);
+      color: #ba4a4a;
+    }
+    .gene-name {
+      flex: 1;
+      font-family: 'Courier New', monospace;
+      color: #a0daa0;
+      transition: color 0.3s;
+    }
+    .gene-desc {
+      font-size: 10px;
+      color: #4a7a4a;
+    }
+
+    /* Feeding genes */
+    .feeding-gene {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      border: 1px solid #1a1a1a;
+      font-size: 12px;
+      transition: all 0.8s;
+    }
+    .feeding-gene.active-feeding {
+      border-color: #5a1a1a;
+      background: rgba(60, 10, 10, 0.3);
+    }
+    .feeding-gene .gene-status.dormant {
+      background: rgba(30, 30, 30, 0.4);
+      color: #4a4a4a;
+    }
+    .feeding-gene .gene-status.active {
+      background: rgba(80, 20, 20, 0.4);
+      color: #da5a5a;
+    }
+    .feeding-gene .gene-name {
+      color: #5a3a3a;
+      transition: color 0.8s;
+    }
+    .feeding-gene.active-feeding .gene-name {
+      color: #da6a6a;
+    }
+
+    /* Status bar */
+    #status-bar {
+      display: flex;
+      gap: 20px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: #4a7a4a;
+      padding-top: 6px;
+      border-top: 1px solid #1a3a1a;
+    }
+
+    /* Final state */
+    #final-state {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 0, 0, 0.97);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.5s ease;
+      z-index: 100;
+    }
+    #final-state.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .final-title {
+      font-size: 14px;
+      letter-spacing: 4px;
+      color: #ba4a4a;
+      margin-bottom: 20px;
+    }
+    .final-body {
+      font-size: 13px;
+      line-height: 2;
+      color: #6a3a3a;
+    }
+    .final-note {
+      margin-top: 30px;
+      font-size: 11px;
+      color: #3a2a2a;
+      font-style: italic;
+    }
+
+    /* Warmth overlay — grows as feeding genes activate */
+    #experiment::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
+        rgba(180, 40, 40, calc(var(--warmth) * 0.15)) 0%,
+        transparent 40%
+      );
+      pointer-events: none;
+      z-index: 50;
+      transition: opacity 0.3s;
+    }
+
+    /* Scan-line effect when feeding genes are active */
+    .scanlines #scene::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        transparent 0px,
+        transparent 2px,
+        rgba(180, 40, 40, 0.03) 2px,
+        rgba(180, 40, 40, 0.03) 4px
+      );
+      pointer-events: none;
+      animation: scanPulse 3s ease-in-out infinite;
+    }
+    @keyframes scanPulse {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      #terminal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+      #species-note {
+        margin-left: 0;
+      }
+      #panels {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .gene-row, .feeding-gene {
+        padding: 6px 8px;
+        font-size: 11px;
+      }
+      .gene-desc {
+        display: none;
+      }
+      #status-bar {
+        gap: 10px;
+        font-size: 9px;
+      }
+    }
+  </style>
+
+  <script>
+    interface VisionGene {
+      id: string;
+      name: string;
+      desc: string;
+      filter: string;
+      active: boolean;
+    }
+
+    interface FeedingGene {
+      id: string;
+      name: string;
+      desc: string;
+      active: boolean;
+    }
+
+    const visionGenes: VisionGene[] = [
+      {
+        id: "chromatic",
+        name: "OPN4_CHROMATIC",
+        desc: "Color perception — distinguishes wavelengths",
+        filter: "saturate(0)",
+        active: true,
+      },
+      {
+        id: "contrast",
+        name: "GNAT2_CONTRAST",
+        desc: "Contrast sensitivity — separates figure from ground",
+        filter: "contrast(0.4)",
+        active: true,
+      },
+      {
+        id: "acuity",
+        name: "CRX_ACUITY",
+        desc: "Visual acuity — resolves fine detail",
+        filter: "blur(3px)",
+        active: true,
+      },
+      {
+        id: "luminance",
+        name: "RHO_LUMINANCE",
+        desc: "Luminance response — adapts to brightness",
+        filter: "brightness(0.25)",
+        active: true,
+      },
+      {
+        id: "motion",
+        name: "SAC_MOTION",
+        desc: "Motion detection — tracks moving objects",
+        filter: "",
+        active: true,
+      },
+      {
+        id: "depth",
+        name: "PAX6_DEPTH",
+        desc: "Depth perception — binocular distance estimation",
+        filter: "",
+        active: true,
+      },
+    ];
+
+    const feedingGenes: FeedingGene[] = [
+      {
+        id: "thermo",
+        name: "TRPV1_THERMAL",
+        desc: "Infrared thermoreception — detects host body heat",
+        active: false,
+      },
+      {
+        id: "hemo",
+        name: "AQP_HEMOGLOBIN",
+        desc: "Hemoglobin chemoreception — smells blood",
+        active: false,
+      },
+      {
+        id: "grip",
+        name: "INTG_ADHESION",
+        desc: "Tarsal grip strength — permanent host attachment",
+        active: false,
+      },
+      {
+        id: "coag",
+        name: "SIAL_ANTICOAG",
+        desc: "Salivary anticoagulant — prevents blood clotting",
+        active: false,
+      },
+      {
+        id: "digest",
+        name: "TRYP_DIGESTION",
+        desc: "Hematophagous digestion — metabolises blood meals",
+        active: false,
+      },
+      {
+        id: "repro",
+        name: "VTG_VIVIPAR",
+        desc: "Adenotrophic viviparity — live birth of single larva",
+        active: false,
+      },
+    ];
+
+    let silencedCount = 0;
+    let wingsDetached = false;
+
+    function init(): void {
+      renderVisionGenes();
+      renderFeedingGenes();
+      setupCursorTracking();
+    }
+
+    function renderVisionGenes(): void {
+      const list = document.getElementById("gene-list");
+      if (!list) return;
+      list.innerHTML = "";
+
+      visionGenes.forEach((gene, i) => {
+        const row = document.createElement("div");
+        row.className = `gene-row${gene.active ? "" : " silenced"}`;
+        row.setAttribute("data-testid", "gene-row");
+        row.setAttribute("data-gene-id", gene.id);
+
+        row.innerHTML = `
+          <span class="gene-status ${gene.active ? "active" : "silenced"}"
+                data-testid="gene-status">${gene.active ? "ACTIVE" : "SILENCED"}</span>
+          <span class="gene-name" data-testid="gene-name">${gene.name}</span>
+          <span class="gene-desc">${gene.desc}</span>
+        `;
+
+        if (gene.active) {
+          row.addEventListener("click", () => silenceGene(i));
+        }
+
+        list.appendChild(row);
+      });
+    }
+
+    function renderFeedingGenes(): void {
+      const list = document.getElementById("feeding-list");
+      if (!list) return;
+      list.innerHTML = "";
+
+      feedingGenes.forEach((gene) => {
+        const row = document.createElement("div");
+        row.className = `feeding-gene${gene.active ? " active-feeding" : ""}`;
+        row.setAttribute("data-testid", "feeding-gene");
+
+        row.innerHTML = `
+          <span class="gene-status ${gene.active ? "active" : "dormant"}">${gene.active ? "ACTIVE" : "DORMANT"}</span>
+          <span class="gene-name">${gene.name}</span>
+          <span class="gene-desc">${gene.desc}</span>
+        `;
+
+        list.appendChild(row);
+      });
+    }
+
+    function silenceGene(index: number): void {
+      const gene = visionGenes[index];
+      if (!gene || !gene.active) return;
+
+      gene.active = false;
+      silencedCount++;
+
+      // Detach wings on first silencing
+      if (!wingsDetached) {
+        wingsDetached = true;
+        const wings = document.getElementById("wings");
+        if (wings) wings.classList.add("detached");
+        const wingStatus = document.getElementById("wing-status");
+        if (wingStatus) wingStatus.textContent = "WINGS: DETACHED";
+      }
+
+      // Activate corresponding feeding gene
+      if (silencedCount <= feedingGenes.length) {
+        feedingGenes[silencedCount - 1].active = true;
+      }
+
+      // Apply cumulative visual degradation to the scene
+      applyDegradation();
+
+      // Handle motion gene — freeze animations
+      if (gene.id === "motion") {
+        const scene = document.getElementById("scene");
+        if (scene) scene.style.setProperty("animation-play-state", "paused");
+        document.querySelectorAll(".tree, .wing, .blink").forEach((el) => {
+          (el as HTMLElement).style.animationPlayState = "paused";
+        });
+      }
+
+      // Handle depth gene — flatten everything
+      if (gene.id === "depth") {
+        document.querySelectorAll(".tree").forEach((el) => {
+          (el as HTMLElement).style.filter = "none";
+          (el as HTMLElement).style.boxShadow = "none";
+        });
+        const deer = document.getElementById("deer");
+        if (deer) deer.style.filter = "contrast(0.8)";
+      }
+
+      // Add scanlines once feeding is active
+      if (silencedCount >= 2) {
+        document.getElementById("experiment")?.classList.add("scanlines");
+      }
+
+      // Update displays
+      renderVisionGenes();
+      renderFeedingGenes();
+      updateStatusBar();
+
+      // Check for completion
+      if (silencedCount >= visionGenes.length) {
+        setTimeout(showFinalState, 1200);
+      }
+    }
+
+    function applyDegradation(): void {
+      const world = document.getElementById("scene");
+      if (!world) return;
+
+      const filters = visionGenes
+        .filter((g) => !g.active && g.filter)
+        .map((g) => g.filter);
+
+      world.style.filter = filters.length > 0 ? filters.join(" ") : "none";
+
+      // Update warmth level based on feeding genes
+      const activeFeeding = feedingGenes.filter((g) => g.active).length;
+      document.getElementById("experiment")?.style.setProperty(
+        "--warmth",
+        String(activeFeeding)
+      );
+    }
+
+    function updateStatusBar(): void {
+      const active = visionGenes.filter((g) => g.active).length;
+      const visionPct = Math.round((active / visionGenes.length) * 100);
+      const feedingActive = feedingGenes.filter((g) => g.active).length;
+      const feedingPct = Math.round((feedingActive / feedingGenes.length) * 100);
+
+      const visionEl = document.getElementById("vision-pct");
+      if (visionEl) visionEl.textContent = `VISION: ${visionPct}%`;
+      const feedingEl = document.getElementById("feeding-pct");
+      if (feedingEl) feedingEl.textContent = `FEEDING: ${feedingPct}%`;
+    }
+
+    function showFinalState(): void {
+      const finalState = document.getElementById("final-state");
+      if (finalState) finalState.classList.add("visible");
+    }
+
+    function setupCursorTracking(): void {
+      const experiment = document.getElementById("experiment");
+      if (!experiment) return;
+
+      experiment.addEventListener("mousemove", (e: MouseEvent) => {
+        const rect = experiment.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        experiment.style.setProperty("--cursor-x", `${x}%`);
+        experiment.style.setProperty("--cursor-y", `${y}%`);
+      });
+    }
+
+    // Also apply the filter to the data-testid="world" element for the test
+    const observer = new MutationObserver(() => {
+      const scene = document.getElementById("scene");
+      const world = document.querySelector("[data-testid='world']") as HTMLElement | null;
+      if (scene && world && scene.style.filter && scene.style.filter !== "none") {
+        world.style.filter = scene.style.filter;
+      }
+    });
+
+    const sceneEl = document.getElementById("scene");
+    if (sceneEl) {
+      observer.observe(sceneEl, { attributes: true, attributeFilter: ["style"] });
+    }
+
+    init();
+  </script>
+</Base>
