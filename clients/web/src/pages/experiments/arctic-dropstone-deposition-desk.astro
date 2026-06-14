@@ -1,0 +1,1900 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Arctic Dropstone Deposition Desk // Benthic Accretion Registry">
+  <div class="desk-container" id="dropstone-root" data-biodiversity="0" data-active-stones="0" data-temperature="2.0" data-bays-completed="0" data-current-speed="0">
+    <!-- CRT Screen Overlay for Immersive Depth UI -->
+    <div class="crt-overlay" aria-hidden="true"></div>
+    <div class="crt-flicker" aria-hidden="true"></div>
+    
+    <!-- Background slow drifting particles -->
+    <canvas id="ambient-ocean-canvas" class="background-canvas" aria-hidden="true"></canvas>
+
+    <!-- Header Section -->
+    <header class="desk-header">
+      <h1 class="page-title text-gradient">Arctic Dropstone Deposition Desk</h1>
+      <p class="subtitle font-mono">BENTHIC ACCRETION REGISTRY // SEAFLOOR ECOSYSTEM OFFICE</p>
+    </header>
+
+    <!-- Arming Overlay for synthesizer system activation -->
+    <div id="arming-overlay" class="overlay glass">
+      <div class="overlay-content">
+        <div class="overlay-icon">🧊</div>
+        <h2 class="overlay-title font-mono">BENTHIC LEDGER & HYDROPHONES INITIALIZATION</h2>
+        <p class="overlay-desc">
+          Melting Arctic icebergs deposit mineral debris (dropstones) onto the barren ocean floor, seeding vibrant micro-habitats of soft corals, glass sponges, and cold-water anemones.
+        </p>
+        <div class="alert alert-info font-mono text-left">
+          <strong>OPERATIONAL MANDATE:</strong><br/>
+          1. Drop diverse mineral debris from the inventory into the current column.<br/>
+          2. Deflect falling debris using the <strong>Thermohaline Current</strong>.<br/>
+          3. Accrete exactly <strong class="text-gold">3 dropstones</strong> in each of the four seafloor sectors (A, B, C, D) to satisfy biodiversity offset quotas.<br/>
+          4. <strong>CAUTION:</strong> Rising water temperatures accelerate calving but cause established benthic organisms to decay over time.
+        </div>
+        <button id="arm-button" class="btn btn-primary font-mono">
+          Initialize Ocean Column & Synth
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="workspace-grid hidden" id="workspace">
+      <!-- Left Column: Hydrographic Current Column -->
+      <div class="panel stage-panel glass">
+        <div class="panel-header">
+          <h2 class="panel-title font-mono">I. Hydrographic Column</h2>
+          <span class="status-indicator font-mono" id="simulation-status">STANDBY</span>
+        </div>
+
+        <div class="canvas-stage-wrapper">
+          <div class="canvas-stage" id="canvas-stage" role="img" aria-label="Vector Water Column showing icebergs at the top, falling stones, current flow lines, and marine organisms at the seafloor.">
+            <canvas id="simulation-canvas" width="400" height="500"></canvas>
+            
+            <!-- Accessible Keyboard Control Overlay -->
+            <div id="keyboard-steer-indicator" class="keyboard-hud font-mono hidden">
+              <span>ACTIVE STONE STEERING:</span>
+              <div class="steer-keys">
+                <span class="key-cap">Shift</span> + <span class="key-cap">&larr;</span> / <span class="key-cap">&rarr;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="keyboard-hint font-mono">
+          [CLICK ON CANVAS] Drop Stone at position // [TAB] Navigate Panel controls // [SHIFT + ARROWS] Steer active falling stone
+        </div>
+      </div>
+
+      <!-- Right Column: Deposition Ledger & Accretion HUD -->
+      <div class="panel control-panel glass">
+        <h2 class="panel-title font-mono">II. Deposition Ledger</h2>
+
+        <!-- Metrics Dashboard -->
+        <div class="telemetry-grid">
+          <div class="telemetry-box">
+            <span class="box-label font-mono">HEAT INDEX</span>
+            <div class="box-value font-mono text-danger" id="temp-display">+2.00 °C</div>
+          </div>
+          <div class="telemetry-box">
+            <span class="box-label font-mono">GLACIAL RUNOFF</span>
+            <div class="box-value font-mono text-cyan" id="melt-rate-display">0.05 m³/s</div>
+          </div>
+          <div class="telemetry-box full-width">
+            <span class="box-label font-mono">BIODIVERSITY OFFSET ACCELERATION</span>
+            <div class="offset-bar-container">
+              <div class="offset-bar-fill" id="offset-bar" style="width: 0%"></div>
+              <span class="offset-value font-mono" id="offset-display">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accretion Bays Status (Playwright Target Elements) -->
+        <div class="bays-panel">
+          <span class="panel-section-title font-mono">SEAFLOOR ACCRETION BAYS STATUS:</span>
+          <div class="bays-grid">
+            <div class="bay-status-card" id="bay-indicator-A" data-accretion="0">
+              <span class="bay-name font-mono">BAY A (0-100px)</span>
+              <div class="bay-progress">
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+              </div>
+              <span class="bay-count font-mono">0 / 3</span>
+            </div>
+            <div class="bay-status-card" id="bay-indicator-B" data-accretion="0">
+              <span class="bay-name font-mono">BAY B (100-200px)</span>
+              <div class="bay-progress">
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+              </div>
+              <span class="bay-count font-mono">0 / 3</span>
+            </div>
+            <div class="bay-status-card" id="bay-indicator-C" data-accretion="0">
+              <span class="bay-name font-mono">BAY C (200-300px)</span>
+              <div class="bay-progress">
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+              </div>
+              <span class="bay-count font-mono">0 / 3</span>
+            </div>
+            <div class="bay-status-card" id="bay-indicator-D" data-accretion="0">
+              <span class="bay-name font-mono">BAY D (300-400px)</span>
+              <div class="bay-progress">
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+              </div>
+              <span class="bay-count font-mono">0 / 3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Debris Spawn Inventory (Draggable / Clickable) -->
+        <div class="inventory-section">
+          <span class="panel-section-title font-mono">SINKING DEBRIS INVENTORY:</span>
+          <div class="inventory-list">
+            <button class="debris-card" id="debris-granite" draggable="true" data-type="granite">
+              <span class="debris-icon">🪨</span>
+              <div class="debris-details text-left">
+                <span class="debris-name font-mono">Granite Erratic</span>
+                <span class="debris-meta font-mono">Heavy // Rapid Sinking</span>
+              </div>
+            </button>
+            <button class="debris-card" id="debris-basalt" draggable="true" data-type="basalt">
+              <span class="debris-icon">🌋</span>
+              <div class="debris-details text-left">
+                <span class="debris-name font-mono">Basalt Nodule</span>
+                <span class="debris-meta font-mono">Medium Weight // Coarse Texture</span>
+              </div>
+            </button>
+            <button class="debris-card" id="debris-shale" draggable="true" data-type="shale">
+              <span class="debris-icon">🫓</span>
+              <div class="debris-details text-left">
+                <span class="debris-name font-mono">Fossilized Shale</span>
+                <span class="debris-meta font-mono">Light // High Current Deflection</span>
+              </div>
+            </button>
+            <button class="debris-card" id="debris-silt" draggable="true" data-type="silt">
+              <span class="debris-icon">⏳</span>
+              <div class="debris-details text-left">
+                <span class="debris-name font-mono">Glacial Silt Bundle</span>
+                <span class="debris-meta font-mono">Drifting // Creates Soft Anemones</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Hydrographic Controls -->
+        <div class="sliders-section">
+          <div class="slider-container">
+            <div class="slider-labels">
+              <label for="current-slider" class="font-mono">THERMOHALINE CURRENT FORCE</label>
+              <span id="current-val-display" class="font-mono text-cyan">0.0 px/f</span>
+            </div>
+            <input type="range" id="current-slider" min="-10" max="10" step="0.5" value="0" class="custom-slider" />
+          </div>
+
+          <div class="slider-container">
+            <div class="slider-labels">
+              <label for="temp-slider" class="font-mono">WATER TEMPERATURE STIMULUS</label>
+              <span id="temp-val-display" class="font-mono text-danger">+2.0 °C</span>
+            </div>
+            <input type="range" id="temp-slider" min="0.5" max="4.5" step="0.1" value="2.0" class="custom-slider" />
+          </div>
+        </div>
+
+        <!-- Accretion Submission Actions -->
+        <div class="system-actions">
+          <span class="status-indicator font-mono text-danger" id="audit-status">OFFSETS UNVERIFIED</span>
+          <button id="submit-audit-btn" class="btn btn-danger font-mono" disabled>
+            📁 Submit Accretion Audit
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Registry Confirmation Overlay -->
+    <div id="success-screen" class="success-screen hidden">
+      <div class="success-content glass">
+        <div class="success-icon">🪸</div>
+        <h1 class="success-title text-gradient">Ecosystem Offsets Verified</h1>
+        <p class="success-desc">
+          Benthic accretion quotas satisfied. Glacial dropstones have successfully seeded cold-water soft coral colonies, glass sponges, and anemones across all four deep-sea sectors.
+        </p>
+        <div class="success-metrics font-mono">
+          <div class="metric-box">
+            <span class="m-val text-gradient" id="final-bays-display">4 / 4</span>
+            <span class="m-lbl">Sectors Accreted</span>
+          </div>
+          <div class="metric-box">
+            <span class="m-val text-gradient" id="final-temp-display">+2.0 °C</span>
+            <span class="m-lbl">Audit Temperature</span>
+          </div>
+          <div class="metric-box">
+            <span class="m-val text-gradient">100%</span>
+            <span class="m-lbl">Ecosystem Balance</span>
+          </div>
+        </div>
+        <div class="success-quote italic">
+          "The melting peaks construct the deep gardens of tomorrow."
+        </div>
+        <button id="restart-btn" class="btn btn-tranquil font-mono">
+          Reset Accretion Records
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Scoped layout styling */
+    .desk-container {
+      position: relative;
+      min-height: calc(100vh - 6rem);
+      padding: var(--spacing-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-6);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      overflow: hidden;
+    }
+
+    /* CRT monitor effect */
+    .crt-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 3px 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    .crt-flicker {
+      position: absolute;
+      inset: 0;
+      background: rgba(18, 16, 16, 0.02);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+      animation: flicker 0.15s infinite;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.18; }
+      50% { opacity: 0.22; }
+      100% { opacity: 0.18; }
+    }
+
+    .background-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.25;
+    }
+
+    .desk-header {
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-1);
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: var(--spacing-3);
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+    }
+
+    /* Arming Screen */
+    .overlay {
+      position: absolute;
+      inset: var(--spacing-6);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-8);
+      text-align: center;
+    }
+
+    .overlay-content {
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+      align-items: center;
+    }
+
+    .overlay-icon {
+      font-size: 4rem;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(3deg); }
+    }
+
+    .overlay-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-brass);
+    }
+
+    .overlay-desc {
+      font-size: 1.05rem;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+
+    .alert {
+      padding: var(--spacing-4);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      border: 1px solid var(--color-border);
+    }
+
+    .alert-info {
+      background: oklch(90% 0.02 240 / 0.1);
+      border-color: oklch(75% 0.1 240 / 0.3);
+      color: oklch(90% 0.05 240);
+    }
+
+    .btn {
+      padding: var(--spacing-3) var(--spacing-6);
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border: 1px solid var(--color-border);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--color-brass);
+      color: var(--color-bg);
+      border-color: var(--color-brass);
+      box-shadow: 0 0 15px var(--color-brass-light);
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 25px var(--color-brass-light);
+    }
+
+    /* Workspace */
+    .workspace-grid {
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--spacing-6);
+      flex: 1;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+      padding: var(--spacing-6);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: var(--spacing-2);
+    }
+
+    .panel-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--color-brass);
+    }
+
+    .status-indicator {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .status-indicator.text-danger {
+      color: #ef4444;
+    }
+
+    .status-indicator.text-cyan {
+      color: #06b6d4;
+    }
+
+    .status-indicator.text-gold {
+      color: #f59e0b;
+    }
+
+    /* Simulation Canvas column */
+    .canvas-stage-wrapper {
+      position: relative;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: oklch(0% 0 0 / 0.25);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      min-height: 400px;
+    }
+
+    #simulation-canvas {
+      display: block;
+      background-color: oklch(8% 0.03 240);
+      cursor: crosshair;
+      max-width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 5;
+    }
+
+    .keyboard-hud {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--color-border);
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: #f59e0b;
+    }
+
+    .key-cap {
+      background: #333;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid #555;
+      color: #fff;
+    }
+
+    .keyboard-hint {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      text-align: center;
+    }
+
+    /* Telemetry grid */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-3);
+    }
+
+    .telemetry-box {
+      background: oklch(100% 0 0 / 0.02);
+      border: 1px solid var(--color-border);
+      padding: var(--spacing-3);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-1);
+    }
+
+    .telemetry-box.full-width {
+      grid-column: span 2;
+    }
+
+    .box-label {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      letter-spacing: 0.05em;
+    }
+
+    .box-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .text-danger { color: #f87171; }
+    .text-cyan { color: #22d3ee; }
+    .text-gold { color: #fbbf24; }
+
+    .offset-bar-container {
+      position: relative;
+      height: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .offset-bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, #06b6d4, #10b981);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .offset-value {
+      position: relative;
+      z-index: 2;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Accretion Bays Status Grid */
+    .bays-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-2);
+    }
+
+    .panel-section-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      opacity: 0.8;
+      letter-spacing: 0.05em;
+      color: var(--color-brass);
+    }
+
+    .bays-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-2);
+    }
+
+    .bay-status-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-2);
+      transition: all 0.2s ease;
+    }
+
+    .bay-status-card[data-accretion="3"] {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.04);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+    }
+
+    .bay-name {
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .bay-progress {
+      display: flex;
+      gap: 6px;
+    }
+
+    .progress-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--color-border);
+      transition: background 0.3s ease;
+    }
+
+    .bay-status-card[data-accretion="1"] .progress-dot:nth-child(1) { background: #06b6d4; box-shadow: 0 0 6px #06b6d4; }
+    .bay-status-card[data-accretion="2"] .progress-dot:nth-child(-n+2) { background: #06b6d4; box-shadow: 0 0 6px #06b6d4; }
+    .bay-status-card[data-accretion="3"] .progress-dot:nth-child(-n+3) { background: #10b981; box-shadow: 0 0 6px #10b981; }
+
+    .bay-count {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    /* Sinking Debris Inventory */
+    .inventory-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-2);
+    }
+
+    .inventory-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-2);
+    }
+
+    .debris-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-2) var(--spacing-3);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      cursor: grab;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+
+    .debris-card:active {
+      cursor: grabbing;
+    }
+
+    .debris-card:hover, .debris-card:focus-visible {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--color-brass);
+      outline: none;
+    }
+
+    .debris-icon {
+      font-size: 1.5rem;
+    }
+
+    .debris-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .debris-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .debris-meta {
+      font-size: 0.65rem;
+      opacity: 0.6;
+    }
+
+    /* Custom Sliders */
+    .sliders-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-3);
+      background: rgba(0, 0, 0, 0.1);
+      padding: var(--spacing-4);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .custom-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      border: 1px solid var(--color-border);
+    }
+
+    .custom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--color-brass);
+      cursor: pointer;
+      border: 2px solid var(--color-bg);
+      box-shadow: 0 0 8px var(--color-brass-light);
+    }
+
+    .custom-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--color-brass);
+      cursor: pointer;
+      border: 2px solid var(--color-bg);
+      box-shadow: 0 0 8px var(--color-brass-light);
+    }
+
+    /* Submission controls */
+    .system-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--color-border);
+      padding-top: var(--spacing-4);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-color: rgba(239, 68, 68, 0.15);
+    }
+
+    .btn-gold {
+      background: #f59e0b;
+      color: #000;
+      border-color: #f59e0b;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-gold:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+    }
+
+    .pulse-gold {
+      animation: pulse-gold-anim 2s infinite;
+    }
+
+    @keyframes pulse-gold-anim {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+    }
+
+    /* Success Screen overlay */
+    .success-screen {
+      position: absolute;
+      inset: var(--spacing-6);
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-8);
+      text-align: center;
+    }
+
+    .success-content {
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-6);
+      align-items: center;
+      padding: var(--spacing-8);
+      border-radius: var(--radius-lg);
+    }
+
+    .success-icon {
+      font-size: 5rem;
+      animation: bounce-slow 3s infinite;
+    }
+
+    @keyframes bounce-slow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .success-title {
+      font-size: 2.25rem;
+      font-weight: 900;
+    }
+
+    .success-desc {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    .success-metrics {
+      display: flex;
+      gap: var(--spacing-6);
+      justify-content: center;
+      width: 100%;
+    }
+
+    .metric-box {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-1);
+    }
+
+    .m-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .m-lbl {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      text-transform: uppercase;
+    }
+
+    .success-quote {
+      font-size: 0.95rem;
+      opacity: 0.7;
+    }
+
+    .btn-tranquil {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--color-text);
+      border-color: var(--color-border);
+    }
+
+    .btn-tranquil:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--color-brass);
+    }
+
+    /* Helper utility classes */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive scaling for mobile viewport */
+    @media (max-width: 900px) {
+      .desk-container {
+        padding: var(--spacing-3);
+        height: auto;
+        min-height: auto;
+      }
+      .overlay {
+        inset: var(--spacing-3);
+        padding: var(--spacing-4);
+      }
+      .workspace-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+      }
+      .panel {
+        padding: var(--spacing-4);
+      }
+      .canvas-stage-wrapper {
+        min-height: 320px;
+      }
+      .success-screen {
+        inset: var(--spacing-3);
+        padding: var(--spacing-4);
+      }
+      .success-content {
+        padding: var(--spacing-4);
+      }
+      .success-metrics {
+        flex-direction: column;
+        gap: var(--spacing-2);
+      }
+    }
+  </style>
+
+  <script>
+    // System state structures
+    let isArmed = false;
+    let isLocked = false;
+    let currentSpeed = 0.0; // horizontal ocean current speed
+    let waterTemp = 2.0;    // water temperature in C
+    let activeStonesCount = 0;
+    let biodiversityOffset = 0;
+    let baysCompleted = 0;
+
+    // Sinking Dropstone data structure
+    interface Dropstone {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      type: string;
+      radius: number;
+      alpha: number;
+      color: string;
+    }
+
+    // Settled Benthic Organisms data structure
+    interface BenthicOrganism {
+      x: number;
+      y: number;
+      type: string; // coral, sponge, anemone
+      size: number;
+      age: number;
+      decayRate: number;
+      color: string;
+      points: Array<{ x: number, y: number, length: number, angle: number }>; // for organic branch sway
+    }
+
+    let activeStones: Dropstone[] = [];
+    let settledOrganisms: BenthicOrganism[] = [];
+
+    // Bay thresholds (0 to 400px mapped to 4 bays of 100px width)
+    const bayAccretion = { A: 0, B: 0, C: 0, D: 0 };
+    const BAY_MAX = 3;
+
+    // Benthic Synthesizer State
+    let audioCtx: AudioContext | null = null;
+    let ambientHum: OscillatorNode | null = null;
+    let humGain: GainNode | null = null;
+    let noiseGen: ScriptProcessorNode | null = null;
+    let noiseGain: GainNode | null = null;
+    let noiseFilter: BiquadFilterNode | null = null;
+    let chimeGain: GainNode | null = null;
+
+    // DOM Elements
+    const root = document.getElementById("dropstone-root")!;
+    const armingOverlay = document.getElementById("arming-overlay")!;
+    const armButton = document.getElementById("arm-button")!;
+    const workspace = document.getElementById("workspace")!;
+    const simCanvas = document.getElementById("simulation-canvas") as HTMLCanvasElement;
+    const simStatus = document.getElementById("simulation-status")!;
+    const keyboardSteerHUD = document.getElementById("keyboard-steer-indicator")!;
+    
+    // Ledger display nodes
+    const tempDisplay = document.getElementById("temp-display")!;
+    const meltRateDisplay = document.getElementById("melt-rate-display")!;
+    const offsetBar = document.getElementById("offset-bar")!;
+    const offsetDisplay = document.getElementById("offset-display")!;
+    
+    // Sliders
+    const currentSlider = document.getElementById("current-slider") as HTMLInputElement;
+    const currentValDisplay = document.getElementById("current-val-display")!;
+    const tempSlider = document.getElementById("temp-slider") as HTMLInputElement;
+    const tempValDisplay = document.getElementById("temp-val-display")!;
+
+    // Action button
+    const auditStatus = document.getElementById("audit-status")!;
+    const submitAuditBtn = document.getElementById("submit-audit-btn") as HTMLButtonElement;
+    
+    // Success / Restart
+    const successScreen = document.getElementById("success-screen")!;
+    const restartBtn = document.getElementById("restart-btn")!;
+    const finalBaysDisplay = document.getElementById("final-bays-display")!;
+    const finalTempDisplay = document.getElementById("final-temp-display")!;
+
+    // Ambient Ocean drifting particles background
+    const ambientCanvas = document.getElementById("ambient-ocean-canvas") as HTMLCanvasElement;
+    let ambientCtx: CanvasRenderingContext2D | null = null;
+    let ambientDrifters: Array<{ x: number, y: number, speed: number, alpha: number, size: number }> = [];
+
+    function initAmbientCanvas() {
+      if (!ambientCanvas) return;
+      ambientCtx = ambientCanvas.getContext("2d");
+      resizeAmbientCanvas();
+      window.addEventListener("resize", resizeAmbientCanvas);
+
+      // Create 30 slow floating silt particles
+      ambientDrifters = [];
+      for (let i = 0; i < 30; i++) {
+        ambientDrifters.push({
+          x: Math.random() * ambientCanvas.width,
+          y: Math.random() * ambientCanvas.height,
+          speed: Math.random() * 0.15 + 0.05,
+          alpha: Math.random() * 0.12 + 0.04,
+          size: Math.random() * 2 + 1
+        });
+      }
+      runAmbientLoop();
+    }
+
+    function resizeAmbientCanvas() {
+      if (ambientCanvas) {
+        ambientCanvas.width = window.innerWidth;
+        ambientCanvas.height = window.innerHeight;
+      }
+    }
+
+    function runAmbientLoop() {
+      if (!ambientCtx || !ambientCanvas) return;
+      ambientCtx.clearRect(0, 0, ambientCanvas.width, ambientCanvas.height);
+
+      ambientCtx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ambientDrifters.forEach(p => {
+        p.y += p.speed;
+        if (p.y > ambientCanvas.height) {
+          p.y = 0;
+          p.x = Math.random() * ambientCanvas.width;
+        }
+        
+        ambientCtx!.fillStyle = `rgba(34, 211, 238, ${p.alpha})`;
+        ambientCtx!.beginPath();
+        ambientCtx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ambientCtx!.fill();
+      });
+
+      requestAnimationFrame(runAmbientLoop);
+    }
+
+    // Primary simulation loops
+    let simCtx: CanvasRenderingContext2D | null = null;
+
+    // Drifting icebergs coordinates and size
+    interface Iceberg {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      speed: number;
+      meltAccumulator: number;
+    }
+    let icebergs: Iceberg[] = [
+      { x: 50, y: 30, width: 80, height: 40, speed: 0.15, meltAccumulator: 0 },
+      { x: 180, y: 20, width: 110, height: 45, speed: -0.1, meltAccumulator: 0 },
+      { x: 310, y: 35, width: 75, height: 35, speed: 0.08, meltAccumulator: 0 }
+    ];
+
+    // Current lines flowing dynamically in water
+    interface FlowLine {
+      x: number;
+      y: number;
+      length: number;
+      speed: number;
+    }
+    let flowLines: FlowLine[] = [];
+
+    function initSimulation() {
+      if (!simCanvas) return;
+      simCtx = simCanvas.getContext("2d");
+
+      // Generate initial flow lines
+      flowLines = [];
+      for (let i = 0; i < 15; i++) {
+        flowLines.push({
+          x: Math.random() * 400,
+          y: 120 + Math.random() * 300,
+          length: Math.random() * 40 + 30,
+          speed: Math.random() * 0.5 + 0.8
+        });
+      }
+
+      // Hook up interaction event handlers
+      simCanvas.addEventListener("click", handleCanvasClick);
+      setupDragAndDrop();
+
+      runSimulationLoop();
+    }
+
+    function handleCanvasClick(e: MouseEvent) {
+      if (!isArmed || isLocked) return;
+      const rect = simCanvas.getBoundingClientRect();
+      
+      // Calculate normalized X position relative to canvas coordinate system (400px width)
+      const relativeX = (e.clientX - rect.left) / rect.width;
+      const spawnX = Math.max(10, Math.min(390, relativeX * 400));
+      
+      // Spawn standard basalt stone
+      spawnDropstone(spawnX, 80, "basalt");
+    }
+
+    function setupDragAndDrop() {
+      const debrisCards = document.querySelectorAll(".debris-card");
+      debrisCards.forEach(card => {
+        card.addEventListener("dragstart", (e: any) => {
+          if (!isArmed || isLocked) {
+            e.preventDefault();
+            return;
+          }
+          const type = card.getAttribute("data-type") || "basalt";
+          e.dataTransfer.setData("text/plain", type);
+        });
+
+        // Click handler to drop stone immediately at a random top position (keyboard/touch friendly)
+        card.addEventListener("click", (e) => {
+          if (!isArmed || isLocked) return;
+          const type = card.getAttribute("data-type") || "basalt";
+          const randomX = 50 + Math.random() * 300;
+          spawnDropstone(randomX, 80, type);
+        });
+      });
+
+      simCanvas.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+
+      simCanvas.addEventListener("drop", (e: DragEvent) => {
+        e.preventDefault();
+        if (!isArmed || isLocked || !e.dataTransfer) return;
+        const type = e.dataTransfer.getData("text/plain") || "basalt";
+        
+        const rect = simCanvas.getBoundingClientRect();
+        const relativeX = (e.clientX - rect.left) / rect.width;
+        const spawnX = Math.max(10, Math.min(390, relativeX * 400));
+        
+        spawnDropstone(spawnX, 80, type);
+      });
+    }
+
+    function spawnDropstone(x: number, y: number, type: string) {
+      if (activeStones.length >= 10) return; // Hardcap active stones
+
+      let radius = 8;
+      let vy = 1.0;
+      let color = "#3b82f6"; // default blue
+      
+      if (type === "granite") {
+        radius = 12;
+        vy = 2.0;
+        color = "#e2e8f0";
+      } else if (type === "basalt") {
+        radius = 9;
+        vy = 1.4;
+        color = "#64748b";
+      } else if (type === "shale") {
+        radius = 7;
+        vy = 0.8;
+        color = "#a1a1aa";
+      } else if (type === "silt") {
+        radius = 5;
+        vy = 0.5;
+        color = "#f59e0b";
+      }
+
+      activeStones.push({
+        x: x,
+        y: y,
+        vx: 0,
+        vy: vy,
+        type: type,
+        radius: radius,
+        alpha: 1.0,
+        color: color
+      });
+
+      // Play ice fracture alert sound
+      playIceCrack();
+    }
+
+    // Keyboard support for steering active falling stones
+    document.addEventListener("keydown", (e) => {
+      if (!isArmed || isLocked || activeStones.length === 0) return;
+      
+      // Shift + Arrows to steer active stones
+      if (e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+        e.preventDefault();
+        const force = e.key === "ArrowLeft" ? -1.0 : 1.0;
+        
+        // Apply force to the most recently spawned stone that is still falling
+        const activeStone = activeStones[activeStones.length - 1];
+        if (activeStone) {
+          activeStone.vx = Math.max(-4.0, Math.min(4.0, activeStone.vx + force));
+        }
+      }
+    });
+
+    // Steer sliders with keyboard standard binds
+    document.addEventListener("keydown", (e) => {
+      if (!isArmed || isLocked) return;
+      
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        const activeEl = document.activeElement;
+        if (activeEl === currentSlider) {
+          // slider already handles natively, just log/sync
+          setTimeout(syncControlsFromDOM, 0);
+        }
+      }
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        const activeEl = document.activeElement;
+        if (activeEl === tempSlider) {
+          // slider handles, sync
+          setTimeout(syncControlsFromDOM, 0);
+        }
+      }
+    });
+
+    function syncControlsFromDOM() {
+      currentSpeed = parseFloat(currentSlider.value);
+      waterTemp = parseFloat(tempSlider.value);
+
+      currentValDisplay.textContent = `${currentSpeed > 0 ? "+" : ""}${currentSpeed.toFixed(1)} px/f`;
+      tempValDisplay.textContent = `+${waterTemp.toFixed(1)} °C`;
+      tempDisplay.textContent = `+${waterTemp.toFixed(2)} °C`;
+
+      // Update data attributes on root
+      root.setAttribute("data-temperature", waterTemp.toString());
+      root.setAttribute("data-current-speed", currentSpeed.toString());
+
+      const meltRate = 0.01 + (waterTemp - 0.5) * 0.04;
+      meltRateDisplay.textContent = `${meltRate.toFixed(3)} m³/s`;
+    }
+
+    // Main animation step
+    function runSimulationLoop() {
+      if (!simCtx || !simCanvas) return;
+      simCtx.clearRect(0, 0, 400, 500);
+
+      // Render Stage Grid
+      drawColumnGrid();
+
+      // 1. Update and Draw Icebergs
+      drawIcebergs();
+
+      // 2. Update and Draw Water Currents
+      drawWaterCurrents();
+
+      // 3. Update and Draw Active Falling Stones
+      drawFallingStones();
+
+      // 4. Update and Draw Settled Marine Organisms
+      drawMarineOrganisms();
+
+      // 5. Update game stats
+      updateEcosystemHealth();
+
+      // Keyboard steer HUD visibility
+      if (activeStones.length > 0) {
+        keyboardSteerHUD.classList.remove("hidden");
+      } else {
+        keyboardSteerHUD.classList.add("hidden");
+      }
+
+      root.setAttribute("data-active-stones", activeStones.length.toString());
+
+      // Audio frequency & volume modulations
+      updateAudioModulations();
+
+      requestAnimationFrame(runSimulationLoop);
+    }
+
+    function drawColumnGrid() {
+      if (!simCtx) return;
+      // Draw grid lines
+      simCtx.strokeStyle = "rgba(6, 182, 212, 0.05)";
+      simCtx.lineWidth = 1;
+      
+      // Vertical grid dividers
+      for (let x = 100; x < 400; x += 100) {
+        simCtx.beginPath();
+        simCtx.moveTo(x, 100);
+        simCtx.lineTo(x, 460);
+        simCtx.stroke();
+      }
+
+      // Horizontal depth lines
+      for (let y = 150; y < 450; y += 75) {
+        simCtx.beginPath();
+        simCtx.moveTo(0, y);
+        simCtx.lineTo(400, y);
+        simCtx.stroke();
+        
+        simCtx.fillStyle = "rgba(6, 182, 212, 0.2)";
+        simCtx.font = "8px monospace";
+        simCtx.textAlign = "left";
+        simCtx.fillText(`DEPTH: -${Math.floor(y * 2.5)}m`, 8, y - 4);
+      }
+
+      // Draw Sector boundaries at seafloor (y: 440)
+      simCtx.fillStyle = "rgba(255, 255, 255, 0.03)";
+      simCtx.fillRect(0, 440, 400, 60);
+
+      simCtx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      simCtx.lineWidth = 2;
+      simCtx.beginPath();
+      simCtx.moveTo(0, 440);
+      simCtx.lineTo(400, 440);
+      simCtx.stroke();
+
+      // Draw sector names (A, B, C, D)
+      const sectorNames = ["A", "B", "C", "D"];
+      simCtx.font = "bold 14px Outfit, Inter, sans-serif";
+      simCtx.textAlign = "center";
+      
+      for (let i = 0; i < 4; i++) {
+        const x = i * 100 + 50;
+        const currentQuota = bayAccretion[sectorNames[i] as "A" | "B" | "C" | "D"];
+        
+        simCtx.fillStyle = currentQuota >= BAY_MAX 
+          ? "rgba(16, 185, 129, 0.5)" 
+          : "rgba(6, 182, 212, 0.3)";
+        simCtx.fillText(`SECTOR ${sectorNames[i]}`, x, 465);
+        simCtx.font = "9px monospace";
+        simCtx.fillText(`Quota: ${currentQuota}/${BAY_MAX}`, x, 482);
+        simCtx.font = "bold 14px Outfit, Inter, sans-serif"; // restore
+      }
+    }
+
+    function drawIcebergs() {
+      if (!simCtx) return;
+      
+      // Icebergs melt rate is directly influenced by water temperature slider
+      const meltMultiplier = waterTemp * 0.005;
+
+      icebergs.forEach(berg => {
+        // Drifting movement
+        berg.x += berg.speed;
+        
+        // Bounce off canvas walls
+        if (berg.x < -10) {
+          berg.x = -10;
+          berg.speed = -berg.speed;
+        } else if (berg.x + berg.width > 410) {
+          berg.x = 410 - berg.width;
+          berg.speed = -berg.speed;
+        }
+
+        // Natural calving accumulator
+        berg.meltAccumulator += meltMultiplier;
+        if (berg.meltAccumulator >= 10.0) {
+          berg.meltAccumulator = 0;
+          // Calve a stone randomly under the iceberg
+          if (activeStones.length < 8 && !isLocked) {
+            spawnDropstone(berg.x + berg.width / 2 + (Math.random() - 0.5) * 20, berg.y + berg.height, "silt");
+          }
+        }
+
+        // Draw stylized geometric iceberg (flat vector translucent look)
+        simCtx!.beginPath();
+        simCtx!.moveTo(berg.x, berg.y + berg.height / 2);
+        simCtx!.lineTo(berg.x + berg.width * 0.2, berg.y);
+        simCtx!.lineTo(berg.x + berg.width * 0.8, berg.y + berg.height * 0.1);
+        simCtx!.lineTo(berg.x + berg.width, berg.y + berg.height / 2);
+        simCtx!.lineTo(berg.x + berg.width * 0.75, berg.y + berg.height);
+        simCtx!.lineTo(berg.x + berg.width * 0.25, berg.y + berg.height * 0.95);
+        simCtx!.closePath();
+
+        simCtx!.fillStyle = "rgba(224, 242, 254, 0.35)"; // translucent sky blue
+        simCtx!.strokeStyle = "rgba(224, 242, 254, 0.7)";
+        simCtx!.lineWidth = 1.5;
+        simCtx!.shadowColor = "#e0f2fe";
+        simCtx!.shadowBlur = 6;
+        simCtx!.fill();
+        simCtx!.stroke();
+        simCtx!.shadowBlur = 0; // reset
+
+        // Draw waterline shading
+        simCtx!.beginPath();
+        simCtx!.moveTo(berg.x, berg.y + berg.height / 2);
+        simCtx!.lineTo(berg.x + berg.width, berg.y + berg.height / 2);
+        simCtx!.strokeStyle = "rgba(6, 182, 212, 0.5)";
+        simCtx!.lineWidth = 1;
+        simCtx!.stroke();
+
+        // Melt progress bar under iceberg
+        simCtx!.fillStyle = "rgba(34, 211, 238, 0.1)";
+        simCtx!.fillRect(berg.x + berg.width * 0.2, berg.y + berg.height + 4, berg.width * 0.6, 2);
+        simCtx!.fillStyle = "#22d3ee";
+        simCtx!.fillRect(berg.x + berg.width * 0.2, berg.y + berg.height + 4, berg.width * 0.6 * (berg.meltAccumulator / 10.0), 2);
+      });
+    }
+
+    function drawWaterCurrents() {
+      if (!simCtx) return;
+
+      // Update and draw flowing water vector lines
+      simCtx.strokeStyle = currentSpeed >= 0 ? "rgba(6, 182, 212, 0.12)" : "rgba(244, 63, 94, 0.12)";
+      simCtx.lineWidth = 1;
+
+      flowLines.forEach(line => {
+        // Vector movement matches Thermohaline Current slider speed
+        // If current speed is 0, we drift slowly
+        const drift = currentSpeed === 0 ? 0.3 : currentSpeed * 0.3;
+        line.x += line.speed * drift;
+
+        // Wrap around canvas boundaries
+        if (line.x > 420) {
+          line.x = -40;
+          line.y = 120 + Math.random() * 300;
+        } else if (line.x < -40) {
+          line.x = 420;
+          line.y = 120 + Math.random() * 300;
+        }
+
+        simCtx!.beginPath();
+        simCtx!.moveTo(line.x, line.y);
+        simCtx!.lineTo(line.x + line.length, line.y);
+        simCtx!.stroke();
+
+        // Draw tiny current direction arrowhead on some lines
+        if (Math.abs(currentSpeed) > 1.0) {
+          simCtx!.beginPath();
+          const arrowDir = currentSpeed > 0 ? 1 : -1;
+          const arrowX = line.x + (arrowDir > 0 ? line.length : 0);
+          simCtx!.moveTo(arrowX, line.y);
+          simCtx!.lineTo(arrowX - arrowDir * 4, line.y - 3);
+          simCtx!.lineTo(arrowX - arrowDir * 4, line.y + 3);
+          simCtx!.closePath();
+          simCtx!.fillStyle = currentSpeed >= 0 ? "rgba(6, 182, 212, 0.15)" : "rgba(244, 63, 94, 0.15)";
+          simCtx!.fill();
+        }
+      });
+    }
+
+    function drawFallingStones() {
+      if (!simCtx) return;
+
+      activeStones.forEach((stone, index) => {
+        // Physics update
+        stone.vy += 0.05; // gravity
+        stone.vy = Math.min(2.8, stone.vy); // cap sinking speed
+        
+        // Deflect horizontally based on Thermohaline current slider
+        stone.vx += currentSpeed * 0.015;
+        stone.vx *= 0.97; // air drag / dampening
+
+        stone.x += stone.vx;
+        stone.y += stone.vy;
+
+        // Collision bounds check for left/right canvas walls
+        if (stone.x < stone.radius) {
+          stone.x = stone.radius;
+          stone.vx = -stone.vx * 0.3; // tiny bounce
+        } else if (stone.x > 400 - stone.radius) {
+          stone.x = 400 - stone.radius;
+          stone.vx = -stone.vx * 0.3;
+        }
+
+        // Render dropstone
+        simCtx!.beginPath();
+        simCtx!.arc(stone.x, stone.y, stone.radius, 0, Math.PI * 2);
+        simCtx!.fillStyle = stone.color;
+        
+        // Glow effect
+        simCtx!.shadowColor = stone.color;
+        simCtx!.shadowBlur = 8;
+        simCtx!.fill();
+        simCtx!.shadowBlur = 0; // reset
+
+        // Accretion Seafloor landing check
+        if (stone.y >= 440 - stone.radius) {
+          accreteStone(stone);
+          // Remove from active list
+          activeStones.splice(index, 1);
+        }
+      });
+    }
+
+    function accreteStone(stone: Dropstone) {
+      // Determine which sector A, B, C, D (0-100, 100-200, 200-300, 300-400)
+      const bayLetter = stone.x < 100 ? "A" : (stone.x < 200 ? "B" : (stone.x < 300 ? "C" : "D"));
+      
+      const currentQuota = bayAccretion[bayLetter];
+      
+      // Accrete organism seed
+      let orgType = "coral";
+      let color = "#22d3ee"; // cyan soft coral
+      
+      if (stone.type === "silt") {
+        orgType = "anemone";
+        color = "#fbbf24"; // yellow anemone
+      } else if (stone.type === "granite") {
+        orgType = "sponge";
+        color = "#e2e8f0"; // white glass sponge
+      } else if (stone.type === "shale") {
+        orgType = "coral";
+        color = "#ec4899"; // pink coral
+      }
+
+      // Generate branching polyline points for organic swaying animation
+      const height = 15 + Math.random() * 20;
+      const branches: Array<{ x: number, y: number, length: number, angle: number }> = [];
+      const numBranches = orgType === "coral" ? 5 : (orgType === "anemone" ? 12 : 3);
+
+      for (let i = 0; i < numBranches; i++) {
+        branches.push({
+          x: 0,
+          y: 0,
+          length: 5 + Math.random() * 12,
+          angle: orgType === "coral" 
+            ? (-Math.PI / 2 + (Math.random() - 0.5) * 0.8)
+            : ((Math.random() - 0.5) * Math.PI * 2)
+        });
+      }
+
+      // Increment quota for this sector if not already full
+      if (currentQuota < BAY_MAX) {
+        bayAccretion[bayLetter]++;
+        
+        // Update DOM element for Playwright assertions
+        const indicator = document.getElementById(`bay-indicator-${bayLetter}`);
+        if (indicator) {
+          indicator.setAttribute("data-accretion", bayAccretion[bayLetter].toString());
+          const countEl = indicator.querySelector(".bay-count");
+          if (countEl) countEl.textContent = `${bayAccretion[bayLetter]} / 3`;
+        }
+
+        // Play watery accretion chime (pitch escalates with bay letter)
+        const scaleIndex = bayLetter === "A" ? 0 : (bayLetter === "B" ? 1 : (bayLetter === "C" ? 2 : 3));
+        playAccretionChime(scaleIndex);
+      } else {
+        // Quota already met: play a dull sink pop sound
+        playDullSink();
+      }
+
+      // Store settled coral structure
+      settledOrganisms.push({
+        x: stone.x,
+        y: 440,
+        type: orgType,
+        size: height,
+        age: 0,
+        decayRate: 0.00015, // decay speed
+        color: color,
+        points: branches
+      });
+    }
+
+    function drawMarineOrganisms() {
+      if (!simCtx) return;
+
+      // Established organisms decay faster if temperature is higher (satirical penalty)
+      const decayMultiplier = 1.0 + (waterTemp - 1.0) * 2.5;
+
+      settledOrganisms.forEach((org, idx) => {
+        // Natural aging and decay
+        org.age += org.decayRate * decayMultiplier;
+
+        // If completely decayed, fade out and remove
+        if (org.age >= 1.0) {
+          settledOrganisms.splice(idx, 1);
+          
+          // Re-evaluate bay accretion counts if we lost a coral
+          recalculateBayCounts();
+          return;
+        }
+
+        // Calculate organic swaying motion with time and currents
+        const timeFactor = Date.now() * 0.0025;
+        const currentImpact = currentSpeed * 0.05;
+        const swayAngle = Math.sin(timeFactor + org.x) * 0.15 + currentImpact;
+
+        simCtx!.save();
+        simCtx!.translate(org.x, org.y);
+
+        // Alpha decays as it ages
+        const alpha = Math.max(0.0, 1.0 - org.age);
+        simCtx!.fillStyle = org.color;
+        simCtx!.strokeStyle = org.color;
+        simCtx!.globalAlpha = alpha;
+        
+        simCtx!.shadowColor = org.color;
+        simCtx!.shadowBlur = 4;
+
+        if (org.type === "coral") {
+          // Draw branching soft coral
+          simCtx!.lineWidth = 2.5;
+          simCtx!.beginPath();
+          simCtx!.moveTo(0, 0);
+          simCtx!.lineTo(swayAngle * 8, -org.size * 0.4);
+          simCtx!.stroke();
+
+          simCtx!.translate(swayAngle * 8, -org.size * 0.4);
+          org.points.forEach(br => {
+            simCtx!.beginPath();
+            simCtx!.moveTo(0, 0);
+            const bx = Math.cos(br.angle + swayAngle) * br.length;
+            const by = Math.sin(br.angle + swayAngle) * br.length;
+            simCtx!.lineTo(bx, by);
+            simCtx!.stroke();
+          });
+        } else if (org.type === "anemone") {
+          // Draw sea anemone swaying tentacles
+          simCtx!.lineWidth = 1.2;
+          org.points.forEach((tent, i) => {
+            const angle = (i / org.points.length) * Math.PI - Math.PI;
+            const tx = Math.cos(angle + swayAngle * 0.3) * org.size * 0.7;
+            const ty = Math.sin(angle + swayAngle * 0.3) * org.size * 0.7;
+            
+            simCtx!.beginPath();
+            simCtx!.moveTo(0, 0);
+            simCtx!.quadraticCurveTo(tx * 0.5, ty * 0.2, tx, ty);
+            simCtx!.stroke();
+          });
+          
+          // Anemone core mouth
+          simCtx!.beginPath();
+          simCtx!.arc(0, 0, 4, 0, Math.PI * 2);
+          simCtx!.fill();
+        } else if (org.type === "sponge") {
+          // Draw glass sponge vase
+          simCtx!.lineWidth = 1.5;
+          simCtx!.beginPath();
+          simCtx!.moveTo(-4, 0);
+          simCtx!.quadraticCurveTo(-6 + swayAngle * 2, -org.size * 0.6, -3 + swayAngle * 3, -org.size);
+          simCtx!.lineTo(3 + swayAngle * 3, -org.size);
+          simCtx!.quadraticCurveTo(6 + swayAngle * 2, -org.size * 0.6, 4, 0);
+          simCtx!.closePath();
+          simCtx!.stroke();
+          
+          // Draw hollow grid structure inside glass sponge
+          simCtx!.strokeStyle = "rgba(255, 255, 255, 0.15)";
+          simCtx!.beginPath();
+          for (let y = -4; y > -org.size; y -= 6) {
+            simCtx!.moveTo(-5 + swayAngle * 2, y);
+            simCtx!.lineTo(5 + swayAngle * 2, y);
+          }
+          simCtx!.stroke();
+        }
+
+        simCtx!.restore();
+      });
+      simCtx!.globalAlpha = 1.0;
+    }
+
+    function recalculateBayCounts() {
+      // Clear values
+      bayAccretion.A = 0;
+      bayAccretion.B = 0;
+      bayAccretion.C = 0;
+      bayAccretion.D = 0;
+
+      // Count settled corals in each sector
+      settledOrganisms.forEach(org => {
+        const bayLetter = org.x < 100 ? "A" : (org.x < 200 ? "B" : (org.x < 300 ? "C" : "D"));
+        if (bayAccretion[bayLetter] < BAY_MAX) {
+          bayAccretion[bayLetter]++;
+        }
+      });
+
+      // Update DOM indicators
+      const sectors = ["A", "B", "C", "D"] as const;
+      sectors.forEach(bayLetter => {
+        const count = bayAccretion[bayLetter];
+        const indicator = document.getElementById(`bay-indicator-${bayLetter}`);
+        if (indicator) {
+          indicator.setAttribute("data-accretion", count.toString());
+          const countEl = indicator.querySelector(".bay-count");
+          if (countEl) countEl.textContent = `${count} / 3`;
+        }
+      });
+    }
+
+    function updateEcosystemHealth() {
+      // Calculate how many bays are fully completed
+      let completed = 0;
+      if (bayAccretion.A >= BAY_MAX) completed++;
+      if (bayAccretion.B >= BAY_MAX) completed++;
+      if (bayAccretion.C >= BAY_MAX) completed++;
+      if (bayAccretion.D >= BAY_MAX) completed++;
+
+      baysCompleted = completed;
+      root.setAttribute("data-bays-completed", completed.toString());
+
+      // Biodiversity index progress
+      biodiversityOffset = Math.floor((completed / 4.0) * 100);
+      root.setAttribute("data-biodiversity", biodiversityOffset.toString());
+
+      offsetBar.style.width = `${biodiversityOffset}%`;
+      offsetDisplay.textContent = `${biodiversityOffset}%`;
+
+      // Submission status validation
+      if (biodiversityOffset === 100) {
+        simStatus.textContent = "OFFSET TARGET ACHIEVED";
+        simStatus.className = "status-indicator font-mono text-gold pulse-gold";
+        auditStatus.textContent = "REGISTRY COMPLIANT";
+        auditStatus.className = "status-indicator font-mono text-gold pulse-gold";
+        submitAuditBtn.removeAttribute("disabled");
+        submitAuditBtn.className = "btn btn-gold font-mono";
+      } else {
+        simStatus.textContent = "DEPOSITING SEDIMENTS";
+        simStatus.className = "status-indicator font-mono text-cyan";
+        auditStatus.textContent = "OFFSETS UNVERIFIED";
+        auditStatus.className = "status-indicator font-mono text-danger";
+        submitAuditBtn.setAttribute("disabled", "true");
+        submitAuditBtn.className = "btn btn-danger font-mono";
+      }
+    }
+
+    // Audio Synthesis Core
+    function initAudio() {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioCtx = new AudioContextClass();
+
+        // 1. Underwater slow ambient rumble filter sweep (white noise based)
+        const bufferSize = 4096 * 4;
+        noiseGen = audioCtx.createScriptProcessor(bufferSize, 1, 1);
+        noiseGen.onaudioprocess = function(e) {
+          const outputBuffer = e.outputBuffer;
+          const channelData = outputBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            // Pinkish lowpass noise
+            channelData[i] = (Math.random() * 2 - 1) * 0.7;
+          }
+        };
+
+        noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = "lowpass";
+        noiseFilter.frequency.setValueAtTime(60, audioCtx.currentTime); // very low rumble
+        noiseFilter.Q.setValueAtTime(3.0, audioCtx.currentTime);
+
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+
+        noiseGen.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+
+        // 2. Slow sub-bass hum oscillator (sine at 41.2 Hz - E1)
+        ambientHum = audioCtx.createOscillator();
+        humGain = audioCtx.createGain();
+        
+        ambientHum.type = "sine";
+        ambientHum.frequency.setValueAtTime(41.2, audioCtx.currentTime);
+        humGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+
+        ambientHum.connect(humGain);
+        humGain.connect(audioCtx.destination);
+        ambientHum.start();
+
+        // 3. Resonant watery chimes gain bus
+        chimeGain = audioCtx.createGain();
+        chimeGain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        chimeGain.connect(audioCtx.destination);
+
+      } catch (e) {
+        console.error("Failed to initialize benthic hydrophone system:", e);
+      }
+    }
+
+    function updateAudioModulations() {
+      if (!audioCtx || !noiseFilter || !noiseGain) return;
+
+      // Slow underwater swell (LFO emulation using timestamp)
+      const swell = Math.sin(Date.now() * 0.001) * 15 + 65;
+      noiseFilter.frequency.setValueAtTime(swell, audioCtx.currentTime);
+
+      // Noise gain sweeps slightly higher if current speed is strong
+      const currentImpact = Math.abs(currentSpeed) * 0.01;
+      noiseGain.gain.setTargetAtTime(0.12 + currentImpact, audioCtx.currentTime, 0.1);
+    }
+
+    function playIceCrack() {
+      if (!audioCtx) return;
+
+      // Synthesis of short cracking ice block (high frequency FM pop)
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.08);
+
+      gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function playAccretionChime(scaleIndex: number) {
+      if (!audioCtx || !chimeGain) return;
+
+      // F Major pentatonic scale for underwater chime harmony
+      const notes = [174.61, 196.00, 220.00, 261.63, 293.66]; // F3, G3, A3, C4, D4
+      const freq = notes[scaleIndex % notes.length];
+
+      // Physical modeling plucked excitation simulation
+      const osc = audioCtx.createOscillator();
+      const bubbleMod = audioCtx.createOscillator();
+      const bubbleGain = audioCtx.createGain();
+      const gainNode = audioCtx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      // bubble-like frequency modulation upward
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, audioCtx.currentTime + 0.4);
+
+      // Delay feedback nodes for spacious aquatic room reverb
+      const delay = audioCtx.createDelay();
+      const feedback = audioCtx.createGain();
+      
+      delay.delayTime.setValueAtTime(0.25, audioCtx.currentTime);
+      feedback.gain.setValueAtTime(0.45, audioCtx.currentTime);
+
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+
+      osc.connect(gainNode);
+      
+      // Delay feedback loop routing
+      gainNode.connect(delay);
+      delay.connect(feedback);
+      feedback.connect(delay);
+      delay.connect(chimeGain);
+      
+      gainNode.connect(chimeGain);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.9);
+    }
+
+    function playDullSink() {
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(30, audioCtx.currentTime + 0.15);
+
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    // Interactive button activations
+    armButton.addEventListener("click", () => {
+      isArmed = true;
+      armingOverlay.classList.add("hidden");
+      workspace.classList.remove("hidden");
+      
+      // Initialize Audio Context on user gesture
+      initAudio();
+      initSimulation();
+      initAmbientCanvas();
+    });
+
+    submitAuditBtn.addEventListener("click", () => {
+      if (biodiversityOffset < 100) return;
+      isLocked = true;
+      successScreen.classList.remove("hidden");
+      
+      // Populate success final stats
+      finalBaysDisplay.textContent = `${baysCompleted} / 4`;
+      finalTempDisplay.textContent = `+${waterTemp.toFixed(1)} °C`;
+    });
+
+    restartBtn.addEventListener("click", () => {
+      // Reset variables
+      isLocked = false;
+      activeStones = [];
+      settledOrganisms = [];
+      
+      const keys = ["A", "B", "C", "D"] as const;
+      keys.forEach(k => {
+        bayAccretion[k] = 0;
+        const indicator = document.getElementById(`bay-indicator-${k}`);
+        if (indicator) {
+          indicator.setAttribute("data-accretion", "0");
+          const countEl = indicator.querySelector(".bay-count");
+          if (countEl) countEl.textContent = "0 / 3";
+        }
+      });
+
+      biodiversityOffset = 0;
+      baysCompleted = 0;
+      
+      root.setAttribute("data-biodiversity", "0");
+      root.setAttribute("data-bays-completed", "0");
+      root.setAttribute("data-active-stones", "0");
+      
+      // Reset sliders
+      currentSlider.value = "0";
+      tempSlider.value = "2.0";
+      syncControlsFromDOM();
+
+      successScreen.classList.add("hidden");
+    });
+
+    // Synchronize inputs on first boot
+    currentSlider.addEventListener("input", syncControlsFromDOM);
+    tempSlider.addEventListener("input", syncControlsFromDOM);
+    syncControlsFromDOM();
+  </script>
+</Base>
