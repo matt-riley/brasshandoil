@@ -1,0 +1,665 @@
+---
+import Base from "@layouts/Base.astro"
+
+const tones = [
+  { name: "Cinnabar Bass", code: "CB", color: "#b91c1c", note: "red earth" },
+  { name: "Glass Tenor", code: "GT", color: "#0891b2", note: "cold rim" },
+  { name: "Tin Alto", code: "TA", color: "#64748b", note: "soft metal" },
+  { name: "Sulfur Soprano", code: "SS", color: "#eab308", note: "yellow seal" },
+  { name: "Verdigris Drone", code: "VD", color: "#10b981", note: "green vapor" },
+  { name: "Lampblack Hum", code: "LH", color: "#27272a", note: "dark wick" },
+]
+---
+
+<Base title="Mercury Quarantine Choir">
+  <main id="mercury-choir" class="choir-shell">
+    <section class="choir-brief" aria-label="Mercury quarantine ledger">
+      <p class="choir-kicker">Sealed desk / metallurgical recital</p>
+      <h1>Mercury Quarantine Choir</h1>
+      <p class="choir-copy">
+        Coax skittish mercury into labeled tone wells before the silver chorus
+        beads together and teaches the vent to sing.
+      </p>
+
+      <div class="choir-readouts" aria-live="polite">
+        <div>
+          <span>Sealed</span>
+          <strong id="sealed-count">0</strong>
+        </div>
+        <div>
+          <span>Tone</span>
+          <strong id="current-tone">unclaimed</strong>
+        </div>
+        <div>
+          <span>Vapor</span>
+          <strong id="vapor-index">0</strong>
+        </div>
+        <div>
+          <span>Choir</span>
+          <strong id="choir-state">unsealed</strong>
+        </div>
+      </div>
+
+      <div class="choir-actions">
+        <button id="seal-button" type="button">Seal</button>
+        <button id="vent-button" type="button">Vent</button>
+      </div>
+    </section>
+
+    <section
+      id="quarantine-stage"
+      class="quarantine-stage"
+      data-awake="false"
+      data-sealed="0"
+      aria-label="Interactive mercury quarantine stage"
+    >
+      <canvas id="mercury-canvas" aria-label="Mercury droplets"></canvas>
+
+      <div class="retort-grid" aria-hidden="true">
+        <span class="retort-ring ring-a"></span>
+        <span class="retort-ring ring-b"></span>
+        <span class="retort-pipe pipe-a"></span>
+        <span class="retort-pipe pipe-b"></span>
+        <span class="cursor-lens"></span>
+      </div>
+
+      <div id="choir-ribbon" class="choir-ribbon" aria-label="Quarantined tone sequence">
+        <span>awaiting tone</span>
+      </div>
+
+      <div class="tone-wells" aria-label="Mercury tone wells">
+        {tones.map((tone, index) => (
+          <button
+            class="tone-well"
+            type="button"
+            data-tone={tone.name}
+            data-code={tone.code}
+            data-note={tone.note}
+            data-index={index}
+            style={`--well-color: ${tone.color}; --well-index: ${index};`}
+            aria-pressed="false"
+          >
+            <b>{tone.code}</b>
+            <span>{tone.name}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #e7ecef;
+  }
+
+  :global(.container) {
+    max-inline-size: none;
+    padding-inline: 0;
+  }
+
+  .choir-shell {
+    --paper: #edf3f4;
+    --ink: #111827;
+    --steel: #64748b;
+    --teal: #0f766e;
+    --yellow: #eab308;
+    --red: #b91c1c;
+    --line: rgba(17, 24, 39, 0.16);
+    --cursor-x: 52%;
+    --cursor-y: 48%;
+    display: grid;
+    grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr);
+    gap: clamp(1rem, 2.5vw, 2rem);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.4vw, 1.9rem);
+    color: var(--ink);
+    background:
+      linear-gradient(115deg, rgba(237, 243, 244, 0.94), rgba(237, 243, 244, 0.66)),
+      repeating-linear-gradient(0deg, rgba(15, 118, 110, 0.08) 0 1px, transparent 1px 54px),
+      linear-gradient(145deg, #d8dee4 0%, #f5f7dc 38%, #d6f5ef 68%, #f6d1c9 100%);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .choir-brief {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 1rem;
+  }
+
+  .choir-kicker,
+  .choir-readouts span {
+    margin: 0;
+    color: var(--teal);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 9ch;
+    margin: 0;
+    color: #1f2937;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.45rem, 5.65vw, 5.1rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.9;
+    text-shadow:
+      0.034em 0.044em 0 rgba(100, 116, 139, 0.35),
+      -0.028em 0.024em 0 rgba(234, 179, 8, 0.34);
+  }
+
+  .choir-copy {
+    max-width: 32rem;
+    margin: 0;
+    color: rgba(17, 24, 39, 0.76);
+    font-size: clamp(1rem, 1.3vw, 1.1rem);
+    line-height: 1.56;
+  }
+
+  .choir-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.72rem;
+  }
+
+  .choir-readouts div {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.78rem;
+    background: rgba(255, 255, 255, 0.58);
+    box-shadow: 0 0.9rem 2rem rgba(15, 23, 42, 0.08);
+  }
+
+  .choir-readouts strong {
+    display: block;
+    min-height: 1.45rem;
+    margin-top: 0.4rem;
+    color: #111827;
+    font-size: clamp(1rem, 1.75vw, 1.3rem);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .choir-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.72rem;
+  }
+
+  .choir-actions button {
+    min-height: 3.1rem;
+    border: 1px solid rgba(17, 24, 39, 0.2);
+    border-radius: 8px;
+    color: #111827;
+    background: var(--yellow);
+    font: 850 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      transform 160ms ease,
+      filter 160ms ease;
+  }
+
+  .choir-actions button:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+  }
+
+  #vent-button {
+    color: #f8fafc;
+    background: #334155;
+  }
+
+  .quarantine-stage {
+    position: relative;
+    align-self: stretch;
+    min-width: 0;
+    min-height: min(43rem, calc(100vh - 8rem));
+    overflow: hidden;
+    border: 1px solid rgba(17, 24, 39, 0.14);
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at var(--cursor-x) var(--cursor-y), rgba(255, 255, 255, 0.8), transparent 9rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(203, 213, 225, 0.22));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.36);
+    touch-action: none;
+  }
+
+  .quarantine-stage::before {
+    content: "";
+    position: absolute;
+    inset: 1rem;
+    border: 1px dashed rgba(17, 24, 39, 0.18);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  #mercury-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .retort-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .retort-ring {
+    position: absolute;
+    border: 1px solid rgba(15, 118, 110, 0.28);
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 2rem rgba(255, 255, 255, 0.52),
+      0 0 3rem rgba(100, 116, 139, 0.16);
+  }
+
+  .ring-a {
+    width: 34%;
+    aspect-ratio: 1;
+    left: 10%;
+    top: 12%;
+  }
+
+  .ring-b {
+    width: 42%;
+    aspect-ratio: 1;
+    right: 8%;
+    bottom: 13%;
+  }
+
+  .retort-pipe {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(17, 24, 39, 0.28), transparent);
+    transform-origin: center;
+  }
+
+  .pipe-a {
+    width: 62%;
+    left: 17%;
+    top: 43%;
+    transform: rotate(-12deg);
+  }
+
+  .pipe-b {
+    width: 52%;
+    right: 12%;
+    top: 58%;
+    transform: rotate(18deg);
+  }
+
+  .cursor-lens {
+    position: absolute;
+    left: var(--cursor-x);
+    top: var(--cursor-y);
+    width: clamp(4rem, 12vw, 7rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(185, 28, 28, 0.48);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, rgba(255, 255, 255, 0.48), transparent 60%),
+      conic-gradient(from 90deg, rgba(185, 28, 28, 0.12), rgba(234, 179, 8, 0.14), rgba(15, 118, 110, 0.12), rgba(185, 28, 28, 0.12));
+    transform: translate(-50%, -50%);
+  }
+
+  .choir-ribbon {
+    position: absolute;
+    z-index: 3;
+    left: 1.35rem;
+    right: 1.35rem;
+    top: 1.35rem;
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    border: 1px solid rgba(17, 24, 39, 0.16);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: #111827;
+    background: rgba(255, 255, 255, 0.72);
+    font: 800 clamp(0.78rem, 1.5vw, 0.96rem)/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow-wrap: anywhere;
+    box-shadow: 0 0.8rem 1.8rem rgba(15, 23, 42, 0.08);
+  }
+
+  .tone-wells {
+    position: absolute;
+    z-index: 4;
+    left: 1.35rem;
+    right: 1.35rem;
+    bottom: 1.35rem;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .tone-well {
+    min-width: 0;
+    min-height: 5.6rem;
+    border: 1px solid color-mix(in srgb, var(--well-color), #111827 18%);
+    border-radius: 8px;
+    padding: 0.78rem 0.58rem;
+    color: #111827;
+    background:
+      radial-gradient(circle at 50% 22%, color-mix(in srgb, var(--well-color), white 48%), transparent 1.55rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.78), color-mix(in srgb, var(--well-color), white 72%));
+    box-shadow:
+      inset 0 -0.55rem 0 color-mix(in srgb, var(--well-color), transparent 78%),
+      0 0.75rem 1.5rem rgba(15, 23, 42, 0.1);
+    cursor: pointer;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      filter 160ms ease;
+  }
+
+  .tone-well:hover,
+  .tone-well:focus-visible,
+  .tone-well[aria-pressed="true"] {
+    filter: saturate(1.12);
+    transform: translateY(-0.22rem);
+    box-shadow:
+      inset 0 -0.55rem 0 color-mix(in srgb, var(--well-color), transparent 65%),
+      0 1rem 1.9rem color-mix(in srgb, var(--well-color), transparent 72%);
+  }
+
+  .tone-well b,
+  .tone-well span {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .tone-well b {
+    font-size: clamp(1rem, 2vw, 1.34rem);
+    line-height: 1;
+  }
+
+  .tone-well span {
+    margin-top: 0.35rem;
+    font-size: clamp(0.7rem, 1.2vw, 0.82rem);
+    font-weight: 800;
+    line-height: 1.16;
+  }
+
+  @media (max-width: 780px) {
+    .choir-shell {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      overflow: clip;
+    }
+
+    .choir-brief {
+      align-self: start;
+      padding-block: 0;
+    }
+
+    h1 {
+      max-width: 11ch;
+      font-size: clamp(2.35rem, 14vw, 4.2rem);
+    }
+
+    .quarantine-stage {
+      min-height: 39rem;
+    }
+
+    .tone-wells {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 440px) {
+    .choir-shell {
+      padding: 0.8rem;
+    }
+
+    .choir-readouts,
+    .choir-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .quarantine-stage {
+      min-height: 41rem;
+    }
+
+    .choir-ribbon {
+      left: 0.8rem;
+      right: 0.8rem;
+      top: 0.8rem;
+    }
+
+    .tone-wells {
+      left: 0.8rem;
+      right: 0.8rem;
+      bottom: 0.8rem;
+      gap: 0.5rem;
+    }
+
+    .tone-well {
+      min-height: 5rem;
+      padding-inline: 0.4rem;
+    }
+  }
+</style>
+
+<script is:inline>
+  const stage = document.querySelector("#quarantine-stage")
+  const canvas = document.querySelector("#mercury-canvas")
+  const context = canvas.getContext("2d")
+  const wells = Array.from(document.querySelectorAll(".tone-well"))
+  const sealedCount = document.querySelector("#sealed-count")
+  const currentTone = document.querySelector("#current-tone")
+  const vaporIndex = document.querySelector("#vapor-index")
+  const choirState = document.querySelector("#choir-state")
+  const ribbon = document.querySelector("#choir-ribbon span")
+  const sealButton = document.querySelector("#seal-button")
+  const ventButton = document.querySelector("#vent-button")
+
+  const normalizedCursor = { x: 0.52, y: 0.48 }
+  const sealedTones = []
+  let vapor = 0
+  let activeWell = -1
+  let pixelRatio = 1
+
+  const droplets = Array.from({ length: 36 }, (_, index) => ({
+    x: (Math.sin(index * 9.7) * 0.5 + 0.5) * 0.82 + 0.09,
+    y: (Math.cos(index * 5.3) * 0.5 + 0.5) * 0.62 + 0.16,
+    radius: 4 + (index % 5) * 1.6,
+    phase: index * 0.43,
+    tone: index % wells.length,
+  }))
+
+  function syncCursor() {
+    stage.style.setProperty("--cursor-x", `${(normalizedCursor.x * 100).toFixed(2)}%`)
+    stage.style.setProperty("--cursor-y", `${(normalizedCursor.y * 100).toFixed(2)}%`)
+  }
+
+  function updateFromPoint(clientX, clientY) {
+    const box = stage.getBoundingClientRect()
+    normalizedCursor.x = Math.min(1, Math.max(0, (clientX - box.left) / box.width))
+    normalizedCursor.y = Math.min(1, Math.max(0, (clientY - box.top) / box.height))
+    stage.dataset.awake = "true"
+    vapor = Math.min(99, vapor + 4)
+    vaporIndex.textContent = String(Math.round(vapor))
+    syncCursor()
+  }
+
+  function renderRibbon() {
+    if (sealedTones.length === 0) {
+      ribbon.textContent = "awaiting tone"
+      return
+    }
+
+    ribbon.textContent = sealedTones
+      .map((tone) => `${tone.code} vial: ${tone.name.toLowerCase()}`)
+      .join(" / ")
+  }
+
+  function quarantineTone(index) {
+    const well = wells[index]
+    if (!well) return
+
+    activeWell = index
+    const tone = {
+      name: well.dataset.tone,
+      code: well.dataset.code,
+      note: well.dataset.note,
+    }
+    sealedTones.push(tone)
+    wells.forEach((button, buttonIndex) => {
+      button.setAttribute("aria-pressed", String(buttonIndex === index))
+    })
+    stage.dataset.sealed = String(sealedTones.length)
+    sealedCount.textContent = String(sealedTones.length)
+    currentTone.textContent = tone.name
+    choirState.textContent = `quarantining ${tone.note}`
+    vapor = Math.min(99, vapor + 12)
+    vaporIndex.textContent = String(Math.round(vapor))
+    renderRibbon()
+  }
+
+  function sealChoir() {
+    choirState.textContent = sealedTones.length ? "sealed" : "sealed empty"
+    vapor = Math.min(99, vapor + 18)
+    vaporIndex.textContent = String(Math.round(vapor))
+  }
+
+  function ventChoir() {
+    sealedTones.length = 0
+    activeWell = -1
+    vapor = 0
+    wells.forEach((button) => button.setAttribute("aria-pressed", "false"))
+    stage.dataset.sealed = "0"
+    sealedCount.textContent = "0"
+    currentTone.textContent = "unclaimed"
+    vaporIndex.textContent = "0"
+    choirState.textContent = "unsealed"
+    renderRibbon()
+  }
+
+  function resizeCanvas() {
+    const box = stage.getBoundingClientRect()
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+    canvas.width = Math.max(1, Math.floor(box.width * pixelRatio))
+    canvas.height = Math.max(1, Math.floor(box.height * pixelRatio))
+    canvas.style.width = `${box.width}px`
+    canvas.style.height = `${box.height}px`
+  }
+
+  function drawDroplet(x, y, radius, toneIndex, pulse) {
+    const well = wells[toneIndex]
+    const color = well?.style.getPropertyValue("--well-color") || "#64748b"
+    const gradient = context.createRadialGradient(
+      x - radius * 0.35,
+      y - radius * 0.45,
+      radius * 0.15,
+      x,
+      y,
+      radius * 1.15
+    )
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.92)")
+    gradient.addColorStop(0.42, "rgba(203, 213, 225, 0.9)")
+    gradient.addColorStop(0.74, color)
+    gradient.addColorStop(1, "rgba(17, 24, 39, 0.62)")
+    context.fillStyle = gradient
+    context.beginPath()
+    context.ellipse(x, y, radius * (1.08 + pulse), radius * (0.86 - pulse * 0.2), pulse * 2, 0, Math.PI * 2)
+    context.fill()
+  }
+
+  function animate(time) {
+    const width = canvas.width
+    const height = canvas.height
+    context.clearRect(0, 0, width, height)
+
+    const cursorX = normalizedCursor.x * width
+    const cursorY = normalizedCursor.y * height
+    vapor = Math.max(0, vapor - 0.028)
+    vaporIndex.textContent = String(Math.round(vapor))
+
+    for (const droplet of droplets) {
+      const dx = cursorX / width - droplet.x
+      const dy = cursorY / height - droplet.y
+      const pull = Math.max(0, 0.18 - Math.hypot(dx, dy))
+      const pulse = Math.sin(time / 620 + droplet.phase) * 0.06
+      const choirPull = activeWell === droplet.tone ? 0.025 : 0
+      droplet.x += dx * (0.002 + pull * 0.018 + choirPull)
+      droplet.y += dy * (0.002 + pull * 0.018 + choirPull)
+      droplet.x += Math.sin(time / 1300 + droplet.phase) * 0.0007
+      droplet.y += Math.cos(time / 1500 + droplet.phase) * 0.0007
+      droplet.x = Math.min(0.94, Math.max(0.06, droplet.x))
+      droplet.y = Math.min(0.82, Math.max(0.1, droplet.y))
+
+      drawDroplet(
+        droplet.x * width,
+        droplet.y * height,
+        droplet.radius * pixelRatio,
+        droplet.tone,
+        pulse
+      )
+    }
+
+    requestAnimationFrame(animate)
+  }
+
+  wells.forEach((well, index) => {
+    well.addEventListener("click", () => quarantineTone(index))
+  })
+
+  stage.addEventListener("pointermove", (event) => updateFromPoint(event.clientX, event.clientY))
+  stage.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0]
+    if (touch) updateFromPoint(touch.clientX, touch.clientY)
+  }, { passive: true })
+  stage.addEventListener("touchmove", (event) => {
+    const touch = event.touches[0]
+    if (touch) updateFromPoint(touch.clientX, touch.clientY)
+  }, { passive: true })
+  stage.addEventListener("touchend", () => {
+    stage.dataset.awake = String(vapor > 0)
+  })
+  stage.addEventListener("touchcancel", () => {
+    stage.dataset.awake = String(vapor > 0)
+  })
+
+  sealButton.addEventListener("click", sealChoir)
+  ventButton.addEventListener("click", ventChoir)
+
+  window.addEventListener("keydown", (event) => {
+    const digit = Number(event.key)
+    if (digit >= 1 && digit <= wells.length) {
+      quarantineTone(digit - 1)
+      return
+    }
+
+    const step = event.shiftKey ? 0.025 : 0.055
+    if (event.key === "ArrowLeft") normalizedCursor.x = Math.max(0, normalizedCursor.x - step)
+    if (event.key === "ArrowRight") normalizedCursor.x = Math.min(1, normalizedCursor.x + step)
+    if (event.key === "ArrowUp") normalizedCursor.y = Math.max(0, normalizedCursor.y - step)
+    if (event.key === "ArrowDown") normalizedCursor.y = Math.min(1, normalizedCursor.y + step)
+    if (event.key.startsWith("Arrow")) {
+      stage.dataset.awake = "true"
+      vapor = Math.min(99, vapor + 3)
+      vaporIndex.textContent = String(Math.round(vapor))
+      syncCursor()
+    }
+  })
+
+  resizeCanvas()
+  syncCursor()
+  window.addEventListener("resize", resizeCanvas)
+  requestAnimationFrame(animate)
+</script>
