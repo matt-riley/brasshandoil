@@ -10,6 +10,7 @@ Use one file per theme when a lesson becomes durable enough to guide future expe
 - anti-patterns to avoid next time
 
 ## Recent additions
+- [astro-inline-browser-scripts.md](astro-inline-browser-scripts.md)
 - [sequential-astro-verification.md](sequential-astro-verification.md)
 - [idle-state-animation-gating.md](idle-state-animation-gating.md)
 - [stable-hover-transforms.md](stable-hover-transforms.md)

@@ -6,6 +6,20 @@ Use this file as the running source of truth for review notes after each daily e
 
 ### Session Entry
 
+Date: 2026-06-14
+Experiment: Arctic Dropstone Deposition Desk
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from news: Glacial meltwaters calving dropstones onto benthic seafloors, seeding deep-sea cold-water coral and sponge biodiversity.
+- Implemented hydrographic 2D canvas water column with gravity-driven sediment dropstone particles deflecting based on a current force slider.
+- Added organic branching sways and tentacles for corals/sponges/anemones settling in 4 accretion bays (A, B, C, D) mapped to data-attributes for E2E tests.
+- Coupled F-Major pentatonic chime synth chords with a pink-noise lowpass swept underwater ambient hum using OscillatorNode and ScriptProcessorNode.
+- Set canvas text parameters using standard single-property `font` assignments (`bold 14px Outfit, Inter, sans-serif`) to bypass TypeScript `fontWeight` errors on 2D context.
+- Used `{ force: true }` click bindings on onboarding overlay buttons to reliably defeat interception from local `<astro-dev-toolbar>` dev overlays.
+
+### Session Entry
+
 Date: 2026-06-13
 Experiment: Viscoelastic Rice Lock
 Feedback:
@@ -489,3 +503,17 @@ Carry Forward:
   decorative field proof without brittle screenshot comparison.
 - Run Astro build and the root Node suite sequentially; parallel verification
   can collide on Vite inspector ports because the suite has a nested build test.
+
+### Session Entry
+
+Date: 2026-06-14
+Experiment: Mercury Quarantine Choir
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Use `script is:inline` for compact one-off browser scripts when processed
+  Astro TypeScript checks would require noisy DOM narrowing.
+- Keep build verification in the daily loop; this run's contract and E2E tests
+  were green before `astro check` exposed script typing errors.
+- The in-app browser is useful for final URL, DOM, and overflow confirmation,
+  while Playwright remains the reliable place for canvas pixel assertions.

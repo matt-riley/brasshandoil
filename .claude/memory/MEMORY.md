@@ -152,6 +152,16 @@ For N circular bodies: each frame, check every pair `(i, j)` for overlap (`dist(
 **Technique:** Progressive CSS filter degradation as game mechanic — cumulative `filter` chains (`saturate(0)`, `contrast(0.4)`, `blur(3px)`, `brightness(0.25)`) applied to the scene element as each gene is silenced. CSS `@property` for typed custom property animation (`--warmth`). MutationObserver on style attributes to sync filter state. Dynamic DOM generation with `data-testid` attributes for Playwright testability.
 **File:** clients/web/src/pages/experiments/deer-ked-protocol.astro
 
+### 2026-06-14 — Octagon Terrarium — Nature vs. The Cage
+**Concept:** Inspired by UFC Freedom 250 being held on the White House South Lawn for Trump's 80th birthday. The octagon was left overnight. By morning, an ecosystem has formed inside — butterflies flock, robins peck at dropped protein bars, fire ants annex corner posts, fireflies drift through the ropes. Your cursor is a groundskeeper trying to shoo them away. A reclamation counter climbs. Nature always wins by submission (TKO — Technical Kudzu Overgrowth).
+**Technique:** Boids flocking algorithm — separation (avoid crowding neighbors), alignment (steer toward average heading of same-type neighbors), cohesion (steer toward center of mass of same-type neighbors). Combined with home-seeking force toward octagon center and cursor repulsion force. Per-type behavior modifiers (ants: slow/ground-hugging, fireflies: drifty/glowing, butterflies: wing-flapping, birds: swooping).
+**File:** clients/web/src/pages/experiments/octagon-terrarium.astro
+
+## Techniques & Skills Learned
+
+#### Boids Flocking Algorithm (Separation, Alignment, Cohesion)
+Craig Reynolds' boids model simulates flocking with three rules per agent per frame: (1) **Separation** — steer away from neighbors within a close radius (inverse-distance-squared weighting for smooth falloff), (2) **Alignment** — steer toward the average velocity of neighbors within a medium radius (filter by type for species-specific flocking), (3) **Cohesion** — steer toward the center of mass of neighbors within a larger radius. Each rule produces a steering vector scaled by a force constant; sum them with any environmental forces (home-seeking, predator avoidance, boundary repulsion). Speed-cap per type for behavioral variety. The algorithm is O(n²) per frame but handles ~100 agents comfortably at 60fps. Key insight: filtering alignment/cohesion by agent "type" creates species-specific flocking without separate loops. Cursor repulsion is just another steering force with a distance falloff.
+
 ## Feedback from Matt
 
 ### 2026-05-31 — COMPLAINT RECEIVED

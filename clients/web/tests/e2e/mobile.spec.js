@@ -58,6 +58,9 @@ const pages = [
   "/experiments/pollen-parcel-bureau",
   "/experiments/semaphore-loom",
   "/experiments/viscoelastic-rice-lock",
+  "/experiments/arctic-dropstone-deposition-desk",
+  "/experiments/mercury-quarantine-choir",
+  "/experiments/octagon-terrarium",
 ]
 
 test.use({
