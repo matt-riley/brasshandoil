@@ -1,0 +1,865 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Octagon Terrarium — Nature vs. The Cage">
+  <style is:inline>
+    #experiment {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(180deg, #1a2a1a 0%, #0d1a0d 40%, #0a140a 100%);
+      cursor: none;
+    }
+
+    #header-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+
+    #header-bar h1 {
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #e8dcc8;
+      opacity: 0.7;
+      margin: 0;
+    }
+
+    #header-bar .subtitle {
+      font-family: 'Georgia', serif;
+      font-size: 11px;
+      font-style: italic;
+      color: #a09080;
+      margin-top: 4px;
+    }
+
+    .counter-box {
+      text-align: right;
+    }
+
+    #reclamation-label {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #6a8a5a;
+    }
+
+    #reclamation-value {
+      font-family: 'Georgia', serif;
+      font-size: 32px;
+      font-weight: bold;
+      color: #8ab87a;
+      line-height: 1;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #cursor-label {
+      position: absolute;
+      pointer-events: none;
+      z-index: 15;
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #ff6644;
+      opacity: 0;
+      transform: translate(-50%, 20px);
+      transition: opacity 0.3s;
+      text-shadow: 0 0 8px rgba(255, 102, 68, 0.5);
+    }
+
+    #cursor-label.visible {
+      opacity: 1;
+    }
+
+    .creature-caption-container {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      right: 24px;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .caption-text {
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      font-style: italic;
+      color: #e8dcc8;
+      opacity: 0;
+      transition: opacity 0.6s;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+      line-height: 1.6;
+    }
+
+    .caption-text.visible {
+      opacity: 0.9;
+    }
+
+    .caption-species {
+      font-style: normal;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #8ab87a;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    #victory-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 20, 10, 0.85);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.5s;
+    }
+
+    #victory-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #victory-overlay h2 {
+      font-family: 'Georgia', serif;
+      font-size: 28px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #8ab87a;
+      margin: 0 0 12px;
+      text-align: center;
+    }
+
+    #victory-overlay .ruling {
+      font-family: monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #6a8a5a;
+    }
+
+    #victory-overlay .footnote {
+      font-family: 'Georgia', serif;
+      font-size: 12px;
+      font-style: italic;
+      color: #a09080;
+      margin-top: 24px;
+      max-width: 400px;
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
+
+  <div id="experiment">
+    <div id="header-bar">
+      <div>
+        <h1>Octagon Terrarium</h1>
+        <div class="subtitle">South Lawn, Washington D.C. — the morning after UFC Freedom 250</div>
+      </div>
+      <div class="counter-box">
+        <div id="reclamation-label">Reclamation</div>
+        <div id="reclamation-value" data-testid="reclamation-counter">0%</div>
+      </div>
+    </div>
+
+    <canvas data-testid="terrarium-canvas"></canvas>
+    <div data-testid="octagon" style="position:absolute; top:50%; left:50%; width:1px; height:1px; pointer-events:none;"></div>
+
+    <div id="cursor-label">⚠ GROUNDSKEEPER</div>
+
+    <div class="creature-caption-container">
+      <div class="caption-text" data-testid="creature-caption">
+        <span class="caption-species">Vanessa cardui — Painted Lady</span>
+        The first to arrive. Drawn not by nectar but by the residual warmth of ten thousand screaming fans.
+      </div>
+    </div>
+
+    <div id="victory-overlay" data-testid="victory-message">
+      <h2>NATURE WINS BY SUBMISSION</h2>
+      <div class="ruling">TKO — Technical Kudzu Overgrowth</div>
+      <div class="footnote">
+        The octagon was reclaimed in approximately six hours.
+        Park services has been notified. The moss has filed for
+        protected habitat status under the Endangered Species Act.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    interface Boid {
+      x: number
+      y: number
+      vx: number
+      vy: number
+      type: CreatureType
+      hue: number
+      size: number
+      wingPhase: number
+      trail: Array<{ x: number; y: number }>
+    }
+
+    type CreatureType = "butterfly" | "bird" | "ant" | "firefly"
+
+    interface Vine {
+      angle: number
+      length: number
+      maxLength: number
+      growth: number
+      segments: Array<{ x: number; y: number }>
+      hue: number
+    }
+
+    const canvas = document.querySelector<HTMLCanvasElement>("[data-testid='terrarium-canvas']")!
+    const ctx = canvas.getContext("2d")!
+    const cursorLabel = document.getElementById("cursor-label")!
+    const reclamationEl = document.getElementById("reclamation-value")!
+    const captionEl = document.querySelector<HTMLElement>(".caption-text")!
+    const victoryEl = document.getElementById("victory-overlay")!
+
+    let W = 0
+    let H = 0
+    let cx = 0
+    let cy = 0
+    let octRadius = 0
+    const dpr = window.devicePixelRatio || 1
+
+    function resize(): void {
+      const rect = canvas.parentElement!.getBoundingClientRect()
+      W = rect.width
+      H = rect.height
+      canvas.width = W * dpr
+      canvas.height = H * dpr
+      canvas.style.width = W + "px"
+      canvas.style.height = H + "px"
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      cx = W / 2
+      cy = H / 2
+      octRadius = Math.min(W, H) * 0.32
+    }
+
+    resize()
+    window.addEventListener("resize", resize)
+
+    // Mouse tracking
+    let mouseX = -1000
+    let mouseY = -1000
+    let mouseInside = false
+
+    document.getElementById("experiment")!.addEventListener("mousemove", (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      mouseX = e.clientX - rect.left
+      mouseY = e.clientY - rect.top
+      mouseInside = true
+      cursorLabel.style.left = e.clientX + "px"
+      cursorLabel.style.top = e.clientY + "px"
+      cursorLabel.classList.add("visible")
+    })
+
+    document.getElementById("experiment")!.addEventListener("mouseleave", () => {
+      mouseInside = false
+      mouseX = -1000
+      mouseY = -1000
+      cursorLabel.classList.remove("visible")
+    })
+
+    // Octagon geometry
+    function octagonPoint(i: number): { x: number; y: number } {
+      const angle = (Math.PI * 2 * i) / 8 - Math.PI / 8
+      return {
+        x: cx + Math.cos(angle) * octRadius,
+        y: cy + Math.sin(angle) * octRadius,
+      }
+    }
+
+    function drawOctagon(): void {
+      ctx.beginPath()
+      for (let i = 0; i <= 8; i++) {
+        const p = octagonPoint(i % 8)
+        if (i === 0) ctx.moveTo(p.x, p.y)
+        else ctx.lineTo(p.x, p.y)
+      }
+      ctx.closePath()
+      ctx.strokeStyle = "rgba(120, 100, 80, 0.3)"
+      ctx.lineWidth = 3
+      ctx.stroke()
+
+      // Rope shadows
+      ctx.strokeStyle = "rgba(100, 80, 60, 0.15)"
+      ctx.lineWidth = 6
+      ctx.stroke()
+
+      // Corner posts
+      for (let i = 0; i < 8; i++) {
+        const p = octagonPoint(i)
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2)
+        ctx.fillStyle = "rgba(100, 80, 60, 0.4)"
+        ctx.fill()
+      }
+    }
+
+    function isInsideOctagon(x: number, y: number): boolean {
+      const dx = x - cx
+      const dy = y - cy
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      return dist < octRadius * 0.95
+    }
+
+    // Boids
+    const CREATURE_TYPES: CreatureType[] = ["butterfly", "bird", "ant", "firefly"]
+    const CAPTIONS: Record<CreatureType, { species: string; text: string }> = {
+      butterfly: {
+        species: "Vanessa cardui — Painted Lady",
+        text: "The first to arrive. Drawn not by nectar but by the residual warmth of ten thousand screaming fans.",
+      },
+      bird: {
+        species: "Turdus migratorius — American Robin",
+        text: "A bold scout. It hops across the canvas mat, pecking at fragments of protein bar dropped during the undercard.",
+      },
+      ant: {
+        species: "Solenopsis invicta — Red Imported Fire Ant",
+        text: "An advance column. They have already annexed the northeast corner post and are negotiating terms with a discarded nacho.",
+      },
+      firefly: {
+        species: "Photinus pyralis — Common Eastern Firefly",
+        text: "The night shift. Their bioluminescence serves no reproductive purpose here — they simply enjoy the acoustics.",
+      },
+    }
+
+    const boids: Boid[] = []
+    const NUM_BOIDS = 60
+
+    function spawnBoid(): Boid {
+      const type = CREATURE_TYPES[Math.floor(Math.random() * CREATURE_TYPES.length)]
+      const angle = Math.random() * Math.PI * 2
+      const dist = octRadius * (0.5 + Math.random() * 0.8)
+      return {
+        x: cx + Math.cos(angle) * dist,
+        y: cy + Math.sin(angle) * dist,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: (Math.random() - 0.5) * 1.5,
+        type,
+        hue: type === "butterfly" ? 30 + Math.random() * 300
+          : type === "bird" ? 20 + Math.random() * 30
+          : type === "ant" ? 0
+          : 50 + Math.random() * 20,
+        size: type === "butterfly" ? 4 + Math.random() * 3
+          : type === "bird" ? 5 + Math.random() * 3
+          : type === "ant" ? 2 + Math.random() * 1.5
+          : 2 + Math.random() * 2,
+        wingPhase: Math.random() * Math.PI * 2,
+        trail: [],
+      }
+    }
+
+    for (let i = 0; i < NUM_BOIDS; i++) {
+      boids.push(spawnBoid())
+    }
+
+    // Expose for tests
+    ;(window as any).__boids = boids
+
+    // Vines growing on octagon edges
+    const vines: Vine[] = []
+    for (let i = 0; i < 8; i++) {
+      const p = octagonPoint(i)
+      for (let j = 0; j < 2; j++) {
+        vines.push({
+          angle: (Math.PI * 2 * i) / 8 - Math.PI / 8 + (Math.random() - 0.5) * 0.3,
+          length: 0,
+          maxLength: 20 + Math.random() * 40,
+          growth: 0.02 + Math.random() * 0.03,
+          segments: [{ x: p.x, y: p.y }],
+          hue: 90 + Math.random() * 40,
+        })
+      }
+    }
+
+    // Moss patches
+    interface MossPatch {
+      x: number
+      y: number
+      radius: number
+      maxRadius: number
+      growth: number
+      hue: number
+    }
+
+    const mossPatches: MossPatch[] = []
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2
+      const dist = Math.random() * octRadius * 0.8
+      mossPatches.push({
+        x: cx + Math.cos(angle) * dist,
+        y: cy + Math.sin(angle) * dist,
+        radius: 0,
+        maxRadius: 8 + Math.random() * 20,
+        growth: 0.01 + Math.random() * 0.02,
+        hue: 80 + Math.random() * 50,
+      })
+    }
+
+    // Boids flocking
+    const SEPARATION_DIST = 25
+    const ALIGNMENT_DIST = 50
+    const COHESION_DIST = 60
+    const SEPARATION_FORCE = 0.05
+    const ALIGNMENT_FORCE = 0.03
+    const COHESION_FORCE = 0.01
+    const MAX_SPEED = 2.5
+    const CURSOR_SCARE_DIST = 120
+    const CURSOR_SCARE_FORCE = 0.3
+    const HOME_FORCE = 0.002
+
+    function updateBoids(): void {
+      for (let i = 0; i < boids.length; i++) {
+        const b = boids[i]
+        let sepX = 0, sepY = 0
+        let aliVx = 0, aliVy = 0, aliCount = 0
+        let cohX = 0, cohY = 0, cohCount = 0
+
+        for (let j = 0; j < boids.length; j++) {
+          if (i === j) continue
+          const other = boids[j]
+          const dx = b.x - other.x
+          const dy = b.y - other.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+
+          if (dist < SEPARATION_DIST && dist > 0) {
+            sepX += dx / dist / dist * 10
+            sepY += dy / dist / dist * 10
+          }
+          if (dist < ALIGNMENT_DIST && b.type === other.type) {
+            aliVx += other.vx
+            aliVy += other.vy
+            aliCount++
+          }
+          if (dist < COHESION_DIST && b.type === other.type) {
+            cohX += other.x
+            cohY += other.y
+            cohCount++
+          }
+        }
+
+        // Separation
+        b.vx += sepX * SEPARATION_FORCE
+        b.vy += sepY * SEPARATION_FORCE
+
+        // Alignment
+        if (aliCount > 0) {
+          aliVx /= aliCount
+          aliVy /= aliCount
+          b.vx += (aliVx - b.vx) * ALIGNMENT_FORCE
+          b.vy += (aliVy - b.vy) * ALIGNMENT_FORCE
+        }
+
+        // Cohesion
+        if (cohCount > 0) {
+          cohX /= cohCount
+          cohY /= cohCount
+          b.vx += (cohX - b.x) * COHESION_FORCE * 0.01
+          b.vy += (cohY - b.y) * COHESION_FORCE * 0.01
+        }
+
+        // Home-seeking: drift toward octagon center
+        const homeDx = cx - b.x
+        const homeDy = cy - b.y
+        b.vx += homeDx * HOME_FORCE
+        b.vy += homeDy * HOME_FORCE
+
+        // Cursor repulsion
+        if (mouseInside) {
+          const cdx = b.x - mouseX
+          const cdy = b.y - mouseY
+          const cdist = Math.sqrt(cdx * cdx + cdy * cdy)
+          if (cdist < CURSOR_SCARE_DIST && cdist > 0) {
+            const force = CURSOR_SCARE_FORCE * (1 - cdist / CURSOR_SCARE_DIST)
+            b.vx += (cdx / cdist) * force
+            b.vy += (cdy / cdist) * force
+          }
+        }
+
+        // Type-specific behavior
+        if (b.type === "ant") {
+          // Ants stay low, move in lines
+          b.vy += 0.01
+          const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy)
+          if (speed > MAX_SPEED * 0.6) {
+            b.vx *= (MAX_SPEED * 0.6) / speed
+            b.vy *= (MAX_SPEED * 0.6) / speed
+          }
+        } else if (b.type === "firefly") {
+          // Fireflies drift slowly, wobble
+          b.vx += (Math.random() - 0.5) * 0.1
+          b.vy += (Math.random() - 0.5) * 0.1
+          const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy)
+          if (speed > MAX_SPEED * 0.5) {
+            b.vx *= (MAX_SPEED * 0.5) / speed
+            b.vy *= (MAX_SPEED * 0.5) / speed
+          }
+        } else {
+          // Speed limit for butterflies and birds
+          const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy)
+          if (speed > MAX_SPEED) {
+            b.vx *= MAX_SPEED / speed
+            b.vy *= MAX_SPEED / speed
+          }
+        }
+
+        // Boundary soft-bounce
+        const margin = 40
+        if (b.x < margin) b.vx += 0.2
+        if (b.x > W - margin) b.vx -= 0.2
+        if (b.y < margin) b.vy += 0.2
+        if (b.y > H - margin) b.vy -= 0.2
+
+        b.x += b.vx
+        b.y += b.vy
+        b.wingPhase += 0.15
+
+        // Trail for fireflies
+        if (b.type === "firefly") {
+          b.trail.push({ x: b.x, y: b.y })
+          if (b.trail.length > 8) b.trail.shift()
+        }
+      }
+    }
+
+    // Drawing
+    function drawBoid(b: Boid, t: number): void {
+      ctx.save()
+      ctx.translate(b.x, b.y)
+
+      const angle = Math.atan2(b.vy, b.vx)
+      ctx.rotate(angle)
+
+      if (b.type === "butterfly") {
+        const wingFlap = Math.sin(b.wingPhase) * 0.7
+        const s = b.size
+
+        // Wings
+        ctx.save()
+        ctx.scale(1, wingFlap)
+        ctx.beginPath()
+        ctx.ellipse(-s * 0.3, -s * 0.8, s * 1.2, s * 0.8, -0.3, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${b.hue}, 70%, 60%, 0.7)`
+        ctx.fill()
+        ctx.restore()
+
+        ctx.save()
+        ctx.scale(1, -wingFlap)
+        ctx.beginPath()
+        ctx.ellipse(-s * 0.3, -s * 0.8, s * 1.2, s * 0.8, -0.3, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${b.hue}, 70%, 55%, 0.6)`
+        ctx.fill()
+        ctx.restore()
+
+        // Body
+        ctx.beginPath()
+        ctx.ellipse(0, 0, s * 0.8, s * 0.25, 0, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${b.hue}, 40%, 25%, 0.9)`
+        ctx.fill()
+
+      } else if (b.type === "bird") {
+        const wingFlap = Math.sin(b.wingPhase * 0.8) * 0.5
+        const s = b.size
+
+        // Body
+        ctx.beginPath()
+        ctx.ellipse(0, 0, s * 1.2, s * 0.5, 0, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${b.hue}, 50%, 35%, 0.8)`
+        ctx.fill()
+
+        // Wings
+        ctx.beginPath()
+        ctx.moveTo(-s * 0.3, 0)
+        ctx.quadraticCurveTo(-s, -s * (1.5 + wingFlap), -s * 0.2, -s * 0.3)
+        ctx.fillStyle = `hsla(${b.hue}, 45%, 40%, 0.6)`
+        ctx.fill()
+
+        ctx.beginPath()
+        ctx.moveTo(-s * 0.3, 0)
+        ctx.quadraticCurveTo(-s, s * (1.5 + wingFlap), -s * 0.2, s * 0.3)
+        ctx.fill()
+
+        // Beak
+        ctx.beginPath()
+        ctx.moveTo(s * 1.2, 0)
+        ctx.lineTo(s * 1.8, -s * 0.15)
+        ctx.lineTo(s * 1.8, s * 0.15)
+        ctx.closePath()
+        ctx.fillStyle = `hsla(40, 80%, 55%, 0.9)`
+        ctx.fill()
+
+      } else if (b.type === "ant") {
+        const s = b.size
+        // Three segments
+        ctx.fillStyle = `hsla(0, 20%, 15%, 0.9)`
+        ctx.beginPath()
+        ctx.arc(-s * 0.8, 0, s * 0.4, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.beginPath()
+        ctx.arc(0, 0, s * 0.5, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.beginPath()
+        ctx.arc(s * 0.7, 0, s * 0.35, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Legs
+        const legPhase = b.wingPhase * 2
+        ctx.strokeStyle = `hsla(0, 20%, 15%, 0.7)`
+        ctx.lineWidth = 0.5
+        for (let leg = 0; leg < 3; leg++) {
+          const legX = -s * 0.4 + leg * s * 0.5
+          const legAngle = Math.sin(legPhase + leg * 1.2) * 0.3
+          ctx.beginPath()
+          ctx.moveTo(legX, -s * 0.3)
+          ctx.lineTo(legX - s * 0.4, -s * (0.8 + legAngle * 0.3))
+          ctx.stroke()
+          ctx.beginPath()
+          ctx.moveTo(legX, s * 0.3)
+          ctx.lineTo(legX - s * 0.4, s * (0.8 + legAngle * 0.3))
+          ctx.stroke()
+        }
+
+      } else if (b.type === "firefly") {
+        const s = b.size
+        const glow = 0.4 + Math.sin(t * 0.003 + b.wingPhase) * 0.4
+
+        // Trail
+        for (let ti = 0; ti < b.trail.length; ti++) {
+          const tp = b.trail[ti]
+          const alpha = (ti / b.trail.length) * 0.2 * glow
+          ctx.save()
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+          ctx.beginPath()
+          ctx.arc(tp.x, tp.y, s * 0.5, 0, Math.PI * 2)
+          ctx.fillStyle = `hsla(${b.hue}, 80%, 70%, ${alpha})`
+          ctx.fill()
+          ctx.restore()
+        }
+
+        // Glow
+        ctx.beginPath()
+        ctx.arc(0, 0, s * 2, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${b.hue}, 90%, 65%, ${glow * 0.15})`
+        ctx.fill()
+
+        // Body
+        ctx.beginPath()
+        ctx.arc(0, 0, s * 0.6, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${b.hue}, 80%, ${50 + glow * 30}%, ${0.6 + glow * 0.4})`
+        ctx.fill()
+      }
+
+      ctx.restore()
+    }
+
+    function drawVines(t: number): void {
+      for (const vine of vines) {
+        if (vine.length < vine.maxLength) {
+          vine.length += vine.growth
+        }
+        const startP = octagonPoint(Math.round(((vine.angle + Math.PI / 8) / (Math.PI * 2)) * 8) % 8)
+        const inwardAngle = Math.atan2(cy - startP.y, cx - startP.x)
+
+        ctx.beginPath()
+        ctx.moveTo(startP.x, startP.y)
+
+        const steps = Math.floor(vine.length)
+        for (let s = 1; s <= steps; s++) {
+          const frac = s / vine.maxLength
+          const wobble = Math.sin(s * 0.8 + t * 0.001) * 8 * frac
+          const px = startP.x + Math.cos(inwardAngle) * s * 1.5 + Math.cos(inwardAngle + Math.PI / 2) * wobble
+          const py = startP.y + Math.sin(inwardAngle) * s * 1.5 + Math.sin(inwardAngle + Math.PI / 2) * wobble
+          ctx.lineTo(px, py)
+        }
+
+        ctx.strokeStyle = `hsla(${vine.hue}, 50%, 30%, 0.5)`
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+
+        // Leaves
+        for (let s = 3; s <= steps; s += 4) {
+          const frac = s / vine.maxLength
+          const wobble = Math.sin(s * 0.8 + t * 0.001) * 8 * frac
+          const px = startP.x + Math.cos(inwardAngle) * s * 1.5 + Math.cos(inwardAngle + Math.PI / 2) * wobble
+          const py = startP.y + Math.sin(inwardAngle) * s * 1.5 + Math.sin(inwardAngle + Math.PI / 2) * wobble
+          ctx.beginPath()
+          ctx.ellipse(px, py, 3, 1.5, inwardAngle + Math.sin(s) * 0.5, 0, Math.PI * 2)
+          ctx.fillStyle = `hsla(${vine.hue + 10}, 55%, 35%, 0.6)`
+          ctx.fill()
+        }
+      }
+    }
+
+    function drawMoss(): void {
+      for (const patch of mossPatches) {
+        if (patch.radius < patch.maxRadius) {
+          patch.radius += patch.growth
+        }
+        if (patch.radius > 0) {
+          const grad = ctx.createRadialGradient(patch.x, patch.y, 0, patch.x, patch.y, patch.radius)
+          grad.addColorStop(0, `hsla(${patch.hue}, 50%, 25%, 0.4)`)
+          grad.addColorStop(0.6, `hsla(${patch.hue}, 45%, 20%, 0.2)`)
+          grad.addColorStop(1, `hsla(${patch.hue}, 40%, 15%, 0)`)
+          ctx.beginPath()
+          ctx.arc(patch.x, patch.y, patch.radius, 0, Math.PI * 2)
+          ctx.fillStyle = grad
+          ctx.fill()
+        }
+      }
+    }
+
+    // Reclamation calculation
+    let reclamation = 0
+    let gameOver = false
+
+    function calcReclamation(): number {
+      let insideCount = 0
+      for (const b of boids) {
+        if (isInsideOctagon(b.x, b.y)) insideCount++
+      }
+      const boidFactor = insideCount / boids.length
+
+      const vineFactor = vines.reduce((sum, v) => sum + v.length / v.maxLength, 0) / vines.length
+      const mossFactor = mossPatches.reduce((sum, m) => sum + m.radius / m.maxRadius, 0) / mossPatches.length
+
+      return Math.min(100, Math.round((boidFactor * 40 + vineFactor * 30 + mossFactor * 30)))
+    }
+
+    // Force reclamation for testing
+    ;(window as any).__forceReclamation = (value: number) => {
+      reclamation = value
+      if (value >= 100) {
+        gameOver = true
+        victoryEl.classList.add("visible")
+      }
+      reclamationEl.textContent = Math.round(value) + "%"
+    }
+
+    // Caption cycling
+    let currentCaption = 0
+    const captionTypes: CreatureType[] = ["butterfly", "bird", "ant", "firefly"]
+    let captionTimer = 0
+
+    function updateCaption(t: number): void {
+      if (t - captionTimer > 6000) {
+        captionTimer = t
+        currentCaption = (currentCaption + 1) % captionTypes.length
+        const type = captionTypes[currentCaption]
+        const caption = CAPTIONS[type]
+        captionEl.classList.remove("visible")
+        setTimeout(() => {
+          const speciesEl = captionEl.querySelector(".caption-species")
+          if (speciesEl) speciesEl.textContent = caption.species
+          // Replace text content after the species span
+          const textNode = captionEl.lastChild
+          if (textNode) textNode.textContent = "\n" + caption.text
+          captionEl.classList.add("visible")
+        }, 600)
+      }
+    }
+
+    // Ground texture (sparse grass tufts)
+    function drawGround(): void {
+      // Sparse grass
+      ctx.strokeStyle = "rgba(60, 90, 40, 0.15)"
+      ctx.lineWidth = 1
+      for (let i = 0; i < 200; i++) {
+        const gx = (Math.sin(i * 127.1 + 311.7) * 0.5 + 0.5) * W
+        const gy = (Math.sin(i * 269.5 + 183.3) * 0.5 + 0.5) * H
+        const gh = 4 + Math.sin(i * 73.3) * 3
+        ctx.beginPath()
+        ctx.moveTo(gx, gy)
+        ctx.lineTo(gx + Math.sin(i * 0.7) * 2, gy - gh)
+        ctx.stroke()
+      }
+    }
+
+    // Main loop
+    let startTime = 0
+
+    function frame(t: number): void {
+      if (!startTime) startTime = t
+      if (gameOver) {
+        requestAnimationFrame(frame)
+        return
+      }
+
+      ctx.clearRect(0, 0, W, H)
+
+      drawGround()
+      drawMoss()
+      drawOctagon()
+      drawVines(t)
+
+      updateBoids()
+
+      for (const b of boids) {
+        drawBoid(b, t)
+      }
+
+      // Cursor scare radius visual
+      if (mouseInside) {
+        ctx.beginPath()
+        ctx.arc(mouseX, mouseY, CURSOR_SCARE_DIST, 0, Math.PI * 2)
+        ctx.strokeStyle = "rgba(255, 100, 60, 0.08)"
+        ctx.lineWidth = 1
+        ctx.stroke()
+
+        // Crosshair
+        ctx.beginPath()
+        ctx.moveTo(mouseX - 8, mouseY)
+        ctx.lineTo(mouseX + 8, mouseY)
+        ctx.moveTo(mouseX, mouseY - 8)
+        ctx.lineTo(mouseX, mouseY + 8)
+        ctx.strokeStyle = "rgba(255, 100, 60, 0.4)"
+        ctx.lineWidth = 1
+        ctx.stroke()
+      }
+
+      // Update reclamation
+      const newRecl = calcReclamation()
+      reclamation = reclamation + (newRecl - reclamation) * 0.02
+      reclamationEl.textContent = Math.round(reclamation) + "%"
+
+      if (reclamation >= 99 && !gameOver) {
+        gameOver = true
+        reclamationEl.textContent = "100%"
+        victoryEl.classList.add("visible")
+      }
+
+      updateCaption(t)
+
+      requestAnimationFrame(frame)
+    }
+
+    // Initial caption
+    captionEl.classList.add("visible")
+
+    requestAnimationFrame(frame)
+  </script>
+</Base>
