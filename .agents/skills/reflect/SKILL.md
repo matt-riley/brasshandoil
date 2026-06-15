@@ -4,6 +4,7 @@ description: >-
   Reflect on the conversation and update the brain. Use when wrapping up, after mistakes
   or corrections, or when significant codebase knowledge was gained. Triggers: "reflect",
   "remember this".
+schedule: "Follow-up stage after every agent session."
 ---
 
 # Reflect

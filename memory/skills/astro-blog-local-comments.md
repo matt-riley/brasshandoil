@@ -13,3 +13,4 @@
 - Add a blog post entry in `clients/web/src/content/blog/` for each daily experiment review.
 - Link the experiment route inside the post body so feedback has direct context.
 - Use consistent tags (for example: `feedback`, `accessibility`, `interaction`) so trends are easy to filter.
+- Model the blog post as a follow-up stage after `execute` so every completed experiment automatically gets a written summary.

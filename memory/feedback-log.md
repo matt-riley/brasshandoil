@@ -6,6 +6,20 @@ Use this file as the running source of truth for review notes after each daily e
 
 ### Session Entry
 
+Date: 2026-06-15
+Experiment: Brackish Groundwater Choir
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from hydrologic reports: Saltwater intrusion in coastal aquifers due to extraction drawdowns and rising tides.
+- Implemented 2D canvas simulation displaying freshwater inflow, saline ocean wedge, halocline boundary, and municipal intake wells.
+- Added salt crystallization visual growth branching on well intakes when salinity exceeds 25%.
+- Programmed multi-channel synthesizer using Web Audio API: sine wave harmonics (C2, G3, D4) representing aquifer layers, a triangle drone representing brackish intrusion, and a sawtooth crackle node representing salt popping.
+- Implemented low-pass filter cutoff sweep and Waveshaper distortion modulated by salinity.
+- Built keyboard shortcuts (arrow keys for recharge, number keys for well switches) and ensured zero viewport overflow at 375px mobile width.
+
+### Session Entry
+
 Date: 2026-06-14
 Experiment: Arctic Dropstone Deposition Desk
 Feedback:

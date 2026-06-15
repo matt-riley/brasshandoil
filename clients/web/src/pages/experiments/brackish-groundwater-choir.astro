@@ -1,0 +1,1239 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Brackish Groundwater Choir // Hydrologic Sounding Terminal">
+  <div class="choir-container" id="brackish-root" data-status="balanced">
+    <!-- Retro CRT effects -->
+    <div class="crt-overlay" aria-hidden="true"></div>
+    <div class="crt-flicker" aria-hidden="true"></div>
+
+    <!-- Header -->
+    <header class="choir-header">
+      <h1 class="page-title text-gradient">Brackish Groundwater Choir</h1>
+      <p class="subtitle font-mono">COASTAL AQUIFER SOUNDING CONSOLE // AQUIFER SALINITY TEST DESK</p>
+    </header>
+
+    <!-- Arming Overlay for user gesture initialization of AudioContext -->
+    <div id="arming-overlay" class="overlay glass">
+      <div class="overlay-content">
+        <div class="overlay-icon">🌊</div>
+        <h2 class="overlay-title font-mono">HYDROLOGIC SONIC ARMING SEQUENCE</h2>
+        <p class="overlay-desc">
+          You are logging into the municipal coastal aquifer monitoring desk. Heavy extraction from municipal wells triggers drawdowns, pulling the marine saltwater wedge into the clean freshwater aquifer.
+        </p>
+        <div class="alert alert-info font-mono text-left">
+          <strong>HYDRAULIC RULES OF BALANCE:</strong><br/>
+          1. <strong>Freshwater Head:</strong> Increasing the recharge level pushes the saltwater wedge back into the ocean.<br/>
+          2. <strong>Well Extraction:</strong> Turning on the municipal wells pulls water out but accelerates seawater intrusion.<br/>
+          3. <strong>Choir Synthesizer:</strong> Clean freshwater generates clear, resonant chords. Rising salinity muffles the tones and introduces crackling distortion as salt crystals encrust the extraction wells.
+        </div>
+        <button id="arm-button" class="btn btn-primary font-mono">
+          Arm Sounding Desk & Synthesizer
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="workspace-grid hidden" id="workspace">
+      <!-- Left Panel: Aquifer Cross-Section -->
+      <div class="panel stage-panel glass">
+        <div class="panel-header">
+          <h2 class="panel-title font-mono">I. Aquifer Cross-Section</h2>
+          <span class="status-indicator font-mono" id="status-badge">BALANCED</span>
+        </div>
+
+        <div class="canvas-stage-wrapper">
+          <div class="canvas-stage" id="canvas-stage">
+            <canvas id="aquifer-canvas" width="500" height="360"></canvas>
+            
+            <!-- Virtual crosshair for keyboard focus -->
+            <svg id="virtual-cursor" class="virtual-cursor-svg" viewBox="0 0 40 40" aria-hidden="true">
+              <circle cx="20" cy="20" r="10" class="cursor-ring" />
+              <line x1="20" y1="0" x2="20" y2="40" class="cursor-line" />
+              <line x1="0" y1="20" x2="40" y2="20" class="cursor-line" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="keyboard-hint font-mono">
+          [LEFT/RIGHT] Adjust Recharge Slider // [1] Toggle Well 1 // [2] Toggle Well 2
+        </div>
+      </div>
+
+      <!-- Right Panel: Controls & Diagnostics -->
+      <div class="panel control-panel glass">
+        <h2 class="panel-title font-mono">II. Aquifer Diagnostics & Telemetry</h2>
+
+        <div class="telemetry-grid">
+          <div class="telemetry-box">
+            <span class="box-label font-mono">SALINITY LEVEL</span>
+            <div class="box-value font-mono text-cyan" id="salinity-display">0.0%</div>
+          </div>
+          <div class="telemetry-box">
+            <span class="box-label font-mono">AQUIFER STATE</span>
+            <div class="box-value font-mono text-gold" id="status-display">BALANCED AQUIFER</div>
+          </div>
+          <div class="telemetry-box full-width">
+            <span class="box-label font-mono">HYDRAULIC RECHARGE HEAD</span>
+            <div class="recharge-bar-container">
+              <div class="recharge-bar-fill" id="recharge-bar"></div>
+              <span class="recharge-value font-mono" id="recharge-display">70.0 m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recharge Head Slider -->
+        <div class="control-section">
+          <div class="control-header">
+            <label for="recharge-slider" class="control-label font-mono">FRESHWATER RECHARGE HEAD (INFLOW):</label>
+            <span id="recharge-slider-value" class="font-mono text-cyan">70%</span>
+          </div>
+          <input type="range" id="recharge-slider" class="slider" min="0" max="100" value="70" />
+        </div>
+
+        <!-- Extraction Wells Toggle -->
+        <div class="control-section">
+          <span class="control-label font-mono">MUNICIPAL EXTRACTION WELLS:</span>
+          <div class="well-toggles-grid">
+            <div class="well-control-card glass">
+              <span class="well-id font-mono">WELL #1 (SHALLOW)</span>
+              <label class="switch">
+                <input type="checkbox" class="well-switch" id="well-1-switch" />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+            <div class="well-control-card glass">
+              <span class="well-id font-mono">WELL #2 (DEEP AQUIFER)</span>
+              <label class="switch">
+                <input type="checkbox" class="well-switch" id="well-2-switch" />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio Choir details -->
+        <div class="choir-details glass font-mono">
+          <div class="detail-row">
+            <span>Subterranean Voices:</span>
+            <span class="text-cyan">C2, G3, D4 Chorals</span>
+          </div>
+          <div class="detail-row">
+            <span>Active Saline Noise:</span>
+            <span id="saline-noise-state" class="text-danger">OFF</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #080f14;
+    color: #e2e8f0;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .choir-container {
+    --bg-dark: #050b0f;
+    --panel-bg: rgba(10, 25, 35, 0.7);
+    --border-cyan: #06b6d4;
+    --border-gold: #f59e0b;
+    --border-red: #ef4444;
+    --text-glow-cyan: 0 0 8px rgba(6, 182, 212, 0.6);
+    --text-glow-gold: 0 0 8px rgba(245, 158, 11, 0.6);
+    --text-glow-red: 0 0 8px rgba(239, 68, 68, 0.6);
+    
+    position: relative;
+    min-height: 100vh;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: radial-gradient(circle at center, #0b1a24 0%, #050b0f 100%);
+    overflow-x: hidden;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #22d3ee 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  }
+
+  .text-cyan { color: #22d3ee; }
+  .text-gold { color: #f59e0b; }
+  .text-danger { color: #ef4444; }
+
+  /* CRT Screen Aesthetics */
+  .crt-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 6px 100%;
+    z-index: 99;
+    pointer-events: none;
+  }
+
+  .crt-flicker {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: transparent;
+    opacity: 0.15;
+    z-index: 98;
+    pointer-events: none;
+    animation: crt-flicker-anim 0.15s infinite;
+  }
+
+  @keyframes crt-flicker-anim {
+    0% { background-color: rgba(255, 255, 255, 0.01); }
+    50% { background-color: rgba(0, 0, 0, 0.02); }
+    100% { background-color: rgba(255, 255, 255, 0.01); }
+  }
+
+  .choir-header {
+    margin-bottom: 2rem;
+    text-align: center;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    letter-spacing: 0.15em;
+  }
+
+  /* Arming Overlay styling */
+  .overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: rgba(4, 9, 13, 0.85);
+    backdrop-filter: blur(12px);
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+
+  .overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .glass {
+    background: rgba(13, 31, 46, 0.45);
+    border: 1px solid rgba(6, 182, 212, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    border-radius: 12px;
+  }
+
+  .overlay-content {
+    max-width: 550px;
+    padding: 3rem;
+    text-align: center;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    background: radial-gradient(circle at center, rgba(15, 37, 54, 0.9) 0%, rgba(5, 13, 20, 0.95) 100%);
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.2);
+  }
+
+  .overlay-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    animation: wave-float 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes wave-float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    100% { transform: translateY(-8px) rotate(10deg); }
+  }
+
+  .overlay-title {
+    font-size: 1.25rem;
+    color: #22d3ee;
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+  }
+
+  .overlay-desc {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-info {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background: rgba(6, 182, 212, 0.08);
+    border-left: 4px solid #06b6d4;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    border-radius: 0 8px 8px 0;
+    color: #e2e8f0;
+  }
+
+  .btn {
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-primary {
+    background: #06b6d4;
+    color: #050b0f;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+  }
+
+  .btn-primary:hover {
+    background: #22d3ee;
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.6);
+    transform: scale(1.03);
+  }
+
+  /* Workspace Layout */
+  .workspace-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1100px;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  .workspace-grid.hidden {
+    display: none;
+    opacity: 0;
+  }
+
+  @media (max-width: 900px) {
+    .workspace-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  .panel {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(226, 232, 240, 0.08);
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+
+  .panel-title {
+    font-size: 1rem;
+    margin: 0;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+  }
+
+  .status-indicator {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+
+  /* Set status-badge colors based on state attributes */
+  #brackish-root[data-status="balanced"] #status-badge {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+  }
+
+  #brackish-root[data-status="intrusion"] #status-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+  }
+
+  #brackish-root[data-status="spoilt"] #status-badge {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+  }
+
+  .canvas-stage-wrapper {
+    position: relative;
+    background: #020609;
+    border: 1px solid rgba(6, 182, 212, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .canvas-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 500 / 360;
+  }
+
+  #aquifer-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Keyboard virtual cursor overlay */
+  .virtual-cursor-svg {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+    transition: left 0.1s linear, top 0.1s linear;
+    z-index: 10;
+    opacity: 0.8;
+  }
+
+  .cursor-ring {
+    stroke: #06b6d4;
+    stroke-width: 2px;
+    fill: none;
+  }
+
+  .cursor-line {
+    stroke: #06b6d4;
+    stroke-width: 1px;
+    stroke-dasharray: 2 2;
+  }
+
+  .keyboard-hint {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: #475569;
+    text-align: center;
+  }
+
+  /* Telemetry box styles */
+  .telemetry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .telemetry-box {
+    background: rgba(2, 6, 9, 0.5);
+    border: 1px solid rgba(6, 182, 212, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+  }
+
+  .telemetry-box.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .box-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #475569;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .box-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  /* Recharge Head Bar Indicator */
+  .recharge-bar-container {
+    position: relative;
+    height: 24px;
+    background: #020609;
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding-left: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .recharge-bar-fill {
+    position: absolute;
+    top: 0; left: 0; height: 100%;
+    width: 70%;
+    background: linear-gradient(90deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.5));
+    transition: width 0.1s linear;
+  }
+
+  .recharge-value {
+    position: relative;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #e2e8f0;
+    z-index: 2;
+  }
+
+  /* Control Section and Slider */
+  .control-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .control-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .control-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+  }
+
+  .slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #091a24;
+    border-radius: 3px;
+    outline: none;
+    border: 1px solid rgba(6, 182, 212, 0.2);
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #06b6d4;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.6);
+    border: none;
+    transition: background 0.1s;
+  }
+
+  .slider::-webkit-slider-thumb:hover {
+    background: #22d3ee;
+  }
+
+  /* Extraction Well Switch Controls */
+  .well-toggles-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .well-control-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(6, 182, 212, 0.1);
+  }
+
+  .well-id {
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    font-weight: bold;
+  }
+
+  /* Toggle Switch styling */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+
+  .switch input {
+    opacity: 0; width: 0; height: 0;
+  }
+
+  .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #0b1a24;
+    transition: .3s;
+    border-radius: 24px;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+  }
+
+  .switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #475569;
+    transition: .3s;
+    border-radius: 50%;
+  }
+
+  input:checked + .switch-slider {
+    background-color: rgba(6, 182, 212, 0.2);
+    border-color: #06b6d4;
+  }
+
+  input:checked + .switch-slider:before {
+    transform: translateX(20px);
+    background-color: #06b6d4;
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
+  }
+
+  /* Details Box */
+  .choir-details {
+    padding: 1rem;
+    font-size: 0.75rem;
+    border: 1px solid rgba(6, 182, 212, 0.1);
+    margin-top: auto;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+
+  .detail-row:last-child {
+    margin-bottom: 0;
+  }
+</style>
+
+<script is:inline>
+  // Wrap in immediate scope
+  (function() {
+    // Application state
+    const state = {
+      armed: false,
+      recharge: 70,       // 0 to 100 slider
+      wells: [false, false], // extraction switches
+      salinity: 0,        // calculated actual salinity (0 - 100)
+      targetSalinity: 0,
+      headLevel: 70,      // calculated hydraulic head
+      keyboardX: 250,     // virtual cursor X (aquifer width 500)
+      keyboardY: 180,     // virtual cursor Y (aquifer height 360)
+      
+      // Particle systems
+      freshwaterParticles: [],
+      saltwaterParticles: [],
+      saltCrystals: [],   // crystal nodes to grow on well tips
+      
+      // Web Audio components
+      audioContext: null,
+      gainNode: null,
+      voices: [],         // array of oscillators + gain nodes
+      crackleNode: null,  // oscillator for clicking saline sound
+      filterNode: null,
+      distortionNode: null,
+    };
+
+    // Canvas dimensions
+    const WIDTH = 500;
+    const HEIGHT = 360;
+    let canvas, ctx, animationFrameId;
+
+    // Elements
+    let rootEl, armingOverlay, workspace, rechargeSlider, rechargeSliderVal, rechargeBar, rechargeDisplay;
+    let salinityDisplay, statusDisplay, statusBadge, salineNoiseState, virtualCursor;
+    let well1Switch, well2Switch;
+
+    // Initialize DOM links after content load
+    window.addEventListener('DOMContentLoaded', () => {
+      rootEl = document.getElementById('brackish-root');
+      armingOverlay = document.getElementById('arming-overlay');
+      workspace = document.getElementById('workspace');
+      rechargeSlider = document.getElementById('recharge-slider');
+      rechargeSliderVal = document.getElementById('recharge-slider-value');
+      rechargeBar = document.getElementById('recharge-bar');
+      rechargeDisplay = document.getElementById('recharge-display');
+      salinityDisplay = document.getElementById('salinity-display');
+      statusDisplay = document.getElementById('status-display');
+      statusBadge = document.getElementById('status-badge');
+      salineNoiseState = document.getElementById('saline-noise-state');
+      virtualCursor = document.getElementById('virtual-cursor');
+      well1Switch = document.getElementById('well-1-switch');
+      well2Switch = document.getElementById('well-2-switch');
+
+      canvas = document.getElementById('aquifer-canvas');
+      if (canvas) {
+        ctx = canvas.getContext('2d');
+      }
+
+      // Hook up UI listeners
+      document.getElementById('arm-button').addEventListener('click', armSystem);
+      rechargeSlider.addEventListener('input', (e) => {
+        state.recharge = parseFloat(e.target.value);
+        updateRechargeUI();
+        updatePhysics();
+      });
+
+      well1Switch.addEventListener('change', (e) => {
+        state.wells[0] = e.target.checked;
+        updatePhysics();
+      });
+
+      well2Switch.addEventListener('change', (e) => {
+        state.wells[1] = e.target.checked;
+        updatePhysics();
+      });
+
+      // Keyboard navigation
+      window.addEventListener('keydown', handleKeyDown);
+
+      // Setup exposed test hooks for Playwright tests
+      window.__setSalinity = (val) => {
+        state.salinity = val;
+        state.targetSalinity = val;
+        updateStatusDisplay(val);
+        if (state.armed && state.gainNode) {
+          updateSynthSounds(val);
+        }
+      };
+
+      window.__triggerWellState = (index, active) => {
+        state.wells[index] = active;
+        const switchEl = index === 0 ? well1Switch : well2Switch;
+        if (switchEl) switchEl.checked = active;
+        updatePhysics();
+      };
+
+      // Set initial recharge UI state
+      updateRechargeUI();
+    });
+
+    // Arm the audio context and reveal the workspace
+    function armSystem() {
+      if (state.armed) return;
+      
+      // Initialize AudioContext
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      state.audioContext = new AudioContextClass();
+      
+      // Build Synthesizer graph
+      setupSynth();
+
+      // Update state
+      state.armed = true;
+      armingOverlay.classList.add('hidden');
+      workspace.classList.remove('hidden');
+
+      // Initialize particles
+      initParticles();
+
+      // Start animation loop
+      state.lastTime = performance.now();
+      animationFrameId = requestAnimationFrame(animationLoop);
+    }
+
+    // Keyboard handlers
+    function handleKeyDown(e) {
+      if (!state.armed) return;
+
+      const step = e.shiftKey ? 2 : 8; // Steer slower with shift
+      let updated = false;
+
+      if (e.key === 'ArrowLeft') {
+        state.recharge = Math.max(0, state.recharge - 5);
+        rechargeSlider.value = state.recharge;
+        updateRechargeUI();
+        updatePhysics();
+        updated = true;
+      } else if (e.key === 'ArrowRight') {
+        state.recharge = Math.min(100, state.recharge + 5);
+        rechargeSlider.value = state.recharge;
+        updateRechargeUI();
+        updatePhysics();
+        updated = true;
+      } else if (e.key === '1') {
+        well1Switch.checked = !well1Switch.checked;
+        state.wells[0] = well1Switch.checked;
+        updatePhysics();
+        updated = true;
+      } else if (e.key === '2') {
+        well2Switch.checked = !well2Switch.checked;
+        state.wells[1] = well2Switch.checked;
+        updatePhysics();
+        updated = true;
+      } else if (e.key === 'ArrowUp') {
+        state.keyboardY = Math.max(20, state.keyboardY - step);
+        updated = true;
+      } else if (e.key === 'ArrowDown') {
+        state.keyboardY = Math.min(HEIGHT - 20, state.keyboardY + step);
+        updated = true;
+      }
+
+      if (updated) {
+        // Position the virtual cursor overlay
+        virtualCursor.style.left = `${(state.keyboardX / WIDTH) * 100}%`;
+        virtualCursor.style.top = `${(state.keyboardY / HEIGHT) * 100}%`;
+      }
+    }
+
+    function updateRechargeUI() {
+      if (rechargeSliderVal) rechargeSliderVal.textContent = `${state.recharge}%`;
+      if (rechargeBar) rechargeBar.style.width = `${state.recharge}%`;
+      if (rechargeDisplay) rechargeDisplay.textContent = `${state.recharge.toFixed(1)} m`;
+    }
+
+    // Hydrologic pressure & salinity calculations
+    function updatePhysics() {
+      // Calculate active wells drawdown pressure
+      const drawdown = (state.wells[0] ? 22 : 0) + (state.wells[1] ? 38 : 0);
+      
+      // Freshwater pressure balance
+      const balance = state.recharge - drawdown;
+      
+      // Salinity target: lower balance -> higher salinity
+      // Ocean threshold behaves like a constant pressure of 50.
+      const threat = 52;
+      const netForce = threat - balance;
+      state.targetSalinity = Math.max(0, Math.min(100, (netForce / threat) * 100));
+    }
+
+    // Initialize particles for simulation visual
+    function initParticles() {
+      state.freshwaterParticles = [];
+      state.saltwaterParticles = [];
+      state.saltCrystals = [];
+
+      // Create initial flow particles
+      for (let i = 0; i < 40; i++) {
+        state.freshwaterParticles.push({
+          x: Math.random() * WIDTH * 0.6,
+          y: Math.random() * HEIGHT,
+          speed: 0.5 + Math.random() * 1.5,
+          size: 1 + Math.random() * 2,
+          opacity: 0.2 + Math.random() * 0.5
+        });
+      }
+
+      for (let i = 0; i < 30; i++) {
+        state.saltwaterParticles.push({
+          x: WIDTH * 0.5 + Math.random() * WIDTH * 0.5,
+          y: HEIGHT * 0.5 + Math.random() * HEIGHT * 0.5,
+          speed: 0.3 + Math.random() * 0.9,
+          size: 1.5 + Math.random() * 2.5,
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    // Web Audio Synthesizer Graph
+    function setupSynth() {
+      const ctx = state.audioContext;
+      
+      // Master Gain Node
+      state.gainNode = ctx.createGain();
+      state.gainNode.gain.setValueAtTime(0.0, ctx.currentTime);
+      state.gainNode.gain.linearRampToValueAtTime(0.6, ctx.currentTime + 1.0); // fade in
+
+      // Subterranean lowpass filter
+      state.filterNode = ctx.createBiquadFilter();
+      state.filterNode.type = 'lowpass';
+      state.filterNode.frequency.setValueAtTime(1200, ctx.currentTime);
+      state.filterNode.Q.setValueAtTime(1.5, ctx.currentTime);
+
+      // Waveshaper for salt crystallization distortion
+      state.distortionNode = ctx.createWaveShaper();
+      state.distortionNode.curve = makeDistortionCurve(0);
+      state.distortionNode.oversample = '4x';
+
+      // Connect nodes
+      state.distortionNode.connect(state.filterNode);
+      state.filterNode.connect(state.gainNode);
+      state.gainNode.connect(ctx.destination);
+
+      // Create Choral Voices (Oscillators)
+      // Voice 1 (Freshwater Hum): C2 (65.4 Hz)
+      createVoice(65.4, 'sine', 0.4);
+      // Voice 2 (Aquifer Core): G3 (196.0 Hz)
+      createVoice(196.0, 'sine', 0.25);
+      // Voice 3 (Upper Choral): D4 (293.7 Hz)
+      createVoice(293.7, 'sine', 0.15);
+      // Voice 4 (Brackish Threat Drone): E3 (164.8 Hz)
+      createVoice(164.8, 'triangle', 0.0); // Starts silent
+
+      // Create the crackle node for salt popping
+      state.crackleNode = ctx.createOscillator();
+      state.crackleNode.type = 'sawtooth';
+      state.crackleNode.frequency.setValueAtTime(80, ctx.currentTime);
+      
+      const crackleGain = ctx.createGain();
+      crackleGain.gain.setValueAtTime(0, ctx.currentTime);
+
+      // Modulate crackle using an LFO or fast gain ramp for pops
+      state.crackleNode.connect(crackleGain);
+      crackleGain.connect(state.distortionNode);
+      state.crackleNode.start();
+
+      state.voices.push({ osc: state.crackleNode, gain: crackleGain, baseWeight: 0, type: 'crackle' });
+    }
+
+    function createVoice(freq, type, initialGain) {
+      const ctx = state.audioContext;
+      const osc = ctx.createOscillator();
+      const voiceGain = ctx.createGain();
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      
+      voiceGain.gain.setValueAtTime(initialGain, ctx.currentTime);
+
+      osc.connect(voiceGain);
+      voiceGain.connect(state.distortionNode);
+      osc.start();
+
+      state.voices.push({
+        osc: osc,
+        gain: voiceGain,
+        baseFreq: freq,
+        baseGain: initialGain,
+        type: type
+      });
+    }
+
+    // Standard waveshaper distortion curve maker
+    function makeDistortionCurve(amount) {
+      const k = typeof amount === 'number' ? amount : 50;
+      const n_samples = 44100;
+      const curve = new Float32Array(n_samples);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < n_samples; ++i) {
+        const x = (i * 2) / n_samples - 1;
+        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+      }
+      return curve;
+    }
+
+    // Dynamic Sound updates according to salinity
+    function updateSynthSounds(salinity) {
+      const ctx = state.audioContext;
+      if (!ctx) return;
+
+      const t = ctx.currentTime;
+
+      // 1. Muffle filter cutoff frequency as salinity rises
+      // Clean: 1400Hz -> Intruding: 400Hz -> Spoilt: 150Hz
+      const targetCutoff = Math.max(150, 1400 - (salinity * 12.5));
+      state.filterNode.frequency.setTargetAtTime(targetCutoff, t, 0.2);
+
+      // 2. Adjust voices
+      state.voices.forEach(voice => {
+        if (voice.type === 'sine') {
+          // Sine clean voices lose volume slightly at critical salinity
+          const scalar = Math.max(0.2, 1 - (salinity / 100));
+          voice.gain.gain.setTargetAtTime(voice.baseGain * scalar, t, 0.3);
+          
+          // Slightly detune the voices (instability)
+          const detuneAmount = (salinity / 100) * 15; // up to 15 cents detuning
+          voice.osc.frequency.setTargetAtTime(voice.baseFreq + (Math.sin(t * 2) * detuneAmount), t, 0.1);
+        }
+        
+        if (voice.type === 'triangle') {
+          // Brackish buzzing triangle wave gain rises
+          // Peak at 60% salinity, then fade slightly as everything goes silent
+          const peakGain = salinity > 0 ? Math.min(0.25, (salinity / 60) * 0.25) : 0;
+          voice.gain.gain.setTargetAtTime(peakGain, t, 0.2);
+        }
+
+        if (voice.type === 'crackle') {
+          // Salt crackle gain rises when salinity is high
+          const crackleVolume = salinity > 45 ? Math.min(0.12, ((salinity - 45) / 55) * 0.12) : 0;
+          voice.gain.gain.setTargetAtTime(crackleVolume, t, 0.15);
+          
+          // Randomize frequency of crackle to sound like sparks/popping salt crystals
+          if (salinity > 45 && Math.random() < 0.2) {
+            voice.osc.frequency.setValueAtTime(120 + Math.random() * 800, t);
+          }
+        }
+      });
+
+      // 3. Distortion shaper
+      // Increase distortion amount with salinity
+      const distAmount = salinity > 30 ? Math.min(40, (salinity - 30) * 0.8) : 0;
+      state.distortionNode.curve = makeDistortionCurve(distAmount);
+    }
+
+    // Salinity Status string logic
+    function updateStatusDisplay(salinity) {
+      if (salinityDisplay) {
+        salinityDisplay.textContent = `${salinity.toFixed(1)}%`;
+      }
+
+      let statusText = "BALANCED AQUIFER";
+      let statusAttr = "balanced";
+      let badgeText = "BALANCED";
+
+      if (salinity >= 60.0) {
+        statusText = "SPOILT AQUIFER";
+        statusAttr = "spoilt";
+        badgeText = "CRITICAL FAILURE";
+      } else if (salinity >= 15.0) {
+        statusText = "SALINE INTRUSION";
+        statusAttr = "intrusion";
+        badgeText = "INTRUDING";
+      }
+
+      if (statusDisplay) statusDisplay.textContent = statusText;
+      if (statusBadge) statusBadge.textContent = badgeText;
+      if (rootEl) rootEl.setAttribute('data-status', statusAttr);
+
+      if (salineNoiseState) {
+        salineNoiseState.textContent = salinity > 45.0 ? "ACTIVE CRACKLE" : "OFF";
+        salineNoiseState.className = salinity > 45.0 ? "text-danger" : "";
+      }
+    }
+
+    // Animation frames loop
+    function animationLoop(timestamp) {
+      // Delta calculations
+      const dt = (timestamp - state.lastTime) / 1000;
+      state.lastTime = timestamp;
+
+      // Smooth salinity transition
+      const salinityDiff = state.targetSalinity - state.salinity;
+      if (Math.abs(salinityDiff) > 0.05) {
+        state.salinity += salinityDiff * 0.05; // ease towards target
+        updateStatusDisplay(state.salinity);
+        updateSynthSounds(state.salinity);
+      }
+
+      // Draw and update simulation on Canvas
+      drawAquifer();
+
+      animationFrameId = requestAnimationFrame(animationLoop);
+    }
+
+    // Draw the entire hydrologic aquifer cross-section
+    function drawAquifer() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+      const salinityRatio = state.salinity / 100;
+
+      // 1. Draw geological layers & aquifer matrix background
+      ctx.fillStyle = '#060d13';
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      // Aquifer boundaries (dotted sand grain lines)
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.08)';
+      ctx.lineWidth = 1;
+      for (let y = 120; y < HEIGHT; y += 20) {
+        ctx.beginPath();
+        ctx.setLineDash([5, 15]);
+        ctx.moveTo(0, y);
+        ctx.lineTo(WIDTH, y);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]); // reset
+
+      // 2. Draw Saltwater wedge pushing from the right
+      // Wedge pushes left at the bottom due to density difference (Ghyben-Herzberg relation)
+      const wedgeTipX = WIDTH - (salinityRatio * WIDTH * 0.8);
+      
+      // Draw ocean on the very right
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.06)';
+      ctx.beginPath();
+      ctx.moveTo(WIDTH, 100);
+      ctx.lineTo(wedgeTipX, HEIGHT);
+      ctx.lineTo(WIDTH, HEIGHT);
+      ctx.closePath();
+      ctx.fill();
+
+      // Halocline Boundary Line
+      ctx.strokeStyle = `rgba(245, 158, 11, ${0.2 + salinityRatio * 0.6})`;
+      ctx.lineWidth = 2 + (salinityRatio * 2);
+      ctx.beginPath();
+      ctx.moveTo(WIDTH, 100);
+      ctx.quadraticCurveTo((WIDTH + wedgeTipX) / 2, (HEIGHT + 100) / 2, wedgeTipX, HEIGHT);
+      ctx.stroke();
+
+      // 3. Draw clean freshwater head flow from left
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.04)';
+      ctx.beginPath();
+      ctx.moveTo(0, 100);
+      ctx.lineTo(0, HEIGHT);
+      ctx.lineTo(wedgeTipX, HEIGHT);
+      ctx.quadraticCurveTo((WIDTH + wedgeTipX) / 2, (HEIGHT + 100) / 2, WIDTH, 100);
+      ctx.closePath();
+      ctx.fill();
+
+      // 4. Update and draw flow particles
+      // Freshwater particles (flow left-to-right, sinking/rising to well drawdowns)
+      ctx.fillStyle = 'rgba(34, 211, 238, 0.35)';
+      state.freshwaterParticles.forEach(p => {
+        // Move right
+        p.x += p.speed;
+        if (p.x > WIDTH) {
+          p.x = 0;
+          p.y = 100 + Math.random() * (HEIGHT - 100);
+        }
+
+        // Drawdown attraction to active wells
+        state.wells.forEach((active, index) => {
+          if (active) {
+            const wellX = index === 0 ? 180 : 330;
+            const wellTipY = index === 0 ? 250 : 310;
+            
+            const dx = wellX - p.x;
+            const dy = wellTipY - p.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 100) {
+              p.x += (dx / dist) * 0.4;
+              p.y += (dy / dist) * 0.4;
+            }
+          }
+        });
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Saltwater particles (Amber, denser, drifting from bottom right)
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.4)';
+      state.saltwaterParticles.forEach(p => {
+        p.x -= p.speed * 0.5 * (1 + salinityRatio);
+        p.y += Math.sin(p.angle) * 0.2;
+        p.angle += 0.05;
+
+        // Keep inside saltwater wedge roughly
+        if (p.x < wedgeTipX || p.y < 100) {
+          p.x = WIDTH + Math.random() * 50;
+          p.y = HEIGHT - Math.random() * (HEIGHT - 150);
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 5. Draw Municipal Wells
+      // Well 1 (Shallow): X = 180, Y = 60 to 250
+      // Well 2 (Deep): X = 330, Y = 60 to 310
+      drawWell(180, 250, state.wells[0], 0);
+      drawWell(330, 310, state.wells[1], 1);
+
+      // 6. Grow and draw salt crystals when salinity is high
+      if (state.salinity > 25.0) {
+        growSaltCrystals(180, 250, 0);
+        growSaltCrystals(330, 310, 1);
+      }
+    }
+
+    function drawWell(x, tipY, isActive, index) {
+      // Draw well pipes
+      ctx.strokeStyle = isActive ? '#22d3ee' : '#475569';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x, 40);
+      ctx.lineTo(x, tipY);
+      ctx.stroke();
+
+      // Screen intake base
+      ctx.fillStyle = isActive ? 'rgba(34, 211, 238, 0.2)' : '#1e293b';
+      ctx.fillRect(x - 8, tipY - 15, 16, 15);
+      ctx.strokeStyle = isActive ? '#22d3ee' : '#475569';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x - 8, tipY - 15, 16, 15);
+
+      // Label
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px monospace';
+      ctx.fillText(`WELL #${index+1}`, x - 20, 32);
+
+      // Draw active suction ripples
+      if (isActive) {
+        ctx.strokeStyle = 'rgba(34, 211, 238, 0.3)';
+        ctx.lineWidth = 1.5;
+        const radius = (performance.now() / 15) % 30;
+        ctx.beginPath();
+        ctx.arc(x, tipY - 8, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    // Grow crystal lines on the wells
+    function growSaltCrystals(x, tipY, wellIndex) {
+      const salinityVal = state.salinity;
+      // Define crystal nodes if empty
+      if (!state.saltCrystals[wellIndex]) {
+        state.saltCrystals[wellIndex] = [];
+        // Populate base nodes
+        for (let i = 0; i < 15; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const length = 5 + Math.random() * 20;
+          state.saltCrystals[wellIndex].push({
+            x1: x,
+            y1: tipY - 8,
+            x2: x + Math.cos(angle) * length,
+            y2: tipY - 8 + Math.sin(angle) * length,
+            branchFactor: Math.random()
+          });
+        }
+      }
+
+      // Draw crystals with opacity based on salinity scale
+      const crystalScale = Math.min(1.0, (salinityVal - 25.0) / 75.0);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.25 + crystalScale * 0.65})`;
+      ctx.lineWidth = 1.5;
+
+      state.saltCrystals[wellIndex].forEach(c => {
+        // Scale crystal growth length
+        const curX = c.x1 + (c.x2 - c.x1) * crystalScale;
+        const curY = c.y1 + (c.y2 - c.y1) * crystalScale;
+
+        ctx.beginPath();
+        ctx.moveTo(c.x1, c.y1);
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+
+        // Branching sub-crystal
+        if (c.branchFactor > 0.4 && crystalScale > 0.6) {
+          const subScale = (crystalScale - 0.6) * 2.5; // 0 to 1
+          const bx = curX + Math.sin(performance.now() / 200 + c.branchFactor) * 8 * subScale;
+          const by = curY + 6 * subScale;
+          ctx.beginPath();
+          ctx.moveTo(curX, curY);
+          ctx.lineTo(bx, by);
+          ctx.stroke();
+        }
+      });
+    }
+
+  })();
+</script>
