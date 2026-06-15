@@ -5,4 +5,4 @@
 ## Experiments
 
 1. [x] Build a first experiment with noodle
-2. [ ] Build the Brackish Groundwater Choir experiment
+2. [x] Build the Brackish Groundwater Choir experiment
