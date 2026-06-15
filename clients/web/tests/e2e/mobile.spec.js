@@ -10,6 +10,7 @@ const pages = [
   "/experiments/backrooms",
   "/experiments/boatfire-regatta",
   "/experiments/chrono-calibration",
+  "/experiments/civic-fog-harpsichord",
   "/experiments/complaint-received",
   "/experiments/dependency-caterpillar",
   "/experiments/ghost-kitchen-district",

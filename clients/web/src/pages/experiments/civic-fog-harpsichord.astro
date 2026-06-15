@@ -1,0 +1,697 @@
+---
+import Base from "@layouts/Base.astro"
+
+const registers = [
+  { name: "Brass Intake", code: "BI", color: "#b58a2a", note: "civic fifth" },
+  { name: "Canal Tenor", code: "CT", color: "#2f7f7a", note: "brackish third" },
+  { name: "Ledger Reed", code: "LR", color: "#39464c", note: "ink minor" },
+  { name: "Lamp Wick", code: "LW", color: "#8f3f33", note: "red seal" },
+  { name: "Bellows Clerk", code: "BC", color: "#6f7d86", note: "paper drone" },
+  { name: "Gutter Choir", code: "GC", color: "#4d6b58", note: "rainy octave" },
+]
+---
+
+<Base title="Civic Fog Harpsichord">
+  <main id="civic-fog-harpsichord" class="fog-shell">
+    <section class="fog-brief" aria-label="Civic fog ledger">
+      <h1>Civic Fog Harpsichord</h1>
+      <p class="fog-copy">
+        Tune the drifting municipal fog through brass register keys, then stamp
+        each civic chord before the basin forgets which street it was.
+      </p>
+
+      <div class="fog-readouts" aria-live="polite">
+        <div>
+          <span>Chords</span>
+          <strong id="chord-count">0</strong>
+        </div>
+        <div>
+          <span>Register</span>
+          <strong id="current-register">unpulled</strong>
+        </div>
+        <div>
+          <span>Density</span>
+          <strong id="fog-density">18</strong>
+        </div>
+        <div>
+          <span>Ordinance</span>
+          <strong id="ordinance-state">drafting</strong>
+        </div>
+      </div>
+
+      <div class="fog-actions">
+        <button id="stamp-button" type="button">Stamp</button>
+        <button id="clear-button" type="button">Clear</button>
+      </div>
+
+      <ol id="stamp-ledger" class="stamp-ledger" aria-label="Stamped civic fog chords">
+        <li>awaiting first register</li>
+      </ol>
+    </section>
+
+    <section
+      id="fog-basin"
+      class="fog-basin"
+      data-awake="false"
+      data-chords="0"
+      aria-label="Interactive civic fog basin"
+    >
+      <canvas id="fog-canvas" aria-label="Drifting civic fog"></canvas>
+
+      <div id="harpsichord-frame" class="harpsichord-frame" aria-hidden="true">
+        <span class="soundboard board-a"></span>
+        <span class="soundboard board-b"></span>
+        <span class="pinrail"></span>
+        <span class="spine spine-a"></span>
+        <span class="spine spine-b"></span>
+        <span class="fog-cursor"></span>
+      </div>
+
+      <div class="register-bank" aria-label="Fog register keys">
+        {registers.map((register, index) => (
+          <button
+            class="register-key"
+            type="button"
+            data-register={register.name}
+            data-code={register.code}
+            data-note={register.note}
+            data-index={index}
+            style={`--register-color: ${register.color}; --register-index: ${index};`}
+            aria-pressed="false"
+          >
+            <b>{register.code}</b>
+            <span>{register.name}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #e9ece8;
+  }
+
+  :global(.container) {
+    max-inline-size: none;
+    padding-inline: 0;
+  }
+
+  .fog-shell {
+    --paper: #e9ece8;
+    --ink: #17201d;
+    --muted: rgba(23, 32, 29, 0.68);
+    --teal: #2f7f7a;
+    --brass: #b58a2a;
+    --stamp: #8f3f33;
+    --line: rgba(23, 32, 29, 0.17);
+    --cursor-x: 54%;
+    --cursor-y: 45%;
+    display: grid;
+    grid-template-columns: minmax(20rem, 26rem) minmax(0, 1fr);
+    gap: clamp(1rem, 2.3vw, 2rem);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.5vw, 2rem);
+    color: var(--ink);
+    background:
+      linear-gradient(110deg, rgba(233, 236, 232, 0.98), rgba(233, 236, 232, 0.74)),
+      repeating-linear-gradient(90deg, rgba(47, 127, 122, 0.07) 0 1px, transparent 1px 4.5rem),
+      linear-gradient(145deg, #dde4df 0%, #eef0e9 38%, #d8e2df 72%, #ead9cd 100%);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .fog-brief {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 0.7rem;
+  }
+
+  h1 {
+    max-width: 9ch;
+    margin: 0;
+    color: #18231f;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.45rem, 4.6vw, 4.35rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.89;
+    text-shadow:
+      0.035em 0.045em 0 rgba(181, 138, 42, 0.28),
+      -0.026em 0.022em 0 rgba(47, 127, 122, 0.28);
+  }
+
+  .fog-copy {
+    max-width: 32rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.25vw, 1.1rem);
+    line-height: 1.56;
+  }
+
+  .fog-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .fog-readouts div,
+  .stamp-ledger {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0.8rem 1.8rem rgba(23, 32, 29, 0.08);
+  }
+
+  .fog-readouts div {
+    padding: 0.78rem;
+  }
+
+  .fog-readouts span {
+    display: block;
+    color: var(--teal);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .fog-readouts strong {
+    display: block;
+    min-height: 1.5rem;
+    margin-top: 0.4rem;
+    color: var(--ink);
+    font-size: clamp(1rem, 1.7vw, 1.26rem);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .fog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  .fog-actions button {
+    min-height: 3.1rem;
+    border: 1px solid rgba(23, 32, 29, 0.2);
+    border-radius: 8px;
+    color: #151b18;
+    background: var(--brass);
+    font: 850 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      filter 160ms ease,
+      transform 160ms ease;
+  }
+
+  .fog-actions button:hover,
+  .fog-actions button:focus-visible {
+    filter: brightness(1.05) saturate(1.08);
+    transform: translateY(-1px);
+  }
+
+  #clear-button {
+    color: #f7f3ee;
+    background: #39464c;
+  }
+
+  .stamp-ledger {
+    display: grid;
+    gap: 0.5rem;
+    min-height: 8.5rem;
+    margin: 0;
+    padding: 0.82rem 0.82rem 0.82rem 1.95rem;
+    color: rgba(23, 32, 29, 0.76);
+    font: 760 0.82rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .stamp-ledger li::marker {
+    color: var(--stamp);
+  }
+
+  .fog-basin {
+    position: relative;
+    align-self: stretch;
+    min-width: 0;
+    min-height: min(41rem, calc(100vh - 10rem));
+    overflow: hidden;
+    border: 1px solid rgba(23, 32, 29, 0.15);
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at var(--cursor-x) var(--cursor-y), rgba(255, 255, 255, 0.75), transparent 8.6rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(47, 127, 122, 0.12));
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+      0 1rem 2.2rem rgba(23, 32, 29, 0.08);
+    touch-action: none;
+  }
+
+  .fog-basin::before {
+    content: "";
+    position: absolute;
+    inset: 1rem;
+    z-index: 2;
+    border: 1px dashed rgba(23, 32, 29, 0.2);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  #fog-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .harpsichord-frame {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .soundboard {
+    position: absolute;
+    border: 1px solid rgba(23, 32, 29, 0.18);
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.18), transparent),
+      color-mix(in srgb, var(--teal), transparent 88%);
+    clip-path: polygon(5% 10%, 92% 0, 100% 78%, 17% 100%);
+  }
+
+  .board-a {
+    left: 12%;
+    top: 12%;
+    width: 62%;
+    height: 48%;
+  }
+
+  .board-b {
+    right: 9%;
+    bottom: 17%;
+    width: 48%;
+    height: 35%;
+    transform: rotate(180deg);
+  }
+
+  .pinrail,
+  .spine {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(23, 32, 29, 0.35), transparent);
+    transform-origin: center;
+  }
+
+  .pinrail {
+    left: 13%;
+    right: 13%;
+    top: 46%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(181, 138, 42, 0.72), transparent);
+    transform: rotate(-7deg);
+  }
+
+  .spine-a {
+    left: 16%;
+    top: 28%;
+    width: 67%;
+    transform: rotate(18deg);
+  }
+
+  .spine-b {
+    left: 22%;
+    top: 62%;
+    width: 58%;
+    transform: rotate(-21deg);
+  }
+
+  .fog-cursor {
+    position: absolute;
+    left: var(--cursor-x);
+    top: var(--cursor-y);
+    width: clamp(4rem, 11vw, 7rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(143, 63, 51, 0.54);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, rgba(255, 255, 255, 0.46), transparent 62%),
+      conic-gradient(from 120deg, rgba(143, 63, 51, 0.12), rgba(181, 138, 42, 0.14), rgba(47, 127, 122, 0.14), rgba(143, 63, 51, 0.12));
+    transform: translate(-50%, -50%);
+  }
+
+  .register-bank {
+    position: absolute;
+    z-index: 4;
+    left: 1.35rem;
+    right: 1.35rem;
+    bottom: 1.35rem;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.62rem;
+  }
+
+  .register-key {
+    min-width: 0;
+    min-height: 5.55rem;
+    border: 1px solid color-mix(in srgb, var(--register-color), #17201d 20%);
+    border-radius: 8px;
+    padding: 0.78rem 0.5rem;
+    color: #17201d;
+    background:
+      radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--register-color), white 54%), transparent 1.5rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.74), color-mix(in srgb, var(--register-color), white 70%));
+    box-shadow:
+      inset 0 -0.55rem 0 color-mix(in srgb, var(--register-color), transparent 78%),
+      0 0.75rem 1.45rem rgba(23, 32, 29, 0.1);
+    cursor: pointer;
+    transition:
+      filter 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .register-key:hover,
+  .register-key:focus-visible,
+  .register-key[aria-pressed="true"] {
+    filter: saturate(1.12);
+    transform: translateY(-0.22rem);
+    box-shadow:
+      inset 0 -0.55rem 0 color-mix(in srgb, var(--register-color), transparent 64%),
+      0 1rem 1.8rem color-mix(in srgb, var(--register-color), transparent 72%);
+  }
+
+  .register-key b,
+  .register-key span {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .register-key b {
+    font-size: clamp(1rem, 1.9vw, 1.32rem);
+    line-height: 1;
+  }
+
+  .register-key span {
+    margin-top: 0.35rem;
+    font-size: clamp(0.68rem, 1.14vw, 0.8rem);
+    font-weight: 820;
+    line-height: 1.16;
+  }
+
+  @media (max-width: 800px) {
+    .fog-shell {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      overflow: clip;
+    }
+
+    .fog-brief {
+      align-self: start;
+      padding-block: 0;
+    }
+
+    h1 {
+      max-width: 10ch;
+      font-size: clamp(2.35rem, 12vw, 3.7rem);
+    }
+
+    .fog-basin {
+      min-height: 39rem;
+    }
+
+    .register-bank {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 440px) {
+    .fog-shell {
+      padding: 0.8rem;
+    }
+
+    .fog-readouts {
+      gap: 0.55rem;
+    }
+
+    .fog-readouts div {
+      padding: 0.66rem;
+    }
+
+    .fog-actions {
+      gap: 0.55rem;
+    }
+
+    .stamp-ledger {
+      min-height: 5.2rem;
+    }
+
+    .fog-basin {
+      min-height: 41rem;
+    }
+
+    .fog-basin::before {
+      inset: 0.8rem;
+    }
+
+    .register-bank {
+      left: 0.8rem;
+      right: 0.8rem;
+      bottom: 0.8rem;
+      gap: 0.5rem;
+    }
+
+    .register-key {
+      min-height: 5rem;
+      padding-inline: 0.4rem;
+    }
+  }
+</style>
+
+<script is:inline>
+  const basin = document.querySelector("#fog-basin")
+  const canvas = document.querySelector("#fog-canvas")
+  const context = canvas.getContext("2d")
+  const registerKeys = Array.from(document.querySelectorAll(".register-key"))
+  const chordCount = document.querySelector("#chord-count")
+  const currentRegister = document.querySelector("#current-register")
+  const fogDensity = document.querySelector("#fog-density")
+  const ordinanceState = document.querySelector("#ordinance-state")
+  const stampLedger = document.querySelector("#stamp-ledger")
+  const stampButton = document.querySelector("#stamp-button")
+  const clearButton = document.querySelector("#clear-button")
+
+  const normalizedCursor = { x: 0.54, y: 0.45 }
+  const stampedChords = []
+  let activeRegister = -1
+  let density = 18
+  let pixelRatio = 1
+
+  const fogBanks = Array.from({ length: 42 }, (_, index) => ({
+    x: (Math.sin(index * 7.1) * 0.5 + 0.5) * 0.86 + 0.07,
+    y: (Math.cos(index * 4.9) * 0.5 + 0.5) * 0.62 + 0.14,
+    width: 48 + (index % 7) * 14,
+    height: 14 + (index % 5) * 5,
+    phase: index * 0.51,
+    register: index % registerKeys.length,
+  }))
+
+  function syncCursor() {
+    basin.style.setProperty("--cursor-x", `${(normalizedCursor.x * 100).toFixed(2)}%`)
+    basin.style.setProperty("--cursor-y", `${(normalizedCursor.y * 100).toFixed(2)}%`)
+  }
+
+  function updateDensity(amount) {
+    density = Math.max(0, Math.min(99, density + amount))
+    fogDensity.textContent = String(Math.round(density))
+  }
+
+  function updateFromPoint(clientX, clientY) {
+    const box = basin.getBoundingClientRect()
+    normalizedCursor.x = Math.min(1, Math.max(0, (clientX - box.left) / box.width))
+    normalizedCursor.y = Math.min(1, Math.max(0, (clientY - box.top) / box.height))
+    basin.dataset.awake = "true"
+    updateDensity(3)
+    syncCursor()
+  }
+
+  function renderLedger() {
+    stampLedger.replaceChildren()
+
+    if (stampedChords.length === 0) {
+      const empty = document.createElement("li")
+      empty.textContent = "awaiting first register"
+      stampLedger.append(empty)
+      return
+    }
+
+    for (const chord of stampedChords.slice(-5).reverse()) {
+      const item = document.createElement("li")
+      item.textContent = `${chord.code} stamped: ${chord.name.toLowerCase()} / ${chord.note}`
+      stampLedger.append(item)
+    }
+  }
+
+  function tuneRegister(index) {
+    const key = registerKeys[index]
+    if (!key) return
+
+    activeRegister = index
+    registerKeys.forEach((button, buttonIndex) => {
+      button.setAttribute("aria-pressed", String(buttonIndex === index))
+    })
+    currentRegister.textContent = key.dataset.register
+    ordinanceState.textContent = `tuning ${key.dataset.note}`
+    updateDensity(9)
+  }
+
+  function stampChord() {
+    const key = registerKeys[activeRegister] || registerKeys[0]
+    if (activeRegister < 0) activeRegister = 0
+
+    const chord = {
+      name: key.dataset.register,
+      code: key.dataset.code,
+      note: key.dataset.note,
+    }
+    stampedChords.push(chord)
+    basin.dataset.chords = String(stampedChords.length)
+    chordCount.textContent = String(stampedChords.length)
+    currentRegister.textContent = chord.name
+    ordinanceState.textContent = "stamped"
+    updateDensity(14)
+    renderLedger()
+  }
+
+  function clearChords() {
+    stampedChords.length = 0
+    activeRegister = -1
+    density = 18
+    basin.dataset.chords = "0"
+    chordCount.textContent = "0"
+    currentRegister.textContent = "unpulled"
+    fogDensity.textContent = "18"
+    ordinanceState.textContent = "drafting"
+    registerKeys.forEach((button) => button.setAttribute("aria-pressed", "false"))
+    renderLedger()
+  }
+
+  function resizeCanvas() {
+    const box = basin.getBoundingClientRect()
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+    canvas.width = Math.max(1, Math.floor(box.width * pixelRatio))
+    canvas.height = Math.max(1, Math.floor(box.height * pixelRatio))
+    canvas.style.width = `${box.width}px`
+    canvas.style.height = `${box.height}px`
+  }
+
+  function drawFogBank(x, y, width, height, color, alpha, lean) {
+    const gradient = context.createRadialGradient(x, y, 0, x, y, width * 0.62)
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${alpha + 0.12})`)
+    gradient.addColorStop(0.42, `rgba(201, 215, 212, ${alpha})`)
+    gradient.addColorStop(0.78, color)
+    gradient.addColorStop(1, "rgba(233, 236, 232, 0)")
+    context.fillStyle = gradient
+    context.beginPath()
+    context.ellipse(x, y, width, height, lean, 0, Math.PI * 2)
+    context.fill()
+  }
+
+  function animate(time) {
+    const width = canvas.width
+    const height = canvas.height
+    context.clearRect(0, 0, width, height)
+
+    const cursorX = normalizedCursor.x
+    const cursorY = normalizedCursor.y
+    updateDensity(-0.018)
+
+    for (const bank of fogBanks) {
+      const dx = cursorX - bank.x
+      const dy = cursorY - bank.y
+      const proximity = Math.max(0, 0.2 - Math.hypot(dx, dy))
+      const registerPull = activeRegister === bank.register ? 0.022 : 0
+      bank.x += dx * (0.0015 + proximity * 0.018 + registerPull)
+      bank.y += dy * (0.001 + proximity * 0.012 + registerPull * 0.6)
+      bank.x += Math.sin(time / 1400 + bank.phase) * 0.0008
+      bank.y += Math.cos(time / 1600 + bank.phase) * 0.0007
+      bank.x = Math.min(0.95, Math.max(0.05, bank.x))
+      bank.y = Math.min(0.82, Math.max(0.08, bank.y))
+
+      const key = registerKeys[bank.register]
+      const color = key?.style.getPropertyValue("--register-color") || "#6f7d86"
+      const pulse = Math.sin(time / 700 + bank.phase) * 0.12
+      drawFogBank(
+        bank.x * width,
+        bank.y * height,
+        (bank.width + density * 0.12) * pixelRatio,
+        (bank.height + density * 0.04) * pixelRatio,
+        color,
+        0.16 + density / 520,
+        pulse
+      )
+    }
+
+    requestAnimationFrame(animate)
+  }
+
+  registerKeys.forEach((key, index) => {
+    key.addEventListener("click", () => tuneRegister(index))
+  })
+
+  basin.addEventListener("pointermove", (event) => updateFromPoint(event.clientX, event.clientY))
+  basin.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0]
+    if (touch) updateFromPoint(touch.clientX, touch.clientY)
+  }, { passive: true })
+  basin.addEventListener("touchmove", (event) => {
+    const touch = event.touches[0]
+    if (touch) updateFromPoint(touch.clientX, touch.clientY)
+  }, { passive: true })
+  basin.addEventListener("touchend", () => {
+    basin.dataset.awake = String(density > 18)
+  })
+  basin.addEventListener("touchcancel", () => {
+    basin.dataset.awake = String(density > 18)
+  })
+
+  stampButton.addEventListener("click", stampChord)
+  clearButton.addEventListener("click", clearChords)
+
+  window.addEventListener("keydown", (event) => {
+    const digit = Number(event.key)
+    if (digit >= 1 && digit <= registerKeys.length) {
+      tuneRegister(digit - 1)
+      return
+    }
+
+    const step = event.shiftKey ? 0.025 : 0.055
+    if (event.key === "ArrowLeft") normalizedCursor.x = Math.max(0, normalizedCursor.x - step)
+    if (event.key === "ArrowRight") normalizedCursor.x = Math.min(1, normalizedCursor.x + step)
+    if (event.key === "ArrowUp") normalizedCursor.y = Math.max(0, normalizedCursor.y - step)
+    if (event.key === "ArrowDown") normalizedCursor.y = Math.min(1, normalizedCursor.y + step)
+    if (event.key.startsWith("Arrow")) {
+      basin.dataset.awake = "true"
+      updateDensity(2)
+      syncCursor()
+    }
+    if (event.key === " " || event.key === "Enter") {
+      stampChord()
+    }
+  })
+
+  resizeCanvas()
+  syncCursor()
+  renderLedger()
+  window.addEventListener("resize", resizeCanvas)
+  requestAnimationFrame(animate)
+</script>
