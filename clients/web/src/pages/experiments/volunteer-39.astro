@@ -1,0 +1,1003 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Volunteer 39 — Post-Injection Observation">
+  <style is:inline>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    #observation-room {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(180deg, #f0ede8 0%, #e8e4dd 50%, #ddd8cf 100%);
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: crosshair;
+      user-select: none;
+    }
+
+    /* Fluorescent lighting overlay */
+    #fluorescent {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 3px,
+        rgba(255,255,255,0.015) 3px,
+        rgba(255,255,255,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    #header-bar {
+      position: absolute;
+      top: 16px;
+      left: 24px;
+      right: 24px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+
+    #header-bar h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b5e50;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #header-bar .subtitle {
+      font-size: 11px;
+      color: #9b8e80;
+      margin-top: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* Clock */
+    #clock-container {
+      position: absolute;
+      top: 60px;
+      right: 40px;
+      width: 200px;
+      height: 200px;
+      z-index: 5;
+    }
+
+    #clock {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #faf8f4;
+      border: 3px solid #c5beb3;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08), inset 0 2px 8px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #clock-time {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 36px;
+      font-weight: 600;
+      color: #3a332b;
+    }
+
+    #clock-label {
+      font-size: 10px;
+      color: #9b8e80;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+
+    #clock-frozen-indicator {
+      position: absolute;
+      bottom: 18px;
+      font-size: 9px;
+      color: #d4443b;
+      font-family: 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    #clock-container:hover #clock-frozen-indicator {
+      opacity: 1;
+    }
+
+    /* Vitals monitor */
+    #vitals-monitor {
+      position: absolute;
+      top: 80px;
+      left: 40px;
+      width: 260px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 16px;
+      z-index: 5;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    #vitals-header {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      color: #4a6;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+    }
+
+    .vital-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .vital-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: #6a8;
+    }
+
+    .vital-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 18px;
+      font-weight: 600;
+      color: #4f8;
+    }
+
+    #heart-rate-value { color: #f85; }
+
+    canvas#ecg-canvas {
+      width: 100%;
+      height: 40px;
+      margin-top: 8px;
+    }
+
+    /* Room objects */
+    .room-object {
+      position: absolute;
+      z-index: 5;
+      transition: filter 0.2s;
+    }
+
+    .room-object:hover {
+      filter: brightness(0.85) saturate(0.3);
+    }
+
+    /* IV Drip */
+    #iv-drip {
+      top: 100px;
+      left: 340px;
+      width: 60px;
+      text-align: center;
+    }
+
+    #iv-bag {
+      width: 40px;
+      height: 60px;
+      background: linear-gradient(180deg, rgba(180,210,240,0.6), rgba(160,190,220,0.8));
+      border-radius: 4px 4px 8px 8px;
+      margin: 0 auto;
+      border: 1px solid rgba(120,150,180,0.4);
+    }
+
+    #iv-tube {
+      width: 2px;
+      height: 80px;
+      background: rgba(120,150,180,0.5);
+      margin: 0 auto;
+    }
+
+    #iv-drip-drop {
+      width: 6px;
+      height: 6px;
+      background: rgba(160,200,240,0.7);
+      border-radius: 50%;
+      margin: 0 auto;
+    }
+
+    #iv-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px;
+      color: #9b8e80;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Poster */
+    #poster {
+      bottom: 80px;
+      right: 60px;
+      width: 180px;
+      padding: 16px;
+      background: #faf8f4;
+      border: 1px solid #d5cfc5;
+      box-shadow: 2px 4px 12px rgba(0,0,0,0.06);
+    }
+
+    #poster-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #6b5e50;
+      margin-bottom: 8px;
+    }
+
+    #poster-text {
+      font-size: 11px;
+      color: #7a6e60;
+      line-height: 1.5;
+    }
+
+    /* Plant */
+    #plant {
+      bottom: 40px;
+      left: 60px;
+      text-align: center;
+    }
+
+    #plant-pot {
+      width: 50px;
+      height: 35px;
+      background: #c4855c;
+      border-radius: 2px 2px 8px 8px;
+      margin: 0 auto;
+    }
+
+    #plant-stem {
+      width: 4px;
+      height: 40px;
+      background: #5a8a4a;
+      margin: 0 auto;
+      transform-origin: bottom center;
+    }
+
+    .plant-leaf {
+      width: 20px;
+      height: 10px;
+      background: #6aaa55;
+      border-radius: 0 50% 50% 0;
+      position: absolute;
+    }
+
+    /* Nurse message */
+    #nurse-message {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      border: 1px solid #c5beb3;
+      border-radius: 8px;
+      padding: 14px 24px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: #4a3f35;
+      z-index: 30;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      max-width: 500px;
+      text-align: center;
+      display: none;
+    }
+
+    .nurse-name {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #9b8e80;
+      margin-bottom: 6px;
+    }
+
+    /* Discharge message */
+    #discharge-message {
+      position: fixed;
+      inset: 0;
+      background: rgba(240,237,232,0.97);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    #discharge-message h2 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 24px;
+      color: #3a332b;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    #discharge-message p {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      color: #7a6e60;
+      max-width: 400px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Status bar */
+    #status-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 36px;
+      background: rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 20;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      pointer-events: none;
+    }
+
+    .status-item {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: #9b8e80;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    #observation-warning {
+      color: #d4443b;
+      font-weight: 600;
+    }
+
+    /* Magazine on seat */
+    #magazine {
+      bottom: 200px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-3deg);
+      width: 140px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #e0dbd3;
+      box-shadow: 2px 3px 10px rgba(0,0,0,0.05);
+    }
+
+    #magazine-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #b0a090;
+      margin-bottom: 6px;
+    }
+
+    #magazine-headline {
+      font-size: 12px;
+      font-weight: 600;
+      color: #4a3f35;
+      line-height: 1.3;
+    }
+
+    /* Progress bar (minutes elapsed) */
+    #progress-container {
+      position: absolute;
+      top: 44px;
+      left: 24px;
+      right: 24px;
+      height: 3px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 2px;
+      z-index: 10;
+    }
+
+    #progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #6b5e50, #4a6);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    @media (max-width: 600px) {
+      #header-bar {
+        left: 12px;
+        right: 12px;
+        top: 8px;
+      }
+      #header-bar h1 {
+        font-size: 10px;
+      }
+      #header-bar .subtitle {
+        font-size: 8px;
+        margin-top: 2px;
+      }
+      #progress-container {
+        top: 36px;
+        left: 12px;
+        right: 12px;
+      }
+      #vitals-monitor {
+        top: 55px;
+        left: 10px;
+        width: 170px;
+        padding: 8px;
+      }
+      #vitals-header {
+        font-size: 8px;
+        margin-bottom: 6px;
+      }
+      .vital-row {
+        margin-bottom: 4px;
+      }
+      .vital-label {
+        font-size: 9px;
+      }
+      .vital-value {
+        font-size: 13px;
+      }
+      canvas#ecg-canvas {
+        height: 25px;
+        margin-top: 4px;
+      }
+      #clock-container {
+        top: 45px;
+        right: 10px;
+        width: 120px;
+        height: 120px;
+      }
+      #clock-time {
+        font-size: 24px;
+      }
+      #clock-label {
+        font-size: 8px;
+      }
+      #clock-frozen-indicator {
+        bottom: 8px;
+        font-size: 7px;
+      }
+      #iv-drip {
+        top: 195px;
+        left: 15px;
+        width: 50px;
+      }
+      #iv-bag {
+        width: 28px;
+        height: 42px;
+      }
+      #iv-tube {
+        height: 50px;
+      }
+      #iv-label {
+        font-size: 7px;
+        margin-top: 4px;
+      }
+      #poster {
+        bottom: 50px;
+        right: 10px;
+        width: 150px;
+        padding: 10px;
+      }
+      #poster-title {
+        font-size: 8px;
+        margin-bottom: 4px;
+      }
+      #poster-text {
+        font-size: 9px;
+        line-height: 1.3;
+      }
+      #plant {
+        bottom: 50px;
+        left: 15px;
+      }
+      #plant-pot {
+        width: 35px;
+        height: 25px;
+      }
+      #plant-stem {
+        height: 25px;
+      }
+      #magazine {
+        bottom: 130px;
+        width: 120px;
+        padding: 8px;
+      }
+      #magazine-title {
+        font-size: 7px;
+      }
+      #magazine-headline {
+        font-size: 10px;
+      }
+      #nurse-message {
+        width: 90%;
+        max-width: 340px;
+        padding: 10px 16px;
+        font-size: 11px;
+        bottom: 45px;
+      }
+    }
+  </style>
+
+  <div id="observation-room" data-testid="observation-room">
+    <div id="fluorescent"></div>
+
+    <div id="header-bar">
+      <div>
+        <h1>Addenbrooke's Hospital — Observation Bay 3</h1>
+        <div class="subtitle">Phase I Trial — AI-Designed Universal Vaccine — Volunteer #39 of 39</div>
+      </div>
+    </div>
+
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+
+    <!-- Clock -->
+    <div id="clock-container" class="room-object" data-testid="room-object">
+      <div id="clock" data-testid="clock">
+        <div id="clock-time">0:00</div>
+        <div id="clock-label">Minutes Elapsed</div>
+        <div id="clock-frozen-indicator">Observation Detected</div>
+      </div>
+    </div>
+
+    <!-- Vitals Monitor -->
+    <div id="vitals-monitor" data-testid="vitals-monitor" class="room-object">
+      <div id="vitals-header">Volunteer 39 — Live Vitals</div>
+      <div class="vital-row">
+        <span class="vital-label">HR</span>
+        <span class="vital-value" id="heart-rate-value">72</span>
+      </div>
+      <div class="vital-row">
+        <span class="vital-label">BP</span>
+        <span class="vital-value" id="bp-value">118/76</span>
+      </div>
+      <div class="vital-row">
+        <span class="vital-label">SpO₂</span>
+        <span class="vital-value" id="spo2-value">98%</span>
+      </div>
+      <div class="vital-row">
+        <span class="vital-label">Temp</span>
+        <span class="vital-value" id="temp-value">36.7°</span>
+      </div>
+      <canvas id="ecg-canvas" width="260" height="40"></canvas>
+    </div>
+
+    <!-- IV Drip -->
+    <div id="iv-drip" class="room-object" data-testid="room-object">
+      <div id="iv-bag"></div>
+      <div id="iv-tube"></div>
+      <div id="iv-drip-drop"></div>
+      <div id="iv-label">Saline 0.9%</div>
+    </div>
+
+    <!-- Poster -->
+    <div id="poster" class="room-object" data-testid="room-object">
+      <div id="poster-title">Patient Information</div>
+      <div id="poster-text">Your immune system is now reviewing the AI-designed antigen. This is normal. The antigen was designed by a neural network and is, statistically, better at its job than you are at yours.</div>
+    </div>
+
+    <!-- Magazine -->
+    <div id="magazine" class="room-object" data-testid="room-object">
+      <div id="magazine-title">Cambridge Clinical Quarterly</div>
+      <div id="magazine-headline">AI Designs Vaccine: First Human Trial Begins. "The Machine Seemed Confident," Researchers Report</div>
+    </div>
+
+    <!-- Plant -->
+    <div id="plant" class="room-object" data-testid="room-object">
+      <div id="plant-stem"></div>
+      <div id="plant-pot"></div>
+    </div>
+
+    <!-- Nurse message -->
+    <div id="nurse-message" data-testid="nurse-message">
+      <div class="nurse-name">Nurse Chen — Observation Notes</div>
+      <div id="nurse-text"></div>
+    </div>
+
+    <!-- Discharge message -->
+    <div id="discharge-message" data-testid="discharge-message">
+      <h2>You are free to leave</h2>
+      <p>30 minutes have elapsed. No adverse reactions detected. The AI-designed antigen has been successfully reviewed by your immune system. You may experience mild arm tingling. This is the machine's way of saying thank you.</p>
+    </div>
+
+    <!-- Status bar -->
+    <div id="status-bar">
+      <span class="status-item" id="observation-warning"></span>
+      <span class="status-item" id="elapsed-display">Elapsed: 0:00 / 30:00</span>
+    </div>
+  </div>
+
+  <script>
+    // Types
+    interface RoomAnimation {
+      element: HTMLElement;
+      animation: Animation;
+      label: string;
+    }
+
+    // State
+    let clockMinutes = 0;
+    let clockFrozen = false;
+    let discharged = false;
+    let lastFrameTime = performance.now();
+    let nurseCheckIndex = 0;
+    const MINUTES_PER_SECOND = 0.5; // 1 real second = 0.5 game minutes → 60s to complete
+    const roomAnimations: RoomAnimation[] = [];
+    let hoveredElement: HTMLElement | null = null;
+
+    // Expose for tests
+    (window as any).__clockMinutes = clockMinutes;
+
+    // DOM refs
+    const room = document.getElementById("observation-room") as HTMLDivElement;
+    const clockTime = document.getElementById("clock-time") as HTMLDivElement;
+    const clockContainer = document.getElementById("clock-container") as HTMLDivElement;
+    const progressBar = document.getElementById("progress-bar") as HTMLDivElement;
+    const elapsedDisplay = document.getElementById("elapsed-display") as HTMLSpanElement;
+    const observationWarning = document.getElementById("observation-warning") as HTMLSpanElement;
+    const nurseMessage = document.getElementById("nurse-message") as HTMLDivElement;
+    const nurseText = document.getElementById("nurse-text") as HTMLDivElement;
+    const dischargeMessage = document.getElementById("discharge-message") as HTMLDivElement;
+    const heartRateValue = document.getElementById("heart-rate-value") as HTMLSpanElement;
+    const bpValue = document.getElementById("bp-value") as HTMLSpanElement;
+    const spo2Value = document.getElementById("spo2-value") as HTMLSpanElement;
+    const tempValue = document.getElementById("temp-value") as HTMLSpanElement;
+    const ecgCanvas = document.getElementById("ecg-canvas") as HTMLCanvasElement;
+    const ecgCtx = ecgCanvas.getContext("2d") as CanvasRenderingContext2D;
+
+    // Nurse messages
+    const nurseMessages = [
+      "Still at zero minutes? That can't be right. The clock was definitely working this morning.",
+      "I've been watching from the desk. You keep staring at the clock. It only moves when you look away. That's... not how clocks work.",
+      "I called maintenance about the clock. They said it's fine. They looked at me strangely.",
+      "Volunteer 38 was discharged 20 minutes ago. She didn't stare at the clock. Just saying.",
+      "The AI that designed your vaccine just sent a note. It says: 'Stop observing the clock. Time is a wave function. You are collapsing it.' I don't know what that means.",
+      "I'm going to pretend I didn't see you try to look at the clock without moving your head.",
+      "Good news: your vitals are perfect. Bad news: your observation technique is creating a localised temporal anomaly. HR wants paperwork.",
+    ];
+
+    // Poster texts that cycle
+    const posterTexts = [
+      "Your immune system is now reviewing the AI-designed antigen. This is normal. The antigen was designed by a neural network and is, statistically, better at its job than you are at yours.",
+      "Side effects may include: mild arm soreness, brief existential awareness, the distinct feeling of being optimised.",
+      "The micro-jet delivery system replaced the needle. The needle has been reassigned. It prefers not to discuss this.",
+      "Fun fact: the AI considered 2.4 million antigen configurations in 11 minutes. Your immune system will take 14 days. The AI is not judging.",
+      "Please remain seated. Time will pass. Unless you watch it. In which case, it won't.",
+    ];
+
+    // Set up Web Animations on room objects
+    function initAnimations(): void {
+      // Fluorescent flicker
+      const fluorescent = document.getElementById("fluorescent") as HTMLDivElement;
+      const flickerAnim = fluorescent.animate(
+        [
+          { opacity: 0.3 },
+          { opacity: 0.5 },
+          { opacity: 0.2 },
+          { opacity: 0.45 },
+          { opacity: 0.3 },
+        ],
+        { duration: 4000, iterations: Infinity, easing: "steps(5)" }
+      );
+      roomAnimations.push({ element: fluorescent, animation: flickerAnim, label: "fluorescent" });
+
+      // IV drip drop animation
+      const ivDrop = document.getElementById("iv-drip-drop") as HTMLDivElement;
+      const dripAnim = ivDrop.animate(
+        [
+          { transform: "translateY(0) scale(1)", opacity: 1 },
+          { transform: "translateY(30px) scale(0.5)", opacity: 0 },
+          { transform: "translateY(0) scale(0)", opacity: 0 },
+          { transform: "translateY(0) scale(1)", opacity: 1 },
+        ],
+        { duration: 2000, iterations: Infinity, easing: "ease-in" }
+      );
+      roomAnimations.push({ element: ivDrop, animation: dripAnim, label: "iv-drip" });
+
+      // Plant gentle sway
+      const plantStem = document.getElementById("plant-stem") as HTMLDivElement;
+      const swayAnim = plantStem.animate(
+        [
+          { transform: "rotate(-2deg)" },
+          { transform: "rotate(2deg)" },
+          { transform: "rotate(-2deg)" },
+        ],
+        { duration: 5000, iterations: Infinity, easing: "ease-in-out" }
+      );
+      roomAnimations.push({ element: plantStem, animation: swayAnim, label: "plant" });
+
+      // Poster slight drift
+      const poster = document.getElementById("poster") as HTMLDivElement;
+      const posterAnim = poster.animate(
+        [
+          { transform: "rotate(-0.5deg) translateY(0px)" },
+          { transform: "rotate(0.3deg) translateY(-2px)" },
+          { transform: "rotate(-0.5deg) translateY(0px)" },
+        ],
+        { duration: 7000, iterations: Infinity, easing: "ease-in-out" }
+      );
+      roomAnimations.push({ element: poster, animation: posterAnim, label: "poster" });
+
+      // Magazine subtle float
+      const magazine = document.getElementById("magazine") as HTMLDivElement;
+      const magAnim = magazine.animate(
+        [
+          { transform: "translateX(-50%) rotate(-3deg) translateY(0)" },
+          { transform: "translateX(-50%) rotate(-1deg) translateY(-3px)" },
+          { transform: "translateX(-50%) rotate(-3deg) translateY(0)" },
+        ],
+        { duration: 6000, iterations: Infinity, easing: "ease-in-out" }
+      );
+      roomAnimations.push({ element: magazine, animation: magAnim, label: "magazine" });
+
+      // Vitals monitor glow pulse
+      const vitals = document.getElementById("vitals-monitor") as HTMLDivElement;
+      const vitalsAnim = vitals.animate(
+        [
+          { boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 8px rgba(68,255,136,0.05)" },
+          { boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 16px rgba(68,255,136,0.12)" },
+          { boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 8px rgba(68,255,136,0.05)" },
+        ],
+        { duration: 3000, iterations: Infinity, easing: "ease-in-out" }
+      );
+      roomAnimations.push({ element: vitals, animation: vitalsAnim, label: "vitals" });
+
+      // Clock tick animation (seconds indicator)
+      const clockEl = document.getElementById("clock") as HTMLDivElement;
+      const clockAnim = clockEl.animate(
+        [
+          { borderColor: "#c5beb3" },
+          { borderColor: "#b5aea3" },
+          { borderColor: "#c5beb3" },
+        ],
+        { duration: 1000, iterations: Infinity }
+      );
+      roomAnimations.push({ element: clockEl, animation: clockAnim, label: "clock" });
+    }
+
+    // Quantum observation: hover pauses animations on that element + its parent room-object
+    function setupObservationMechanic(): void {
+      const roomObjects = document.querySelectorAll<HTMLElement>(".room-object");
+
+      roomObjects.forEach((obj) => {
+        obj.addEventListener("mouseenter", () => {
+          hoveredElement = obj;
+          // Pause all animations on this element and its children
+          const allAnims = obj.getAnimations({ subtree: true });
+          allAnims.forEach((a) => a.pause());
+
+          // Also pause any roomAnimations associated with this element tree
+          roomAnimations.forEach((ra) => {
+            if (obj.contains(ra.element)) {
+              ra.animation.pause();
+            }
+          });
+
+          // Is it the clock?
+          if (obj === clockContainer) {
+            clockFrozen = true;
+            observationWarning.textContent = "⚠ Temporal observation detected — clock suspended";
+          }
+        });
+
+        obj.addEventListener("mouseleave", () => {
+          hoveredElement = null;
+          // Resume all animations
+          const allAnims = obj.getAnimations({ subtree: true });
+          allAnims.forEach((a) => a.play());
+
+          roomAnimations.forEach((ra) => {
+            if (obj.contains(ra.element)) {
+              ra.animation.play();
+            }
+          });
+
+          if (obj === clockContainer) {
+            clockFrozen = false;
+            observationWarning.textContent = "";
+          }
+        });
+      });
+    }
+
+    // ECG drawing
+    let ecgX = 0;
+    function drawECG(): void {
+      const w = ecgCanvas.width;
+      const h = ecgCanvas.height;
+      const midY = h / 2;
+
+      ecgCtx.fillStyle = "rgba(26,26,26,0.15)";
+      ecgCtx.fillRect(ecgX, 0, 4, h);
+
+      ecgCtx.strokeStyle = "#4f8";
+      ecgCtx.lineWidth = 1.5;
+      ecgCtx.beginPath();
+
+      // Simple QRS complex approximation
+      const phase = (ecgX % 80) / 80;
+      let yOff = 0;
+      if (phase > 0.3 && phase < 0.35) yOff = -12;
+      else if (phase > 0.35 && phase < 0.38) yOff = 18;
+      else if (phase > 0.38 && phase < 0.42) yOff = -8;
+      else yOff = Math.sin(ecgX * 0.08) * 1.5;
+
+      ecgCtx.moveTo(ecgX - 1, midY + yOff);
+      ecgCtx.lineTo(ecgX, midY + yOff);
+      ecgCtx.stroke();
+
+      ecgX = (ecgX + 1) % w;
+      if (ecgX === 0) {
+        ecgCtx.clearRect(0, 0, w, h);
+      }
+    }
+
+    // Update vitals with slight variation
+    let vitalsTick = 0;
+    function updateVitals(): void {
+      vitalsTick++;
+      if (vitalsTick % 60 === 0) {
+        const hr = 68 + Math.floor(Math.random() * 10);
+        // Heart rate increases when hovering the monitor (anxiety)
+        const anxietyBoost = hoveredElement?.id === "vitals-monitor" ? 15 : 0;
+        heartRateValue.textContent = String(hr + anxietyBoost);
+
+        const sys = 115 + Math.floor(Math.random() * 8);
+        const dia = 72 + Math.floor(Math.random() * 8);
+        bpValue.textContent = `${sys}/${dia}`;
+
+        const spo2 = 97 + Math.floor(Math.random() * 3);
+        spo2Value.textContent = `${spo2}%`;
+
+        const temp = (36.5 + Math.random() * 0.4).toFixed(1);
+        tempValue.textContent = `${temp}°`;
+      }
+    }
+
+    // Update poster text periodically
+    let posterIndex = 0;
+    function cyclePosterText(): void {
+      const posterText = document.getElementById("poster-text") as HTMLDivElement;
+      posterIndex = (posterIndex + 1) % posterTexts.length;
+      posterText.textContent = posterTexts[posterIndex];
+    }
+
+    // Nurse check-in
+    function showNurseMessage(msg: string): void {
+      nurseText.textContent = msg;
+      nurseMessage.style.display = "block";
+
+      // Animate in with WAAPI
+      const entryAnim = nurseMessage.animate(
+        [
+          { opacity: 0, transform: "translateX(-50%) translateY(20px)" },
+          { opacity: 1, transform: "translateX(-50%) translateY(0)" },
+        ],
+        { duration: 400, fill: "forwards", easing: "ease-out" }
+      );
+
+      // Auto-dismiss after 5 seconds
+      entryAnim.finished.then(() => {
+        return new Promise<void>((resolve) => setTimeout(resolve, 5000));
+      }).then(() => {
+        const exitAnim = nurseMessage.animate(
+          [
+            { opacity: 1, transform: "translateX(-50%) translateY(0)" },
+            { opacity: 0, transform: "translateX(-50%) translateY(20px)" },
+          ],
+          { duration: 400, fill: "forwards", easing: "ease-in" }
+        );
+        return exitAnim.finished;
+      }).then(() => {
+        nurseMessage.style.display = "none";
+      });
+    }
+
+    function triggerNurseCheck(): void {
+      if (nurseCheckIndex < nurseMessages.length && !discharged) {
+        showNurseMessage(nurseMessages[nurseCheckIndex]);
+        nurseCheckIndex++;
+      }
+    }
+
+    // Schedule nurse checks at specific minute marks
+    const nurseCheckMinutes = [3, 7, 12, 17, 21, 25, 28];
+    let lastNurseCheck = -1;
+
+    function checkNurseSchedule(): void {
+      const target = nurseCheckMinutes[nurseCheckIndex];
+      if (target !== undefined && clockMinutes >= target && lastNurseCheck !== nurseCheckIndex) {
+        lastNurseCheck = nurseCheckIndex;
+        triggerNurseCheck();
+      }
+    }
+
+    // Discharge
+    function showDischarge(): void {
+      discharged = true;
+      dischargeMessage.style.display = "flex";
+      dischargeMessage.animate(
+        [{ opacity: 0 }, { opacity: 1 }],
+        { duration: 1000, fill: "forwards", easing: "ease-out" }
+      );
+    }
+
+    // Format clock display
+    function formatClock(minutes: number): string {
+      const m = Math.floor(minutes);
+      const s = Math.floor((minutes - m) * 60);
+      return `${m}:${s.toString().padStart(2, "0")}`;
+    }
+
+    // Main game loop
+    function gameLoop(now: number): void {
+      if (discharged) return;
+
+      const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+      lastFrameTime = now;
+
+      // Advance clock only when not frozen
+      if (!clockFrozen) {
+        clockMinutes += dt * MINUTES_PER_SECOND;
+        (window as any).__clockMinutes = clockMinutes;
+      }
+
+      // Update display
+      clockTime.textContent = formatClock(clockMinutes);
+      elapsedDisplay.textContent = `Elapsed: ${formatClock(clockMinutes)} / 30:00`;
+      progressBar.style.width = `${Math.min((clockMinutes / 30) * 100, 100)}%`;
+
+      // Cycle poster text every ~5 game minutes
+      if (Math.floor(clockMinutes) % 5 === 0 && Math.floor(clockMinutes) > 0) {
+        const posterIdx = Math.floor(clockMinutes / 5);
+        if (posterIdx !== posterIndex) {
+          cyclePosterText();
+        }
+      }
+
+      // Check nurse schedule
+      checkNurseSchedule();
+
+      // Check discharge
+      if (clockMinutes >= 30) {
+        showDischarge();
+        return;
+      }
+
+      // ECG
+      drawECG();
+      updateVitals();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Test helpers
+    (window as any).__triggerNurseCheck = triggerNurseCheck;
+    (window as any).__forceClockTo = (minutes: number) => {
+      clockMinutes = minutes;
+      (window as any).__clockMinutes = minutes;
+      if (minutes >= 30) {
+        showDischarge();
+      }
+    };
+
+    // Init
+    initAnimations();
+    setupObservationMechanic();
+    requestAnimationFrame(gameLoop);
+  </script>
+</Base>

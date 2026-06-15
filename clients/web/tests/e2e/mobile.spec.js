@@ -54,6 +54,7 @@ const pages = [
   "/experiments/ymca-attempt-18",
   "/experiments/speed-trap",
   "/experiments/voyager-telemetry-recalibrator",
+  "/experiments/volunteer-39",
   "/experiments/deer-ked-protocol",
   "/experiments/pollen-parcel-bureau",
   "/experiments/semaphore-loom",
