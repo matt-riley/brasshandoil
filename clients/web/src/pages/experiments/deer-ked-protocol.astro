@@ -757,13 +757,29 @@ import Base from "@layouts/Base.astro"
       const experiment = document.getElementById("experiment");
       if (!experiment) return;
 
-      experiment.addEventListener("mousemove", (e: MouseEvent) => {
+      const updateCoords = (clientX: number, clientY: number) => {
         const rect = experiment.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 100;
-        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        const x = ((clientX - rect.left) / rect.width) * 100;
+        const y = ((clientY - rect.top) / rect.height) * 100;
         experiment.style.setProperty("--cursor-x", `${x}%`);
         experiment.style.setProperty("--cursor-y", `${y}%`);
+      };
+
+      experiment.addEventListener("mousemove", (e: MouseEvent) => {
+        updateCoords(e.clientX, e.clientY);
       });
+
+      experiment.addEventListener("touchstart", (e: TouchEvent) => {
+        if (e.touches && e.touches.length > 0) {
+          updateCoords(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      experiment.addEventListener("touchmove", (e: TouchEvent) => {
+        if (e.touches && e.touches.length > 0) {
+          updateCoords(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
     }
 
     // Also apply the filter to the data-testid="world" element for the test

@@ -267,22 +267,43 @@ import Base from "@layouts/Base.astro"
     let mouseY = -1000
     let mouseInside = false
 
-    document.getElementById("experiment")!.addEventListener("mousemove", (e: MouseEvent) => {
+    const handleTouchMove = (clientX: number, clientY: number) => {
       const rect = canvas.getBoundingClientRect()
-      mouseX = e.clientX - rect.left
-      mouseY = e.clientY - rect.top
+      mouseX = clientX - rect.left
+      mouseY = clientY - rect.top
       mouseInside = true
-      cursorLabel.style.left = e.clientX + "px"
-      cursorLabel.style.top = e.clientY + "px"
+      cursorLabel.style.left = clientX + "px"
+      cursorLabel.style.top = clientY + "px"
       cursorLabel.classList.add("visible")
-    })
+    }
 
-    document.getElementById("experiment")!.addEventListener("mouseleave", () => {
+    const handleTouchEnd = () => {
       mouseInside = false
       mouseX = -1000
       mouseY = -1000
       cursorLabel.classList.remove("visible")
+    }
+
+    document.getElementById("experiment")!.addEventListener("mousemove", (e: MouseEvent) => {
+      handleTouchMove(e.clientX, e.clientY)
     })
+
+    document.getElementById("experiment")!.addEventListener("mouseleave", handleTouchEnd)
+
+    document.getElementById("experiment")!.addEventListener("touchstart", (e: TouchEvent) => {
+      if (e.touches && e.touches.length > 0) {
+        handleTouchMove(e.touches[0].clientX, e.touches[0].clientY)
+      }
+    }, { passive: true })
+
+    document.getElementById("experiment")!.addEventListener("touchmove", (e: TouchEvent) => {
+      if (e.touches && e.touches.length > 0) {
+        handleTouchMove(e.touches[0].clientX, e.touches[0].clientY)
+      }
+    }, { passive: true })
+
+    document.getElementById("experiment")!.addEventListener("touchend", handleTouchEnd)
+    document.getElementById("experiment")!.addEventListener("touchcancel", handleTouchEnd)
 
     // Octagon geometry
     function octagonPoint(i: number): { x: number; y: number } {
