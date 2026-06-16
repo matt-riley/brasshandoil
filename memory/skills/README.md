@@ -10,6 +10,7 @@ Use one file per theme when a lesson becomes durable enough to guide future expe
 - anti-patterns to avoid next time
 
 ## Recent additions
+- [css-3d-prism-transitions.md](css-3d-prism-transitions.md)
 - [first-viewport-instrument-framing.md](first-viewport-instrument-framing.md)
 - [astro-inline-browser-scripts.md](astro-inline-browser-scripts.md)
 - [sequential-astro-verification.md](sequential-astro-verification.md)
