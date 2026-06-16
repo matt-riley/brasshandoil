@@ -6,6 +6,21 @@ Use this file as the running source of truth for review notes after each daily e
 
 ### Session Entry
 
+Date: 2026-06-16
+Experiment: Tessera Gladiatoria (Gladiator Tag Rubbing)
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from recent HS2 excavation news: discovery of a rare Roman gladiator's bone tag.
+- Implemented interactive pseudo-3D rotating bone tag prism using CSS Y-axis rotations and dual-canvas layering (dirt/mud layer scratched off via pointer actions to reveal underlying carved Latin inscriptions).
+- Programmed Web Audio synthesizer combining a low-frequency ambient rumble (detuned triangle/sine waves whose pitches modulate with tag face rotation) and gravelly rubbing/scratching noise (bandpass-filtered white noise modulated by swipe velocity).
+- Built a satirical Decryption Console with selects translating the Latin descriptors to software engineering jokes (e.g. Subagent gladiator, DeepMind owner, Story Point 7 sprint approved, JS & C++ consuls).
+- Enabled keyboard overrides: Arrow keys steer virtual crosshair to clean cells, A/D keys rotate prism left/right.
+- Mitigated mobile viewport overflow (375px) via dynamic flex-wrapping, canvas size constraints, and `touch-action: none` gesture overrides.
+- Handled Playwright E2E automation seamlessly with a test-only `window.__revealAll()` helper to bypass manual scraping.
+
+### Session Entry
+
 Date: 2026-06-15
 Experiment: Brackish Groundwater Choir
 Feedback:
