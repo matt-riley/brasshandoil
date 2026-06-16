@@ -66,6 +66,8 @@ const pages = [
   "/experiments/mercury-quarantine-choir",
   "/experiments/octagon-terrarium",
   "/experiments/byssus-loom",
+  "/experiments/gladiator-tag-rubbing",
+  "/experiments/memory-tide-elevator",
 ]
 
 test.use({
