@@ -1,0 +1,605 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Memory Tide Elevator // Brass Hand Oil">
+  <section id="memory-tide-elevator" class="memory-elevator" data-archived="0" data-stirred="false">
+    <div class="scene-plate" aria-hidden="true"></div>
+
+    <header class="elevator-header">
+      <div>
+        <p class="station-code">LOCK 7 / MISPLACED RECALLS</p>
+        <h1>Memory Tide Elevator</h1>
+      </div>
+      <div class="header-gauges" aria-label="Elevator status">
+        <div>
+          <span>Tide</span>
+          <strong><span id="tide-level">34</span>%</strong>
+        </div>
+        <div>
+          <span>Archived</span>
+          <strong id="archived-count">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <div class="elevator-grid">
+      <section id="tide-shaft" class="tide-shaft" aria-label="Canal memory tide shaft">
+        <canvas id="memory-canvas" width="720" height="920"></canvas>
+        <div class="shaft-glass" aria-hidden="true">
+          <div class="pulley pulley-top"></div>
+          <div class="pulley pulley-bottom"></div>
+          <div class="waterline"></div>
+        </div>
+      </section>
+
+      <aside class="control-console" aria-label="Elevator controls">
+        <div class="destination-panel">
+          <h2>Destination Drum</h2>
+          <button class="destination-button" type="button" data-level="34" data-name="Lower Quay" aria-pressed="true">
+            <span>01</span>
+            Lower Quay
+          </button>
+          <button class="destination-button" type="button" data-level="58" data-name="Midnight Stacks" aria-pressed="false">
+            <span>02</span>
+            Midnight Stacks
+          </button>
+          <button class="destination-button" type="button" data-level="82" data-name="Upper Archive" aria-pressed="false">
+            <span>03</span>
+            Upper Archive
+          </button>
+        </div>
+
+        <div class="status-panel">
+          <span class="panel-label">Current Landing</span>
+          <strong id="current-destination">Lower Quay</strong>
+          <p id="parcel-caption">Three wet recollections waiting for municipal embossing.</p>
+        </div>
+
+        <button id="stamp-button" class="stamp-button" type="button">
+          Stamp Current Parcel
+        </button>
+      </aside>
+    </div>
+
+    <section class="ledger-strip" aria-label="Tide ledger">
+      <h2>Tide Ledger</h2>
+      <ol id="tide-ledger">
+        <li><span>LQ</span> parcel drying below the brass sill</li>
+        <li><span>MS</span> lantern index requesting a salt-safe shelf</li>
+        <li><span>UA</span> upper archive gate listening for a stamp</li>
+      </ol>
+    </section>
+  </section>
+</Base>
+
+<script is:inline>
+  function bootMemoryTideElevator() {
+    const root = document.querySelector("#memory-tide-elevator")
+    if (!root || root.dataset.booted === "true") return
+    root.dataset.booted = "true"
+
+    const canvas = root.querySelector("#memory-canvas")
+    const context = canvas.getContext("2d")
+    const shaft = root.querySelector("#tide-shaft")
+    const tideLevel = root.querySelector("#tide-level")
+    const destinationLabel = root.querySelector("#current-destination")
+    const archivedCount = root.querySelector("#archived-count")
+    const caption = root.querySelector("#parcel-caption")
+    const stampButton = root.querySelector("#stamp-button")
+    const ledger = root.querySelector("#tide-ledger")
+    const buttons = Array.from(root.querySelectorAll(".destination-button"))
+
+    const parcels = [
+      { x: 0.25, y: 0.72, hue: "#f7f1dc", label: "LQ", speed: 0.7 },
+      { x: 0.55, y: 0.56, hue: "#d9f0eb", label: "MS", speed: 0.5 },
+      { x: 0.72, y: 0.36, hue: "#ffd0bd", label: "UA", speed: 0.62 },
+      { x: 0.38, y: 0.44, hue: "#fff8ef", label: "07", speed: 0.44 },
+    ]
+
+    let activeIndex = 0
+    let archived = 0
+    let stirred = false
+    let phase = 0
+
+    function setDestination(index) {
+      activeIndex = index
+      const button = buttons[index]
+      buttons.forEach((item, itemIndex) => {
+        item.setAttribute("aria-pressed", String(itemIndex === index))
+      })
+      tideLevel.textContent = button.dataset.level
+      destinationLabel.textContent = button.dataset.name
+      root.style.setProperty("--tide", `${button.dataset.level}%`)
+      caption.textContent = `${button.dataset.name} has accepted the next damp recollection.`
+    }
+
+    function stampParcel() {
+      archived += 1
+      root.dataset.archived = String(archived)
+      archivedCount.textContent = String(archived)
+      const destination = buttons[activeIndex].dataset.name
+      const item = document.createElement("li")
+      const code = document.createElement("span")
+      code.textContent = buttons[activeIndex].textContent.trim().slice(0, 2)
+      item.append(code, ` ${destination} stamped at tide ${tideLevel.textContent}`)
+      ledger.prepend(item)
+      while (ledger.children.length > 3) ledger.lastElementChild.remove()
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect()
+      const scale = window.devicePixelRatio || 1
+      canvas.width = Math.max(1, Math.floor(rect.width * scale))
+      canvas.height = Math.max(1, Math.floor(rect.height * scale))
+      context.setTransform(scale, 0, 0, scale, 0, 0)
+    }
+
+    function drawParcel(parcel, width, height, index) {
+      const bob = Math.sin(phase * parcel.speed + index) * 12
+      const x = parcel.x * width
+      const y = parcel.y * height + bob
+      context.save()
+      context.translate(x, y)
+      context.rotate(Math.sin(phase * 0.5 + index) * 0.08)
+      context.fillStyle = parcel.hue
+      context.strokeStyle = "rgba(42, 30, 18, 0.62)"
+      context.lineWidth = 1.5
+      context.beginPath()
+      context.roundRect(-42, -22, 84, 44, 7)
+      context.fill()
+      context.stroke()
+      context.fillStyle = "rgba(33, 37, 41, 0.72)"
+      context.font = "700 13px ui-monospace, SFMono-Regular, Menlo, monospace"
+      context.textAlign = "center"
+      context.textBaseline = "middle"
+      context.fillText(parcel.label, 0, 1)
+      context.restore()
+    }
+
+    function render() {
+      const width = canvas.clientWidth
+      const height = canvas.clientHeight
+      phase += stirred ? 0.035 : 0.018
+      context.clearRect(0, 0, width, height)
+
+      const gradient = context.createLinearGradient(0, 0, 0, height)
+      gradient.addColorStop(0, "rgba(202, 241, 228, 0.16)")
+      gradient.addColorStop(0.45, "rgba(21, 95, 98, 0.34)")
+      gradient.addColorStop(1, "rgba(6, 18, 26, 0.76)")
+      context.fillStyle = gradient
+      context.fillRect(0, 0, width, height)
+
+      const level = Number(tideLevel.textContent) / 100
+      const waterY = height * (1 - level)
+      const water = context.createLinearGradient(0, waterY, 0, height)
+      water.addColorStop(0, "rgba(80, 190, 177, 0.48)")
+      water.addColorStop(1, "rgba(8, 55, 70, 0.86)")
+      context.fillStyle = water
+      context.beginPath()
+      context.moveTo(0, waterY)
+      for (let x = 0; x <= width; x += 18) {
+        context.lineTo(x, waterY + Math.sin(x * 0.035 + phase) * 9)
+      }
+      context.lineTo(width, height)
+      context.lineTo(0, height)
+      context.closePath()
+      context.fill()
+
+      context.strokeStyle = "rgba(244, 191, 103, 0.42)"
+      context.lineWidth = 2
+      for (let rail = 0; rail < 4; rail += 1) {
+        const x = width * (0.17 + rail * 0.22)
+        context.beginPath()
+        context.moveTo(x, 20)
+        context.lineTo(x, height - 20)
+        context.stroke()
+      }
+
+      parcels.forEach((parcel, index) => drawParcel(parcel, width, height, index))
+
+      context.fillStyle = "rgba(244, 191, 103, 0.14)"
+      for (let index = 0; index < 18; index += 1) {
+        const x = ((index * 83 + phase * 18) % width)
+        const y = (index * 47) % height
+        context.beginPath()
+        context.arc(x, y, 2.2, 0, Math.PI * 2)
+        context.fill()
+      }
+
+      requestAnimationFrame(render)
+    }
+
+    buttons.forEach((button, index) => {
+      button.addEventListener("click", () => setDestination(index))
+    })
+    stampButton.addEventListener("click", stampParcel)
+    shaft.addEventListener("pointermove", () => {
+      stirred = true
+      root.dataset.stirred = "true"
+    })
+    shaft.addEventListener("pointerenter", () => {
+      stirred = true
+      root.dataset.stirred = "true"
+    })
+    window.addEventListener("keydown", (event) => {
+      if (["1", "2", "3"].includes(event.key)) {
+        setDestination(Number(event.key) - 1)
+      }
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        stampParcel()
+      }
+    })
+    window.addEventListener("resize", resizeCanvas)
+
+    setDestination(0)
+    resizeCanvas()
+    render()
+  }
+
+  bootMemoryTideElevator()
+  document.addEventListener("astro:page-load", bootMemoryTideElevator)
+</script>
+
+<style>
+  :global(body) {
+    background: #071118;
+  }
+
+  :global(main.container) {
+    max-inline-size: none;
+    padding-inline: 0;
+  }
+
+  .memory-elevator {
+    --ink: #071118;
+    --deep: #0b2530;
+    --teal: #1f8a83;
+    --brass: #e0ac55;
+    --paper: #f6edd7;
+    --coral: #ef765f;
+    --line: rgba(246, 237, 215, 0.18);
+    --panel: rgba(7, 17, 24, 0.78);
+    --tide: 34%;
+    position: relative;
+    min-height: calc(100dvh - 6rem);
+    overflow: clip;
+    color: var(--paper);
+    background:
+      radial-gradient(circle at 14% 18%, rgba(31, 138, 131, 0.26), transparent 28rem),
+      linear-gradient(135deg, #071118 0%, #12303a 52%, #231d1d 100%);
+    isolation: isolate;
+    padding: clamp(1rem, 2vw, 2rem);
+  }
+
+  .scene-plate {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image:
+      linear-gradient(90deg, rgba(7, 17, 24, 0.82), rgba(7, 17, 24, 0.34) 48%, rgba(7, 17, 24, 0.8)),
+      url("/experiments/memory-tide-elevator-concept.png");
+    background-position: center;
+    background-size: cover;
+    opacity: 0.48;
+    filter: saturate(0.82) contrast(1.04);
+  }
+
+  .memory-elevator::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(246, 237, 215, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(246, 237, 215, 0.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, black, transparent 92%);
+  }
+
+  .elevator-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+    max-width: 1220px;
+    margin-inline: auto;
+    margin-bottom: clamp(0.7rem, 1.5vw, 1.05rem);
+  }
+
+  .station-code,
+  .panel-label,
+  .header-gauges span {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(246, 237, 215, 0.62);
+  }
+
+  h1 {
+    margin-top: 0.15rem;
+    max-width: 11ch;
+    font-size: clamp(3rem, 6vw, 5.35rem);
+    line-height: 0.88;
+    letter-spacing: 0;
+    color: #fff6df;
+    text-shadow: 0 16px 54px rgba(0, 0, 0, 0.38);
+  }
+
+  .header-gauges {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(5.2rem, 1fr));
+    gap: 0.75rem;
+    min-width: 13rem;
+  }
+
+  .header-gauges div,
+  .control-console,
+  .ledger-strip {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.26);
+    backdrop-filter: blur(18px);
+  }
+
+  .header-gauges div {
+    padding: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .header-gauges strong {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 1.45rem;
+    line-height: 1;
+    color: var(--brass);
+  }
+
+  .elevator-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 23rem);
+    gap: clamp(1rem, 2vw, 1.4rem);
+    align-items: stretch;
+    max-width: 1220px;
+    margin-inline: auto;
+  }
+
+  .tide-shaft {
+    position: relative;
+    min-height: min(52vh, 34rem);
+    border: 1px solid rgba(224, 172, 85, 0.42);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(5, 15, 20, 0.74);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 34px 90px rgba(0, 0, 0, 0.36);
+  }
+
+  #memory-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+  }
+
+  .shaft-glass {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.18), transparent 12%, transparent 82%, rgba(255, 255, 255, 0.1)),
+      linear-gradient(to bottom, transparent calc(100% - var(--tide)), rgba(246, 237, 215, 0.1) calc(100% - var(--tide)));
+  }
+
+  .waterline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--tide);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--brass), transparent);
+    box-shadow: 0 0 18px rgba(224, 172, 85, 0.62);
+  }
+
+  .pulley {
+    position: absolute;
+    right: 1rem;
+    width: 4.5rem;
+    aspect-ratio: 1;
+    border: 8px solid rgba(224, 172, 85, 0.76);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px rgba(7, 17, 24, 0.7);
+  }
+
+  .pulley-top {
+    top: 1rem;
+  }
+
+  .pulley-bottom {
+    bottom: 1rem;
+    opacity: 0.42;
+  }
+
+  .control-console {
+    display: grid;
+    gap: 0.82rem;
+    border-radius: 8px;
+    padding: clamp(1rem, 2vw, 1.2rem);
+    align-self: stretch;
+  }
+
+  .destination-panel {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  h2 {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(246, 237, 215, 0.72);
+  }
+
+  .destination-button,
+  .stamp-button {
+    min-height: 3rem;
+    border: 1px solid rgba(246, 237, 215, 0.18);
+    border-radius: 8px;
+    color: var(--paper);
+    background: rgba(255, 255, 255, 0.055);
+    cursor: pointer;
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      background 160ms ease;
+  }
+
+  .destination-button {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.66rem;
+    text-align: left;
+    font-weight: 800;
+  }
+
+  .destination-button span {
+    display: inline-grid;
+    place-items: center;
+    width: 2.2rem;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    color: var(--ink);
+    background: var(--brass);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+  }
+
+  .destination-button[aria-pressed="true"] {
+    border-color: rgba(224, 172, 85, 0.84);
+    background: rgba(224, 172, 85, 0.16);
+  }
+
+  .destination-button:hover,
+  .stamp-button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(246, 237, 215, 0.36);
+  }
+
+  .status-panel {
+    border-block: 1px solid var(--line);
+    padding-block: 0.82rem;
+  }
+
+  .status-panel strong {
+    display: block;
+    margin-top: 0.35rem;
+    color: #fff6df;
+    font-size: 1.45rem;
+    line-height: 1.05;
+  }
+
+  .status-panel p {
+    margin-top: 0.62rem;
+    color: rgba(246, 237, 215, 0.68);
+    font-size: 0.98rem;
+  }
+
+  .stamp-button {
+    align-self: end;
+    width: 100%;
+    padding: 0.9rem 1rem;
+    color: #1a1110;
+    background: linear-gradient(135deg, var(--brass), var(--coral));
+    border-color: rgba(255, 255, 255, 0.24);
+    font-weight: 900;
+  }
+
+  .ledger-strip {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: start;
+    max-width: 1220px;
+    margin: clamp(1rem, 2vw, 1.4rem) auto 0;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  #tide-ledger {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  #tide-ledger li {
+    min-height: 3.5rem;
+    border-left: 3px solid rgba(224, 172, 85, 0.72);
+    padding-left: 0.75rem;
+    color: rgba(246, 237, 215, 0.76);
+    font-size: 0.9rem;
+  }
+
+  #tide-ledger span {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-family: var(--font-mono);
+    color: var(--brass);
+  }
+
+  @media (max-width: 820px) {
+    .memory-elevator {
+      min-height: calc(100dvh - 5rem);
+      padding: 0.85rem;
+    }
+
+    .elevator-header {
+      display: grid;
+    }
+
+    h1 {
+      max-width: 9ch;
+      font-size: 3.15rem;
+    }
+
+    .header-gauges {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .elevator-grid,
+    .ledger-strip {
+      grid-template-columns: 1fr;
+    }
+
+    .tide-shaft {
+      min-height: 23rem;
+    }
+
+    .control-console {
+      align-self: auto;
+    }
+
+    #tide-ledger {
+      grid-template-columns: 1fr;
+    }
+
+    .pulley {
+      width: 3.2rem;
+      border-width: 6px;
+    }
+  }
+</style>
