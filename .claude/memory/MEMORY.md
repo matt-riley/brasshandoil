@@ -152,6 +152,11 @@ For N circular bodies: each frame, check every pair `(i, j)` for overlap (`dist(
 **Technique:** Progressive CSS filter degradation as game mechanic — cumulative `filter` chains (`saturate(0)`, `contrast(0.4)`, `blur(3px)`, `brightness(0.25)`) applied to the scene element as each gene is silenced. CSS `@property` for typed custom property animation (`--warmth`). MutationObserver on style attributes to sync filter state. Dynamic DOM generation with `data-testid` attributes for Playwright testability.
 **File:** clients/web/src/pages/experiments/deer-ked-protocol.astro
 
+### 2026-06-16 — Byssus Loom — Structural Color Weaving
+**Concept:** Inspired by Korean scientists recreating 2,000-year-old sea silk from pen shell clam byssus, discovering the shimmer comes from "photonin" — a protein that bends light through structural interference, not dyes. Scroll to weave golden threads across a deep-ocean canvas; cursor X guides the shuttle. Thread color shifts via thin-film interference simulation (slow = thick/gold, fast = thin/violet). Background, loom frame, and caustic lights all driven by CSS scroll-driven animations.
+**Technique:** CSS Scroll-driven Animations — `scroll-timeline: --name block` on `html`, then `animation-timeline: --name` on elements. Keyframes tied to scroll progress rather than time. Also: thin-film interference color mapping (`λ = 2nd`, wavelength→hue conversion).
+**File:** clients/web/src/pages/experiments/byssus-loom.astro
+
 ### 2026-06-15 — Volunteer 39 — Post-Injection Observation
 **Concept:** Inspired by Cambridge's first AI-designed universal coronavirus vaccine passing human trials (39 volunteers, needle-free micro-jet). You are Volunteer 39 in the observation room. Everything is animated via WAAPI. But anything you hover freezes — the clock only advances when you're not watching it. Nurse Chen checks in periodically, increasingly baffled.
 **Technique:** Web Animations API (WAAPI) programmatic control — `element.animate()` returning `Animation` objects, `element.getAnimations({ subtree: true })`, `.pause()`/`.play()` as game mechanic, `.finished` promises for sequencing nurse messages, `.playbackRate` potential.
@@ -169,6 +174,12 @@ For N circular bodies: each frame, check every pair `(i, j)` for overlap (`dist(
 
 #### Boids Flocking Algorithm (Separation, Alignment, Cohesion)
 Craig Reynolds' boids model simulates flocking with three rules per agent per frame: (1) **Separation** — steer away from neighbors within a close radius (inverse-distance-squared weighting for smooth falloff), (2) **Alignment** — steer toward the average velocity of neighbors within a medium radius (filter by type for species-specific flocking), (3) **Cohesion** — steer toward the center of mass of neighbors within a larger radius. Each rule produces a steering vector scaled by a force constant; sum them with any environmental forces (home-seeking, predator avoidance, boundary repulsion). Speed-cap per type for behavioral variety. The algorithm is O(n²) per frame but handles ~100 agents comfortably at 60fps. Key insight: filtering alignment/cohesion by agent "type" creates species-specific flocking without separate loops. Cursor repulsion is just another steering force with a distance falloff.
+
+#### CSS Scroll-driven Animations (scroll-timeline / animation-timeline)
+Declare `scroll-timeline: --name block` on the scrolling element (e.g., `html` for the page scroll). Then on any element: `animation: my-keyframes linear both; animation-timeline: --name;` — the animation's progress tracks scroll position (0% at top, 100% at bottom) instead of time. Works with standard `@keyframes`. Enables background color transitions, opacity fades, transforms, and any animatable property all driven by scroll without JavaScript. `view()` timeline variant ties to an element entering/leaving the viewport. Supported in Chrome 115+ (2023), Firefox 110+ (behind flag until ~2024). Gotcha: `linear` timing function is usually correct for scroll-driven (ease-in-out feels sluggish). Gotcha: `background` shorthand with gradients is not interpolatable — browsers will snap between keyframes rather than smoothly blending gradients.
+
+#### Thin-film Interference Color Mapping
+Structural color (like butterfly wings, soap bubbles, sea silk photonin) arises from constructive interference: `λ = 2 * n * d` where `n` is refractive index and `d` is film thickness. Map wavelength to hue: 380nm→violet(270°), 480nm→blue(220°), 520nm→green(120°), 580nm→yellow(60°), 700nm→red(0°). Linear interpolation: `hue = 270 - ((λ - 380) / 320) * 270`. Useful for any "structural color" effect — thickness as the input variable produces physically-motivated color shifts.
 
 ## Feedback from Matt
 

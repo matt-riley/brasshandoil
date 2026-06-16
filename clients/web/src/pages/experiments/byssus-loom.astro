@@ -1,0 +1,508 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Byssus Loom — Structural Color Weaving">
+  <style is:inline>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@300;400&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --depth: 0;
+    }
+
+    html {
+      scroll-timeline: --page-scroll block;
+    }
+
+    body {
+      background: #000;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    #scroll-runway {
+      height: 800vh;
+      position: relative;
+    }
+
+    #ocean-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      animation: ocean-depth linear both;
+      animation-timeline: --page-scroll;
+    }
+
+    @keyframes ocean-depth {
+      0% {
+        background: linear-gradient(180deg, #0a0a1a 0%, #0d1b2a 50%, #1b263b 100%);
+      }
+      30% {
+        background: linear-gradient(180deg, #0d1b2a 0%, #1a3a5c 50%, #2a5a7a 100%);
+      }
+      70% {
+        background: linear-gradient(180deg, #1a3a5c 0%, #3a7a6a 50%, #5a9a5a 100%);
+      }
+      100% {
+        background: linear-gradient(180deg, #3a6a5a 0%, #8a7a3a 50%, #c9a84c 100%);
+      }
+    }
+
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #weave-canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #loom-frame {
+      position: fixed;
+      inset: 30px;
+      border: 2px solid rgba(201, 168, 76, 0.15);
+      z-index: 2;
+      pointer-events: none;
+      animation: loom-glow linear both;
+      animation-timeline: --page-scroll;
+    }
+
+    @keyframes loom-glow {
+      0% {
+        border-color: rgba(201, 168, 76, 0.05);
+        box-shadow: inset 0 0 30px rgba(201, 168, 76, 0.02);
+      }
+      100% {
+        border-color: rgba(201, 168, 76, 0.4);
+        box-shadow: inset 0 0 60px rgba(201, 168, 76, 0.1);
+      }
+    }
+
+    #depth-gauge {
+      position: fixed;
+      top: 40px;
+      right: 50px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: rgba(201, 168, 76, 0.6);
+      letter-spacing: 0.1em;
+      z-index: 10;
+      text-align: right;
+      line-height: 1.6;
+    }
+
+    #title-card {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 5;
+      pointer-events: none;
+      animation: title-fade linear both;
+      animation-timeline: --page-scroll;
+    }
+
+    @keyframes title-fade {
+      0% { opacity: 1; }
+      8% { opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    #title-card h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(28px, 5vw, 56px);
+      font-weight: 400;
+      color: #c9a84c;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    #title-card p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: rgba(201, 168, 76, 0.5);
+      margin-top: 12px;
+      letter-spacing: 0.2em;
+    }
+
+    #title-card .instruction {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 300;
+      color: rgba(201, 168, 76, 0.35);
+      margin-top: 30px;
+      letter-spacing: 0.05em;
+    }
+
+    #clam {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-size: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: rgba(201, 168, 76, 0.4);
+      text-align: center;
+      pointer-events: none;
+      animation: clam-appear linear both;
+      animation-timeline: --page-scroll;
+    }
+
+    @keyframes clam-appear {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      80% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    #tension-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #c9a84c, #e8d48b);
+      z-index: 10;
+      transition: width 0.3s ease;
+    }
+
+    /* Warp lines — vertical threads that appear with scroll */
+    .warp-line {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      z-index: 1;
+      opacity: 0;
+      animation: warp-appear linear both;
+      animation-timeline: --page-scroll;
+    }
+
+    @keyframes warp-appear {
+      0% { opacity: 0; }
+      10% { opacity: 0.03; }
+      50% { opacity: 0.08; }
+      100% { opacity: 0.15; }
+    }
+
+    #light-caustics {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0;
+      animation: caustics-appear linear both;
+      animation-timeline: --page-scroll;
+    }
+
+    @keyframes caustics-appear {
+      0% { opacity: 0; }
+      60% { opacity: 0; }
+      100% { opacity: 0.15; }
+    }
+  </style>
+
+  <div id="scroll-runway">
+    <div id="ocean-bg"></div>
+
+    <div id="canvas-container">
+      <canvas id="weave-canvas" data-testid="weave-canvas"></canvas>
+    </div>
+
+    <div id="loom-frame"></div>
+
+    <div id="title-card">
+      <h1>Byssus Loom</h1>
+      <p>GEOJE MARINE SILK LABORATORY — THREAD INSPECTION STATION</p>
+      <p class="instruction">scroll to weave &middot; move cursor to guide the shuttle</p>
+    </div>
+
+    <div id="depth-gauge" data-testid="depth-gauge">
+      DEPTH: 0m<br>
+      TENSION: 0.00 N<br>
+      THICKNESS: — nm<br>
+      λ DOMINANT: — nm
+    </div>
+
+    <div id="clam" data-testid="clam">
+      ◗ Atrina pectinata — Thread #0047 ◖<br>
+      <span style="font-size:10px; opacity:0.6;">byssus secretion rate: nominal</span>
+    </div>
+
+    <div id="tension-bar"></div>
+
+    <canvas id="light-caustics"></canvas>
+  </div>
+
+  <script is:inline>
+    (function () {
+      // --- Canvas setup ---
+      /** @type {HTMLCanvasElement} */
+      var canvas = document.getElementById("weave-canvas");
+      var ctx = canvas.getContext("2d");
+      /** @type {HTMLCanvasElement} */
+      var causticsCanvas = document.getElementById("light-caustics");
+      var causticsCtx = causticsCanvas.getContext("2d");
+      var depthGauge = document.getElementById("depth-gauge");
+      var tensionBar = document.getElementById("tension-bar");
+
+      var W = 0, H = 0;
+      function resize() {
+        var dpr = window.devicePixelRatio || 1;
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + "px";
+        canvas.style.height = H + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        causticsCanvas.width = W * dpr;
+        causticsCanvas.height = H * dpr;
+        causticsCanvas.style.width = W + "px";
+        causticsCanvas.style.height = H + "px";
+        causticsCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resize();
+      window.addEventListener("resize", resize);
+
+      // --- State ---
+      var mouseX = W / 2;
+      var mouseY = H / 2;
+      var scrollSpeed = 0;
+      var lastScrollTime = Date.now();
+
+      // ThreadPoint: { x, y, hue, thickness, alpha }
+      var threadPoints = [];
+      var totalWoven = 0;
+      var maxDepth = 4200; // Mariana-ish
+
+      // Expose for test
+      window.__lastThreadHue = -1;
+
+      // --- Thin-film interference ---
+      // Simulate structural color from photonin layers
+      // Constructive interference: 2 * n * d = m * lambda
+      // n = refractive index (~1.5 for protein), d = layer thickness
+      function thinFilmHue(thickness) {
+        var n = 1.5;
+        var lambda = 2 * n * thickness;
+        if (lambda < 380) return 270;
+        if (lambda > 700) return 45;
+        var hue = 270 - ((lambda - 380) / 320) * 270;
+        return Math.max(0, Math.min(360, hue));
+      }
+
+      // --- Mouse tracking ---
+      document.addEventListener("mousemove", function (e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      function handleTouch(e) {
+        if (e.touches && e.touches.length > 0) {
+          mouseX = e.touches[0].clientX;
+          mouseY = e.touches[0].clientY;
+        }
+      }
+      document.addEventListener("touchstart", handleTouch, { passive: true });
+      document.addEventListener("touchmove", handleTouch, { passive: true });
+
+      // --- Scroll tracking ---
+      var prevScrollY = 0;
+      function onScroll() {
+        var now = Date.now();
+        var dt = Math.max(now - lastScrollTime, 1);
+        var dy = Math.abs(window.scrollY - prevScrollY);
+        scrollSpeed = dy / dt * 1000;
+        prevScrollY = window.scrollY;
+        lastScrollTime = now;
+
+        var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        var progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+
+        // Map scroll speed to thread thickness (nm)
+        // Slow = thick (200nm, gold) -> Fast = thin (80nm, violet)
+        var thickness = Math.max(80, Math.min(200, 200 - scrollSpeed * 0.15));
+
+        var hue = thinFilmHue(thickness);
+        var lambda = 2 * 1.5 * thickness;
+
+        // Update depth gauge
+        var depth = Math.round(progress * maxDepth);
+        var tension = (0.1 + progress * 2.4 + scrollSpeed * 0.002).toFixed(2);
+        depthGauge.innerHTML =
+          "DEPTH: " + depth + "m<br>TENSION: " + tension + " N<br>THICKNESS: " + Math.round(thickness) + " nm<br>&lambda; DOMINANT: " + Math.round(lambda) + " nm";
+
+        // Tension bar
+        tensionBar.style.width = Math.min(100, progress * 100) + "%";
+
+        // Add thread point if scrolling
+        if (dy > 0.5) {
+          var shuttleX = mouseX;
+          var canvasY = progress * H;
+
+          threadPoints.push({
+            x: shuttleX,
+            y: canvasY,
+            hue: hue,
+            thickness: Math.max(1, thickness / 40),
+            alpha: Math.min(1, 0.3 + progress * 0.7),
+          });
+          totalWoven++;
+          window.__lastThreadHue = hue;
+        }
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      // --- Generate warp lines (vertical background threads) ---
+      function createWarpLines() {
+        var container = document.getElementById("scroll-runway");
+        var count = Math.floor(W / 25);
+        for (var i = 0; i < count; i++) {
+          var line = document.createElement("div");
+          line.className = "warp-line";
+          line.style.left = ((i + 0.5) / count * 100) + "%";
+          line.style.background = "rgba(201,168,76," + (0.03 + Math.random() * 0.05) + ")";
+          container.appendChild(line);
+        }
+      }
+      createWarpLines();
+
+      // --- Render loop ---
+      function drawThread() {
+        // Subtle fade for depth — accumulate rather than clear
+        ctx.fillStyle = "rgba(0,0,0,0.003)";
+        ctx.fillRect(0, 0, W, H);
+
+        if (threadPoints.length < 2) return;
+
+        // Draw thread segments with structural color
+        for (var i = 1; i < threadPoints.length; i++) {
+          var prev = threadPoints[i - 1];
+          var curr = threadPoints[i];
+
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+
+          // Slight curve for organic feel
+          var cpx = (prev.x + curr.x) / 2 + (Math.random() - 0.5) * 3;
+          var cpy = (prev.y + curr.y) / 2;
+          ctx.quadraticCurveTo(cpx, cpy, curr.x, curr.y);
+
+          var sat = 70 + curr.alpha * 30;
+          var light = 50 + curr.alpha * 20;
+          ctx.strokeStyle = "hsla(" + curr.hue + ", " + sat + "%, " + light + "%, " + (curr.alpha * 0.8) + ")";
+          ctx.lineWidth = curr.thickness;
+          ctx.lineCap = "round";
+          ctx.stroke();
+
+          // Shimmer highlight — the "photonin" structural glow
+          if (Math.random() < 0.15) {
+            ctx.beginPath();
+            ctx.arc(curr.x + (Math.random() - 0.5) * 6, curr.y, 1 + Math.random() * 2, 0, Math.PI * 2);
+            ctx.fillStyle = "hsla(" + ((curr.hue + 30) % 360) + ", 90%, 80%, " + (0.2 + Math.random() * 0.3) + ")";
+            ctx.fill();
+          }
+        }
+      }
+
+      // --- Caustics (underwater light patterns) ---
+      var causticTime = 0;
+      function drawCaustics() {
+        causticsCtx.clearRect(0, 0, W, H);
+        causticTime += 0.005;
+
+        var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        var progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+        if (progress < 0.5) return;
+
+        var intensity = (progress - 0.5) * 2;
+        var count = Math.floor(8 + intensity * 12);
+
+        for (var i = 0; i < count; i++) {
+          var phase = causticTime + i * 1.7;
+          var x = W * (0.1 + 0.8 * ((Math.sin(phase * 0.3 + i) + 1) / 2));
+          var y = H * (0.1 + 0.8 * ((Math.cos(phase * 0.2 + i * 1.3) + 1) / 2));
+          var size = 30 + Math.sin(phase) * 20;
+
+          var grad = causticsCtx.createRadialGradient(x, y, 0, x, y, size);
+          grad.addColorStop(0, "rgba(201,168,76," + (0.06 * intensity) + ")");
+          grad.addColorStop(1, "rgba(201,168,76,0)");
+          causticsCtx.fillStyle = grad;
+          causticsCtx.fillRect(x - size, y - size, size * 2, size * 2);
+        }
+      }
+
+      // --- Floating particles (silt / byssus fibers) ---
+      var particles = [];
+      for (var i = 0; i < 40; i++) {
+        particles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: -0.1 - Math.random() * 0.2,
+          size: 0.5 + Math.random() * 1.5,
+          alpha: 0.1 + Math.random() * 0.2,
+          hue: 35 + Math.random() * 20,
+        });
+      }
+
+      function drawParticles() {
+        for (var j = 0; j < particles.length; j++) {
+          var p = particles[j];
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+          if (p.x < -10) p.x = W + 10;
+          if (p.x > W + 10) p.x = -10;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = "hsla(" + p.hue + ", 60%, 70%, " + p.alpha + ")";
+          ctx.fill();
+        }
+      }
+
+      // --- Shuttle cursor indicator ---
+      function drawShuttle() {
+        var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        var progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+        var canvasY = progress * H;
+
+        // Horizontal shuttle line
+        ctx.beginPath();
+        ctx.moveTo(mouseX - 15, canvasY);
+        ctx.lineTo(mouseX + 15, canvasY);
+        ctx.strokeStyle = "rgba(201,168,76,0.3)";
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+
+        // Shuttle point
+        ctx.beginPath();
+        ctx.arc(mouseX, canvasY, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(201,168,76,0.5)";
+        ctx.fill();
+      }
+
+      function animate() {
+        drawThread();
+        drawParticles();
+        drawShuttle();
+        drawCaustics();
+        requestAnimationFrame(animate);
+      }
+
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</Base>

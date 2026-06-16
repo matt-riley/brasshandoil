@@ -65,6 +65,7 @@ const pages = [
   "/experiments/arctic-dropstone-deposition-desk",
   "/experiments/mercury-quarantine-choir",
   "/experiments/octagon-terrarium",
+  "/experiments/byssus-loom",
 ]
 
 test.use({
