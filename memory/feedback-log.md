@@ -6,6 +6,20 @@ Use this file as the running source of truth for review notes after each daily e
 
 ### Session Entry
 
+Date: 2026-06-17
+Experiment: Oahu Web Camouflage Atelier (Hyposmocoma Case Decorator)
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from recent news: Hyposmocoma osteophaga carnivorous caterpillar utilizing silken cases decorated with harvested insect prey parts to hide from resident spiders.
+- Implemented mathematical web canvas with physics-based damped thread tension and vibration decay.
+- Programmed Web Audio synthesizer: low-frequency forest night drone modulated by a slow LFO, triangle/sawtooth plucking chimes with fast exponential decay, and multi-tone escape victory sweep.
+- Built active plucking calibration panel where users select harvested remains to fit the resident spider's expectation profile (fly-wing for top, ant-head for mid, weevil-leg for bottom).
+- Enabled keyboard overrides: Arrow keys steer virtual crosshair to vibrate and pluck web remains, Spacebar triggers high-amplitude pluck/harvest actions.
+- Mitigated mobile viewport overflow (375px) by adding overflow-y scrolling and responsive padding/font scaling to onboarding overlays.
+
+### Session Entry
+
 Date: 2026-06-16
 Experiment: Tessera Gladiatoria (Gladiator Tag Rubbing)
 Feedback:

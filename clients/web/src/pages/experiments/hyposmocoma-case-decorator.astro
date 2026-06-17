@@ -1,0 +1,1286 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Oahu Web Camouflage Atelier // Hyposmocoma Case Decorator">
+  <div class="decorator-container" id="case-decorator-root" data-status="naked" data-harvested-count="0">
+    <!-- Forest canopy / CRT atmosphere overlay -->
+    <div class="jungle-canopy-overlay" aria-hidden="true"></div>
+    <div class="crt-scanlines" aria-hidden="true"></div>
+
+    <!-- Header -->
+    <header class="atelier-header">
+      <h1 class="page-title text-gradient">Oahu Web Camouflage Atelier</h1>
+      <p class="subtitle font-mono">SPECIES STUDY: HYPOSMOCOMA OSTEOPHAGA // CO-HABITATION INTERACTION UNIT</p>
+    </header>
+
+    <!-- Arming Onboarding Overlay -->
+    <div id="arming-overlay" class="overlay glass">
+      <div class="overlay-content">
+        <div class="overlay-icon">🕸️</div>
+        <h2 class="overlay-title font-mono">BIOLUMINESCENT SPECIATION LAB</h2>
+        <p class="overlay-desc">
+          In the high-altitude wet forests of Oahu, the unique carnivorous caterpillar <em>Hyposmocoma</em> lives inside spider webs. To avoid predation by the resident spider, it harvests discarded insect parts and attaches them to its silken case, blending into the debris pile.
+        </p>
+        <div class="instructions-card font-mono text-left">
+          <strong>LAB OBJECTIVES:</strong><br/>
+          1. <strong>Harvest Camouflage:</strong> Move your cursor or press arrow keys to navigate the web. Click on trapped remains (wings, heads, legs) to pluck them from the silk threads.<br/>
+          2. <strong>Avoid Web Vibration:</strong> Dragging or plucking too quickly creates thread tension. High velocity spikes spider alertness.<br/>
+          3. <strong>Synthesize Protection:</strong> Select harvested items from your inventory to dress the top, mid, and bottom segments of the caterpillar's case.<br/>
+          4. <strong>Lodge Camouflage:</strong> Match the case profile to the spider's blindness expectations to complete the trial.
+        </div>
+        <button id="arm-button" class="btn btn-primary font-mono">
+          Arm Web Audio & Open Stage
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <div class="workspace-grid hidden" id="workspace">
+      <!-- Left Panel: Web Sandbox -->
+      <div class="panel stage-panel glass">
+        <div class="panel-header">
+          <h2 class="panel-title font-mono">I. Oahu Web Stage</h2>
+          <span class="status-indicator font-mono alert-low" id="alert-badge">SPIDER CALM</span>
+        </div>
+
+        <div class="canvas-relative-wrapper">
+          <!-- Web Canvas -->
+          <canvas id="web-canvas" width="400" height="400"></canvas>
+
+          <!-- Interactive remains elements positioned absolutely on top of the canvas so Playwright can click them -->
+          <div id="remain-fly-wing" class="web-remain font-mono" style="top: 25%; left: 30%;" data-type="fly-wing">
+            <span class="remain-emoji">🪰</span> fly-wing
+          </div>
+          <div id="remain-ant-head" class="web-remain font-mono" style="top: 65%; left: 20%;" data-type="ant-head">
+            <span class="remain-emoji">🐜</span> ant-head
+          </div>
+          <div id="remain-weevil-leg" class="web-remain font-mono" style="top: 45%; left: 70%;" data-type="weevil-leg">
+            <span class="remain-emoji">🦿</span> weevil-leg
+          </div>
+
+          <!-- Virtual Keyboard Cursor -->
+          <svg id="virtual-cursor" class="virtual-cursor-svg" viewBox="0 0 40 40" aria-hidden="true">
+            <circle cx="20" cy="20" r="14" class="cursor-ring" />
+            <line x1="20" y1="0" x2="20" y2="40" class="cursor-line" />
+            <line x1="0" y1="20" x2="40" y2="20" class="cursor-line" />
+          </svg>
+        </div>
+
+        <div class="keyboard-hints font-mono">
+          [ARROW KEYS] Steer Virtual Collector // [SPACE] Pluck Nearest Web Node
+        </div>
+      </div>
+
+      <!-- Right Panel: Specimen Case & Profiler -->
+      <div class="panel control-panel glass" id="profile-panel">
+        <h2 class="panel-title font-mono">II. Camouflage Calibration</h2>
+
+        <!-- Spider Threat Diagnostics -->
+        <div class="diagnostics-grid">
+          <div class="diagnostic-box">
+            <span class="box-label font-mono">SPIDER ALERTNESS</span>
+            <div class="box-value font-mono alert-low" id="alertness-value">0%</div>
+          </div>
+          <div class="diagnostic-box">
+            <span class="box-label font-mono">HARVESTED PARTS</span>
+            <div class="box-value font-mono text-cyan" id="harvest-value">0 / 3</div>
+          </div>
+          <div class="diagnostic-box full-width">
+            <span class="box-label font-mono">THREAD SILK TENSION</span>
+            <div class="tension-bar-container">
+              <div class="tension-bar-fill" id="tension-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spider expectations reference -->
+        <div class="spider-profile-section glass-dark" id="spider-profile">
+          <h3 class="section-heading font-mono">🕸️ RESIDENT SPIDER BLINDNESS PROFILE</h3>
+          <ul class="profile-list font-mono">
+            <li><span class="bullet">▶</span> <span class="profile-req text-gold">TOP PROFILE:</span> Requires light fly-wing structure to break insect silhouette.</li>
+            <li><span class="bullet">▶</span> <span class="profile-req text-gold">MID PROFILE:</span> Requires heavy ant-head to match web center debris density.</li>
+            <li><span class="bullet">▶</span> <span class="profile-req text-gold">BOTTOM PROFILE:</span> Requires spindly weevil-leg to mimic dry debris dangle.</li>
+          </ul>
+        </div>
+
+        <!-- Case Decorator Configuration -->
+        <div class="case-configuration-section">
+          <h3 class="section-heading font-mono">🐛 CASE ATTACHMENT SLOTS</h3>
+
+          <div class="slots-grid font-mono">
+            <!-- Top Slot -->
+            <div class="slot-row">
+              <label for="select-top-slot" class="slot-label text-cyan">A. TOP SLOT (HEAD END)</label>
+              <div class="select-container">
+                <select id="select-top-slot" class="slot-select" disabled>
+                  <option value="">-- [Locked: Harvest Remains] --</option>
+                  <option value="ant-head">Ant Head</option>
+                  <option value="fly-wing">Fly Wing</option>
+                  <option value="weevil-leg">Weevil Leg</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Mid Slot -->
+            <div class="slot-row">
+              <label for="select-mid-slot" class="slot-label text-cyan">B. MID SLOT (BODY COLLAR)</label>
+              <div class="select-container">
+                <select id="select-mid-slot" class="slot-select" disabled>
+                  <option value="">-- [Locked: Harvest Remains] --</option>
+                  <option value="ant-head">Ant Head</option>
+                  <option value="fly-wing">Fly Wing</option>
+                  <option value="weevil-leg">Weevil Leg</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Bottom Slot -->
+            <div class="slot-row">
+              <label for="select-bottom-slot" class="slot-label text-cyan">C. BOTTOM SLOT (ANCHOR HIND)</label>
+              <div class="select-container">
+                <select id="select-bottom-slot" class="slot-select" disabled>
+                  <option value="">-- [Locked: Harvest Remains] --</option>
+                  <option value="ant-head">Ant Head</option>
+                  <option value="fly-wing">Fly Wing</option>
+                  <option value="weevil-leg">Weevil Leg</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completion Actions -->
+        <div class="actions-section">
+          <button id="release-btn" class="btn btn-success font-mono btn-block" disabled>
+            Execute Slip-Past Walk
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Screen Overlay -->
+    <div id="success-screen" class="overlay success-overlay glass hidden">
+      <div class="overlay-content">
+        <div class="overlay-icon">🏆</div>
+        <h2 class="overlay-title font-mono text-emerald">CAMOUFLAGE SUCCESSFUL</h2>
+        <p class="overlay-desc font-mono">
+          THE SILKEN CASE IS DECORATED WITH INSECT REMAINS TO FLAWLESS SPECIFICATIONS. THE SPIDER IGNORES YOUR WEB CROSSINGS AS DISCARDED PREY DEBRIS.
+        </p>
+        <div class="report-card font-mono text-left">
+          <strong>POST-TRIAL OBSERVATION REPORT:</strong><br/>
+          - CAMOUFLAGE INDEX: 100% (MATCHED)<br/>
+          - SPIDER RECOGNITION FACTOR: 0.000 (INERT)<br/>
+          - SILK VIBRATION LEVEL: DAMPED<br/>
+          - STATUS: CASE UNRESTRICTED, SURVIVAL SECURED.
+        </div>
+        <button onclick="window.location.reload()" class="btn btn-primary font-mono">
+          Run Another Observation
+        </button>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* Base color design tokens using HSL */
+  :root {
+    --bg-dark: #070d08;
+    --primary-moss: #0d2914;
+    --primary-glow: #39ff14;
+    --accent-cyan: #00f0ff;
+    --accent-gold: #ffcf00;
+    --alert-low: #39ff14;
+    --alert-high: #ff3c3c;
+    --glass-bg: rgba(13, 41, 20, 0.25);
+    --glass-border: rgba(57, 255, 20, 0.2);
+    --font-heading: 'Outfit', 'Inter', system-ui, sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+
+  .decorator-container {
+    min-height: 100vh;
+    background-color: var(--bg-dark);
+    color: #e5ffe8;
+    font-family: var(--font-heading);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .jungle-canopy-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: 
+      radial-gradient(circle at 10% 20%, rgba(13, 80, 20, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(0, 100, 100, 0.15) 0%, transparent 45%);
+    z-index: 1;
+  }
+
+  .crt-scanlines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    z-index: 2;
+  }
+
+  /* Header styles */
+  .atelier-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    z-index: 3;
+  }
+
+  .page-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.03em;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #aeffb4 0%, var(--primary-glow) 50%, var(--accent-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    color: #8fae92;
+  }
+
+  /* Overlay systems */
+  .overlay {
+    position: fixed;
+    top: 6rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background-color: rgba(7, 13, 8, 0.85);
+    overflow-y: auto;
+  }
+
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+  }
+
+  .glass-dark {
+    background: rgba(4, 10, 5, 0.6);
+    border: 1px solid rgba(57, 255, 20, 0.15);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .overlay-content {
+    max-width: 550px;
+    width: 100%;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: rgba(10, 25, 12, 0.95);
+    text-align: center;
+    box-sizing: border-box;
+    margin: auto; /* Allow natural vertical spacing when scrolling */
+  }
+
+  .overlay-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 10px var(--primary-glow));
+    animation: pulse 3s infinite ease-in-out;
+  }
+
+  .overlay-title {
+    font-size: 1.5rem;
+    color: var(--primary-glow);
+    margin: 0 0 1rem;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+  }
+
+  .overlay-desc {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #c5ffd1;
+    margin-bottom: 1.5rem;
+  }
+
+  .instructions-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(57, 255, 20, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    color: #aaeeb4;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.9rem;
+  }
+
+  .btn-primary {
+    background: var(--primary-glow);
+    color: #070d08;
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+  }
+
+  .btn-primary:hover {
+    background: #5eff44;
+    box-shadow: 0 0 25px rgba(57, 255, 20, 0.7);
+  }
+
+  .btn-success {
+    background: var(--accent-cyan);
+    color: #070d08;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+  }
+
+  .btn-success:hover:not(:disabled) {
+    background: #4ef5ff;
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+  }
+
+  .btn-success:disabled {
+    background: #2a3c3e;
+    color: #66888c;
+    cursor: not-allowed;
+    box-shadow: none;
+    border: 1px dashed rgba(0, 240, 255, 0.2);
+  }
+
+  .btn-block {
+    width: 100%;
+    display: block;
+  }
+
+  /* Main workspace grid */
+  .workspace-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    z-index: 3;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(57, 255, 20, 0.15);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .panel-title {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #e5ffe8;
+  }
+
+  .status-indicator {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .alert-low {
+    background: rgba(57, 255, 20, 0.15);
+    color: var(--primary-glow);
+    border: 1px solid rgba(57, 255, 20, 0.3);
+  }
+
+  .alert-high {
+    background: rgba(255, 60, 60, 0.15);
+    color: var(--alert-high);
+    border: 1px solid rgba(255, 60, 60, 0.3);
+  }
+
+  /* Web Stage Visualizations */
+  .canvas-relative-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(4, 10, 5, 0.5);
+    border: 1px dashed rgba(57, 255, 20, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 380px;
+  }
+
+  #web-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    aspect-ratio: 1/1;
+  }
+
+  .web-remain {
+    position: absolute;
+    color: var(--primary-glow);
+    background: rgba(8, 20, 10, 0.9);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    user-select: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .web-remain:hover {
+    transform: scale(1.05);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+  }
+
+  .web-remain.harvested {
+    pointer-events: none;
+    opacity: 0.2;
+    transform: scale(0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .remain-emoji {
+    font-size: 1.1rem;
+  }
+
+  /* Virtual keyboard crosshair */
+  .virtual-cursor-svg {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    transition: left 0.1s ease, top 0.1s ease;
+    transform: translate(-20px, -20px);
+    display: none; /* Only shown if keyboard interaction active */
+    z-index: 10;
+  }
+
+  .cursor-ring {
+    fill: none;
+    stroke: var(--accent-cyan);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 2;
+    animation: rotate 12s linear infinite;
+  }
+
+  .cursor-line {
+    stroke: var(--accent-cyan);
+    stroke-width: 1;
+    opacity: 0.7;
+  }
+
+  .keyboard-hints {
+    font-size: 0.75rem;
+    color: #65806b;
+    text-align: center;
+    margin-top: 0.75rem;
+  }
+
+  /* Diagnostics & Panel Controls */
+  .diagnostics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .diagnostic-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(57, 255, 20, 0.1);
+    border-radius: 6px;
+    padding: 0.75rem;
+    box-sizing: border-box;
+  }
+
+  .full-width {
+    grid-column: span 2;
+  }
+
+  .box-label {
+    font-size: 0.7rem;
+    color: #65806b;
+    display: block;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .box-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .text-cyan {
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .text-gold {
+    color: var(--accent-gold);
+    text-shadow: 0 0 10px rgba(255, 207, 0, 0.3);
+  }
+
+  .tension-bar-container {
+    height: 8px;
+    background: #0b1c0e;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.4rem;
+    border: 1px solid rgba(57, 255, 20, 0.1);
+  }
+
+  .tension-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary-glow) 0%, var(--alert-high) 100%);
+    transition: width 0.1s ease;
+  }
+
+  .spider-profile-section {
+    margin-bottom: 1.25rem;
+  }
+
+  .section-heading {
+    font-size: 0.85rem;
+    color: #c5ffd1;
+    margin: 0 0 0.75rem;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .profile-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .profile-list li {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .bullet {
+    color: var(--primary-glow);
+    font-size: 0.65rem;
+    margin-top: 0.1rem;
+  }
+
+  .case-configuration-section {
+    flex: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  .slots-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .slot-row {
+    background: rgba(13, 41, 20, 0.2);
+    border: 1px solid rgba(57, 255, 20, 0.1);
+    border-radius: 6px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .slot-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .select-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .slot-select {
+    width: 100%;
+    background: rgba(4, 10, 5, 0.9);
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    color: #e5ffe8;
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  .slot-select:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+  }
+
+  .slot-select:disabled {
+    background: rgba(5, 12, 6, 0.5);
+    border-color: rgba(57, 255, 20, 0.1);
+    color: #65806b;
+    cursor: not-allowed;
+  }
+
+  /* Success Screen Overlay */
+  .success-overlay {
+    background-color: rgba(4, 10, 5, 0.96);
+  }
+
+  .text-emerald {
+    color: #10b981;
+    text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+  }
+
+  .report-card {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+    padding: 1.25rem;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    color: #a7f3d0;
+  }
+
+  /* Utilities */
+  .hidden {
+    display: none !important;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.85;
+    }
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Responsive styling */
+  @media (max-width: 768px) {
+    .decorator-container {
+      padding: 1rem;
+      height: auto;
+      overflow-y: auto;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+    }
+
+    .workspace-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .canvas-relative-wrapper {
+      min-height: 300px;
+    }
+
+    .overlay-content {
+      padding: 1rem;
+    }
+
+    .overlay-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .overlay-title {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .overlay-desc {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .instructions-card {
+      font-size: 0.75rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+    }
+  }
+</style>
+
+<script>
+  // Setup interface elements with non-null aliases to satisfy TS compiler constraints
+  const armingOverlay = document.getElementById("arming-overlay") as HTMLDivElement | null;
+  const armButton = document.getElementById("arm-button") as HTMLButtonElement | null;
+  const workspace = document.getElementById("workspace") as HTMLDivElement | null;
+  const successScreen = document.getElementById("success-screen") as HTMLDivElement | null;
+  const releaseBtn = document.getElementById("release-btn") as HTMLButtonElement | null;
+
+  const selectTop = document.getElementById("select-top-slot") as HTMLSelectElement | null;
+  const selectMid = document.getElementById("select-mid-slot") as HTMLSelectElement | null;
+  const selectBottom = document.getElementById("select-bottom-slot") as HTMLSelectElement | null;
+
+  const alertBadge = document.getElementById("alert-badge") as HTMLSpanElement | null;
+  const alertnessVal = document.getElementById("alertness-value") as HTMLDivElement | null;
+  const harvestVal = document.getElementById("harvest-value") as HTMLDivElement | null;
+  const tensionFill = document.getElementById("tension-fill") as HTMLDivElement | null;
+  
+  const canvas = document.getElementById("web-canvas") as HTMLCanvasElement | null;
+  const virtualCursor = document.getElementById("virtual-cursor") as unknown as SVGElement | null;
+
+  // Setup Web remains DOM elements
+  const remainFlyWing = document.getElementById("remain-fly-wing") as HTMLDivElement | null;
+  const remainAntHead = document.getElementById("remain-ant-head") as HTMLDivElement | null;
+  const remainWeevilLeg = document.getElementById("remain-weevil-leg") as HTMLDivElement | null;
+
+  // Simulation state
+  let audioContext: AudioContext | null = null;
+  let webAmbientNode: OscillatorNode | null = null;
+  let webAmbientGain: GainNode | null = null;
+
+  let alertness = 0.0; // 0.0 to 100.0
+  let tension = 0.0;   // Current physical silk thread vibration amplitude
+  let harvestedCount = 0;
+  
+  const harvestedState = {
+    "fly-wing": false,
+    "ant-head": false,
+    "weevil-leg": false,
+  };
+
+  // Web structure nodes for canvas rendering
+  const centerX = 200;
+  const centerY = 200;
+  const webRays = 8;
+  const webRings = 5;
+
+  // Keyboard navigation coords on canvas
+  let keyboardActive = false;
+  let cursorX = 200;
+  let cursorY = 200;
+
+  // Initialize Web Audio nodes
+  function initAudio() {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      audioContext = new AudioCtx();
+      
+      // Ambient hum for Hawaiian night / web resonance
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const lpFilter = audioContext.createBiquadFilter();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(65.41, audioContext.currentTime); // C2 low pitch
+      
+      // Modulate frequency slightly to mimic wind sway or spider movement
+      const lfo = audioContext.createOscillator();
+      const lfoGain = audioContext.createGain();
+      lfo.frequency.value = 0.2; // very slow
+      lfoGain.gain.value = 2.0; // 2Hz wobble
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      lfo.start();
+
+      lpFilter.type = "lowpass";
+      lpFilter.frequency.setValueAtTime(250, audioContext.currentTime);
+
+      gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+
+      osc.connect(lpFilter);
+      lpFilter.connect(gain);
+      gain.connect(audioContext.destination);
+
+      osc.start();
+      
+      webAmbientNode = osc;
+      webAmbientGain = gain;
+    } catch (e) {
+      console.warn("Web Audio initialization failed", e);
+    }
+  }
+
+  // Play a high plucked string sound when a web thread is plucked
+  function playPluckSound(pitch: number, isHarsh: boolean = false) {
+    if (!audioContext) return;
+    
+    // Quick fade oscillator
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+
+    osc.type = isHarsh ? "sawtooth" : "triangle";
+    osc.frequency.setValueAtTime(pitch, audioContext.currentTime);
+
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(pitch * 1.5, audioContext.currentTime);
+    filter.Q.setValueAtTime(10, audioContext.currentTime);
+
+    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + (isHarsh ? 0.4 : 0.8));
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioContext.destination);
+
+    osc.start();
+    osc.stop(audioContext.currentTime + 1.0);
+  }
+
+  // Render the spider web and indicators
+  function renderWeb() {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw background texture mesh
+    ctx.strokeStyle = "rgba(57, 255, 20, 0.04)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < canvas.width; i += 20) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, canvas.height);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(canvas.width, i);
+      ctx.stroke();
+    }
+
+    // Draw silken case outline at center
+    ctx.strokeStyle = "rgba(0, 240, 255, 0.3)";
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "rgba(10, 35, 25, 0.6)";
+    
+    // Draw case cylinder (caterpillar's safe zone)
+    ctx.beginPath();
+    ctx.roundRect(centerX - 25, centerY - 60, 50, 120, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    // Draw silken wraps on case
+    ctx.strokeStyle = "rgba(57, 255, 20, 0.25)";
+    ctx.lineWidth = 1;
+    for (let offset = -50; offset <= 50; offset += 15) {
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY + offset, 25, 6, 0, 0, Math.PI);
+      ctx.stroke();
+    }
+
+    // Draw Web thread lines radiating out
+    ctx.strokeStyle = "rgba(57, 255, 20, 0.15)";
+    if (tension > 0.01) {
+      ctx.strokeStyle = `rgba(255, 60, 60, ${0.15 + tension * 0.5})`;
+    }
+    ctx.lineWidth = 1 + tension * 2;
+
+    for (let r = 0; r < webRays; r++) {
+      const angle = (r * Math.PI * 2) / webRays;
+      const x = centerX + Math.cos(angle) * 180;
+      const y = centerY + Math.sin(angle) * 180;
+
+      // Add a small vibratory wobble if tension is active
+      const wobbleX = Math.sin(Date.now() * 0.05 + r) * tension * 4;
+      const wobbleY = Math.cos(Date.now() * 0.05 + r) * tension * 4;
+
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(x + wobbleX, y + wobbleY);
+      ctx.stroke();
+    }
+
+    // Draw concentric web rings
+    for (let ring = 1; ring <= webRings; ring++) {
+      const radius = ring * 35;
+      ctx.beginPath();
+      for (let r = 0; r <= webRays; r++) {
+        const angle = (r * Math.PI * 2) / webRays;
+        // Apply wobble
+        const wX = Math.sin(Date.now() * 0.05 + r + ring) * tension * 3;
+        const wY = Math.cos(Date.now() * 0.05 + r + ring) * tension * 3;
+        
+        const x = centerX + Math.cos(angle) * radius + wX;
+        const y = centerY + Math.sin(angle) * radius + wY;
+
+        if (r === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    }
+
+    // Draw spider icon crouching in top right corner
+    const spiderX = 350;
+    const spiderY = 50;
+    
+    // Draw legs
+    ctx.strokeStyle = alertness > 50 ? "rgba(255, 60, 60, 0.8)" : "rgba(80, 100, 85, 0.7)";
+    ctx.lineWidth = 2;
+    const legOffset = Math.sin(Date.now() * (0.01 + alertness * 0.0003)) * (1 + alertness * 0.08);
+    for (let side = -1; side <= 1; side += 2) {
+      for (let l = 0; l < 4; l++) {
+        ctx.beginPath();
+        ctx.moveTo(spiderX, spiderY);
+        ctx.quadraticCurveTo(
+          spiderX + side * (25 + l * 5), 
+          spiderY - 15 + l * 2 + legOffset,
+          spiderX + side * (35 + l * 3), 
+          spiderY + 15 + l * 5 + legOffset
+        );
+        ctx.stroke();
+      }
+    }
+
+    // Body
+    ctx.fillStyle = alertness > 50 ? "rgba(100, 15, 15, 0.9)" : "rgba(12, 28, 15, 0.95)";
+    ctx.strokeStyle = alertness > 50 ? "rgba(255, 60, 60, 0.6)" : "rgba(57, 255, 20, 0.3)";
+    ctx.beginPath();
+    ctx.arc(spiderX, spiderY, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(spiderX - 8, spiderY + 8, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Glowing eyes
+    ctx.fillStyle = alertness > 40 ? `rgba(255, 0, 0, ${0.4 + alertness * 0.006})` : "rgba(57, 255, 20, 0.6)";
+    ctx.beginPath();
+    ctx.arc(spiderX - 10, spiderY + 10, 1.5, 0, Math.PI * 2);
+    ctx.arc(spiderX - 6, spiderY + 10, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Handle plucking vibration mechanics
+  function triggerPluck(x: number, y: number, velocity: number) {
+    // Calculate distance to center
+    const dx = x - centerX;
+    const dy = y - centerY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    // Increase thread tension amplitude
+    tension = Math.min(2.5, tension + velocity * 0.05);
+
+    // Alertness builds up based on tension/vibration severity
+    if (velocity > 8) {
+      alertness = Math.min(100.0, alertness + velocity * 0.8);
+      playPluckSound(200 + dist * 1.5, true); // Harsh pluck
+    } else {
+      alertness = Math.min(100.0, alertness + velocity * 0.2);
+      playPluckSound(200 + dist * 1.5, false); // Gentle resonance pluck
+    }
+  }
+
+  // Smooth decay of tension and alertness
+  function updatePhysics() {
+    tension *= 0.92; // rapid decay of silk vibrations
+    
+    // Slow decay of spider alertness
+    if (alertness > 0) {
+      alertness = Math.max(0.0, alertness - 0.15);
+    }
+
+    // Update alert indicators
+    if (alertBadge) {
+      if (alertness > 60) {
+        alertBadge.textContent = "SPIDER AGITATED";
+        alertBadge.className = "status-indicator font-mono alert-high";
+      } else if (alertness > 20) {
+        alertBadge.textContent = "SPIDER WARY";
+        alertBadge.className = "status-indicator font-mono alert-high";
+      } else {
+        alertBadge.textContent = "SPIDER CALM";
+        alertBadge.className = "status-indicator font-mono alert-low";
+      }
+    }
+
+    if (alertnessVal) {
+      alertnessVal.textContent = `${Math.round(alertness)}%`;
+      if (alertness > 60) {
+        alertnessVal.className = "box-value font-mono text-gold";
+      } else {
+        alertnessVal.className = "box-value font-mono alert-low";
+      }
+    }
+
+    if (tensionFill) {
+      tensionFill.style.width = `${Math.min(100, tension * 40)}%`;
+    }
+
+    renderWeb();
+    requestAnimationFrame(updatePhysics);
+  }
+
+  // Process item harvesting
+  function harvestItem(type: keyof typeof harvestedState, element: HTMLDivElement) {
+    if (harvestedState[type]) return;
+
+    harvestedState[type] = true;
+    element.classList.add("harvested");
+    harvestedCount++;
+
+    if (harvestVal) {
+      harvestVal.textContent = `${harvestedCount} / 3`;
+    }
+
+    // Trigger local audio effect for collection
+    if (audioContext) {
+      playPluckSound(440 + harvestedCount * 110, false);
+    }
+
+    // Enable select drop-down inputs once items are harvested
+    if (type === "fly-wing" && selectTop) {
+      selectTop.disabled = false;
+      selectTop.innerHTML = `
+        <option value="">-- Choose Attachment --</option>
+        <option value="fly-wing">Fly Wing</option>
+        <option value="ant-head">Ant Head</option>
+        <option value="weevil-leg">Weevil Leg</option>
+      `;
+    }
+    if (type === "ant-head" && selectMid) {
+      selectMid.disabled = false;
+      selectMid.innerHTML = `
+        <option value="">-- Choose Attachment --</option>
+        <option value="fly-wing">Fly Wing</option>
+        <option value="ant-head">Ant Head</option>
+        <option value="weevil-leg">Weevil Leg</option>
+      `;
+    }
+    if (type === "weevil-leg" && selectBottom) {
+      selectBottom.disabled = false;
+      selectBottom.innerHTML = `
+        <option value="">-- Choose Attachment --</option>
+        <option value="fly-wing">Fly Wing</option>
+        <option value="ant-head">Ant Head</option>
+        <option value="weevil-leg">Weevil Leg</option>
+      `;
+    }
+
+    const root = document.getElementById("case-decorator-root");
+    if (root) {
+      root.setAttribute("data-harvested-count", harvestedCount.toString());
+    }
+
+    validateCamouflage();
+  }
+
+  // Validate the current selected configuration
+  function validateCamouflage() {
+    const topVal = selectTop?.value;
+    const midVal = selectMid?.value;
+    const botVal = selectBottom?.value;
+
+    const isMatch = (topVal === "fly-wing" && midVal === "ant-head" && botVal === "weevil-leg");
+    
+    if (releaseBtn) {
+      releaseBtn.disabled = !isMatch;
+    }
+  }
+
+  // Mouse / Pointer drag and vibration tracking
+  let lastX = 200;
+  let lastY = 200;
+  let lastTime = Date.now();
+
+  function handlePointerMove(clientX: number, clientY: number) {
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const dx = x - lastX;
+    const dy = y - lastY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dt = Date.now() - lastTime;
+
+    if (dt > 16 && dist > 1) {
+      const velocity = dist / (dt / 16); // Normalised velocity
+      triggerPluck(x, y, velocity);
+      lastX = x;
+      lastY = y;
+      lastTime = Date.now();
+    }
+  }
+
+  // Arm/Start desktop interface
+  if (armButton && armingOverlay && workspace) {
+    armButton.addEventListener("click", () => {
+      initAudio();
+      armingOverlay.classList.add("hidden");
+      workspace.classList.remove("hidden");
+      
+      // Kickoff loop physics
+      requestAnimationFrame(updatePhysics);
+    });
+  }
+
+  // Setup click handlers for remain nodes directly (touch-action safe)
+  if (remainFlyWing) {
+    remainFlyWing.addEventListener("click", () => harvestItem("fly-wing", remainFlyWing));
+  }
+  if (remainAntHead) {
+    remainAntHead.addEventListener("click", () => harvestItem("ant-head", remainAntHead));
+  }
+  if (remainWeevilLeg) {
+    remainWeevilLeg.addEventListener("click", () => harvestItem("weevil-leg", remainWeevilLeg));
+  }
+
+  // Setup select change observers
+  [selectTop, selectMid, selectBottom].forEach(sel => {
+    sel?.addEventListener("change", validateCamouflage);
+  });
+
+  // Finish trial success trigger
+  if (releaseBtn && successScreen) {
+    releaseBtn.addEventListener("click", () => {
+      if (audioContext) {
+        // High frequency victory chime
+        playPluckSound(600, false);
+        setTimeout(() => playPluckSound(800, false), 150);
+        setTimeout(() => playPluckSound(1200, false), 300);
+      }
+      
+      successScreen.classList.remove("hidden");
+      const root = document.getElementById("case-decorator-root");
+      if (root) {
+        root.setAttribute("data-status", "camouflaged");
+      }
+    });
+  }
+
+  // Setup web pointer monitoring
+  if (canvas) {
+    canvas.addEventListener("pointermove", (e) => {
+      handlePointerMove(e.clientX, e.clientY);
+    });
+    canvas.addEventListener("pointerdown", (e) => {
+      handlePointerMove(e.clientX, e.clientY);
+    });
+  }
+
+  // Setup keyboard navigation overrides
+  window.addEventListener("keydown", (e) => {
+    if (!workspace || workspace.classList.contains("hidden")) return;
+    
+    let moved = false;
+    const step = 15;
+
+    if (e.key === "ArrowUp") {
+      cursorY = Math.max(10, cursorY - step);
+      moved = true;
+    } else if (e.key === "ArrowDown") {
+      cursorY = Math.min(390, cursorY + step);
+      moved = true;
+    } else if (e.key === "ArrowLeft") {
+      cursorX = Math.max(10, cursorX - step);
+      moved = true;
+    } else if (e.key === "ArrowRight") {
+      cursorX = Math.min(390, cursorX + step);
+      moved = true;
+    }
+
+    if (moved) {
+      e.preventDefault();
+      keyboardActive = true;
+      
+      if (virtualCursor) {
+        virtualCursor.style.display = "block";
+        virtualCursor.style.left = `${(cursorX / 400) * 100}%`;
+        virtualCursor.style.top = `${(cursorY / 400) * 100}%`;
+      }
+
+      // Simulate relative coordinate plucking vibration
+      triggerPluck(cursorX, cursorY, 2.0);
+    }
+
+    // Space to pluck/interact
+    if (e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      triggerPluck(cursorX, cursorY, 10.0); // Big vibration
+
+      // Check collision with remains to harvest them
+      const items = [
+        { el: remainFlyWing, type: "fly-wing" as const, x: 140, y: 100 },
+        { el: remainAntHead, type: "ant-head" as const, x: 100, y: 260 },
+        { el: remainWeevilLeg, type: "weevil-leg" as const, x: 280, y: 180 },
+      ];
+
+      items.forEach(item => {
+        const dx = cursorX - item.x;
+        const dy = cursorY - item.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        // Collision threshold
+        if (dist < 40 && item.el) {
+          harvestItem(item.type, item.el);
+        }
+      });
+    }
+  });
+
+  // Expose test revealAll helper globally to bypass manual drag mechanics
+  (window as any).__revealAll = () => {
+    if (remainFlyWing) harvestItem("fly-wing", remainFlyWing);
+    if (remainAntHead) harvestItem("ant-head", remainAntHead);
+    if (remainWeevilLeg) harvestItem("weevil-leg", remainWeevilLeg);
+  };
+</script>
