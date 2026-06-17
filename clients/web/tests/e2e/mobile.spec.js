@@ -1,74 +1,41 @@
 import { test, expect } from "@playwright/test"
 
-const pages = [
-  "/",
-  "/blog",
-  "/blog/post-1",
-  "/blog/2026-06-15-brackish-groundwater-choir",
-  "/experiments",
-  "/experiments/abyssal-naming-committee",
-  "/experiments/anxiety-engine",
-  "/experiments/backrooms",
-  "/experiments/boatfire-regatta",
-  "/experiments/brackish-groundwater-choir",
-  "/experiments/chrono-calibration",
-  "/experiments/civic-fog-harpsichord",
-  "/experiments/complaint-received",
-  "/experiments/dependency-caterpillar",
-  "/experiments/ghost-kitchen-district",
-  "/experiments/lost-and-found-futures",
-  "/experiments/mimetic-tuner",
-  "/experiments/moth-oracle",
-  "/experiments/mouse-census",
-  "/experiments/office-evaporated-things",
-  "/experiments/oil-telegraph",
-  "/experiments/orbital-harmonics",
-  "/experiments/red-card-bloom",
-  "/experiments/scroll-symphony",
-  "/experiments/sentient-monolith",
-  "/experiments/theremin",
-  "/experiments/indisputable-permanence",
-  "/experiments/pigeon-magnetoreception",
-  "/experiments/spin-room",
-  "/experiments/tidal-type-foundry",
-  "/experiments/trionda-calibration",
-  "/experiments/dark-star-observatory",
-  "/experiments/pressure-choir",
-  "/experiments/abyssal-nodule-patchbay",
-  "/experiments/lichen-ledger",
-  "/experiments/love-in-the-west",
-  "/experiments/receipt-rain-choir",
-  "/experiments/quebec-biosphere",
-  "/experiments/specimen-4471",
-  "/experiments/static-orchard-switchboard",
-  "/experiments/glasshouse-parliament",
-  "/experiments/legal-tender",
-  "/experiments/bureau-borrowed-shadows",
-  "/experiments/enhanced-browser-games",
-  "/experiments/operation-mary",
-  "/experiments/post-detection-decorum",
-  "/experiments/quartz-alibi-foundry",
-  "/experiments/riksdag-resolution",
-  "/experiments/glacier-stone-concierge",
-  "/experiments/kq14-deposition",
-  "/experiments/transposon-torpor-modulator",
-  "/experiments/archive-unlicensed-rain",
-  "/experiments/twistronic-lattice-tuner",
-  "/experiments/ymca-attempt-18",
-  "/experiments/speed-trap",
-  "/experiments/voyager-telemetry-recalibrator",
-  "/experiments/volunteer-39",
-  "/experiments/deer-ked-protocol",
-  "/experiments/pollen-parcel-bureau",
-  "/experiments/semaphore-loom",
-  "/experiments/viscoelastic-rice-lock",
-  "/experiments/arctic-dropstone-deposition-desk",
-  "/experiments/mercury-quarantine-choir",
-  "/experiments/octagon-terrarium",
-  "/experiments/byssus-loom",
-  "/experiments/gladiator-tag-rubbing",
-  "/experiments/memory-tide-elevator",
-]
+import fs from "fs"
+import path from "path"
+import { fileURLToPath } from "url"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const pagesDir = path.resolve(__dirname, "../../src/pages")
+const blogContentDir = path.resolve(__dirname, "../../src/content/blog")
+
+const pages = ["/", "/blog", "/experiments"]
+
+// Dynamically add blog posts
+if (fs.existsSync(blogContentDir)) {
+  const files = fs.readdirSync(blogContentDir)
+  for (const file of files) {
+    if (file.endsWith(".md") || file.endsWith(".mdx")) {
+      const slug = file.replace(/\.mdx?$/, "")
+      pages.push(`/blog/${slug}`)
+    }
+  }
+}
+
+// Dynamically add experiments
+const experimentsDir = path.join(pagesDir, "experiments")
+if (fs.existsSync(experimentsDir)) {
+  const files = fs.readdirSync(experimentsDir)
+  // Sort them to keep test runs ordered
+  files.sort().forEach((file) => {
+    if (file.endsWith(".astro") && file !== "index.astro") {
+      const name = file.replace(/\.astro$/, "")
+      pages.push(`/experiments/${name}`)
+    }
+  })
+}
+
 
 test.use({
   viewport: { width: 375, height: 812 },
