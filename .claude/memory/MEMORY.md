@@ -152,6 +152,11 @@ For N circular bodies: each frame, check every pair `(i, j)` for overlap (`dist(
 **Technique:** Progressive CSS filter degradation as game mechanic — cumulative `filter` chains (`saturate(0)`, `contrast(0.4)`, `blur(3px)`, `brightness(0.25)`) applied to the scene element as each gene is silenced. CSS `@property` for typed custom property animation (`--warmth`). MutationObserver on style attributes to sync filter state. Dynamic DOM generation with `data-testid` attributes for Playwright testability.
 **File:** clients/web/src/pages/experiments/deer-ked-protocol.astro
 
+### 2026-06-17 — Eternal Companion Cosmetics
+**Concept:** Inspired by the makeup artist who mixed her dead dog Patch's cremated ashes into semi-permanent eyeliner ink. A luxury pet memorial beauty catalog. Hover product swatches to summon ghost pets from the pigments via canvas particle effects; click to add to your memorial collection. Sales copy escalates from professional to existential horror.
+**Technique:** `CanvasRenderingContext2D.filter` — per-draw-call CSS filter strings applied directly to canvas operations. Ghost particles rendered with `ctx.filter = 'blur(Npx) brightness(1.6)'` for ethereal glow, pet silhouettes with `ctx.filter = 'blur(4px) brightness(2) opacity(N%)'`. Different from SVG filters — these are inline filter pipelines on the 2D context, applied and cleared per draw call.
+**File:** clients/web/src/pages/experiments/eternal-companion-cosmetics.astro
+
 ### 2026-06-16 — Byssus Loom — Structural Color Weaving
 **Concept:** Inspired by Korean scientists recreating 2,000-year-old sea silk from pen shell clam byssus, discovering the shimmer comes from "photonin" — a protein that bends light through structural interference, not dyes. Scroll to weave golden threads across a deep-ocean canvas; cursor X guides the shuttle. Thread color shifts via thin-film interference simulation (slow = thick/gold, fast = thin/violet). Background, loom frame, and caustic lights all driven by CSS scroll-driven animations.
 **Technique:** CSS Scroll-driven Animations — `scroll-timeline: --name block` on `html`, then `animation-timeline: --name` on elements. Keyframes tied to scroll progress rather than time. Also: thin-film interference color mapping (`λ = 2nd`, wavelength→hue conversion).
@@ -180,6 +185,9 @@ Declare `scroll-timeline: --name block` on the scrolling element (e.g., `html` f
 
 #### Thin-film Interference Color Mapping
 Structural color (like butterfly wings, soap bubbles, sea silk photonin) arises from constructive interference: `λ = 2 * n * d` where `n` is refractive index and `d` is film thickness. Map wavelength to hue: 380nm→violet(270°), 480nm→blue(220°), 520nm→green(120°), 580nm→yellow(60°), 700nm→red(0°). Linear interpolation: `hue = 270 - ((λ - 380) / 320) * 270`. Useful for any "structural color" effect — thickness as the input variable produces physically-motivated color shifts.
+
+#### CanvasRenderingContext2D.filter (per-draw CSS filters)
+`ctx.filter = 'blur(4px) brightness(1.6)'` applies a CSS filter pipeline to all subsequent canvas draw operations until changed or `ctx.restore()` is called. Unlike SVG `<filter>` elements, these require no DOM setup — just assign a CSS filter string before each draw call. Reset with `ctx.filter = 'none'`. Combine with `ctx.save()`/`ctx.restore()` to scope filters per shape. Works with all standard CSS filter functions: `blur()`, `brightness()`, `contrast()`, `opacity()`, `hue-rotate()`, `saturate()`, `drop-shadow()`, etc. Powerful for particle systems where each particle needs different glow/blur levels. Supported in Chrome 52+, Firefox 49+, Safari 16+. Key gotcha: `opacity()` in `ctx.filter` stacks with the alpha channel of `fillStyle` — if both are set, you get multiplicative transparency. Another gotcha: heavy blur on many particles is expensive; keep blur radii small (<6px) for 60fps with 50+ particles.
 
 ## Feedback from Matt
 
