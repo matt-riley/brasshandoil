@@ -1,0 +1,625 @@
+---
+import Base from "@layouts/Base.astro"
+
+const cups = [
+  { name: "Rim Archive", code: "RA", tone: "cupboard pulse", color: "#d36f3d" },
+  { name: "Sugar Fault", code: "SF", tone: "spoon tremble", color: "#2f8f83" },
+  { name: "Blue Saucer", code: "BS", tone: "window ledge", color: "#4267b2" },
+  { name: "Kiln Whisper", code: "KW", tone: "hairline chord", color: "#9b4f87" },
+  { name: "Milk Quay", code: "MQ", tone: "harbor hush", color: "#c7a44a" },
+  { name: "Handle Ninth", code: "HN", tone: "cabinet omen", color: "#55746f" },
+]
+---
+
+<Base title="Infrasonic Teacup Seismograph">
+  <main id="infrasonic-teacup-seismograph" class="tea-shell">
+    <section class="tea-console" aria-label="Porcelain tremor desk">
+      <p class="tea-kicker">Porcelain observatory / breakfast fault line</p>
+      <h1>Infrasonic Teacup Seismograph</h1>
+      <p class="tea-copy">
+        Stir the table until tiny tremors collect in the cups. Tune a porcelain
+        witness, stamp the slip, then let the cabinet decide whether the house moved.
+      </p>
+
+      <div class="tea-readouts" aria-live="polite">
+        <div>
+          <span>Tremors</span>
+          <strong id="tremor-count">0</strong>
+        </div>
+        <div>
+          <span>Cup</span>
+          <strong id="current-cup">untuned</strong>
+        </div>
+        <div>
+          <span>Amplitude</span>
+          <strong id="amplitude-reading">12</strong>
+        </div>
+        <div>
+          <span>Omen</span>
+          <strong id="omen-state">waiting</strong>
+        </div>
+      </div>
+
+      <div class="tea-actions">
+        <button id="stamp-button" type="button">Stamp Slip</button>
+        <button id="settle-button" type="button">Settle Table</button>
+      </div>
+
+      <ol id="seismogram-ledger" class="seismogram-ledger" aria-label="Stamped tremor slips">
+        <li>no porcelain testimony filed</li>
+      </ol>
+    </section>
+
+    <section
+      id="teacup-table"
+      class="tea-table"
+      data-awake="false"
+      data-tremors="0"
+      aria-label="Interactive porcelain seismograph table"
+    >
+      <canvas id="tremor-canvas" aria-label="Infrasonic tremor traces"></canvas>
+
+      <div class="table-plate" aria-hidden="true">
+        <span class="plate-ring ring-a"></span>
+        <span class="plate-ring ring-b"></span>
+        <span class="plate-ring ring-c"></span>
+        <span class="spoon-probe"></span>
+      </div>
+
+      <div id="porcelain-array" class="porcelain-array" aria-label="Porcelain tuning cups">
+        {cups.map((cup, index) => (
+          <button
+            class="cup-key"
+            type="button"
+            data-cup={cup.name}
+            data-code={cup.code}
+            data-tone={cup.tone}
+            data-index={index}
+            style={`--cup-color: ${cup.color}; --cup-index: ${index};`}
+            aria-pressed="false"
+          >
+            <b>{cup.code}</b>
+            <span>{cup.name}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #f3ece3;
+  }
+
+  :global(.container) {
+    max-inline-size: none;
+    padding-inline: 0;
+  }
+
+  .tea-shell {
+    --paper: #f8f2e8;
+    --ink: #191614;
+    --muted: rgba(25, 22, 20, 0.68);
+    --line: rgba(25, 22, 20, 0.16);
+    --green: #2f8f83;
+    --blue: #4267b2;
+    --clay: #d36f3d;
+    --gold: #c7a44a;
+    --spoon-x: 50%;
+    --spoon-y: 50%;
+    display: grid;
+    grid-template-columns: minmax(21rem, 29rem) minmax(0, 1fr);
+    gap: clamp(1rem, 2.4vw, 2rem);
+    min-height: calc(100vh - 6rem);
+    overflow: hidden;
+    padding: clamp(1rem, 2.5vw, 2rem);
+    color: var(--ink);
+    background:
+      linear-gradient(110deg, rgba(248, 242, 232, 0.98), rgba(248, 242, 232, 0.76)),
+      repeating-linear-gradient(0deg, rgba(66, 103, 178, 0.07) 0 1px, transparent 1px 4rem),
+      linear-gradient(145deg, #f3ece3 0%, #dce9e4 42%, #ead4cc 74%, #f7f0df 100%);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    isolation: isolate;
+  }
+
+  .tea-console {
+    align-self: center;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding-block: 0.75rem;
+  }
+
+  .tea-kicker,
+  .tea-readouts span {
+    margin: 0;
+    color: var(--green);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 10ch;
+    margin: 0;
+    color: #191614;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.35rem, 4.1vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.9;
+    text-shadow:
+      0.035em 0.045em 0 rgba(211, 111, 61, 0.32),
+      -0.026em 0.025em 0 rgba(66, 103, 178, 0.26);
+  }
+
+  .tea-copy {
+    max-width: 33rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.25vw, 1.1rem);
+    line-height: 1.56;
+  }
+
+  .tea-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .tea-readouts div,
+  .seismogram-ledger {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0.8rem 1.8rem rgba(25, 22, 20, 0.08);
+  }
+
+  .tea-readouts div {
+    padding: 0.78rem;
+  }
+
+  .tea-readouts strong {
+    display: block;
+    min-height: 1.5rem;
+    margin-top: 0.4rem;
+    color: var(--ink);
+    font-size: clamp(1rem, 1.7vw, 1.26rem);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .tea-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  .tea-actions button {
+    min-height: 3.1rem;
+    border: 1px solid rgba(25, 22, 20, 0.2);
+    border-radius: 8px;
+    color: #15120f;
+    background: var(--gold);
+    font: 850 0.8rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      filter 160ms ease,
+      transform 160ms ease;
+  }
+
+  .tea-actions button:hover,
+  .tea-actions button:focus-visible {
+    filter: brightness(1.05) saturate(1.08);
+    transform: translateY(-1px);
+  }
+
+  #settle-button {
+    color: #f8f2e8;
+    background: #2d3f48;
+  }
+
+  .seismogram-ledger {
+    display: grid;
+    gap: 0.5rem;
+    min-height: 8.25rem;
+    margin: 0;
+    padding: 0.82rem 0.82rem 0.82rem 1.95rem;
+    color: rgba(25, 22, 20, 0.74);
+    font: 760 0.82rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .seismogram-ledger li::marker {
+    color: var(--clay);
+  }
+
+  .tea-table {
+    position: relative;
+    min-width: 0;
+    min-height: min(68vw, 44rem);
+    border: 1px solid rgba(25, 22, 20, 0.16);
+    border-radius: 8px;
+    overflow: hidden;
+    background:
+      linear-gradient(90deg, transparent 49.7%, rgba(25, 22, 20, 0.09) 50%, transparent 50.3%),
+      linear-gradient(0deg, transparent 49.7%, rgba(25, 22, 20, 0.09) 50%, transparent 50.3%),
+      radial-gradient(circle at 50% 50%, rgba(248, 242, 232, 0.96) 0 19%, transparent 19.4%),
+      radial-gradient(circle at 50% 50%, rgba(66, 103, 178, 0.16), transparent 42%),
+      linear-gradient(135deg, #253238 0%, #e9e0d7 1px, #f7f0e5 42%, #d7e8e1 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.62),
+      0 1.4rem 3.2rem rgba(25, 22, 20, 0.16);
+    touch-action: none;
+  }
+
+  #tremor-canvas,
+  .table-plate {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #tremor-canvas {
+    z-index: 1;
+  }
+
+  .table-plate {
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .plate-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border: 1px solid rgba(25, 22, 20, 0.16);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .ring-a {
+    width: min(58vw, 29rem);
+    aspect-ratio: 1;
+  }
+
+  .ring-b {
+    width: min(43vw, 21rem);
+    aspect-ratio: 1;
+    border-style: dashed;
+  }
+
+  .ring-c {
+    width: min(26vw, 13rem);
+    aspect-ratio: 1;
+    background: rgba(248, 242, 232, 0.36);
+  }
+
+  .spoon-probe {
+    position: absolute;
+    left: var(--spoon-x);
+    top: var(--spoon-y);
+    width: 4.7rem;
+    height: 1rem;
+    border-radius: 999px;
+    background:
+      radial-gradient(circle at 91% 50%, #f8f2e8 0 28%, transparent 30%),
+      linear-gradient(90deg, #5d6670, #f4efe6 78%);
+    box-shadow:
+      0 0 0 1px rgba(25, 22, 20, 0.18),
+      0 0.6rem 1.3rem rgba(25, 22, 20, 0.22);
+    transform: translate(-16%, -50%) rotate(calc((var(--spoon-x-num, 50) - 50) * 0.45deg));
+  }
+
+  .porcelain-array {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .cup-key {
+    --angle: calc((var(--cup-index) * 60deg) - 90deg);
+    position: absolute;
+    left: calc(50% + cos(var(--angle)) * min(28vw, 16rem));
+    top: calc(50% + sin(var(--angle)) * min(28vw, 16rem));
+    display: grid;
+    place-items: center;
+    gap: 0.1rem;
+    width: clamp(4.7rem, 8vw, 6.2rem);
+    aspect-ratio: 1;
+    border: 1px solid rgba(25, 22, 20, 0.18);
+    border-radius: 50%;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 50% 47%, rgba(255, 255, 255, 0.98) 0 31%, transparent 32%),
+      radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--cup-color), white 55%) 0 47%, var(--cup-color) 48% 54%, rgba(255, 255, 255, 0.84) 55% 100%);
+    box-shadow:
+      0 0.8rem 1.6rem rgba(25, 22, 20, 0.14),
+      inset 0 0 0 0.42rem rgba(255, 255, 255, 0.55);
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+    cursor: pointer;
+    transition:
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .cup-key:hover,
+  .cup-key:focus-visible,
+  .cup-key[aria-pressed="true"] {
+    box-shadow:
+      0 0 0 0.25rem color-mix(in srgb, var(--cup-color), transparent 64%),
+      0 1rem 1.8rem rgba(25, 22, 20, 0.18),
+      inset 0 0 0 0.42rem rgba(255, 255, 255, 0.7);
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+
+  .cup-key b {
+    color: var(--cup-color);
+    font: 900 clamp(1.1rem, 2vw, 1.45rem)/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .cup-key span {
+    max-width: 5.2rem;
+    color: rgba(25, 22, 20, 0.76);
+    font: 760 0.66rem/1.05 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 780px) {
+    .tea-shell {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      overflow: clip;
+    }
+
+    .tea-console {
+      align-self: stretch;
+    }
+
+    h1 {
+      max-width: 11ch;
+      font-size: clamp(2.25rem, 12vw, 3.45rem);
+    }
+
+    .tea-table {
+      min-height: 31rem;
+    }
+
+    .cup-key {
+      left: calc(50% + cos(var(--angle)) * min(33vw, 8.8rem));
+      top: calc(50% + sin(var(--angle)) * min(33vw, 8.8rem));
+      width: clamp(4.25rem, 22vw, 5.15rem);
+    }
+
+    .ring-a {
+      width: min(73vw, 22rem);
+    }
+
+    .ring-b {
+      width: min(55vw, 16rem);
+    }
+
+    .ring-c {
+      width: min(34vw, 10rem);
+    }
+  }
+
+  @media (max-width: 420px) {
+    .tea-readouts,
+    .tea-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .tea-table {
+      min-height: 29rem;
+    }
+
+    .cup-key span {
+      display: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  const table = document.getElementById("teacup-table")
+  const canvas = document.getElementById("tremor-canvas")
+  const context = canvas.getContext("2d")
+  const cupButtons = Array.from(document.querySelectorAll(".cup-key"))
+  const tremorCount = document.getElementById("tremor-count")
+  const currentCup = document.getElementById("current-cup")
+  const amplitudeReading = document.getElementById("amplitude-reading")
+  const omenState = document.getElementById("omen-state")
+  const stampButton = document.getElementById("stamp-button")
+  const settleButton = document.getElementById("settle-button")
+  const ledger = document.getElementById("seismogram-ledger")
+
+  let normalizedSpoon = { x: 0.5, y: 0.5 }
+  let targetSpoon = { x: 0.5, y: 0.5 }
+  let selectedCup = null
+  let tremors = 0
+  let amplitude = 12
+  let tick = 0
+
+  function clamp(value) {
+    return Math.max(0, Math.min(1, value))
+  }
+
+  function updateSpoonStyles() {
+    const x = Math.round(normalizedSpoon.x * 100)
+    const y = Math.round(normalizedSpoon.y * 100)
+    table.style.setProperty("--spoon-x", `${x}%`)
+    table.style.setProperty("--spoon-y", `${y}%`)
+    table.style.setProperty("--spoon-x-num", String(x))
+  }
+
+  function setSpoonFromClient(clientX, clientY) {
+    const rect = table.getBoundingClientRect()
+    targetSpoon = {
+      x: clamp((clientX - rect.left) / rect.width),
+      y: clamp((clientY - rect.top) / rect.height),
+    }
+    table.dataset.awake = "true"
+    amplitude = Math.max(amplitude, Math.round(24 + Math.abs(targetSpoon.x - 0.5) * 74))
+  }
+
+  function tuneCup(button) {
+    selectedCup = button
+    cupButtons.forEach((cup) => cup.setAttribute("aria-pressed", String(cup === button)))
+    currentCup.textContent = button.dataset.cup
+    omenState.textContent = button.dataset.tone
+    amplitude = Math.max(amplitude, 26 + Number(button.dataset.index) * 7)
+  }
+
+  function stampTremor() {
+    if (!selectedCup) {
+      tuneCup(cupButtons[0])
+    }
+    tremors += 1
+    table.dataset.tremors = String(tremors)
+    tremorCount.textContent = String(tremors)
+    const item = document.createElement("li")
+    item.textContent = `${selectedCup.dataset.code} logged at ${Math.round(amplitude)} microns: ${selectedCup.dataset.tone}`
+    if (ledger.children.length === 1 && ledger.textContent.includes("no porcelain")) {
+      ledger.innerHTML = ""
+    }
+    ledger.prepend(item)
+    while (ledger.children.length > 5) {
+      ledger.lastElementChild.remove()
+    }
+  }
+
+  function settleTable() {
+    tremors = 0
+    amplitude = 12
+    selectedCup = null
+    table.dataset.tremors = "0"
+    tremorCount.textContent = "0"
+    amplitudeReading.textContent = "12"
+    currentCup.textContent = "untuned"
+    omenState.textContent = "waiting"
+    cupButtons.forEach((cup) => cup.setAttribute("aria-pressed", "false"))
+    ledger.innerHTML = "<li>no porcelain testimony filed</li>"
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect()
+    const ratio = window.devicePixelRatio || 1
+    canvas.width = Math.max(1, Math.floor(rect.width * ratio))
+    canvas.height = Math.max(1, Math.floor(rect.height * ratio))
+    context.setTransform(ratio, 0, 0, ratio, 0, 0)
+  }
+
+  function draw() {
+    const width = canvas.clientWidth
+    const height = canvas.clientHeight
+    tick += 0.018
+    normalizedSpoon.x += (targetSpoon.x - normalizedSpoon.x) * 0.12
+    normalizedSpoon.y += (targetSpoon.y - normalizedSpoon.y) * 0.12
+    updateSpoonStyles()
+    amplitude += (12 - amplitude) * 0.012
+    amplitudeReading.textContent = String(Math.round(amplitude))
+
+    context.clearRect(0, 0, width, height)
+    context.lineWidth = 1
+    context.strokeStyle = "rgba(25, 22, 20, 0.16)"
+    for (let row = 0; row < 8; row += 1) {
+      const y = (row + 1) * (height / 9)
+      context.beginPath()
+      for (let x = 0; x <= width; x += 8) {
+        const wave =
+          Math.sin(x * 0.025 + tick * (row + 1)) *
+          (2 + amplitude * 0.045) *
+          (1 + row * 0.08)
+        if (x === 0) {
+          context.moveTo(x, y + wave)
+        } else {
+          context.lineTo(x, y + wave)
+        }
+      }
+      context.stroke()
+    }
+
+    const spoonX = normalizedSpoon.x * width
+    const spoonY = normalizedSpoon.y * height
+    const pulse = 40 + Math.sin(tick * 8) * 6 + amplitude * 0.55
+    const gradient = context.createRadialGradient(spoonX, spoonY, 4, spoonX, spoonY, pulse)
+    gradient.addColorStop(0, "rgba(211, 111, 61, 0.34)")
+    gradient.addColorStop(0.48, "rgba(66, 103, 178, 0.16)")
+    gradient.addColorStop(1, "rgba(47, 143, 131, 0)")
+    context.fillStyle = gradient
+    context.beginPath()
+    context.arc(spoonX, spoonY, pulse, 0, Math.PI * 2)
+    context.fill()
+
+    requestAnimationFrame(draw)
+  }
+
+  cupButtons.forEach((button) => {
+    button.addEventListener("click", () => tuneCup(button))
+  })
+
+  table.addEventListener("pointermove", (event) => {
+    setSpoonFromClient(event.clientX, event.clientY)
+  })
+
+  table.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0]
+    if (touch) {
+      setSpoonFromClient(touch.clientX, touch.clientY)
+    }
+  }, { passive: true })
+
+  table.addEventListener("touchmove", (event) => {
+    const touch = event.touches[0]
+    if (touch) {
+      setSpoonFromClient(touch.clientX, touch.clientY)
+    }
+  }, { passive: true })
+
+  document.addEventListener("keydown", (event) => {
+    const digit = Number(event.key)
+    if (digit >= 1 && digit <= cupButtons.length) {
+      tuneCup(cupButtons[digit - 1])
+      return
+    }
+    if (event.key === "Enter") {
+      stampTremor()
+      return
+    }
+    if (event.key === "ArrowLeft") {
+      targetSpoon.x = clamp(targetSpoon.x - 0.06)
+    }
+    if (event.key === "ArrowRight") {
+      targetSpoon.x = clamp(targetSpoon.x + 0.06)
+    }
+    if (event.key === "ArrowUp") {
+      targetSpoon.y = clamp(targetSpoon.y - 0.06)
+    }
+    if (event.key === "ArrowDown") {
+      targetSpoon.y = clamp(targetSpoon.y + 0.06)
+    }
+    if (event.key.startsWith("Arrow")) {
+      table.dataset.awake = "true"
+      amplitude = Math.max(amplitude, 32)
+      normalizedSpoon = { ...targetSpoon }
+      updateSpoonStyles()
+    }
+  })
+
+  stampButton.addEventListener("click", stampTremor)
+  settleButton.addEventListener("click", settleTable)
+  window.addEventListener("resize", resizeCanvas)
+
+  resizeCanvas()
+  updateSpoonStyles()
+  requestAnimationFrame(draw)
+</script>
