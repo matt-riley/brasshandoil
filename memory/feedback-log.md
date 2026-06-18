@@ -6,6 +6,20 @@ Use this file as the running source of truth for review notes after each daily e
 
 ### Session Entry
 
+Date: 2026-06-18
+Experiment: Dinoflagellate Bioluminescent Shear Reactor
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Seeded from marine biology mechanics: dinoflagellate shear-induced bioluminescence.
+- Implemented HTML5 Canvas displaying petri dish, rotating magnetic stirrer, and 130 drifting cell particles.
+- Modeled dynamic shear rate equations incorporating culture medium viscosity changes (Water, Agar, Glycerol) and velocity inputs.
+- Coupled Web Audio synthesis: low bubble hum (modulated by stirrer speed) and high-frequency glass-like chime tones triggered during excitation cascades.
+- Addressed keyboard overrides: arrow keys steer virtual stirrer cursor, digits 1-9 set stirrer RPM, Spacebar triggers high-shear pulse.
+- Prevented horizontal scroll overflow at 375px mobile width via responsive padding, layout wrapping, and Touch-Action overrides.
+
+### Session Entry
+
 Date: 2026-06-17
 Experiment: Oahu Web Camouflage Atelier (Hyposmocoma Case Decorator)
 Feedback:
