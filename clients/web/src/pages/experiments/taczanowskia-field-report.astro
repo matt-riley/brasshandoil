@@ -1,0 +1,769 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Taczanowskia waska — Field Report #7">
+  <style is:inline>
+    @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f4edd8;
+      color: #2c2416;
+      font-family: 'IM Fell English', serif;
+      min-height: 300vh;
+      overflow-x: hidden;
+    }
+
+    #scene {
+      position: relative;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 28px 120px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      border-bottom: 2px solid #8b7355;
+      padding-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+      color: #4a3728;
+      margin-bottom: 8px;
+    }
+
+    header .subtitle {
+      font-style: italic;
+      color: #7a6548;
+      font-size: 0.95rem;
+    }
+
+    header .classification {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      color: #b44;
+      margin-top: 8px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .journal-entry {
+      margin-bottom: 28px;
+      line-height: 1.7;
+      font-size: 1.05rem;
+      text-align: justify;
+    }
+
+    .journal-entry .time {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.8rem;
+      color: #8b7355;
+      margin-bottom: 6px;
+    }
+
+    .specimen-container {
+      position: relative;
+      margin: 32px auto;
+      width: 280px;
+      height: 200px;
+      border: 1px solid #a89070;
+      background: #eee5d0;
+      overflow: visible;
+      cursor: crosshair;
+    }
+
+    .specimen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  opacity 0.3s ease;
+    }
+
+    .specimen[data-evaded="true"] {
+      transform: translate(var(--evade-x, 0px), var(--evade-y, 0px));
+    }
+
+    .specimen-label {
+      position: absolute;
+      bottom: -22px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.7rem;
+      color: #8b7355;
+    }
+
+    .specimen-label.revealed {
+      color: #b44;
+      font-weight: bold;
+    }
+
+    .specimen canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* The shutter button — appears when a specimen is partially visible */
+    #shutter-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #2c2416;
+      border: 3px solid #f4edd8;
+      color: #f4edd8;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    #shutter-btn:hover {
+      transform: scale(1.1);
+      background: #4a3728;
+    }
+
+    #shutter-btn.visible {
+      display: flex;
+    }
+
+    /* Frustration log — fixed sidebar */
+    #frustration-panel {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 220px;
+      background: rgba(244, 237, 216, 0.95);
+      border: 1px solid #a89070;
+      padding: 12px;
+      font-size: 0.78rem;
+      max-height: 40vh;
+      overflow-y: auto;
+      z-index: 90;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    #frustration-panel h3 {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.7rem;
+      color: #4a3728;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid #c4b394;
+      padding-bottom: 4px;
+    }
+
+    .log-entry {
+      margin-bottom: 6px;
+      padding: 4px 0;
+      border-bottom: 1px dotted #d4c4a4;
+      font-style: italic;
+      color: #6a5438;
+      line-height: 1.4;
+    }
+
+    .log-entry .log-time {
+      font-style: normal;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.65rem;
+      color: #999;
+    }
+
+    #photo-counter {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.72rem;
+      color: #4a3728;
+      margin-bottom: 8px;
+    }
+
+    /* Viewfinder overlay flash */
+    .viewfinder-flash {
+      position: fixed;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 200;
+      transition: opacity 0.08s ease;
+    }
+
+    .viewfinder-flash.flash {
+      opacity: 0.7;
+      transition: none;
+    }
+
+    /* Captured state — specimen stops moving, reveals spider */
+    .specimen[data-state="captured"] canvas {
+      filter: none;
+    }
+
+    .specimen-container.captured {
+      border-color: #b44;
+      box-shadow: 0 0 0 2px #b44;
+    }
+
+    @media (max-width: 800px) {
+      #frustration-panel {
+        position: static;
+        width: 100%;
+        max-height: none;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+
+  <div id="scene">
+    <header>
+      <h1>Field Report #7 — <em>Taczanowskia waska</em></h1>
+      <div class="subtitle">Reserva Ecológica Tamshiyacu-Tahuayo, Loreto, Peru</div>
+      <div class="classification">SPECIMEN STATUS: UNCONFIRMED — EVASION PROTOCOL ACTIVE</div>
+    </header>
+
+    <div data-testid="frustration-log" id="frustration-panel">
+      <h3>Field Notes — Observation Log</h3>
+      <div data-testid="photo-counter" id="photo-counter">Captures: <span id="capture-count">0</span> / 5 &nbsp;|&nbsp; Evasions: <span id="evasion-count">0</span></div>
+      <div id="log-entries"></div>
+    </div>
+
+    <div data-testid="journal" id="journal">
+      <div class="journal-entry">
+        <div class="time">06:14 — Day 12</div>
+        <p>Twelve days in the canopy and I have yet to photograph a single confirmed specimen.
+        The literature describes <em>Taczanowskia waska</em> as "behaviourally cryptic," which is
+        the entomological equivalent of calling a con artist "socially flexible." This spider does not
+        merely resemble <em>Ophiocordyceps</em> fungal growths — it performs them. The elongated
+        abdomen mimics a fruiting body. The legs splay like hyphae. When disturbed, it sways as if
+        releasing spores. I have been fooled eleven times.</p>
+      </div>
+
+      <div class="specimen-container" id="specimen-0">
+        <div class="specimen" data-testid="specimen" data-state="disguised" data-evaded="false" data-index="0">
+          <canvas width="560" height="400"></canvas>
+        </div>
+        <div class="specimen-label">Fig. 1 — Presumed <em>Ophiocordyceps</em> fruiting body on <em>Camponotus</em> sp.</div>
+      </div>
+
+      <div class="journal-entry">
+        <div class="time">08:30 — Day 12</div>
+        <p>Attempted macro photography of the growth in Fig. 1 at dawn. As I adjusted focus, the
+        "fungus" shifted. Not in the way that wind moves a dead ant — in the way that something alive
+        decides it has been seen. By the time the shutter clicked, it had repositioned to the edge of
+        my viewfinder. I am beginning to suspect this organism has evolved to detect the geometry of
+        observation itself.</p>
+      </div>
+
+      <div class="specimen-container" id="specimen-1">
+        <div class="specimen" data-testid="specimen" data-state="disguised" data-evaded="false" data-index="1">
+          <canvas width="560" height="400"></canvas>
+        </div>
+        <div class="specimen-label">Fig. 2 — Cluster of fruiting bodies, secondary branch, 14m elevation</div>
+      </div>
+
+      <div class="journal-entry">
+        <div class="time">11:45 — Day 12</div>
+        <p>A colleague at MUSM suggests I am "overthinking a small spider." She has not spent twelve days
+        watching fungi run away. The specimens do not merely avoid the camera — they avoid being
+        <em>fully framed</em>. Partial observation is tolerated. It is the completion of the gaze they
+        cannot abide. I have started to wonder if the spider has internalised some perverse version of
+        the observer effect: it is the fungus until it is completely seen, at which point it must become
+        the spider, and the spider must flee.</p>
+      </div>
+
+      <div class="specimen-container" id="specimen-2">
+        <div class="specimen" data-testid="specimen" data-state="disguised" data-evaded="false" data-index="2">
+          <canvas width="560" height="400"></canvas>
+        </div>
+        <div class="specimen-label">Fig. 3 — Solitary growth, underside of <em>Cecropia</em> leaf</div>
+      </div>
+
+      <div class="journal-entry">
+        <div class="time">14:22 — Day 12</div>
+        <p>I have modified my approach. Rather than scrolling smoothly through my observations, I will
+        attempt a rapid "snap" — bringing the specimen into full view and triggering the shutter before
+        the evasion response engages. The literature gives no reaction time for <em>T. waska</em>.
+        Perhaps it is faster than my camera. Perhaps it is faster than my attention. I have allocated
+        the rest of the afternoon to finding out.</p>
+      </div>
+
+      <div class="specimen-container" id="specimen-3">
+        <div class="specimen" data-testid="specimen" data-state="disguised" data-evaded="false" data-index="3">
+          <canvas width="560" height="400"></canvas>
+        </div>
+        <div class="specimen-label">Fig. 4 — Possible mimic, junction of primary and secondary branch</div>
+      </div>
+
+      <div class="journal-entry">
+        <div class="time">16:50 — Day 12</div>
+        <p>I photographed a genuine <em>Ophiocordyceps</em> fruiting body this afternoon. It did not
+        move. It did not flinch. It simply sat there being dead, which is the one thing the mimic cannot
+        convincingly do. The stillness of actual death has become my diagnostic. If I observe a growth
+        that seems too perfectly still — too committed to the performance — I know it is the spider,
+        holding its breath.</p>
+      </div>
+
+      <div class="specimen-container" id="specimen-4">
+        <div class="specimen" data-testid="specimen" data-state="disguised" data-evaded="false" data-index="4">
+          <canvas width="560" height="400"></canvas>
+        </div>
+        <div class="specimen-label">Fig. 5 — Terminal specimen, canopy edge, 18m elevation</div>
+      </div>
+
+      <div class="journal-entry">
+        <div class="time">19:10 — Day 12</div>
+        <p>As sunset approaches, I review my empty memory card. Five specimens. Zero confirmed photographs.
+        Tomorrow I will try a different strategy entirely — perhaps if I stop looking at them directly,
+        they will forget I am here. The mycologist's paradox: the best way to observe a mimic is to
+        convince it you are observing something else.</p>
+      </div>
+    </div>
+
+    <button id="shutter-btn" data-testid="shutter-btn" aria-label="Capture photo">📷</button>
+    <div class="viewfinder-flash" id="flash"></div>
+  </div>
+
+  <script>
+    interface SpecimenState {
+      el: HTMLElement;
+      canvas: HTMLCanvasElement;
+      ctx: CanvasRenderingContext2D;
+      container: HTMLElement;
+      label: HTMLElement;
+      index: number;
+      state: "disguised" | "evading" | "captured";
+      evadeCount: number;
+      intersectionRatio: number;
+      hue: number;
+      swayOffset: number;
+    }
+
+    const specimens: SpecimenState[] = [];
+    const logEntries: string[] = [];
+    let captureCount = 0;
+    let evasionCount = 0;
+    let partiallyVisibleSpecimens: Set<number> = new Set();
+
+    const captureCountEl = document.getElementById("capture-count") as HTMLElement;
+    const evasionCountEl = document.getElementById("evasion-count") as HTMLElement;
+    const logEntriesEl = document.getElementById("log-entries") as HTMLElement;
+    const shutterBtn = document.getElementById("shutter-btn") as HTMLButtonElement;
+    const flashEl = document.getElementById("flash") as HTMLElement;
+
+    const frustrations = [
+      "It moved. Again. The moment I had it centered, it shifted left — not far, just enough.",
+      "Specimen has relocated to the margin of my viewfinder. It knows exactly where the frame ends.",
+      "I am now certain: partial observation is tolerated. Full observation triggers flight.",
+      "The 'fungus' appears to be tracking my scroll position. This is... not normal fungal behavior.",
+      "It dodged. A fungus dodged my camera. I need to sit down.",
+      "Repositioned itself behind a leaf that wasn't there three seconds ago. Or was it?",
+      "Subject demonstrated lateral movement inconsistent with any known mycological growth pattern.",
+      "I blinked. When I looked back, the specimen was 4cm to the right. Fungi do not do this.",
+      "The specimen swayed as if releasing spores, but the 'spores' had eight legs.",
+      "My field assistant has asked if I am 'alright.' I showed her the specimen. It held perfectly still.",
+      "It waited until I was adjusting my lens, then MOVED. It's timing its evasions to my focus pulls.",
+      "Three specimens simultaneously repositioned when I scrolled. Coordinated evasion? Group intelligence?",
+      "I have begun talking to specimen #3. It has not responded, which is exactly what a spider would do.",
+      "At this point I have more photographs of where the specimen WAS than where it IS.",
+      "The 'fruiting body' just extended a leg, realized I was watching, and retracted it. We both pretended it didn't happen.",
+    ];
+
+    // Initialize specimens
+    document.querySelectorAll<HTMLElement>("[data-testid='specimen']").forEach((el, i) => {
+      const canvas = el.querySelector("canvas") as HTMLCanvasElement;
+      const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+      const container = el.closest(".specimen-container") as HTMLElement;
+      const label = container.querySelector(".specimen-label") as HTMLElement;
+
+      specimens.push({
+        el,
+        canvas,
+        ctx,
+        container,
+        label,
+        index: i,
+        state: "disguised",
+        evadeCount: 0,
+        intersectionRatio: 0,
+        hue: 30 + Math.random() * 40,
+        swayOffset: Math.random() * Math.PI * 2,
+      });
+    });
+
+    // Draw fungal/spider forms
+    function drawFungus(s: SpecimenState, time: number): void {
+      const { ctx, canvas } = s;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Background: bark texture
+      ctx.fillStyle = "#8b7355";
+      ctx.fillRect(0, 0, w, h);
+      for (let i = 0; i < 30; i++) {
+        ctx.fillStyle = `rgba(${60 + Math.random() * 40}, ${50 + Math.random() * 30}, ${30 + Math.random() * 20}, 0.3)`;
+        ctx.fillRect(Math.random() * w, Math.random() * h, Math.random() * w * 0.4, 2 + Math.random() * 3);
+      }
+
+      const sway = Math.sin(time * 0.001 + s.swayOffset) * 3;
+      const cx = w / 2 + sway;
+      const cy = h * 0.55;
+
+      if (s.state === "captured") {
+        // Reveal spider form
+        drawSpider(ctx, cx, cy, w, h, time, s);
+      } else {
+        // Draw fungal fruiting body (cordyceps-like)
+        drawCordyceps(ctx, cx, cy, w, h, time, s);
+      }
+    }
+
+    function drawCordyceps(
+      ctx: CanvasRenderingContext2D,
+      cx: number,
+      cy: number,
+      w: number,
+      h: number,
+      time: number,
+      s: SpecimenState
+    ): void {
+      // Dead ant body
+      ctx.fillStyle = "#3a2a1f";
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + 30, 22, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ant legs (stiff, dead)
+      ctx.strokeStyle = "#2c2416";
+      ctx.lineWidth = 1.5;
+      for (let side = -1; side <= 1; side += 2) {
+        for (let leg = 0; leg < 3; leg++) {
+          const lx = cx + side * (10 + leg * 8);
+          const ly = cy + 25 + leg * 5;
+          ctx.beginPath();
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + side * 20, ly + 15);
+          ctx.stroke();
+        }
+      }
+
+      // Fungal stalk — the spider's elongated abdomen
+      const stalkSway = Math.sin(time * 0.0008 + s.swayOffset) * 2;
+      ctx.fillStyle = `hsl(${s.hue}, 35%, 45%)`;
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, cy + 20);
+      ctx.quadraticCurveTo(cx + stalkSway, cy - 20, cx - 3 + stalkSway, cy - 60);
+      ctx.lineTo(cx + 3 + stalkSway, cy - 60);
+      ctx.quadraticCurveTo(cx + stalkSway, cy - 20, cx + 5, cy + 20);
+      ctx.fill();
+
+      // Fruiting body (club-shaped top)
+      const topSway = stalkSway * 1.2;
+      ctx.fillStyle = `hsl(${s.hue}, 40%, 38%)`;
+      ctx.beginPath();
+      ctx.ellipse(cx + topSway, cy - 70, 10, 18, 0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tiny "spore" dots
+      ctx.fillStyle = `hsl(${s.hue}, 30%, 55%)`;
+      for (let i = 0; i < 8; i++) {
+        const sx = cx + topSway + Math.cos(i * 0.8 + time * 0.001) * 12;
+        const sy = cy - 70 + Math.sin(i * 1.1 + time * 0.0012) * 20;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Hyphal threads radiating from the ant (actually spider legs in disguise)
+      ctx.strokeStyle = `hsl(${s.hue}, 25%, 50%)`;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI - Math.PI / 2;
+        const len = 25 + Math.sin(time * 0.0005 + i) * 5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 25);
+        ctx.lineTo(cx + Math.cos(angle) * len, cy + 25 + Math.sin(angle) * len);
+        ctx.stroke();
+      }
+    }
+
+    function drawSpider(
+      ctx: CanvasRenderingContext2D,
+      cx: number,
+      cy: number,
+      w: number,
+      h: number,
+      time: number,
+      s: SpecimenState
+    ): void {
+      // Revealed! The fungus IS the spider
+
+      // Cephalothorax
+      ctx.fillStyle = "#5a3a20";
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + 10, 16, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Elongated abdomen (was the "stalk")
+      ctx.fillStyle = `hsl(${s.hue}, 45%, 35%)`;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy - 30, 10, 30, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pattern on abdomen — warning that this is not fungus
+      ctx.strokeStyle = `hsl(${s.hue + 20}, 50%, 55%)`;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx - 6, cy - 45 + i * 12);
+        ctx.lineTo(cx, cy - 40 + i * 12);
+        ctx.lineTo(cx + 6, cy - 45 + i * 12);
+        ctx.stroke();
+      }
+
+      // Eight legs — splayed and animated
+      ctx.strokeStyle = "#4a2a15";
+      ctx.lineWidth = 2;
+      for (let side = -1; side <= 1; side += 2) {
+        for (let leg = 0; leg < 4; leg++) {
+          const baseAngle = (leg / 4) * Math.PI * 0.8 + Math.PI * 0.1;
+          const legWiggle = Math.sin(time * 0.003 + leg * 1.5 + side) * 0.05;
+          const angle = baseAngle + legWiggle;
+          const jointX = cx + side * Math.cos(angle) * 22;
+          const jointY = cy + 10 + Math.sin(angle) * 15;
+          const tipX = cx + side * Math.cos(angle - 0.3) * 44;
+          const tipY = cy + 10 + Math.sin(angle + 0.4) * 30;
+
+          ctx.beginPath();
+          ctx.moveTo(cx + side * 8, cy + 5 + leg * 4);
+          ctx.lineTo(jointX, jointY);
+          ctx.lineTo(tipX, tipY);
+          ctx.stroke();
+        }
+      }
+
+      // Eyes — two big ones
+      ctx.fillStyle = "#111";
+      ctx.beginPath();
+      ctx.arc(cx - 5, cy + 4, 3, 0, Math.PI * 2);
+      ctx.arc(cx + 5, cy + 4, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#f4edd8";
+      ctx.beginPath();
+      ctx.arc(cx - 4, cy + 3, 1, 0, Math.PI * 2);
+      ctx.arc(cx + 6, cy + 3, 1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Chelicerae
+      ctx.fillStyle = "#3a1a0a";
+      ctx.beginPath();
+      ctx.ellipse(cx - 3, cy + 20, 3, 5, -0.2, 0, Math.PI * 2);
+      ctx.ellipse(cx + 3, cy + 20, 3, 5, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // "CONFIRMED" stamp
+      ctx.save();
+      ctx.translate(cx + 40, cy - 20);
+      ctx.rotate(-0.15);
+      ctx.font = "bold 18px 'Special Elite', monospace";
+      ctx.fillStyle = "rgba(180, 40, 40, 0.8)";
+      ctx.strokeStyle = "rgba(180, 40, 40, 0.8)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-48, -14, 96, 24);
+      ctx.fillText("CONFIRMED", -44, 4);
+      ctx.restore();
+    }
+
+    // IntersectionObserver — the core mechanic
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const el = entry.target.querySelector("[data-testid='specimen']") as HTMLElement | null;
+          if (!el) continue;
+          const idx = parseInt(el.getAttribute("data-index") || "0", 10);
+          const s = specimens[idx];
+          if (!s || s.state === "captured") continue;
+
+          s.intersectionRatio = entry.intersectionRatio;
+
+          if (entry.intersectionRatio > 0.15 && entry.intersectionRatio < 0.85) {
+            // Partially visible — safe zone, spider stays
+            partiallyVisibleSpecimens.add(idx);
+            showShutter();
+          } else if (entry.intersectionRatio >= 0.85 && s.state === "disguised") {
+            // Fully (or nearly fully) visible — EVADE!
+            evadeSpecimen(s);
+            partiallyVisibleSpecimens.delete(idx);
+          }
+
+          if (entry.intersectionRatio < 0.1) {
+            partiallyVisibleSpecimens.delete(idx);
+          }
+
+          if (partiallyVisibleSpecimens.size === 0) {
+            hideShutter();
+          }
+        }
+      },
+      {
+        threshold: [0, 0.1, 0.15, 0.3, 0.5, 0.7, 0.85, 0.95, 1.0],
+      }
+    );
+
+    // Observe all specimen containers
+    document.querySelectorAll<HTMLElement>(".specimen-container").forEach((container) => {
+      observer.observe(container);
+    });
+
+    function evadeSpecimen(s: SpecimenState): void {
+      if (s.state !== "disguised") return;
+      s.state = "evading";
+
+      // Calculate evasion direction — move toward the nearest edge
+      const rect = s.container.getBoundingClientRect();
+      const viewportH = window.innerHeight;
+      const distToTop = rect.top;
+      const distToBottom = viewportH - rect.bottom;
+
+      // Evade toward whichever edge is closer
+      const evadeY = distToTop < distToBottom ? -(80 + Math.random() * 60) : (80 + Math.random() * 60);
+      const evadeX = (Math.random() - 0.5) * 100;
+
+      s.el.style.setProperty("--evade-x", `${evadeX}px`);
+      s.el.style.setProperty("--evade-y", `${evadeY}px`);
+      s.el.setAttribute("data-evaded", "true");
+
+      evasionCount++;
+      evasionCountEl.textContent = String(evasionCount);
+
+      // Add frustrated log entry
+      addLogEntry(s);
+
+      // After evasion animation, reset to disguised but in new position
+      setTimeout(() => {
+        if (s.state === "evading") {
+          s.state = "disguised";
+          s.evadeCount++;
+          // Reset position with a subtle offset so it's not in exactly the same spot
+          s.el.style.setProperty("--evade-x", `${(Math.random() - 0.5) * 20}px`);
+          s.el.style.setProperty("--evade-y", `${(Math.random() - 0.5) * 15}px`);
+        }
+      }, 800);
+    }
+
+    function addLogEntry(s: SpecimenState): void {
+      const msg = frustrations[Math.min(evasionCount - 1, frustrations.length - 1)];
+      const entryEl = document.createElement("div");
+      entryEl.className = "log-entry";
+      entryEl.setAttribute("data-testid", "log-entry");
+
+      const hour = 6 + Math.floor(evasionCount * 0.8);
+      const min = Math.floor(Math.random() * 60);
+      entryEl.innerHTML = `<span class="log-time">${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}</span> — ${msg}`;
+
+      logEntriesEl.prepend(entryEl);
+    }
+
+    function showShutter(): void {
+      shutterBtn.classList.add("visible");
+    }
+
+    function hideShutter(): void {
+      shutterBtn.classList.remove("visible");
+    }
+
+    // Shutter button — attempt to capture
+    shutterBtn.addEventListener("click", () => {
+      // Flash effect
+      flashEl.classList.add("flash");
+      setTimeout(() => flashEl.classList.remove("flash"), 120);
+
+      // Try to capture whichever specimen is most visible (but not fully — they'd evade)
+      let bestSpecimen: SpecimenState | null = null;
+      let bestRatio = 0;
+
+      for (const idx of partiallyVisibleSpecimens) {
+        const s = specimens[idx];
+        if (s.state === "disguised" && s.intersectionRatio > bestRatio) {
+          bestRatio = s.intersectionRatio;
+          bestSpecimen = s;
+        }
+      }
+
+      if (bestSpecimen && bestRatio > 0.4) {
+        // Successful capture!
+        captureSpecimen(bestSpecimen);
+      } else {
+        // Miss — add a frustrated note
+        const missEntry = document.createElement("div");
+        missEntry.className = "log-entry";
+        missEntry.setAttribute("data-testid", "log-entry");
+        missEntry.innerHTML = `<span class="log-time">—</span> — Shutter fired. Frame empty. The viewfinder mocks me.`;
+        logEntriesEl.prepend(missEntry);
+      }
+    });
+
+    function captureSpecimen(s: SpecimenState): void {
+      s.state = "captured";
+      s.el.setAttribute("data-state", "captured");
+      s.el.setAttribute("data-evaded", "false");
+      s.el.style.setProperty("--evade-x", "0px");
+      s.el.style.setProperty("--evade-y", "0px");
+      s.container.classList.add("captured");
+
+      // Update label to revealed
+      s.label.classList.add("revealed");
+      s.label.innerHTML = `Fig. ${s.index + 1} — <strong><em>Taczanowskia waska</em></strong> — CONFIRMED MIMIC`;
+
+      captureCount++;
+      captureCountEl.textContent = String(captureCount);
+
+      // Log the capture
+      const captureEntry = document.createElement("div");
+      captureEntry.className = "log-entry";
+      captureEntry.setAttribute("data-testid", "log-entry");
+      captureEntry.style.color = "#b44";
+      captureEntry.style.fontWeight = "bold";
+      captureEntry.innerHTML = `<span class="log-time">!!!</span> — SPECIMEN ${s.index + 1} CAPTURED. The fungus has legs. I repeat: the fungus has legs.`;
+      logEntriesEl.prepend(captureEntry);
+
+      partiallyVisibleSpecimens.delete(s.index);
+      if (partiallyVisibleSpecimens.size === 0) hideShutter();
+
+      // Check for all captured
+      if (captureCount === 5) {
+        const finalEntry = document.createElement("div");
+        finalEntry.className = "log-entry";
+        finalEntry.setAttribute("data-testid", "log-entry");
+        finalEntry.style.color = "#2a6e2a";
+        finalEntry.style.fontWeight = "bold";
+        finalEntry.innerHTML = `<span class="log-time">!!!</span> — All five specimens confirmed. Submitting to MUSM. Paper title: "On the Impossibility of Looking Directly at <em>Taczanowskia waska</em>."`;
+        logEntriesEl.prepend(finalEntry);
+      }
+    }
+
+    // Animation loop
+    function animate(time: number): void {
+      for (const s of specimens) {
+        drawFungus(s, time);
+      }
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  </script>
+</Base>

@@ -152,6 +152,11 @@ For N circular bodies: each frame, check every pair `(i, j)` for overlap (`dist(
 **Technique:** Progressive CSS filter degradation as game mechanic — cumulative `filter` chains (`saturate(0)`, `contrast(0.4)`, `blur(3px)`, `brightness(0.25)`) applied to the scene element as each gene is silenced. CSS `@property` for typed custom property animation (`--warmth`). MutationObserver on style attributes to sync filter state. Dynamic DOM generation with `data-testid` attributes for Playwright testability.
 **File:** clients/web/src/pages/experiments/deer-ked-protocol.astro
 
+### 2026-06-18 — Taczanowskia waska — Field Report #7
+**Concept:** Inspired by the discovery of a new Amazonian spider (Taczanowskia waska) that mimics the appearance and behavior of a parasitic fungus. You're a field biologist scrolling through your research journal. Illustrations of "fungal growths" evade when fully scrolled into view (IntersectionObserver). Click the shutter when partially visible to capture and reveal the spider beneath.
+**Technique:** IntersectionObserver as adversarial game mechanic — multiple thresholds (0.15–0.85 partial = safe, ≥0.85 = evade) drive specimen evasion via CSS transform. The observed element actively repositions itself to avoid full intersection.
+**File:** clients/web/src/pages/experiments/taczanowskia-field-report.astro
+
 ### 2026-06-17 — Eternal Companion Cosmetics
 **Concept:** Inspired by the makeup artist who mixed her dead dog Patch's cremated ashes into semi-permanent eyeliner ink. A luxury pet memorial beauty catalog. Hover product swatches to summon ghost pets from the pigments via canvas particle effects; click to add to your memorial collection. Sales copy escalates from professional to existential horror.
 **Technique:** `CanvasRenderingContext2D.filter` — per-draw-call CSS filter strings applied directly to canvas operations. Ghost particles rendered with `ctx.filter = 'blur(Npx) brightness(1.6)'` for ethereal glow, pet silhouettes with `ctx.filter = 'blur(4px) brightness(2) opacity(N%)'`. Different from SVG filters — these are inline filter pipelines on the 2D context, applied and cleared per draw call.
@@ -188,6 +193,9 @@ Structural color (like butterfly wings, soap bubbles, sea silk photonin) arises 
 
 #### CanvasRenderingContext2D.filter (per-draw CSS filters)
 `ctx.filter = 'blur(4px) brightness(1.6)'` applies a CSS filter pipeline to all subsequent canvas draw operations until changed or `ctx.restore()` is called. Unlike SVG `<filter>` elements, these require no DOM setup — just assign a CSS filter string before each draw call. Reset with `ctx.filter = 'none'`. Combine with `ctx.save()`/`ctx.restore()` to scope filters per shape. Works with all standard CSS filter functions: `blur()`, `brightness()`, `contrast()`, `opacity()`, `hue-rotate()`, `saturate()`, `drop-shadow()`, etc. Powerful for particle systems where each particle needs different glow/blur levels. Supported in Chrome 52+, Firefox 49+, Safari 16+. Key gotcha: `opacity()` in `ctx.filter` stacks with the alpha channel of `fillStyle` — if both are set, you get multiplicative transparency. Another gotcha: heavy blur on many particles is expensive; keep blur radii small (<6px) for 60fps with 50+ particles.
+
+#### IntersectionObserver as Adversarial Game Mechanic
+`new IntersectionObserver(callback, { threshold: [0, 0.15, 0.5, 0.85, 1.0] })` fires the callback with `entry.intersectionRatio` as elements enter/leave the viewport. Use multiple thresholds to define behavioral zones: partial visibility (ratio 0.15–0.85) is a "safe" state, full visibility (≥0.85) triggers evasion. The observed element repositions itself via CSS transforms to escape full intersection. Key insight: the browser's native visibility-tracking API becomes the antagonist — it detects "being fully observed" and the element reacts by fleeing to the viewport edge. Combine with `getBoundingClientRect()` to determine which viewport edge to flee toward. For a quick evasion-and-reset pattern, CSS transforms work well with a timeout to restore, though transforms change visual position but not layout position (the observer tracks the original layout box).
 
 ## Feedback from Matt
 
