@@ -10,6 +10,7 @@ Use one file per theme when a lesson becomes durable enough to guide future expe
 - anti-patterns to avoid next time
 
 ## Recent additions
+- [headless-stable-animated-controls.md](headless-stable-animated-controls.md)
 - [wide-desktop-title-fit-checks.md](wide-desktop-title-fit-checks.md)
 - [css-3d-prism-transitions.md](css-3d-prism-transitions.md)
 - [first-viewport-instrument-framing.md](first-viewport-instrument-framing.md)
