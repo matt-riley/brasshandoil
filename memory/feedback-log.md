@@ -574,3 +574,17 @@ Carry Forward:
   were green before `astro check` exposed script typing errors.
 - The in-app browser is useful for final URL, DOM, and overflow confirmation,
   while Playwright remains the reliable place for canvas pixel assertions.
+
+### Session Entry
+
+Date: 2026-06-19
+Experiment: Municipal Echo Quarantine
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Translate full-screen generated concepts through the shared site header; keep
+  the first viewport instrument-first after the header takes vertical space.
+- Real paper-slip buttons are a useful compromise between tactile whimsy and
+  stable Playwright behavior.
+- If Browser plugin tools are unavailable in the session, record the fallback
+  and rely on Playwright screenshots plus `view_image` inspection.
