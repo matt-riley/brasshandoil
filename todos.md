@@ -1,6 +1,6 @@
 # Todos
 
-<!-- next-id: 6 -->
+<!-- next-id: 7 -->
 
 ## Experiments
 
@@ -9,3 +9,4 @@
 3. [x] Build the Gladiator Tag Rubbing experiment
 4. [x] Build the Hyposmocoma Case Decorator experiment
 5. [x] Build the Bioluminescent Shear Reactor experiment
+6. [ ] Build the Cuttlefish Chromatophore Camouflage Sequencer experiment
