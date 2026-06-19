@@ -36,3 +36,7 @@ This is a playground for whimsy, creativity and pushing the boundaries of the we
 - Coupled standard keyboard navigation controls with a Spacebar-based slow-dampening step modifier, enabling high-precision, low-velocity keyboard steering for robust E2E test automation.
 ### 10. Headless Browser Canvas Performance Optimization for E2E Reliability
 - Bypassed heavy CPU-bound 2D canvas effects (such as `ctx.filter` blurs and brightness adjustments) when `navigator.webdriver` is detected. This prevents test runner freezes and timeout failures in E2E environments without degrading the visual experience for end users.
+
+### 11. Port and File Isolation for Worktree E2E Validation
+- Terminated pre-existing dev server processes on the standard port (4321) when running Playwright E2E tests within isolated worktree branches. This forces the test runner to launch a fresh local server and prevents it from reusing the unchanged main-workspace directory files.
+- Manually copied untracked files from the main repository to the active worktree before staging and committing, avoiding silent omissions of new experimental pages during worktree build/test audits.
