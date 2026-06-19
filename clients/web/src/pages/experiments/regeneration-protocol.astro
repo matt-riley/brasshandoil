@@ -1,0 +1,571 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="The Regeneration Protocol — Lab Notebook #39">
+  <div id="experiment" data-testid="lab-notebook">
+    <header id="header">
+      <div class="classification">MUNEOKA LAB — REGENERATIVE BIOLOGY DIVISION</div>
+      <h1>Lab Notebook #39</h1>
+      <p class="subtitle">Subject: Mus musculus, digit amputation model P3<br>
+      Protocol: Sequential two-signal treatment (FGF2 → BMP2)<br>
+      Status: <span id="status-text">TISSUE SAMPLES SCARRED — AWAITING TREATMENT</span></p>
+      <p class="instruction">Select scarred tissue to apply FGF2. Release to trigger BMP2 differentiation.</p>
+    </header>
+
+    <div id="treatment-panel" data-testid="treatment-panel">
+      <div class="panel-title">TREATMENT PROGRESS</div>
+      <div id="progress-text"><span id="healed-count">0</span> / 5 tissues regenerated</div>
+      <div id="signal-indicator">
+        <div class="signal" id="sig-fgf2">FGF2 <span class="sig-status">STANDBY</span></div>
+        <div class="signal" id="sig-bmp2">BMP2 <span class="sig-status">STANDBY</span></div>
+      </div>
+    </div>
+
+    <div id="sections">
+      <div class="tissue-section" data-testid="tissue-section" data-state="scarred" data-index="0">
+        <div class="tissue-label" data-testid="tissue-label">BONE — Distal Phalanx</div>
+        <div class="tissue-content" data-real="The sequential application of FGF2 followed by BMP2 induced complete regeneration of the distal phalanx. New trabecular bone formed within 14 days, with osteoblast activity concentrated at the amputation plane. The regenerated bone exhibited normal mineral density and mechanical properties indistinguishable from the original digit."></div>
+      </div>
+
+      <div class="tissue-section" data-testid="tissue-section" data-state="scarred" data-index="1">
+        <div class="tissue-label" data-testid="tissue-label">ARTICULAR CARTILAGE — Joint Surface</div>
+        <div class="tissue-content" data-real="Hyaline cartilage reformed across the joint surface with proper columnar chondrocyte organisation. Type II collagen and aggrecan expression matched native tissue. Crucially, the regenerated cartilage integrated seamlessly with the subchondral bone — no fibrocartilage scar layer was observed. The joint articulated normally under load."></div>
+      </div>
+
+      <div class="tissue-section" data-testid="tissue-section" data-state="scarred" data-index="2">
+        <div class="tissue-label" data-testid="tissue-label">TENDON — Flexor Digitorum</div>
+        <div class="tissue-content" data-real="Tendon regeneration followed a distinct timeline: FGF2 recruited tendon progenitor cells to the wound bed within 72 hours. BMP2 application triggered tenogenic differentiation with aligned collagen type I fibrils. The regenerated tendon withstood 85% of the tensile load capacity of the contralateral control by day 28. No heterotopic ossification was observed."></div>
+      </div>
+
+      <div class="tissue-section" data-testid="tissue-section" data-state="scarred" data-index="3">
+        <div class="tissue-label" data-testid="tissue-label">LIGAMENT — Collateral Complex</div>
+        <div class="tissue-content" data-real="The collateral ligament complex regenerated with proper insertion points on both the proximal and distal phalanges. Elastin content was elevated relative to native tissue in the first 21 days but normalised by day 42. Joint stability under varus/valgus stress testing was restored to within normal parameters. Fibroblast alignment followed the primary tension vector."></div>
+      </div>
+
+      <div class="tissue-section" data-testid="tissue-section" data-state="scarred" data-index="4">
+        <div class="tissue-label" data-testid="tissue-label">NAIL ORGAN — Eponychium & Matrix</div>
+        <div class="tissue-content" data-real="Perhaps the most remarkable finding: the nail organ regenerated completely, including the eponychium, nail matrix, nail bed, and hyponychium. Nail growth resumed at a normal rate of 0.1mm/day by week 3. The regenerated nail was morphologically normal and firmly adhered to the underlying nail bed. This suggests the two-signal treatment reactivates the entire organ-level regenerative programme, not merely individual tissue types."></div>
+      </div>
+    </div>
+
+    <div id="final-discovery" data-testid="final-discovery">
+      <div class="discovery-border">
+        <h2>CONCLUSION</h2>
+        <p>Mammals did not lose the capacity for regeneration.</p>
+        <p class="emphasis">They evolved a switch to turn it off.</p>
+        <p>This two-signal sequential treatment — FGF2 to recruit progenitors, BMP2 to direct differentiation — does not introduce regeneration. It <em>re-enables</em> a programme that was always there, silenced beneath layers of fibrotic default. The scar is not a failure of healing. It is a choice the body makes. And choices, it turns out, can be reversed.</p>
+        <p class="attribution">— Muneoka et al., Nature Communications, April 2026</p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @property --scar-hue {
+      syntax: "<number>";
+      inherits: false;
+      initial-value: 0;
+    }
+
+    @property --regen-glow {
+      syntax: "<number>";
+      inherits: false;
+      initial-value: 0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      color: #c8c0b0;
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #experiment {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    /* Header */
+    #header {
+      border-bottom: 1px solid #333;
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .classification {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: normal;
+      color: #e8e0d0;
+      margin-bottom: 0.8rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: #888;
+    }
+
+    .instruction {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: #8ab4f8;
+      padding: 0.6rem 0.8rem;
+      border: 1px dashed #334;
+      background: rgba(138, 180, 248, 0.05);
+    }
+
+    /* Treatment Panel */
+    #treatment-panel {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0e0e14;
+      border: 1px solid #282830;
+      padding: 0.8rem 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      #treatment-panel {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+      }
+      #progress-text {
+        flex: none;
+      }
+      #signal-indicator {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    .panel-title {
+      color: #555;
+      letter-spacing: 0.15em;
+      font-size: 0.65rem;
+    }
+
+    #progress-text {
+      color: #aaa;
+      flex: 1;
+    }
+
+    #signal-indicator {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .signal {
+      color: #555;
+      font-size: 0.7rem;
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .sig-status {
+      font-size: 0.6rem;
+      padding: 0.15rem 0.4rem;
+      background: #1a1a22;
+      border: 1px solid #333;
+    }
+
+    .signal.active .sig-status {
+      border-color: #4a9;
+      color: #4a9;
+      background: rgba(68, 170, 136, 0.1);
+      animation: pulse-glow 0.8s ease infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 3px rgba(68, 170, 136, 0.3); }
+      50% { box-shadow: 0 0 8px rgba(68, 170, 136, 0.6); }
+    }
+
+    /* Tissue Sections */
+    #sections {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .tissue-section {
+      border: 1px solid #282830;
+      padding: 1.2rem;
+      position: relative;
+      transition: border-color 0.5s ease, background 0.5s ease;
+      cursor: text;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .tissue-section[data-state="scarred"] {
+      background: rgba(80, 40, 30, 0.08);
+      border-color: #3a2a22;
+    }
+
+    .tissue-section[data-state="fgf2"] {
+      background: rgba(68, 170, 136, 0.06);
+      border-color: #2a5040;
+    }
+
+    .tissue-section[data-state="regenerated"] {
+      background: rgba(80, 140, 255, 0.04);
+      border-color: #334a66;
+    }
+
+    .tissue-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: #666;
+      margin-bottom: 0.8rem;
+      pointer-events: none;
+    }
+
+    .tissue-content {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      min-height: 3em;
+      position: relative;
+      word-break: break-all;
+    }
+
+    /* Scar text styling */
+    .scar-char {
+      display: inline;
+      transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .tissue-section[data-state="scarred"] .scar-char {
+      color: #5a3a2a;
+      text-shadow: 0 0 2px rgba(120, 60, 40, 0.3);
+    }
+
+    .tissue-section[data-state="fgf2"] .scar-char {
+      animation: morph-char 0.15s ease infinite;
+    }
+
+    @keyframes morph-char {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; color: #4a9; }
+    }
+
+    .tissue-section[data-state="regenerated"] .tissue-content {
+      color: #c8d8e8;
+    }
+
+    .regen-char {
+      display: inline;
+      animation: type-in 0.05s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes type-in {
+      to { opacity: 1; }
+    }
+
+    /* Final Discovery */
+    #final-discovery {
+      margin-top: 3rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1.5s ease, transform 1.5s ease;
+      pointer-events: none;
+      display: none;
+    }
+
+    #final-discovery.visible {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .discovery-border {
+      border: 2px solid #4a6a8a;
+      padding: 2rem;
+      background: rgba(80, 140, 255, 0.03);
+      position: relative;
+    }
+
+    .discovery-border::before {
+      content: "★ PRINCIPAL FINDING ★";
+      position: absolute;
+      top: -0.7rem;
+      left: 1.5rem;
+      background: #0a0a0f;
+      padding: 0 0.6rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: #6a9acc;
+    }
+
+    #final-discovery h2 {
+      font-size: 1rem;
+      font-weight: normal;
+      letter-spacing: 0.2em;
+      color: #8ab4f8;
+      margin-bottom: 1rem;
+    }
+
+    #final-discovery p {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      margin-bottom: 0.8rem;
+      color: #b0c0d0;
+    }
+
+    .emphasis {
+      font-size: 1.1rem !important;
+      color: #e8e0d0 !important;
+      text-align: center;
+      padding: 0.5rem 0;
+      letter-spacing: 0.05em;
+    }
+
+    .attribution {
+      font-size: 0.75rem !important;
+      color: #556 !important;
+      text-align: right;
+      margin-top: 1.5rem !important;
+      font-style: italic;
+    }
+
+    /* Selection styling */
+    .tissue-section[data-state="scarred"] ::selection {
+      background: rgba(68, 170, 136, 0.4);
+      color: #4a9;
+    }
+
+    /* Scar tissue shimmer */
+    @keyframes scar-shimmer {
+      0% { --scar-hue: 0; }
+      100% { --scar-hue: 20; }
+    }
+
+    .tissue-section[data-state="scarred"]:hover {
+      border-color: #4a3a2a;
+      background: rgba(80, 40, 30, 0.12);
+    }
+
+    .tissue-section[data-state="scarred"]:hover .tissue-label {
+      color: #8ab4f8;
+    }
+  </style>
+
+  <script>
+    type TissueState = "scarred" | "fgf2" | "regenerated"
+
+    interface TissueSection {
+      el: HTMLElement
+      contentEl: HTMLElement
+      realText: string
+      state: TissueState
+    }
+
+    const SCAR_CHARS = "░▒▓█▌▐│┤┘┐╡╢╖╕╣║╗╝╜╛┐▀▄■▬≡÷±≥≤⌐¬½¼¡«»"
+
+    function generateScarText(length: number): string {
+      let result = ""
+      let i = 0
+      while (i < length) {
+        if (Math.random() < 0.12) {
+          result += " "
+        } else {
+          result += SCAR_CHARS[Math.floor(Math.random() * SCAR_CHARS.length)]
+        }
+        i++
+      }
+      return result
+    }
+
+    function fillWithScarTissue(contentEl: HTMLElement, realText: string): void {
+      const scarText = generateScarText(realText.length)
+      contentEl.innerHTML = ""
+      for (const ch of scarText) {
+        const span = document.createElement("span")
+        span.className = "scar-char"
+        span.textContent = ch
+        contentEl.appendChild(span)
+      }
+    }
+
+    function morphToFGF2(contentEl: HTMLElement): void {
+      const chars = contentEl.querySelectorAll<HTMLElement>(".scar-char")
+      const greenChars = "◦○●◎⊕⊗∘∙⋅·"
+      chars.forEach((span, i) => {
+        setTimeout(() => {
+          if (Math.random() < 0.4) {
+            span.textContent = greenChars[Math.floor(Math.random() * greenChars.length)]
+            span.style.color = `hsl(${150 + Math.random() * 30}, 70%, ${50 + Math.random() * 20}%)`
+          }
+        }, i * 2)
+      })
+    }
+
+    function typeInRealText(contentEl: HTMLElement, realText: string): Promise<void> {
+      return new Promise((resolve) => {
+        contentEl.innerHTML = ""
+        const chars = [...realText]
+        let i = 0
+        const interval = setInterval(() => {
+          if (i >= chars.length) {
+            clearInterval(interval)
+            resolve()
+            return
+          }
+          const batch = Math.min(3, chars.length - i)
+          for (let b = 0; b < batch; b++) {
+            const span = document.createElement("span")
+            span.className = "regen-char"
+            span.textContent = chars[i]
+            span.style.animationDelay = `${b * 15}ms`
+            contentEl.appendChild(span)
+            i++
+          }
+        }, 10)
+      })
+    }
+
+    // Initialise
+    const sectionEls = document.querySelectorAll<HTMLElement>("[data-testid='tissue-section']")
+    const tissues: TissueSection[] = []
+
+    sectionEls.forEach((el) => {
+      const contentEl = el.querySelector<HTMLElement>(".tissue-content")!
+      const realText = contentEl.getAttribute("data-real") || ""
+      const tissue: TissueSection = { el, contentEl, realText, state: "scarred" }
+      tissues.push(tissue)
+      fillWithScarTissue(contentEl, realText)
+    })
+
+    let healedCount = 0
+    const healedCountEl = document.getElementById("healed-count")!
+    const statusTextEl = document.getElementById("status-text")!
+    const sigFGF2 = document.getElementById("sig-fgf2")!
+    const sigBMP2 = document.getElementById("sig-bmp2")!
+    const finalDiscovery = document.getElementById("final-discovery")!
+
+    function updateProgress(): void {
+      healedCountEl.textContent = String(healedCount)
+      if (healedCount >= 5) {
+        statusTextEl.textContent = "ALL TISSUES REGENERATED — SEE CONCLUSION"
+        statusTextEl.style.color = "#8ab4f8"
+      } else if (healedCount > 0) {
+        statusTextEl.textContent = `${healedCount} OF 5 TISSUES REGENERATED — CONTINUE TREATMENT`
+      }
+    }
+
+    function findTissueFromSelection(): TissueSection | null {
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed) return null
+
+      const range = sel.getRangeAt(0)
+      let node: Node | null = range.commonAncestorContainer
+      if (node.nodeType === Node.TEXT_NODE) node = node.parentElement
+
+      // Walk up to find the tissue section
+      let current = node as HTMLElement | null
+      while (current && !current.matches?.("[data-testid='tissue-section']")) {
+        current = current.parentElement
+      }
+      if (!current) return null
+
+      const idx = parseInt(current.getAttribute("data-index") || "-1", 10)
+      return idx >= 0 ? tissues[idx] : null
+    }
+
+    let activeTissue: TissueSection | null = null
+
+    // Listen for selection changes via the Selection API
+    document.addEventListener("selectionchange", () => {
+      const tissue = findTissueFromSelection()
+
+      if (tissue && tissue.state === "scarred") {
+        if (activeTissue !== tissue) {
+          // New tissue being selected — apply FGF2
+          activeTissue = tissue
+          tissue.state = "fgf2"
+          tissue.el.setAttribute("data-state", "fgf2")
+          sigFGF2.classList.add("active")
+          morphToFGF2(tissue.contentEl)
+        }
+      }
+    })
+
+    // On mouseup (selection released) — apply BMP2
+    document.addEventListener("mouseup", () => {
+      if (!activeTissue || activeTissue.state !== "fgf2") return
+
+      const tissue = activeTissue
+      activeTissue = null
+
+      sigFGF2.classList.remove("active")
+      sigBMP2.classList.add("active")
+
+      // Type in real text
+      typeInRealText(tissue.contentEl, tissue.realText).then(() => {
+        tissue.state = "regenerated"
+        tissue.el.setAttribute("data-state", "regenerated")
+        sigBMP2.classList.remove("active")
+        healedCount++
+        updateProgress()
+
+        if (healedCount >= 5) {
+          setTimeout(() => {
+            finalDiscovery.style.display = "block"
+            // Force reflow before adding visible class for transition
+            void finalDiscovery.offsetHeight
+            finalDiscovery.classList.add("visible")
+          }, 500)
+        }
+      })
+    })
+
+    // Also handle keyboard selection (Shift+arrows, Ctrl+A, etc.)
+    document.addEventListener("keyup", () => {
+      if (!activeTissue || activeTissue.state !== "fgf2") return
+
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed) {
+        // Selection collapsed — trigger BMP2
+        const tissue = activeTissue
+        activeTissue = null
+        sigFGF2.classList.remove("active")
+        sigBMP2.classList.add("active")
+
+        typeInRealText(tissue.contentEl, tissue.realText).then(() => {
+          tissue.state = "regenerated"
+          tissue.el.setAttribute("data-state", "regenerated")
+          sigBMP2.classList.remove("active")
+          healedCount++
+          updateProgress()
+
+          if (healedCount >= 5) {
+            setTimeout(() => {
+              finalDiscovery.style.display = "block"
+              void finalDiscovery.offsetHeight
+              finalDiscovery.classList.add("visible")
+            }, 500)
+          }
+        })
+      }
+    })
+  </script>
+</Base>

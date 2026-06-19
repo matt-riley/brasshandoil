@@ -1,0 +1,706 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Municipal Echo Quarantine">
+  <main id="municipal-echo-quarantine" class="meq-shell" data-cleared="0">
+    <section class="meq-heading" aria-labelledby="meq-title">
+      <div>
+        <h1 id="meq-title">Municipal Echo Quarantine</h1>
+      </div>
+      <form id="phrase-form" class="phrase-form" aria-label="detain an echo phrase">
+        <label for="phrase-input">incoming phrase</label>
+        <div class="phrase-row">
+          <input id="phrase-input" name="phrase" type="text" value="" placeholder="file a phrase for acoustic holding" autocomplete="off" />
+          <button id="detain-phrase" type="submit">Detain Phrase</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="meq-workbench" aria-label="municipal echo quarantine desk">
+      <div class="bay-deck">
+        <div class="deck-topline">
+          <span>active holding bays</span>
+          <strong id="detained-count">3</strong>
+        </div>
+
+        <div id="quarantine-bays" class="quarantine-bays">
+          <article class="echo-bay" data-bay="A">
+            <header><span>Bay A</span><b>wet stairwell</b></header>
+            <button class="echo-slip selected" type="button" data-phrase="wet stairwell" data-index="0" aria-pressed="true">
+              <span class="slip-stamp">detained</span>
+              <strong>wet stairwell</strong>
+              <i></i>
+            </button>
+          </article>
+          <article class="echo-bay" data-bay="B">
+            <header><span>Bay B</span><b>ticket window</b></header>
+            <button class="echo-slip" type="button" data-phrase="ticket window cough" data-index="1" aria-pressed="false">
+              <span class="slip-stamp">detained</span>
+              <strong>ticket window cough</strong>
+              <i></i>
+            </button>
+          </article>
+          <article class="echo-bay" data-bay="C">
+            <header><span>Bay C</span><b>lift bell</b></header>
+            <button class="echo-slip" type="button" data-phrase="lift bell apology" data-index="2" aria-pressed="false">
+              <span class="slip-stamp">detained</span>
+              <strong>lift bell apology</strong>
+              <i></i>
+            </button>
+          </article>
+        </div>
+      </div>
+
+      <aside class="meter-panel" aria-label="resonance controls and release ledger">
+        <div class="resonance-wrap">
+          <div id="resonance-meter" class="resonance-meter" aria-label="resonance meter">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="48"></circle>
+              <path id="meter-arc" d="M18 72 A44 44 0 1 1 102 72"></path>
+              <line id="meter-needle" x1="60" y1="60" x2="60" y2="20"></line>
+            </svg>
+            <strong id="resonance-score">64%</strong>
+          </div>
+          <div class="live-card">
+            <span>active phrase</span>
+            <strong id="active-phrase">wet stairwell</strong>
+          </div>
+        </div>
+
+        <div class="control-stack">
+          <label>
+            <span>Reverb</span>
+            <input id="reverb-control" type="range" min="0" max="100" value="64" />
+          </label>
+          <label>
+            <span>Dampening</span>
+            <input id="dampening-control" type="range" min="0" max="100" value="42" />
+          </label>
+          <label>
+            <span>Release Pressure</span>
+            <input id="release-pressure-control" type="range" min="0" max="100" value="71" />
+          </label>
+        </div>
+
+        <div class="release-row">
+          <button id="release-active-echo" type="button">release echo</button>
+          <div>
+            <span>cleared</span>
+            <strong id="cleared-count">0</strong>
+          </div>
+        </div>
+
+        <section class="ledger-panel" aria-labelledby="ledger-title">
+          <h2 id="ledger-title">Released Ledger</h2>
+          <div id="released-ledger" class="released-ledger" aria-live="polite">
+            <p>No echoes released.</p>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #080b0a;
+  }
+
+  :global(.container) {
+    max-inline-size: none;
+    padding-inline: 0;
+  }
+
+  .meq-shell {
+    --ink: #080b0a;
+    --field: #0e1713;
+    --panel: rgba(18, 31, 25, 0.88);
+    --glass: rgba(86, 151, 126, 0.16);
+    --line: rgba(209, 231, 205, 0.22);
+    --paper: #f1eee0;
+    --muted: rgba(241, 238, 224, 0.68);
+    --green: #65d69c;
+    --cyan: #91ecf3;
+    --brass: #d7b84e;
+    --stamp: #ef6b3d;
+    min-height: calc(100vh - 6rem);
+    overflow-x: hidden;
+    padding: clamp(1rem, 2.2vw, 1.8rem);
+    color: var(--paper);
+    background:
+      linear-gradient(90deg, rgba(101, 214, 156, 0.13) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(101, 214, 156, 0.08) 1px, transparent 1px),
+      radial-gradient(circle at 72% 16%, rgba(239, 107, 61, 0.2), transparent 20rem),
+      linear-gradient(140deg, #0e1713 0%, #11100d 50%, #070908 100%);
+    background-size: 48px 48px, 48px 48px, auto, auto;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .meq-heading,
+  .meq-workbench {
+    width: min(1180px, 100%);
+    margin-inline: auto;
+  }
+
+  .meq-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 30rem);
+    gap: clamp(1rem, 3vw, 2rem);
+    align-items: end;
+    margin-bottom: clamp(1rem, 2vw, 1.4rem);
+  }
+
+  .meq-heading h1 {
+    max-width: 12ch;
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(3rem, 7vw, 6.8rem);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: 0;
+    text-shadow:
+      0.04em 0.04em 0 rgba(239, 107, 61, 0.55),
+      -0.025em 0.03em 0 rgba(145, 236, 243, 0.34);
+  }
+
+  .phrase-form {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .phrase-form label,
+  .deck-topline,
+  .echo-bay header span,
+  .control-stack span,
+  .live-card span,
+  .release-row span,
+  .slip-stamp {
+    color: var(--brass);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .phrase-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem;
+    padding: 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: rgba(5, 8, 7, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  }
+
+  .phrase-row input,
+  .phrase-row button,
+  .release-row button {
+    min-height: 2.75rem;
+    border-radius: 4px;
+    font: inherit;
+  }
+
+  .phrase-row input {
+    min-width: 0;
+    border: 1px solid rgba(241, 238, 224, 0.18);
+    padding-inline: 0.8rem;
+    color: var(--paper);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .phrase-row button,
+  .release-row button {
+    border: 1px solid rgba(239, 107, 61, 0.55);
+    padding-inline: 1rem;
+    color: #1b0d08;
+    background: linear-gradient(180deg, #ff9b5c, var(--stamp));
+    font-size: 0.82rem;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+  }
+
+  .meq-workbench {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(19rem, 24rem);
+    gap: clamp(1rem, 2vw, 1.35rem);
+  }
+
+  .bay-deck,
+  .meter-panel {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background:
+      linear-gradient(180deg, rgba(241, 238, 224, 0.08), transparent 18%),
+      var(--panel);
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.38);
+  }
+
+  .bay-deck {
+    position: relative;
+    overflow: hidden;
+    min-height: min(58vh, 38rem);
+    padding: clamp(0.9rem, 2vw, 1.2rem);
+  }
+
+  .bay-deck::before {
+    content: "";
+    position: absolute;
+    inset: 4rem 5% 1rem;
+    border: 1px solid rgba(145, 236, 243, 0.2);
+    background:
+      linear-gradient(90deg, transparent 32%, rgba(145, 236, 243, 0.13) 32% 34%, transparent 34% 66%, rgba(145, 236, 243, 0.13) 66% 68%, transparent 68%),
+      linear-gradient(180deg, rgba(101, 214, 156, 0.18), rgba(101, 214, 156, 0.02));
+    pointer-events: none;
+  }
+
+  .deck-topline {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .deck-topline strong {
+    color: var(--cyan);
+    font-size: 0.95rem;
+  }
+
+  .quarantine-bays {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.7rem, 1.5vw, 1rem);
+    min-height: 28rem;
+  }
+
+  .echo-bay {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
+    min-width: 0;
+    padding: 0.8rem;
+    border-inline: 1px solid rgba(241, 238, 224, 0.13);
+    background: rgba(4, 8, 7, 0.28);
+  }
+
+  .echo-bay header {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .echo-bay header b {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+
+  .echo-slip {
+    align-self: center;
+    width: 100%;
+    min-height: 9.2rem;
+    border: 1px solid rgba(216, 184, 78, 0.48);
+    border-radius: 5px;
+    padding: 0.85rem;
+    color: #221b12;
+    background:
+      linear-gradient(90deg, rgba(239, 107, 61, 0.18), transparent 22%),
+      repeating-linear-gradient(180deg, rgba(34, 27, 18, 0.08) 0 1px, transparent 1px 19px),
+      var(--paper);
+    box-shadow:
+      0 0.9rem 2rem rgba(0, 0, 0, 0.28),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    text-align: left;
+    transform: rotate(var(--tilt, -2deg));
+    cursor: pointer;
+  }
+
+  .echo-bay:nth-child(2) .echo-slip { --tilt: 1.4deg; }
+  .echo-bay:nth-child(3) .echo-slip { --tilt: -0.7deg; }
+
+  .echo-slip.selected {
+    outline: 3px solid rgba(145, 236, 243, 0.6);
+    outline-offset: 4px;
+  }
+
+  .echo-slip strong {
+    display: block;
+    margin-top: 0.8rem;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .echo-slip i {
+    display: block;
+    height: 2.2rem;
+    margin-top: 1.1rem;
+    border-block: 2px solid rgba(34, 27, 18, 0.12);
+    background:
+      linear-gradient(90deg, transparent, rgba(13, 111, 91, 0.9), transparent),
+      repeating-linear-gradient(90deg, rgba(13, 111, 91, 0.35) 0 3px, transparent 3px 8px);
+    mask: radial-gradient(90% 80% at 50% 50%, #000 28%, transparent 72%);
+  }
+
+  .meter-panel {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    padding: clamp(0.9rem, 2vw, 1.1rem);
+  }
+
+  .resonance-wrap {
+    display: grid;
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .resonance-meter {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(145, 236, 243, 0.13), rgba(0, 0, 0, 0.22) 62%);
+  }
+
+  .resonance-meter svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .resonance-meter circle,
+  .resonance-meter path {
+    fill: none;
+    stroke: rgba(241, 238, 224, 0.28);
+    stroke-width: 5;
+  }
+
+  .resonance-meter path {
+    stroke: var(--green);
+    stroke-linecap: round;
+  }
+
+  .resonance-meter line {
+    stroke: var(--stamp);
+    stroke-linecap: round;
+    stroke-width: 3;
+    transform-origin: 60px 60px;
+    transform: rotate(22deg);
+    transition: transform 180ms ease;
+  }
+
+  .resonance-meter strong {
+    position: relative;
+    color: var(--paper);
+    font-size: 1.45rem;
+  }
+
+  .live-card {
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid rgba(241, 238, 224, 0.16);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .live-card strong {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--cyan);
+    line-height: 1.15;
+  }
+
+  .control-stack {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .control-stack label {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .control-stack input {
+    width: 100%;
+    accent-color: var(--green);
+  }
+
+  .release-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 5rem;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .release-row div {
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(241, 238, 224, 0.16);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .release-row strong {
+    color: var(--cyan);
+    font-size: 1.3rem;
+  }
+
+  .ledger-panel {
+    min-width: 0;
+    border: 1px solid rgba(241, 238, 224, 0.16);
+    border-radius: 5px;
+    background: rgba(4, 8, 7, 0.42);
+  }
+
+  .ledger-panel h2 {
+    margin: 0;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid rgba(241, 238, 224, 0.13);
+    color: var(--brass);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .released-ledger {
+    display: grid;
+    gap: 0.55rem;
+    min-height: 8.2rem;
+    max-height: 14rem;
+    overflow: auto;
+    padding: 0.8rem;
+  }
+
+  .released-ledger p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .ledger-slip {
+    display: grid;
+    gap: 0.2rem;
+    border-left: 3px solid var(--stamp);
+    padding: 0.55rem 0.65rem;
+    color: #221b12;
+    background: var(--paper);
+    border-radius: 3px;
+  }
+
+  .ledger-slip strong {
+    line-height: 1.1;
+  }
+
+  .ledger-slip span {
+    color: rgba(34, 27, 18, 0.66);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 860px) {
+    .meq-heading,
+    .meq-workbench {
+      grid-template-columns: 1fr;
+    }
+
+    .meq-heading h1 {
+      max-width: 10ch;
+    }
+
+    .bay-deck {
+      min-height: 0;
+    }
+
+    .quarantine-bays {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    .echo-slip {
+      min-height: 7.2rem;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .meq-shell {
+      padding: 0.85rem;
+    }
+
+    .phrase-row,
+    .release-row,
+    .resonance-wrap {
+      grid-template-columns: 1fr;
+    }
+
+    .phrase-row button,
+    .release-row button {
+      width: 100%;
+    }
+  }
+</style>
+
+<script is:inline>
+  const root = document.getElementById("municipal-echo-quarantine")
+  const form = document.getElementById("phrase-form")
+  const input = document.getElementById("phrase-input")
+  const bays = document.getElementById("quarantine-bays")
+  const detainedCount = document.getElementById("detained-count")
+  const clearedCount = document.getElementById("cleared-count")
+  const activePhrase = document.getElementById("active-phrase")
+  const resonanceScore = document.getElementById("resonance-score")
+  const releaseButton = document.getElementById("release-active-echo")
+  const ledger = document.getElementById("released-ledger")
+  const needle = document.getElementById("meter-needle")
+  const reverb = document.getElementById("reverb-control")
+  const dampening = document.getElementById("dampening-control")
+  const pressure = document.getElementById("release-pressure-control")
+
+  const state = {
+    activeIndex: 0,
+    cleared: 0,
+    pointerBias: 0,
+  }
+
+  const slips = () => Array.from(document.querySelectorAll(".echo-slip"))
+
+  function updateReadouts() {
+    const allSlips = slips()
+    detainedCount.textContent = String(allSlips.length)
+    clearedCount.textContent = String(state.cleared)
+    root.dataset.cleared = String(state.cleared)
+    const active = allSlips[state.activeIndex] || allSlips[0]
+    activePhrase.textContent = active ? active.dataset.phrase : "no active echo"
+
+    const score = Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round(
+          Number(reverb.value) * 0.38 +
+            Number(dampening.value) * 0.24 +
+            Number(pressure.value) * 0.32 +
+            state.pointerBias
+        )
+      )
+    )
+    resonanceScore.textContent = `${score}%`
+    needle.style.transform = `rotate(${score * 1.65 - 82}deg)`
+  }
+
+  function selectSlip(index) {
+    const allSlips = slips()
+    state.activeIndex = Math.max(0, Math.min(index, allSlips.length - 1))
+    allSlips.forEach((slip, slipIndex) => {
+      const selected = slipIndex === state.activeIndex
+      slip.classList.toggle("selected", selected)
+      slip.setAttribute("aria-pressed", String(selected))
+    })
+    updateReadouts()
+  }
+
+  function buildSlip(phrase, index) {
+    const slip = document.createElement("button")
+    slip.className = "echo-slip"
+    slip.type = "button"
+    slip.dataset.phrase = phrase
+    slip.dataset.index = String(index)
+    slip.setAttribute("aria-pressed", "false")
+    slip.innerHTML = `<span class="slip-stamp">detained</span><strong></strong><i></i>`
+    slip.querySelector("strong").textContent = phrase
+    slip.addEventListener("click", () => selectSlip(slips().indexOf(slip)))
+    return slip
+  }
+
+  function detainPhrase(rawPhrase) {
+    const phrase = rawPhrase.trim()
+    if (!phrase) return
+    const bayList = Array.from(document.querySelectorAll(".echo-bay"))
+    const targetBay = bayList[slips().length % bayList.length]
+    const slip = buildSlip(phrase, slips().length)
+    targetBay.append(slip)
+    selectSlip(slips().indexOf(slip))
+    input.value = ""
+  }
+
+  function releaseActiveEcho() {
+    const allSlips = slips()
+    const active = allSlips[state.activeIndex]
+    if (!active) return
+    const phrase = active.dataset.phrase || active.textContent.trim()
+    active.remove()
+    state.cleared += 1
+
+    if (ledger.querySelector("p")) {
+      ledger.textContent = ""
+    }
+
+    const entry = document.createElement("article")
+    entry.className = "ledger-slip"
+    entry.innerHTML = `<span>released echo ${state.cleared}</span><strong></strong>`
+    entry.querySelector("strong").textContent = phrase
+    ledger.prepend(entry)
+    selectSlip(Math.min(state.activeIndex, slips().length - 1))
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault()
+    detainPhrase(input.value)
+  })
+
+  releaseButton.addEventListener("click", releaseActiveEcho)
+
+  slips().forEach((slip, index) => {
+    slip.addEventListener("click", () => selectSlip(index))
+  })
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowRight") {
+      event.preventDefault()
+      selectSlip(state.activeIndex + 1)
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault()
+      selectSlip(state.activeIndex - 1)
+    }
+    if (event.key === " " && document.activeElement !== input) {
+      event.preventDefault()
+      releaseActiveEcho()
+    }
+  })
+
+  bays.addEventListener("pointermove", (event) => {
+    const bounds = bays.getBoundingClientRect()
+    state.pointerBias = ((event.clientX - bounds.left) / Math.max(1, bounds.width) - 0.5) * 12
+    updateReadouts()
+  })
+
+  for (const control of [reverb, dampening, pressure]) {
+    control.addEventListener("input", updateReadouts)
+  }
+
+  function animateMeter() {
+    updateReadouts()
+    requestAnimationFrame(animateMeter)
+  }
+
+  window.__detainEchoForTest = detainPhrase
+  window.__releaseEchoForTest = releaseActiveEcho
+
+  animateMeter()
+</script>
