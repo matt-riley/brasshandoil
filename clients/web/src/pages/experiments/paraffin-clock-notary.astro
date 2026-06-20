@@ -1,0 +1,696 @@
+---
+import Base from "@layouts/Base.astro"
+---
+
+<Base title="Paraffin Clock Notary">
+  <main id="paraffin-clock-notary" class="pcn-shell" data-notarized="0">
+    <section class="pcn-heading" aria-labelledby="pcn-title">
+      <h1 id="pcn-title">Paraffin Clock Notary</h1>
+      <div class="clock-readout" aria-live="polite">
+        <span>active second</span>
+        <strong id="active-second">second 17 / wick A</strong>
+      </div>
+    </section>
+
+    <section class="pcn-workbench" aria-label="paraffin clock notary desk">
+      <div id="candle-stage" class="candle-stage" aria-label="melting candle clock stage">
+        <div class="stage-topline">
+          <span>pending wax seconds</span>
+          <strong id="melt-rate">melt 42%</strong>
+        </div>
+
+        <div class="candle-grid" aria-label="select a wax second">
+          <button class="wax-column selected" type="button" data-second="second 17 / wick A" data-index="0" data-height="78" aria-pressed="true" style="--wax-height: 78%; --tilt: -1.5deg;">
+            <span class="flame"></span>
+            <span class="wax-body"><i></i><b></b></span>
+            <strong>17</strong>
+          </button>
+          <button class="wax-column" type="button" data-second="second 23 / wick B" data-index="1" data-height="63" aria-pressed="false" style="--wax-height: 63%; --tilt: 1deg;">
+            <span class="flame"></span>
+            <span class="wax-body"><i></i><b></b></span>
+            <strong>23</strong>
+          </button>
+          <button class="wax-column" type="button" data-second="second 31 / wick C" data-index="2" data-height="86" aria-pressed="false" style="--wax-height: 86%; --tilt: -0.4deg;">
+            <span class="flame"></span>
+            <span class="wax-body"><i></i><b></b></span>
+            <strong>31</strong>
+          </button>
+          <button class="wax-column" type="button" data-second="second 44 / wick D" data-index="3" data-height="71" aria-pressed="false" style="--wax-height: 71%; --tilt: 1.6deg;">
+            <span class="flame"></span>
+            <span class="wax-body"><i></i><b></b></span>
+            <strong>44</strong>
+          </button>
+        </div>
+
+        <svg class="notary-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M8 78 C26 50 39 92 54 58 S80 22 94 39"></path>
+          <path d="M4 30 C22 14 38 48 52 26 S76 66 96 18"></path>
+        </svg>
+      </div>
+
+      <aside class="notary-rail" aria-label="wax notary controls and ledger">
+        <div class="meter-grid" aria-live="polite">
+          <div>
+            <span>notarized</span>
+            <strong id="notarized-count">0</strong>
+          </div>
+          <div>
+            <span>selected candle</span>
+            <strong id="selected-candle">wick A</strong>
+          </div>
+          <div class="wide">
+            <span>seal temperature</span>
+            <strong id="seal-temperature">warm enough for paperwork</strong>
+          </div>
+        </div>
+
+        <form id="paraffin-controls" class="control-stack" aria-label="paraffin timing controls">
+          <label>
+            <span>Wick</span>
+            <input id="wick-control" type="range" min="0" max="100" value="48" />
+          </label>
+          <label>
+            <span>Draft</span>
+            <input id="draft-control" type="range" min="0" max="100" value="36" />
+          </label>
+          <label>
+            <span>Seal Pressure</span>
+            <input id="seal-pressure-control" type="range" min="0" max="100" value="72" />
+          </label>
+        </form>
+
+        <div class="notary-actions">
+          <button id="notarize-second" type="button">Notarize second</button>
+          <div>
+            <span>status</span>
+            <strong id="seal-status">unsealed</strong>
+          </div>
+        </div>
+
+        <section class="ledger-panel" aria-labelledby="wax-ledger-title">
+          <h2 id="wax-ledger-title">Wax ledger</h2>
+          <div id="wax-ledger" class="wax-ledger" aria-live="polite">
+            <p>No seconds have been notarized.</p>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+</Base>
+
+<style>
+  :global(body) {
+    margin: 0;
+    background: #090f0d;
+  }
+
+  :global(.container) {
+    max-inline-size: none;
+    padding-inline: 0;
+  }
+
+  .pcn-shell {
+    --ink: #090f0d;
+    --deep: #0f1815;
+    --panel: rgba(18, 28, 24, 0.86);
+    --line: rgba(238, 220, 178, 0.22);
+    --paper: #efe3bd;
+    --paper-dim: rgba(239, 227, 189, 0.72);
+    --wax: #f4e7bf;
+    --brass: #d9ad55;
+    --seal: #9f2f28;
+    --ember: #ffb35c;
+    --blue: #79d2c4;
+    min-height: calc(100vh - 6rem);
+    overflow-x: hidden;
+    padding: clamp(0.95rem, 2.2vw, 1.8rem);
+    color: var(--paper);
+    background:
+      linear-gradient(90deg, rgba(217, 173, 85, 0.08) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(217, 173, 85, 0.05) 1px, transparent 1px),
+      radial-gradient(circle at 24% 20%, rgba(255, 179, 92, 0.2), transparent 18rem),
+      radial-gradient(circle at 84% 62%, rgba(121, 210, 196, 0.16), transparent 24rem),
+      linear-gradient(135deg, #131f1a 0%, #11100d 48%, #070908 100%);
+    background-size: 46px 46px, 46px 46px, auto, auto, auto;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .pcn-heading,
+  .pcn-workbench {
+    width: min(1180px, 100%);
+    margin-inline: auto;
+  }
+
+  .pcn-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 18rem);
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: clamp(1rem, 2vw, 1.4rem);
+  }
+
+  .pcn-heading h1 {
+    max-width: 10ch;
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.95rem, 7vw, 6.7rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.88;
+    text-shadow:
+      0.04em 0.04em 0 rgba(159, 47, 40, 0.58),
+      -0.025em 0.035em 0 rgba(121, 210, 196, 0.34);
+  }
+
+  .clock-readout,
+  .meter-grid div,
+  .notary-actions div,
+  .ledger-panel {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: rgba(5, 9, 8, 0.5);
+  }
+
+  .clock-readout {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.75rem;
+  }
+
+  .clock-readout span,
+  .stage-topline,
+  .meter-grid span,
+  .control-stack span,
+  .notary-actions span,
+  .ledger-panel h2 {
+    color: var(--brass);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .clock-readout strong {
+    color: var(--blue);
+    line-height: 1.1;
+  }
+
+  .pcn-workbench {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+    gap: clamp(1rem, 2vw, 1.35rem);
+    align-items: stretch;
+  }
+
+  .candle-stage,
+  .notary-rail {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background:
+      linear-gradient(180deg, rgba(244, 231, 191, 0.07), transparent 24%),
+      rgba(8, 14, 12, 0.78);
+    box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.36);
+  }
+
+  .candle-stage {
+    position: relative;
+    min-height: min(63vh, 41rem);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .candle-stage::before {
+    content: "";
+    position: absolute;
+    inset: 4.4rem 7% 2.2rem;
+    border-bottom: 2px solid rgba(217, 173, 85, 0.24);
+    background:
+      radial-gradient(ellipse at 50% 100%, rgba(159, 47, 40, 0.24), transparent 56%),
+      repeating-linear-gradient(90deg, rgba(239, 227, 189, 0.08) 0 1px, transparent 1px 3.4rem);
+    transform: perspective(700px) rotateX(52deg);
+    transform-origin: bottom;
+    pointer-events: none;
+  }
+
+  .stage-topline {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .stage-topline strong {
+    color: var(--blue);
+    font-size: 0.92rem;
+  }
+
+  .candle-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: end;
+    gap: clamp(0.65rem, 2vw, 1.15rem);
+    min-height: 31rem;
+    padding: 4rem clamp(0.8rem, 3vw, 2.2rem) 2.6rem;
+  }
+
+  .wax-column {
+    position: relative;
+    display: grid;
+    grid-template-rows: 2.4rem minmax(10rem, var(--wax-height)) auto;
+    justify-items: center;
+    align-items: end;
+    min-width: 0;
+    height: 100%;
+    min-height: 25rem;
+    border: 0;
+    padding: 0;
+    color: var(--paper);
+    background: transparent;
+    cursor: pointer;
+    transform: rotate(var(--tilt));
+  }
+
+  .wax-column:focus-visible {
+    outline: 3px solid rgba(121, 210, 196, 0.7);
+    outline-offset: 7px;
+  }
+
+  .wax-column.selected .wax-body {
+    box-shadow:
+      0 0 0 3px rgba(121, 210, 196, 0.62),
+      0 1.1rem 2rem rgba(0, 0, 0, 0.3),
+      inset 1rem 0 1.8rem rgba(255, 255, 255, 0.27),
+      inset -1.2rem 0 2rem rgba(128, 82, 45, 0.2);
+  }
+
+  .flame {
+    display: block;
+    width: 1.35rem;
+    height: 2rem;
+    border-radius: 50% 50% 47% 47%;
+    background:
+      radial-gradient(circle at 50% 62%, #fff4b5 0 18%, transparent 19%),
+      radial-gradient(ellipse at 50% 55%, #ffcf71 0 44%, #c8462d 70%, transparent 72%);
+    filter: drop-shadow(0 0 0.9rem rgba(255, 179, 92, 0.8));
+    transform-origin: center bottom;
+    animation: pcn-flicker 980ms infinite alternate ease-in-out;
+  }
+
+  .wax-body {
+    position: relative;
+    display: block;
+    width: min(6.2rem, 82%);
+    height: var(--wax-height);
+    min-height: 13rem;
+    border: 1px solid rgba(100, 69, 37, 0.32);
+    border-radius: 2rem 2rem 0.55rem 0.55rem;
+    background:
+      radial-gradient(circle at 24% 16%, rgba(255, 255, 255, 0.76), transparent 0.8rem),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.34), transparent 28%),
+      linear-gradient(180deg, #fff0c7 0%, #ead4a4 65%, #cda66f 100%);
+    overflow: hidden;
+    transition: box-shadow 180ms ease, transform 180ms ease;
+  }
+
+  .wax-body i,
+  .wax-body b {
+    position: absolute;
+    display: block;
+    width: 0.55rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 244, 201, 0.95), rgba(190, 122, 72, 0.72));
+  }
+
+  .wax-body i {
+    inset: 18% auto auto 20%;
+    height: 34%;
+  }
+
+  .wax-body b {
+    inset: 8% 18% auto auto;
+    height: 48%;
+  }
+
+  .wax-column strong {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-top: 0.8rem;
+    border: 1px solid rgba(159, 47, 40, 0.52);
+    border-radius: 50%;
+    color: var(--paper);
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.25), transparent 24%),
+      var(--seal);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.25rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.26);
+  }
+
+  .notary-lines {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    opacity: 0.38;
+    pointer-events: none;
+  }
+
+  .notary-lines path {
+    fill: none;
+    stroke: rgba(121, 210, 196, 0.45);
+    stroke-width: 0.5;
+  }
+
+  .notary-rail {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    padding: clamp(0.85rem, 2vw, 1.1rem);
+  }
+
+  .meter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .meter-grid div {
+    min-width: 0;
+    padding: 0.7rem;
+  }
+
+  .meter-grid .wide {
+    grid-column: 1 / -1;
+  }
+
+  .meter-grid strong,
+  .notary-actions strong {
+    display: block;
+    margin-top: 0.32rem;
+    color: var(--blue);
+    line-height: 1.08;
+  }
+
+  .control-stack {
+    display: grid;
+    gap: 0.86rem;
+  }
+
+  .control-stack label {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .control-stack input {
+    width: 100%;
+    accent-color: var(--seal);
+  }
+
+  .notary-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 7.3rem;
+    gap: 0.75rem;
+  }
+
+  .notary-actions button {
+    min-width: 0;
+    min-height: 3.1rem;
+    border: 1px solid rgba(159, 47, 40, 0.64);
+    border-radius: 5px;
+    padding-inline: 1rem;
+    color: #210a08;
+    background: linear-gradient(180deg, #e36e54, var(--seal));
+    font: 800 0.88rem/1 Inter, ui-sans-serif, system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+  }
+
+  .notary-actions div {
+    display: grid;
+    place-content: center;
+    padding: 0.55rem;
+  }
+
+  .ledger-panel h2 {
+    margin: 0;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid rgba(238, 220, 178, 0.16);
+  }
+
+  .wax-ledger {
+    display: grid;
+    gap: 0.55rem;
+    min-height: 8.3rem;
+    max-height: 15rem;
+    overflow: auto;
+    padding: 0.8rem;
+  }
+
+  .wax-ledger p {
+    margin: 0;
+    color: var(--paper-dim);
+    font-size: 0.9rem;
+  }
+
+  .ledger-seal {
+    position: relative;
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+    border-left: 3px solid var(--seal);
+    border-radius: 4px;
+    padding: 0.58rem 0.72rem 0.58rem 2.7rem;
+    color: #27190c;
+    background:
+      radial-gradient(circle at 1.3rem 50%, var(--seal) 0 0.62rem, transparent 0.65rem),
+      repeating-linear-gradient(180deg, rgba(39, 25, 12, 0.07) 0 1px, transparent 1px 19px),
+      var(--paper);
+  }
+
+  .ledger-seal span {
+    color: rgba(39, 25, 12, 0.65);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ledger-seal strong {
+    line-height: 1.08;
+  }
+
+  @keyframes pcn-flicker {
+    from {
+      transform: rotate(-5deg) scaleY(0.94);
+    }
+    to {
+      transform: rotate(4deg) scaleY(1.04);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flame {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 880px) {
+    .pcn-heading,
+    .pcn-workbench {
+      grid-template-columns: 1fr;
+    }
+
+    .candle-stage {
+      min-height: 33rem;
+    }
+
+    .candle-grid {
+      min-height: 26rem;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .pcn-shell {
+      padding: 0.82rem;
+    }
+
+    .pcn-heading h1 {
+      font-size: clamp(2.65rem, 17vw, 4.3rem);
+    }
+
+    .candle-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      min-height: 34rem;
+      padding-inline: 0.75rem;
+    }
+
+    .wax-column {
+      min-height: 15rem;
+      grid-template-rows: 2rem minmax(8rem, var(--wax-height)) auto;
+    }
+
+    .wax-body {
+      width: min(5rem, 78%);
+      min-height: 8rem;
+    }
+
+    .notary-actions,
+    .meter-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .notary-actions button {
+      width: 100%;
+    }
+  }
+</style>
+
+<script is:inline>
+  const root = document.getElementById("paraffin-clock-notary")
+  const stage = document.getElementById("candle-stage")
+  const candles = () => Array.from(document.querySelectorAll(".wax-column"))
+  const wick = document.getElementById("wick-control")
+  const draft = document.getElementById("draft-control")
+  const pressure = document.getElementById("seal-pressure-control")
+  const activeSecond = document.getElementById("active-second")
+  const selectedCandle = document.getElementById("selected-candle")
+  const notarizedCount = document.getElementById("notarized-count")
+  const meltRate = document.getElementById("melt-rate")
+  const sealTemperature = document.getElementById("seal-temperature")
+  const sealStatus = document.getElementById("seal-status")
+  const ledger = document.getElementById("wax-ledger")
+  const notarizeButton = document.getElementById("notarize-second")
+
+  const state = {
+    activeIndex: 0,
+    notarized: 0,
+    pointerWarmth: 0,
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(value, max))
+  }
+
+  function currentMelt() {
+    return clamp(
+      Math.round(Number(wick.value) * 0.44 + Number(draft.value) * 0.24 + state.pointerWarmth),
+      0,
+      100
+    )
+  }
+
+  function updateReadouts() {
+    const allCandles = candles()
+    const active = allCandles[state.activeIndex] || allCandles[0]
+    const melt = currentMelt()
+    const seal = Number(pressure.value)
+
+    activeSecond.textContent = active ? active.dataset.second : "no second selected"
+    selectedCandle.textContent = active ? `wick ${String.fromCharCode(65 + state.activeIndex)}` : "none"
+    notarizedCount.textContent = String(state.notarized)
+    root.dataset.notarized = String(state.notarized)
+    meltRate.textContent = `melt ${melt}%`
+    sealTemperature.textContent =
+      seal > 70 ? "hot enough to trouble the minutes" : seal > 42 ? "warm enough for paperwork" : "too cool to bind a second"
+    sealStatus.textContent = state.notarized > 0 ? "sealed" : "unsealed"
+
+    allCandles.forEach((candle, index) => {
+      const baseHeight = Number(candle.dataset.height || 70)
+      const adjustedHeight = clamp(baseHeight - melt * 0.22 + (index === state.activeIndex ? 6 : 0), 38, 90)
+      candle.style.setProperty("--wax-height", `${adjustedHeight}%`)
+    })
+  }
+
+  function selectCandle(index) {
+    const allCandles = candles()
+    state.activeIndex = clamp(index, 0, allCandles.length - 1)
+    allCandles.forEach((candle, candleIndex) => {
+      const selected = candleIndex === state.activeIndex
+      candle.classList.toggle("selected", selected)
+      candle.setAttribute("aria-pressed", String(selected))
+    })
+    updateReadouts()
+  }
+
+  function notarizeSecond() {
+    const active = candles()[state.activeIndex]
+    if (!active) return
+    state.notarized += 1
+
+    if (ledger.querySelector("p")) {
+      ledger.textContent = ""
+    }
+
+    const entry = document.createElement("article")
+    entry.className = "ledger-seal"
+    entry.innerHTML = `<span>seal ${state.notarized} / paraffin minute</span><strong></strong>`
+    entry.querySelector("strong").textContent = `${active.dataset.second} notarized at ${currentMelt()}% melt`
+    ledger.prepend(entry)
+    selectCandle((state.activeIndex + 1) % candles().length)
+  }
+
+  function coolParaffinLedger() {
+    state.notarized = 0
+    ledger.innerHTML = "<p>No seconds have been notarized.</p>"
+    updateReadouts()
+  }
+
+  candles().forEach((candle, index) => {
+    candle.addEventListener("click", () => selectCandle(index))
+  })
+
+  for (const control of [wick, draft, pressure]) {
+    control.addEventListener("input", updateReadouts)
+  }
+
+  notarizeButton.addEventListener("click", notarizeSecond)
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowRight") {
+      event.preventDefault()
+      selectCandle(state.activeIndex + 1)
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault()
+      selectCandle(state.activeIndex - 1)
+    }
+    if (event.key === " ") {
+      const tagName = document.activeElement ? document.activeElement.tagName : ""
+      if (tagName !== "INPUT") {
+        event.preventDefault()
+        notarizeSecond()
+      }
+    }
+    if (event.key === "Escape") {
+      event.preventDefault()
+      coolParaffinLedger()
+    }
+  })
+
+  stage.addEventListener("pointermove", (event) => {
+    const bounds = stage.getBoundingClientRect()
+    const x = (event.clientX - bounds.left) / Math.max(1, bounds.width)
+    state.pointerWarmth = (x - 0.5) * 18
+    updateReadouts()
+  })
+
+  function animateWax() {
+    updateReadouts()
+    requestAnimationFrame(animateWax)
+  }
+
+  window.__selectParaffinCandleForTest = selectCandle
+  window.__notarizeSecondForTest = notarizeSecond
+  window.__coolParaffinLedgerForTest = coolParaffinLedger
+
+  animateWax()
+</script>

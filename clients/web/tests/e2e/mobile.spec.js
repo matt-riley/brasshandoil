@@ -42,6 +42,30 @@ test.use({
   userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 14_8 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1",
 })
 
+test.beforeEach(async ({ page }) => {
+  // Stub speechSynthesis so pages using it (like complaint-received) don't hang in headless environments
+  await page.addInitScript(() => {
+    const mock = {
+      speak: () => {},
+      cancel: () => {},
+      getVoices: () => [],
+      speaking: false,
+      pending: false,
+      paused: false,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }
+    Object.defineProperty(window, "speechSynthesis", {
+      value: mock,
+      writable: true,
+      configurable: true
+    })
+    window.SpeechSynthesisUtterance = class {
+      constructor(text) { this.text = text }
+    }
+  })
+})
+
 for (const url of pages) {
   test(`page ${url} does not have horizontal overflow on mobile viewport`, async ({ page }) => {
     await page.goto(url)

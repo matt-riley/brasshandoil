@@ -22,6 +22,10 @@ const { title = "Brass Hand Oil" } = Astro.props
     <ClientRouter />
     
     <script is:inline>
+      if (navigator.webdriver) {
+        document.documentElement.classList.add("is-webdriver");
+      }
+
       // ─── Web Audio Context Interceptor ──────────────────────────────────────────
       (function() {
         const activeAudioContexts = [];

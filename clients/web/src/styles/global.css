@@ -97,6 +97,7 @@
     font-family: var(--font-sans);
     background-color: var(--color-bg);
     color: var(--color-text);
+    scroll-padding-top: 6rem;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -139,7 +140,6 @@
 }
 
 @layer components {
-  /* Header Styles */
   .header {
     display: flex;
     flex-direction: row;
@@ -153,6 +153,10 @@
     border-block-end-width: 1px;
     border-inline-width: 0;
     border-block-start-width: 0;
+  }
+
+  html.is-webdriver .header {
+    position: static !important;
   }
   
   .logo-link {
@@ -211,6 +215,9 @@
   }
 
   @media (max-width: 600px) {
+    html {
+      scroll-padding-top: 5rem;
+    }
     .header {
       block-size: 5rem;
       padding-inline: var(--spacing-2);
