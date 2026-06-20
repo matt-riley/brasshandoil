@@ -6,6 +6,21 @@ Use this file as the running source of truth for review notes after each daily e
 
 ### Session Entry
 
+Date: 2026-06-20
+Experiment: Paraffin Clock Notary
+Feedback:
+- Awaiting review.
+Carry Forward:
+- Generated a candle-clock notary concept, then compressed the implementation
+  around the persistent site header so the active instrument stayed visible.
+- Used a two-stage TDD pass: structural Node contract first, then a Playwright
+  red case for Escape-based ledger cooling before implementing the reset.
+- Captured desktop and mobile screenshots and kept the 375px viewport free of
+  horizontal overflow.
+- Promoted ledger reset behavior to `memory/skills/ledger-cooling-reset-hooks.md`.
+
+### Session Entry
+
 Date: 2026-06-18
 Experiment: Dinoflagellate Bioluminescent Shear Reactor
 Feedback:
