@@ -8,7 +8,7 @@ on:
 
 jobs:
   root-tests:
-    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@7fd3aefaab1ae14d063930c85b2d629280c36620 # v2
+    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@0d1d8e7a149a53fcaaca6e128f62e0e3d8fdf293 # v2
     with:
       node-version: "22"
       package-manager: pnpm
@@ -21,7 +21,7 @@ jobs:
       concurrency-suffix: root-tests
 
   web-build:
-    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@7fd3aefaab1ae14d063930c85b2d629280c36620 # v2
+    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@0d1d8e7a149a53fcaaca6e128f62e0e3d8fdf293 # v2
     with:
       node-version: "22"
       package-manager: pnpm
