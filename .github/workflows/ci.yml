@@ -8,27 +8,21 @@ on:
 
 jobs:
   root-tests:
-    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@bcaf4ae43edf7d26421741424b82c842c83e55ce # v2
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@bcaf4ae43edf7d26421741424b82c842c83e55ce # v2
     with:
-      node-version: "22"
-      package-manager: pnpm
+      install: true
       working-directory: .
-      run-lint: false
-      run-test: true
-      run-build: false
-      require-lockfile: true
-      cancel-in-progress: true
+      lint: false
+      test: true
+      build: false
       concurrency-suffix: root-tests
 
   web-build:
-    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@bcaf4ae43edf7d26421741424b82c842c83e55ce # v2
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@bcaf4ae43edf7d26421741424b82c842c83e55ce # v2
     with:
-      node-version: "22"
-      package-manager: pnpm
+      install: true
       working-directory: clients/web
-      run-lint: false
-      run-test: false
-      run-build: true
-      require-lockfile: true
-      cancel-in-progress: true
+      lint: false
+      test: false
+      build: true
       concurrency-suffix: web-build
