@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@astrojs/check':
         specifier: 0.9.9
-        version: 0.9.9(prettier@3.8.4)(typescript@6.0.3)
+        version: 0.9.9(prettier@3.9.1)(typescript@6.0.3)
       '@astrojs/cloudflare':
         specifier: ^13.6.0
         version: 13.7.0(astro@6.4.8(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.62.2)(yaml@2.9.0))(jiti@2.7.0)(lightningcss@1.32.0)(workerd@1.20260625.1)(wrangler@4.105.0)(yaml@2.9.0)
@@ -1485,8 +1485,8 @@ packages:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
-  js-yaml@4.2.0:
-    resolution: {integrity: sha512-ePWsvanv0DWuDRsW8dnt+R4jQ31SCRCQ7hhNcPXZPsoBZiemuZNYGf7adZdqX2D86j6rvKp3RpCxVTSb8WQlOw==}
+  js-yaml@4.3.0:
+    resolution: {integrity: sha512-1td788aAnnZ5qs7V2QIRl1owjtYpbKt749Y3xauqQgwIIGF/xXWz1wMTEBx5O3LK3lXLVuqXPdPxj2BoFHaW9Q==}
     hasBin: true
 
   json-schema-traverse@1.0.0:
@@ -1875,8 +1875,8 @@ packages:
     resolution: {integrity: sha512-FfR8sjd4em2T6fb3I2MwAJU7HWVMr9zba+enmQeeWFfCbm+UOC/0X4DS8XtpUTMwWMGbjKYP7xjfNekzyGmB3A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  prettier@3.8.4:
-    resolution: {integrity: sha512-N2MylSdi48+5N/6S5j+maeHbUSIzzZ5uOcX5Hm4QpV8Dkb1HFjfAKTKX6yNPJQD9AhcT3ifHNB66tWTTJDi11Q==}
+  prettier@3.9.1:
+    resolution: {integrity: sha512-ppiDo2CSwexck1eyZUwJHg/N3nf1+6IRCv7W/VJ5vaLnVCmB7+3CdRfMwoCHBBX6xTrREDTksZ4OZl5SSf4zXA==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -2454,9 +2454,9 @@ packages:
 
 snapshots:
 
-  '@astrojs/check@0.9.9(prettier@3.8.4)(typescript@6.0.3)':
+  '@astrojs/check@0.9.9(prettier@3.9.1)(typescript@6.0.3)':
     dependencies:
-      '@astrojs/language-server': 2.16.10(prettier@3.8.4)(typescript@6.0.3)
+      '@astrojs/language-server': 2.16.10(prettier@3.9.1)(typescript@6.0.3)
       chokidar: 4.0.3
       kleur: 4.1.5
       typescript: 6.0.3
@@ -2499,14 +2499,14 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
-      js-yaml: 4.2.0
+      js-yaml: 4.3.0
       picomatch: 4.0.4
       retext-smartypants: 6.2.0
       shiki: 4.3.0
       smol-toml: 1.7.0
       unified: 11.0.5
 
-  '@astrojs/language-server@2.16.10(prettier@3.8.4)(typescript@6.0.3)':
+  '@astrojs/language-server@2.16.10(prettier@3.9.1)(typescript@6.0.3)':
     dependencies:
       '@astrojs/compiler': 2.13.1
       '@astrojs/yaml2ts': 0.2.4
@@ -2520,14 +2520,14 @@ snapshots:
       volar-service-css: 0.0.70(@volar/language-service@2.4.28)
       volar-service-emmet: 0.0.70(@volar/language-service@2.4.28)
       volar-service-html: 0.0.70(@volar/language-service@2.4.28)
-      volar-service-prettier: 0.0.70(@volar/language-service@2.4.28)(prettier@3.8.4)
+      volar-service-prettier: 0.0.70(@volar/language-service@2.4.28)(prettier@3.9.1)
       volar-service-typescript: 0.0.70(@volar/language-service@2.4.28)
       volar-service-typescript-twoslash-queries: 0.0.70(@volar/language-service@2.4.28)
       volar-service-yaml: 0.0.70(@volar/language-service@2.4.28)
       vscode-html-languageservice: 5.6.2
       vscode-uri: 3.1.0
     optionalDependencies:
-      prettier: 3.8.4
+      prettier: 3.9.1
     transitivePeerDependencies:
       - typescript
 
@@ -3352,7 +3352,7 @@ snapshots:
       github-slugger: 2.0.0
       html-escaper: 3.0.3
       http-cache-semantics: 4.2.0
-      js-yaml: 4.2.0
+      js-yaml: 4.3.0
       jsonc-parser: 3.3.1
       magic-string: 0.30.21
       magicast: 0.5.3
@@ -3902,7 +3902,7 @@ snapshots:
 
   jiti@2.7.0: {}
 
-  js-yaml@4.2.0:
+  js-yaml@4.3.0:
     dependencies:
       argparse: 2.0.1
 
@@ -4536,7 +4536,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  prettier@3.8.4: {}
+  prettier@3.9.1: {}
 
   prismjs@1.30.0: {}
 
@@ -4998,12 +4998,12 @@ snapshots:
     optionalDependencies:
       '@volar/language-service': 2.4.28
 
-  volar-service-prettier@0.0.70(@volar/language-service@2.4.28)(prettier@3.8.4):
+  volar-service-prettier@0.0.70(@volar/language-service@2.4.28)(prettier@3.9.1):
     dependencies:
       vscode-uri: 3.1.0
     optionalDependencies:
       '@volar/language-service': 2.4.28
-      prettier: 3.8.4
+      prettier: 3.9.1
 
   volar-service-typescript-twoslash-queries@0.0.70(@volar/language-service@2.4.28):
     dependencies:
@@ -5124,7 +5124,7 @@ snapshots:
       '@vscode/l10n': 0.0.18
       ajv: 8.20.0
       ajv-draft-04: 1.0.0(ajv@8.20.0)
-      prettier: 3.8.4
+      prettier: 3.9.1
       request-light: 0.5.8
       vscode-json-languageservice: 4.1.8
       vscode-languageserver: 9.0.1
