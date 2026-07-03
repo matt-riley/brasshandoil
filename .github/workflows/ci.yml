@@ -8,7 +8,7 @@ on:
 
 jobs:
   root-tests:
-    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@071c2c2bbe410f73126d3cefd0a0b6812b3565f6 # v2
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@0d1d8e7a149a53fcaaca6e128f62e0e3d8fdf293 # v2
     with:
       install: true
       working-directory: .
@@ -18,7 +18,7 @@ jobs:
       concurrency-suffix: root-tests
 
   web-build:
-    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@071c2c2bbe410f73126d3cefd0a0b6812b3565f6 # v2
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@0d1d8e7a149a53fcaaca6e128f62e0e3d8fdf293 # v2
     with:
       install: true
       working-directory: clients/web
