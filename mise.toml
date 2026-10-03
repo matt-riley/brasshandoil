@@ -1,4 +1,5 @@
 [tools]
+pnpm = "11.20.0"
 node = "24"
 
 [tasks.install]
@@ -6,9 +7,11 @@ description = "Install dependencies"
 run = "pnpm install --frozen-lockfile"
 
 [tasks.test]
+depends = ["install"]
 description = "Run tests"
 run = "pnpm test"
 
 [tasks.build]
+depends = ["install"]
 description = "Build"
 run = "pnpm run build"
