@@ -40,3 +40,7 @@ This is a playground for whimsy, creativity and pushing the boundaries of the we
 ### 11. Port and File Isolation for Worktree E2E Validation
 - Terminated pre-existing dev server processes on the standard port (4321) when running Playwright E2E tests within isolated worktree branches. This forces the test runner to launch a fresh local server and prevents it from reusing the unchanged main-workspace directory files.
 - Manually copied untracked files from the main repository to the active worktree before staging and committing, avoiding silent omissions of new experimental pages during worktree build/test audits.
+
+### 12. Cloudflare Adapter Dependency Compatibility
+- Check the installed Vite plugin's Wrangler peer range when updating the web lockfile. Wrangler 4.119.0 does not satisfy the plugin's `^4.123.0` requirement.
+- Run the existing Cloudflare bundle regression after dependency changes: adapter 14.2.0 imports `beginContentEntryCollection`, which is absent from Astro 7.0.9. Astro 7.2.8 restores a successful build while the test continues to reject Sharp in the Worker runtime bundle.
