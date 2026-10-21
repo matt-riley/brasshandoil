@@ -13,7 +13,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}:${{ github.ref }}:root-tests
       cancel-in-progress: true
-    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@cb986078a5bd4775e5fb05348f3618e41fedf4de # v4
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@0a310f1286537ed4fd000af4b35cd6459b00448d # v4
     with:
       install: true
       working-directory: .
@@ -27,7 +27,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}:${{ github.ref }}:web-build
       cancel-in-progress: true
-    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@cb986078a5bd4775e5fb05348f3618e41fedf4de # v4
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@0a310f1286537ed4fd000af4b35cd6459b00448d # v4
     with:
       install: true
       working-directory: clients/web
