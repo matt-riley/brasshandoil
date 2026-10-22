@@ -4,6 +4,7 @@
     "github>matt-riley/renovate-config",
     "github>matt-riley/renovate-config:node",
     "github>matt-riley/renovate-config:astro",
-    "github>matt-riley/renovate-config:github-actions"
+    "github>matt-riley/renovate-config:github-actions",
+    "github>matt-riley/renovate-config:schedule-friday"
   ]
 }
