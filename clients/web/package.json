@@ -14,9 +14,9 @@
   "dependencies": {
     "@astrojs/check": "0.9.12",
     "@astrojs/cloudflare": "^14.0.0",
-    "@astrojs/mdx": "8.1.1",
-    "astro": "7.4.7",
-    "tailwindcss": "4.3.3",
+    "@astrojs/mdx": "8.1.6",
+    "astro": "7.4.13",
+    "tailwindcss": "4.3.5",
     "typescript": "6.0.3"
   },
   "packageManager": "pnpm@12.20.0",
