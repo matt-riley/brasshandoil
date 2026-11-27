@@ -1,5 +1,5 @@
 [tools]
-pnpm = "12.20.0"
+pnpm = "12.22.0"
 node = "24"
 
 [tasks.install]
