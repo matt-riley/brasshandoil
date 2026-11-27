@@ -1,6 +1,6 @@
 [tools]
 pnpm = "12.20.0"
-node = "24"
+node = "26"
 
 [tasks.install]
 description = "Install root and web dependencies used by the test suite"
